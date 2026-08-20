@@ -289,6 +289,11 @@ export const newBuildWork = workPhotos
   .filter((photo) => photo.kind === 'new construction')
   .sort(byOrder);
 
+/** Finished replacement work — the service page shows these, not the framing shots. */
+export const replacementWork = workPhotos
+  .filter((photo) => photo.kind === 'after' || photo.kind === 'interior')
+  .sort(byOrder);
+
 export const allWork = [...workPhotos].sort(byOrder);
 
 export function findWork(id: string) {

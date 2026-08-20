@@ -81,6 +81,6 @@
 
 /* A single tall new-build shot should not stretch to fill the row. */
 .work-grid-newbuild {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-  margin-top: 2rem;
+  grid-template-columns: 1fr;
+  margin-top: 0;
 }

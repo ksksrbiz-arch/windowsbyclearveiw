@@ -1,0 +1,284 @@
+---
+/**
+ * Insert vs full-frame replacement, drawn rather than described.
+ *
+ * This exists because every photo on the site is a 450px phone shot. No CSS
+ * makes those carry a page at hero scale, but a diagram is resolution
+ * independent — it is the one kind of visual weight this site can add without
+ * waiting on a reshoot. It also happens to explain the single question that
+ * decides the price of a job, which is why it earns its place on the
+ * replacement page and in the guide.
+ *
+ * Colours come from the design tokens via currentColor and CSS custom
+ * properties, so the drawing follows the palette instead of freezing hexes.
+ */
+interface Props {
+  /** Rendered above the drawing. Set to null on pages that supply their own. */
+  heading?: string | null;
+}
+const { heading = 'What actually comes out' } = Astro.props;
+---
+<figure class="detail">
+  {heading && <figcaption class="detail-heading">{heading}</figcaption>}
+
+  <div class="detail-pair">
+    <div class="detail-panel">
+      <p class="detail-title">Insert replacement</p>
+      <p class="detail-sub">The existing frame stays</p>
+
+      <svg
+        class="detail-svg"
+        viewBox="0 0 240 200"
+        role="img"
+        aria-label="Cross-section of an insert replacement: siding, sheathing, and the existing window frame all stay in place, and the new unit is set inside the old frame."
+      >
+        <!-- Wall build-up, seen from above through the jamb. -->
+        <rect x="8" y="24" width="224" height="18" class="p-siding" />
+        <rect x="8" y="42" width="224" height="12" class="p-sheathing" />
+
+        <!-- Rough opening framing: untouched. -->
+        <rect x="8" y="54" width="46" height="104" class="p-stud" />
+        <rect x="186" y="54" width="46" height="104" class="p-stud" />
+
+        <!-- Existing frame: kept, so it is the emphasised element. -->
+        <rect x="54" y="54" width="18" height="104" class="p-keep" />
+        <rect x="168" y="54" width="18" height="104" class="p-keep" />
+
+        <!-- New insert unit, sitting inside the old frame. -->
+        <rect x="72" y="60" width="96" height="92" class="p-new" />
+        <line x1="120" y1="60" x2="120" y2="152" class="p-new-line" />
+
+        <rect x="8" y="158" width="224" height="10" class="p-interior" />
+
+        <text x="120" y="106" class="p-label p-label-new">New unit</text>
+        <text x="31" y="112" class="p-label">Wall</text>
+        <text x="209" y="112" class="p-label">Wall</text>
+      </svg>
+
+      <ul class="detail-notes">
+        <li><span class="swatch s-keep"></span>Frame stays in the wall</li>
+        <li><span class="swatch s-new"></span>New unit sets inside it</li>
+        <li>Siding and interior trim are not disturbed</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel">
+      <p class="detail-title">Full-frame replacement</p>
+      <p class="detail-sub">Back to the rough opening</p>
+
+      <svg
+        class="detail-svg"
+        viewBox="0 0 240 200"
+        role="img"
+        aria-label="Cross-section of a full-frame replacement: the old frame is removed back to the rough opening framing, the opening is re-flashed, and a new unit with a nailing fin is set and re-trimmed."
+      >
+        <rect x="8" y="24" width="224" height="18" class="p-siding" />
+        <rect x="8" y="42" width="224" height="12" class="p-sheathing" />
+
+        <rect x="8" y="54" width="46" height="104" class="p-stud" />
+        <rect x="186" y="54" width="46" height="104" class="p-stud" />
+
+        <!-- The old frame is gone: hatched to show the void that opens up. -->
+        <rect x="54" y="54" width="18" height="104" class="p-remove" />
+        <rect x="168" y="54" width="18" height="104" class="p-remove" />
+
+        <!-- New flashing lapped over the sheathing at the opening. -->
+        <path d="M54 54 L54 46 L72 46" class="p-flash" />
+        <path d="M186 54 L186 46 L168 46" class="p-flash" />
+
+        <!-- New unit runs the full opening, with fins landing on the sheathing. -->
+        <rect x="54" y="60" width="132" height="92" class="p-new" />
+        <line x1="54" y1="60" x2="42" y2="60" class="p-fin" />
+        <line x1="186" y1="60" x2="198" y2="60" class="p-fin" />
+        <line x1="120" y1="60" x2="120" y2="152" class="p-new-line" />
+
+        <rect x="8" y="158" width="224" height="10" class="p-interior" />
+
+        <text x="120" y="106" class="p-label p-label-new">New unit</text>
+        <text x="31" y="112" class="p-label">Wall</text>
+        <text x="209" y="112" class="p-label">Wall</text>
+      </svg>
+
+      <ul class="detail-notes">
+        <li><span class="swatch s-remove"></span>Old frame comes out entirely</li>
+        <li><span class="swatch s-flash"></span>Opening is re-flashed</li>
+        <li>Trim is replaced; siding may be cut back</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="detail-foot">
+    Cross-section through the jamb, looking down. The choice is not a
+    preference — a sound, square frame takes an insert; a rotten or racked one
+    does not, and paying for an insert into a bad frame wastes the whole job.
+  </p>
+</figure>
+
+<style>
+  .detail {
+    margin: 0;
+  }
+
+  .detail-heading {
+    display: block;
+    margin: 0 0 var(--space-m);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+
+  .detail-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+  }
+
+  .detail-panel {
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+
+  .detail-title {
+    margin: 0 0 var(--space-3xs);
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .detail-sub {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .detail-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--paper-sunk);
+    border-radius: var(--radius);
+  }
+
+  /* Wall build-up ─────────────────────────────────────────────────────── */
+  .p-siding {
+    fill: color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+
+  .p-sheathing {
+    fill: color-mix(in srgb, var(--ink) 9%, transparent);
+  }
+
+  .p-stud {
+    fill: color-mix(in srgb, var(--ink) 13%, transparent);
+  }
+
+  .p-interior {
+    fill: color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+
+  /* What stays, what goes ─────────────────────────────────────────────── */
+  .p-keep {
+    fill: color-mix(in srgb, var(--accent) 26%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .p-remove {
+    fill: color-mix(in srgb, var(--danger) 12%, transparent);
+    stroke: var(--danger);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  .p-flash {
+    fill: none;
+    stroke: var(--danger);
+    stroke-width: 2.5;
+    stroke-linecap: square;
+  }
+
+  .p-new {
+    fill: var(--paper-raised);
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+
+  .p-new-line,
+  .p-fin {
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+
+  .p-label {
+    fill: var(--ink-soft);
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+    text-transform: uppercase;
+  }
+
+  .p-label-new {
+    fill: var(--ink);
+  }
+
+  /* Legend ────────────────────────────────────────────────────────────── */
+  .detail-notes {
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--space-3xs);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .detail-notes li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .swatch {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 2px;
+    flex: none;
+    translate: 0 0.1rem;
+  }
+
+  .s-keep {
+    background: color-mix(in srgb, var(--accent) 26%, transparent);
+    border: 1.5px solid var(--accent);
+  }
+
+  .s-new {
+    background: var(--paper-raised);
+    border: 2px solid var(--ink);
+  }
+
+  .s-remove {
+    border: 1.5px dashed var(--danger);
+  }
+
+  .s-flash {
+    background: var(--danger);
+  }
+
+  .detail-foot {
+    margin: var(--space-m) 0 0;
+    max-width: var(--measure);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 800px) {
+    .detail-pair {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

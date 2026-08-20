@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
+import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { newBuildWork } from '../data/work';
 ---
@@ -21,21 +22,34 @@ import { newBuildWork } from '../data/work';
     </div>
   </section>
   <section class="section">
-    <div class="wrap split">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">The part that decides whether it leaks</p>
+      <h2>Lap order at the opening.</h2>
+      <p class="lede">
+        A set window looks the same from the street whether or not it was flashed in the
+        right sequence. It does not stay that way. Here is the order we work in, every time.
+      </p>
+      <FlashingOrder />
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap split" data-reveal>
       <article>
-        <h2>What we set</h2>
+        <p class="rule-label">What we set</p>
+        <h2>Fins, shims, and a plumb unit.</h2>
         <p>
           New-construction vinyl and fiberglass with nailing fins, sized to the rough opening.
           We flash the sill, set the unit, and leave you ready for wrap and cladding.
         </p>
-        <h2>How it runs</h2>
+        <h3>How it runs</h3>
         <p>
           Confirm openings, confirm lead time, then a scheduled set — not a surprise on a framing
           day. Tell us if you are the GC or the owner so the quote is written for the right person.
         </p>
       </article>
       <article>
-        <p class="kicker">Bring to the first call</p>
+        <p class="rule-label">Bring to the first call</p>
         <ul class="plain-list">
           <li>Plan or opening schedule</li>
           <li>Window style and finish</li>
@@ -46,14 +60,18 @@ import { newBuildWork } from '../data/work';
       </article>
     </div>
   </section>
-  <section class="section section-muted">
-    <div class="wrap">
-      <p class="kicker">From a framed job</p>
-      <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
-      <p class="lede">
-        Nailing fins taped into the weather barrier, sill flashed, unit plumb. This is what we
-        hand back to the builder.
-      </p>
+
+  <section class="section">
+    <div class="wrap newbuild-band" data-reveal>
+      <div>
+        <p class="rule-label">From a framed job</p>
+        <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
+        <p class="lede">
+          Nailing fins taped into the weather barrier, sill flashed, unit plumb. This is what we
+          hand back to the builder.
+        </p>
+        <p class="section-link"><a href="/gallery">More of the work</a></p>
+      </div>
       <div class="work-grid work-grid-newbuild">
         {newBuildWork.map((photo) => (
           <WorkCard
@@ -67,5 +85,26 @@ import { newBuildWork } from '../data/work';
     </div>
   </section>
 
-  <CtaBar />
+  <CtaBar
+    heading="Tell us the opening schedule."
+    body="Send the plan or the opening count and we will come back with a set date and a written number."
+  />
 </BaseLayout>
+
+<style>
+  /* A single tall framing shot needs a partner, not a full-width grid row of
+     its own — stretched across the page it read as a missing image. */
+  .newbuild-band {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .newbuild-band {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+  }
+</style>
