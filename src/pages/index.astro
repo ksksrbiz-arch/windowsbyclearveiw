@@ -46,6 +46,32 @@ const signs = [
 <BaseLayout title={site.shortName} description={site.description} path="/">
   <VideoHero />
 
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Two kinds of work</p>
+      <h2>Replace what’s there. Set the new ones.</h2>
+      <p class="lede">Homeowners and builders need different pages. Pick the one that matches the job.</p>
+      <div class="service-tiles">
+        <a class="service-tile" href="/replacement">
+          <img src="/work/vaulted-grids.jpg" alt="" />
+          <div class="service-tile-copy">
+            <p class="kicker">Homeowners</p>
+            <h2>Replacement</h2>
+            <p>Pull the tired unit. Leave the room usable.</p>
+          </div>
+        </a>
+        <a class="service-tile" href="/new-construction">
+          <img src="/work/tan-two-story.jpg" alt="" />
+          <div class="service-tile-copy">
+            <p class="kicker">Builders</p>
+            <h2>New construction</h2>
+            <p>Flashed openings. Nailing fins. Ready for siding.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="signs">
     <div class="wrap">
       <p class="kicker">Is it time?</p>
@@ -107,18 +133,19 @@ const signs = [
     </div>
   </section>
 
-  <section class="section section-muted">
+  <section class="section section-muted" id="work">
     <div class="wrap">
       <p class="kicker">From the truck</p>
       <h2>Recent work</h2>
       <p class="lede">Real openings in Washington houses — not stock. More on the gallery, including install-day shots.</p>
       <div class="work-grid work-grid-home">
-        {featuredWork.map((photo) => (
+        {featuredWork.map((photo, index) => (
           <WorkCard
             src={photo.src}
             alt={photo.alt}
             caption={photo.caption}
             kind={photo.kind}
+            featured={index === 0}
           />
         ))}
       </div>
