@@ -1,0 +1,40 @@
+---
+import { site } from '../data/site';
+---
+<form class="card" method="post" action="#" id="estimate-form">
+  <p class="notice">
+    Form backend is not wired yet. Until then, use the phone number in
+    <code>src/data/site.ts</code> or email {site.email || 'once an address is added'}.
+  </p>
+  <label>
+    Name
+    <input name="name" type="text" required autocomplete="name" />
+  </label>
+  <label>
+    Phone
+    <input name="phone" type="tel" required autocomplete="tel" />
+  </label>
+  <label>
+    Email
+    <input name="email" type="email" autocomplete="email" />
+  </label>
+  <label>
+    City
+    <input name="city" type="text" required />
+  </label>
+  <label>
+    Project notes
+    <textarea name="notes" rows="4" placeholder="Number of windows, replacement or new construction, preferred materials..."></textarea>
+  </label>
+  <button class="btn btn-primary" type="submit">Send estimate request</button>
+</form>
+
+<script>
+  const form = document.getElementById('estimate-form');
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const body = [...data.entries()].map(([key, value]) => `${key}: ${value}`).join('\n');
+    window.location.href = `mailto:?subject=Window estimate request&body=${encodeURIComponent(body)}`;
+  });
+</script>

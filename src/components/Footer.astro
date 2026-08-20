@@ -1,0 +1,25 @@
+---
+import { site } from '../data/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <strong>{site.legalName}</strong>
+      <p>Window replacement and installation for Washington homes.</p>
+      <p class="fine-print">
+        Contractor registration: {site.lniNumber || 'Add L&I number before advertising.'}
+      </p>
+    </div>
+    <div>
+      <a href="/estimate">Request an estimate</a><br />
+      <a href="/replacement">Window replacement</a><br />
+      <a href="/areas">Service areas</a><br />
+      <a href="/about">About Mark</a>
+    </div>
+    <div class="fine-print">
+      <p>&copy; {year} {site.legalName}. All rights reserved.</p>
+      <p>Site: {site.domain}</p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,17 @@
+---
+import { site, telHref } from '../data/site';
+---
+<section class="section">
+  <div class="wrap">
+    <div class="cta-bar">
+      <div>
+        <strong>Ready for a clear, quiet, tighter home?</strong>
+        <div>Free in-home estimate. No-pressure walkthrough of options that fit your house and budget.</div>
+      </div>
+      <div>
+        <a class="btn btn-primary" href={telHref()}>{site.phone || 'Call Mark'}</a>
+        <a class="btn btn-ghost" href="/estimate" style="margin-left:0.4rem;border-color:white;color:white;">Request estimate</a>
+      </div>
+    </div>
+  </div>
+</section>

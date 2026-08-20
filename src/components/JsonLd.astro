@@ -1,0 +1,19 @@
+---
+import { site } from '../data/site';
+
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'HomeAndConstructionBusiness',
+  name: site.legalName,
+  url: site.url,
+  description: site.description,
+  areaServed: {
+    '@type': 'State',
+    name: 'Washington',
+  },
+  priceRange: '$$',
+  ...(site.phone ? { telephone: site.phone } : {}),
+  ...(site.email ? { email: site.email } : {}),
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(data)} />

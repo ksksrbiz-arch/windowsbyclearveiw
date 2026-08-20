@@ -1,0 +1,23 @@
+---
+import { site, telHref } from '../data/site';
+---
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <span class="mark" aria-hidden="true"></span>
+      <span>
+        <strong>{site.shortName}</strong>
+        <div class="fine-print">Washington window installation</div>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="/replacement">Replacement</a>
+      <a href="/process">Process</a>
+      <a href="/gallery">Gallery</a>
+      <a href="/areas">Areas</a>
+      <a href="/about">About</a>
+      <a href="/reviews">Reviews</a>
+    </nav>
+    <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+  </div>
+</header>

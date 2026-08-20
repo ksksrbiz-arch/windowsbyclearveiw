@@ -1,0 +1,17 @@
+---
+interface Props {
+  quote: string;
+  name: string;
+  city: string;
+  source?: string;
+}
+
+const { quote, name, city, source = 'Customer' } = Astro.props;
+---
+<blockquote class="review">
+  <p>“{quote}”</p>
+  <footer>
+    <strong>{name}</strong>
+    <div class="fine-print">{city} · {source}</div>
+  </footer>
+</blockquote>
