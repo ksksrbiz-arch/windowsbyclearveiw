@@ -1,0 +1,23 @@
+name = "clearveiw-pricing"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Monthly integrity + freshness check. Emails Mark when the numbers need
+# re-confirming or when a stored document fails validation.
+[triggers]
+crons = ["0 16 1 * *"]
+
+# Create with:  npx wrangler kv namespace create PRICING
+[[kv_namespaces]]
+binding = "PRICING"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+NOTIFY_EMAIL = "mark.rotar1000@gmail.com"
+MAIL_FROM = "Clearveiw Windows <estimates@windowsbyclearveiw.com>"
+SITE_URL = "https://windowsbyclearveiw.com"
+ALLOWED_ORIGIN = "https://windowsbyclearveiw.com"
+
+# Secrets (npx wrangler secret put NAME):
+#   RESEND_API_KEY  — same key the estimate form uses
+#   ADMIN_TOKEN     — bearer token required to PUT new pricing

@@ -22,6 +22,9 @@ window installation in Vancouver, WA and the rest of Clark County.
       form answers "Mail is not configured yet" and no lead reaches Mark.
 - [ ] **Reviews.** `/reviews` is deliberately empty. Only add entries with
       `published: true` for quotes from real customers who agreed to be quoted.
+- [ ] **Pricing.** The cost estimator currently runs on published Washington /
+      Portland-metro averages, labelled as such on the page. Mark's own ranges
+      convert better — see [Pricing](#pricing) below.
 
 ## Local development
 
@@ -74,6 +77,71 @@ pre-shrink it. Photos are *not* in `public/`; anything there ships unprocessed.
 
 Add a markdown file to `src/content/cities/`, then add the city to `nearby` in
 `src/data/site.ts` so it shows up in the schema and the About page.
+
+## Pricing
+
+The cost estimator at `/tools/window-replacement-cost-calculator` gets every
+number from `src/data/pricing.ts`. Nothing else in the codebase knows about money.
+
+Each opening figure is **installed cost per opening**: unit, labour, and normal
+finish work, for a standard-size ground-floor opening, **in vinyl, as an insert**.
+Fiberglass, full-frame, second-story access, and custom shapes are modifiers —
+never fold them into the baseline or they get counted twice.
+
+To switch from regional averages to Mark's real pricing:
+
+1. Replace the figures in `src/data/pricing.ts`.
+2. Set `basis.source` to `'clearveiw'`.
+3. Set `basis.reviewedAt` to today.
+
+The estimator copy changes automatically — it stops saying "published Washington
+averages" and starts presenting them as ours. An opening type left at `0` is
+hidden from the tool rather than counted as free.
+
+### The pricing worker
+
+`workers/pricing/` is a Cloudflare Worker that keeps the numbers honest. It
+deliberately does **not** try to discover market prices — there is no
+authoritative feed for Clark County window pricing, and anything scraping cost
+guides or asking a model to guess would drift silently while looking
+authoritative. What it does:
+
+| Route | Purpose |
+| --- | --- |
+| `GET /` | Serve the current pricing document (refuses if it fails validation) |
+| `GET /health` | Validation state, age, and whether a review is overdue |
+| `PUT /` | Replace pricing — bearer token, validated before it is stored |
+| cron (monthly) | Re-validate and email Mark when it is stale or broken |
+
+The site ships its own copy of the numbers and only *upgrades* from the worker,
+so an outage there can never blank out the estimator.
+
+Deploy:
+
+```bash
+cd workers/pricing
+npx wrangler kv namespace create PRICING   # paste the id into wrangler.toml
+npx wrangler secret put RESEND_API_KEY     # same key the estimate form uses
+npx wrangler secret put ADMIN_TOKEN        # any long random string
+npx wrangler deploy
+```
+
+Then point the site at it by setting `PUBLIC_PRICING_ENDPOINT` in Cloudflare
+Pages → Settings → Environment variables to the worker's URL. Leave it unset and
+the site simply uses its bundled numbers.
+
+Push new pricing without a redeploy:
+
+```bash
+curl -X PUT https://clearveiw-pricing.<subdomain>.workers.dev \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "content-type: application/json" \
+  --data @pricing.json
+```
+
+Validation (`shared/pricing-schema.mjs`, shared by the site and the worker)
+rejects inverted ranges, spreads wider than 5×, missing baselines, multipliers
+outside 0.5–3×, and future review dates.
 
 ## The estimate form
 

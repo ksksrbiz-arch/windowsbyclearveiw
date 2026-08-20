@@ -2,10 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CostEstimator from '../../components/CostEstimator.astro';
 import CtaBar from '../../components/CtaBar.astro';
-import { pricingIsUsable } from '../../data/pricing';
+import { pricing, pricingIsRegionalAverage, pricingIsUsable } from '../../data/pricing';
 import { site } from '../../data/site';
 
 const showMoney = pricingIsUsable();
+const isAverage = pricingIsRegionalAverage();
 
 const title = showMoney
   ? 'Window replacement cost calculator for Clark County, WA'
@@ -121,6 +122,16 @@ const schema = {
 
   <section class="section">
     <div class="wrap guide">
+      {showMoney && isAverage && (
+        <p class="notice">
+          <strong>Whose numbers are these?</strong> Published 2026 Washington and
+          Portland-metro averages, compiled from industry cost guides &mdash; not Clearveiw&rsquo;s
+          own pricing. They are here so you can sanity-check any quote you get, from us or
+          anyone else. Mark gives you a real figure after measuring.
+          Last reviewed {pricing.basis.reviewedAt}.
+        </p>
+      )}
+
       <h2>Common questions</h2>
       <div class="faq">
         {faq.map((item) => (
