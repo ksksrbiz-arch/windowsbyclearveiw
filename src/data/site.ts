@@ -4,9 +4,9 @@ export const site = {
   legalName: 'Clearveiw Windows, LLC',
   domain: 'windowsbyclearveiw.com',
   url: 'https://windowsbyclearveiw.com',
-  tagline: 'Replacement windows installed for Washington homes.',
+  tagline: 'Replacement windows for Vancouver, WA and nearby.',
   description:
-    'Clearveiw Windows, LLC installs energy-efficient replacement windows for homeowners across Washington. Local crew, clean job sites, and a straightforward estimate.',
+    'Clearveiw Windows, LLC installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.',
   owner: 'Mark',
   state: 'Washington',
   email: '',
@@ -14,11 +14,22 @@ export const site = {
   phoneDisplay: 'Call for an estimate',
   address: {
     line1: '',
-    city: '',
+    city: 'Vancouver',
     region: 'WA',
     postalCode: '',
   },
-  serviceAreaNote: 'Serving homeowners throughout Washington. City list is a starting set — prune or add to match where Mark actually works.',
+  serviceArea: 'Vancouver, WA',
+  serviceAreaNote:
+    'Based in Vancouver, WA. We install throughout Clark County and nearby Woodland.',
+  nearby: [
+    'Vancouver',
+    'Camas',
+    'Washougal',
+    'Battle Ground',
+    'Ridgefield',
+    'La Center',
+    'Woodland',
+  ],
   lniNumber: '',
   hours: 'By appointment',
   social: {
