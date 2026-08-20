@@ -3,10 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
-import JobCard from '../components/JobCard.astro';
+import WorkCard from '../components/WorkCard.astro';
 import { site } from '../data/site';
-
-const jobs = (await getCollection('jobs')).filter((job) => job.data.featured).slice(0, 3);
+import { featuredWork } from '../data/work';
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
 );
@@ -110,19 +109,20 @@ const signs = [
 
   <section class="section section-muted">
     <div class="wrap">
+      <p class="kicker">From the truck</p>
       <h2>Recent work</h2>
-      <p class="lede">Placeholder jobs until Mark’s photos land. The layout is ready for real elevations.</p>
-      <div class="cards">
-        {jobs.map((job) => (
-          <JobCard
-            title={job.data.title}
-            city={job.data.city}
-            year={job.data.year}
-            summary={job.data.summary}
-            scope={job.data.scope}
+      <p class="lede">Real openings in Washington houses — not stock. More on the gallery, including install-day shots.</p>
+      <div class="work-grid work-grid-home">
+        {featuredWork.map((photo) => (
+          <WorkCard
+            src={photo.src}
+            alt={photo.alt}
+            caption={photo.caption}
+            kind={photo.kind}
           />
         ))}
       </div>
+      <p><a href="/gallery">See the full gallery</a></p>
     </div>
   </section>
 
