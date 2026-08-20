@@ -8,8 +8,17 @@ const MAX = {
 
 const FROM = 'Clearveiw Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'mark.rotar1000@gmail.com';
-const LEAD_TEMPLATE = 'estimate-request';
-const RECEIPT_TEMPLATE = 'estimate-received';
+
+const TEMPLATES = {
+  lead: {
+    id: 'estimate-request',
+    preview: 'https://resend.com/templates/f8b73ea1-867e-48b8-8ccf-926b1a825913',
+  },
+  receipt: {
+    id: 'estimate-received',
+    preview: 'https://resend.com/templates/68555c62-cbc3-4061-8dfe-ea1b02a59c75',
+  },
+};
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -93,7 +102,7 @@ export async function onRequestPost(context) {
       to: [to],
       ...(lead.email ? { reply_to: lead.email } : {}),
       template: {
-        id: LEAD_TEMPLATE,
+        id: TEMPLATES.lead.id,
         variables: {
           CUSTOMER_NAME: lead.name,
           CUSTOMER_PHONE: lead.phone,
@@ -110,7 +119,7 @@ export async function onRequestPost(context) {
         from,
         to: [lead.email],
         template: {
-          id: RECEIPT_TEMPLATE,
+          id: TEMPLATES.receipt.id,
           variables: {
             CUSTOMER_NAME: lead.name,
             CITY: lead.city,
@@ -128,5 +137,8 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestGet() {
-  return json({ error: 'POST a request from the estimate form.' }, 405);
+  return json({
+    error: 'POST a request from the estimate form.',
+    templates: TEMPLATES,
+  }, 405);
 }
