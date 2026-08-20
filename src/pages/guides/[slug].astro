@@ -1,0 +1,84 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBar from '../../components/CtaBar.astro';
+import { site } from '../../data/site';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => data.published);
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: { guide },
+  }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+const related = (await getCollection('guides', ({ data, id }) => data.published && id !== guide.id))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const article = {
+  '@type': 'Article',
+  headline: guide.data.title,
+  description: guide.data.description,
+  dateModified: guide.data.updated.toISOString(),
+  author: { '@type': 'Organization', name: site.legalName },
+  publisher: { '@type': 'Organization', name: site.legalName },
+  mainEntityOfPage: `${site.url}/guides/${guide.id}`,
+};
+
+const faqPage = guide.data.faq.length
+  ? {
+      '@type': 'FAQPage',
+      mainEntity: guide.data.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    }
+  : null;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': faqPage ? [article, faqPage] : [article],
+};
+---
+<BaseLayout
+  title={guide.data.title}
+  description={guide.data.description}
+  path={`/guides/${guide.id}`}
+  schema={schema}
+>
+  <article class="wrap section guide">
+    <p class="kicker">{guide.data.kicker}</p>
+    <h1>{guide.data.title}</h1>
+    <p class="lede">{guide.data.description}</p>
+    <div class="guide-body">
+      <Content />
+    </div>
+    {guide.data.faq.length > 0 && (
+      <section class="faq">
+        <h2>Common questions</h2>
+        {guide.data.faq.map((item) => (
+          <details>
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </section>
+    )}
+    <section>
+      <h2>Keep reading</h2>
+      <div class="cards">
+        {related.map((item) => (
+          <article class="card">
+            <p class="kicker">{item.data.topic}</p>
+            <h3><a href={`/guides/${item.id}`}>{item.data.title}</a></h3>
+          </article>
+        ))}
+      </div>
+    </section>
+  </article>
+  <CtaBar />
+</BaseLayout>

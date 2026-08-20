@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+<BaseLayout
+  title="Window replacement guides"
+  description="Plain-language guides for Washington homeowners: signs it is time to replace windows, fogged glass, insert vs full-frame, and what a project costs."
+  path="/guides"
+>
+  <section class="wrap section">
+    <p class="kicker">Guides</p>
+    <h1>Understand the opening before you buy a window.</h1>
+    <p class="lede">
+      Short answers to the questions people ask before they call. Written for Washington weather,
+      not a national sales script.
+    </p>
+    <div class="cards">
+      {guides.map((guide) => (
+        <article class="card">
+          <p class="kicker">{guide.data.topic}</p>
+          <h2><a href={`/guides/${guide.id}`}>{guide.data.title}</a></h2>
+          <p>{guide.data.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
