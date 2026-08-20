@@ -152,18 +152,18 @@ a.sign:hover,
 }
 
 .photo-hero {
-  padding: 2.75rem 0 1.25rem;
+  padding: 3.25rem 0 2.5rem;
 }
 
 .photo-hero-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.9fr);
-  gap: clamp(1.5rem, 4vw, 3.25rem);
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.85fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
   align-items: center;
 }
 
 .photo-hero-copy h1 {
-  max-width: 13ch;
+  max-width: 11.5rem;
 }
 
 .photo-hero-copy .lede {
@@ -209,9 +209,17 @@ a.sign:hover,
     grid-template-columns: 1fr;
   }
 
+  .photo-hero {
+    padding: 1.75rem 0 1.5rem;
+  }
+
   .photo-hero-inner {
     grid-template-columns: 1fr;
     gap: 1.6rem;
+  }
+
+  .photo-hero-copy h1 {
+    max-width: 14ch;
   }
 
   .photo-hero-frame {
