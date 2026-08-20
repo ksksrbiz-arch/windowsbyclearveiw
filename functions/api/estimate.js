@@ -73,7 +73,7 @@ async function sendTemplate(key, payload) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    console.error('resend-failed', response.status, body);
+    console.error('resend-failed', response.status, body?.name || body?.message || '');
     throw new Error('Could not deliver the request.');
   }
   return body;
@@ -129,7 +129,7 @@ export async function onRequestPost(context) {
 
   const key = context.env?.RESEND_API_KEY;
   if (!key) {
-    console.error('estimate-request missing RESEND_API_KEY', lead);
+    console.error('estimate-request missing RESEND_API_KEY');
     return asJson ? json({ error: 'Mail is not configured yet.' }, 503) : redirect(request, '/estimate/problem');
   }
 

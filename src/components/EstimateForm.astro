@@ -79,6 +79,11 @@ import { site, telHref } from '../data/site';
       return;
     }
 
+    // ClientRouter fires astro:page-load after this script already ran, so
+    // without a guard the form picks up two submit handlers and sends two leads.
+    if (form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
     const button = form.querySelector('[data-submit]');
     const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
 

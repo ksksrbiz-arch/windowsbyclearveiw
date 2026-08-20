@@ -4,12 +4,17 @@ import sitemap from '@astrojs/sitemap';
 import { site } from './src/data/site.ts';
 
 // Washington requires the contractor registration number in advertising, and a
-// website counts. Shout in the build log until it is filled in.
+// website counts. Warn by default so the site stays deployable while it is still
+// being built out; set REQUIRE_LNI=1 in the Cloudflare Pages production
+// environment to turn that into a hard stop once the number is in hand.
 if (!site.lniNumber) {
-  console.warn(
-    '\n[clearveiw] WARNING: site.lniNumber is empty. Add Mark\'s L&I contractor ' +
-      'registration number in src/data/site.ts before advertising this site.\n',
-  );
+  const message =
+    "site.lniNumber is empty. Add Mark's L&I contractor registration number in " +
+    'src/data/site.ts before advertising this site.';
+  if (process.env.REQUIRE_LNI === '1') {
+    throw new Error(`[clearveiw] ${message}`);
+  }
+  console.warn(`\n[clearveiw] WARNING: ${message}\n`);
 }
 
 export default defineConfig({

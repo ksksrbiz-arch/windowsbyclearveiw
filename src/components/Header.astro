@@ -27,7 +27,7 @@ const links = [
     <div class="header-actions">
       <!-- Most visitors are on a phone. Keep click-to-call reachable at every width. -->
       <a class="btn btn-light header-cta" href={telHref()}>
-        <span class="header-cta-full">{site.phoneDisplay}</span>
+        <span class="header-cta-full" aria-hidden="true">{site.phoneDisplay}</span>
         <span class="header-cta-short" aria-hidden="true">Call</span>
         <span class="visually-hidden">Call {site.phoneDisplay}</span>
       </a>
@@ -39,23 +39,29 @@ const links = [
 </header>
 
 <script>
+  // The header carries transition:persist, so it survives client-side
+  // navigation. Handlers must therefore be attached exactly once, while the
+  // current-page marker has to be recomputed on every load — the server-rendered
+  // aria-current belongs to whichever page happened to be loaded first.
   function bindNav() {
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.getElementById('site-nav');
     if (!(toggle instanceof HTMLButtonElement) || !nav) return;
+    if (nav.dataset.bound === 'true') return;
+    nav.dataset.bound = 'true';
 
     const setOpen = (open: boolean) => {
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', String(open));
     };
 
-    toggle.onclick = (event) => {
+    toggle.addEventListener('click', (event) => {
       event.stopPropagation();
       setOpen(toggle.getAttribute('aria-expanded') !== 'true');
-    };
+    });
 
-    nav.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', () => setOpen(false));
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
     });
 
     // A menu you can only close by hitting the same small button is a trap on
@@ -73,6 +79,22 @@ const links = [
     });
   }
 
-  bindNav();
-  document.addEventListener('astro:page-load', bindNav);
+  function markCurrentPage() {
+    const nav = document.getElementById('site-nav');
+    if (!nav) return;
+    const here = window.location.pathname.replace(/\/$/, '') || '/';
+    nav.querySelectorAll('a').forEach((link) => {
+      const target = link.getAttribute('href')?.replace(/\/$/, '') || '/';
+      if (target === here) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
+  function setUpHeader() {
+    bindNav();
+    markCurrentPage();
+  }
+
+  setUpHeader();
+  document.addEventListener('astro:page-load', setUpHeader);
 </script>

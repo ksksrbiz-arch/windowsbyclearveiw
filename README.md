@@ -12,7 +12,11 @@ window installation in Vancouver, WA and the rest of Clark County.
 - [ ] **L&I contractor registration number.** Set `lniNumber` in `src/data/site.ts`.
       Washington requires a registered contractor's number in advertising, and a
       website is advertising. The build prints a warning while it is empty, and the
-      footer says the number is pending rather than inventing one.
+      footer says the number is pending rather than inventing one. Once you have
+      the number, set `REQUIRE_LNI=1` in the Pages production environment so a
+      later edit that blanks it fails the build instead of quietly publishing.
+      Washington also prohibits advertising that a contractor is "bonded and
+      insured", so that phrase is deliberately absent from the footer.
 - [ ] **`RESEND_API_KEY`** set in Cloudflare Pages → Settings → Environment variables
       (Production, and Preview if you want to test there). Without it the estimate
       form answers "Mail is not configured yet" and no lead reaches Mark.

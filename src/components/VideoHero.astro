@@ -24,7 +24,6 @@ const poster = await getImage({
         muted
         playsinline
         loop
-        autoplay
         preload="metadata"
       >
         <source src="/video/hero.webm" type="video/webm" />
@@ -89,10 +88,13 @@ const poster = await getImage({
   function calmHero() {
     const video = document.getElementById('hero-video');
     if (!(video instanceof HTMLVideoElement)) return;
+    // No autoplay attribute: a static one would start the clip before this
+    // check runs, and would play for people with JS off who never opted in.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      video.removeAttribute('autoplay');
       video.pause();
+      return;
     }
+    video.play().catch(() => {});
   }
 
   calmHero();

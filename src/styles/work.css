@@ -37,9 +37,10 @@
   grid-row: span 2;
 }
 
-/* Span two rows as well, so the tall 3/4 neighbours stay flush with it. */
+/* Spans two rows, so match the 3/4 of its neighbours rather than going wider:
+   a shorter ratio leaves the tile floating above the row below it. */
 .work-card.is-featured img {
-  aspect-ratio: 8 / 9;
+  aspect-ratio: 3 / 4;
 }
 
 .work-card figcaption {
