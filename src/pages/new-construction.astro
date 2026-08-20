@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { newBuildWork } from '../data/work';
 ---
 <BaseLayout
   title="New construction windows"
@@ -40,9 +42,30 @@ import CtaBar from '../components/CtaBar.astro';
           <li>Target set date</li>
           <li>Who is buying: builder or owner</li>
         </ul>
-        <p class="fine-print">New-build shots go up after the next framed job.</p>
+        <p class="fine-print">Ask for a reference on a build we set this season.</p>
       </article>
     </div>
   </section>
+  <section class="section section-muted">
+    <div class="wrap">
+      <p class="kicker">From a framed job</p>
+      <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
+      <p class="lede">
+        Nailing fins taped into the weather barrier, sill flashed, unit plumb. This is what we
+        hand back to the builder.
+      </p>
+      <div class="work-grid work-grid-newbuild">
+        {newBuildWork.map((photo) => (
+          <WorkCard
+            image={photo.image}
+            alt={photo.alt}
+            caption={photo.caption}
+            kind={photo.kind}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
   <CtaBar />
 </BaseLayout>

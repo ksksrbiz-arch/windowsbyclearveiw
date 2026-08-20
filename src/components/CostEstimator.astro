@@ -1,0 +1,333 @@
+---
+import { pricing, pricingIsUsable } from '../data/pricing';
+
+const showMoney = pricingIsUsable();
+
+// Everything the client script needs, serialised once. Keeping the numbers in
+// one payload means Mark's pricing file is the only thing that ever changes.
+const model = {
+  showMoney,
+  rounding: pricing.displayRounding,
+  openings: pricing.openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high })),
+  materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
+  fullFrame: { low: pricing.fullFrame.low, high: pricing.fullFrame.high },
+  modifiers: pricing.modifiers.map((m) => ({
+    id: m.id,
+    label: m.label,
+    perOpening: m.perOpening,
+    low: m.low,
+    high: m.high,
+  })),
+};
+---
+<section class="estimator" data-estimator data-model={JSON.stringify(model)}>
+  <div class="estimator-grid">
+    <div class="estimator-inputs">
+      <fieldset class="est-block">
+        <legend>1 &middot; Count your openings</legend>
+        <p class="est-hint">
+          Walk the house and count what you would replace. Not sure what a window is called?
+          Each one says what it does.
+        </p>
+        <ul class="counter-list">
+          {pricing.openings.map((opening) => (
+            <li class="counter">
+              <span class="counter-copy">
+                <strong>{opening.label}</strong>
+                <span>{opening.blurb}</span>
+              </span>
+              <span class="counter-controls">
+                <button type="button" data-step={opening.id} data-dir="-1" aria-label={`One fewer ${opening.label}`}>&minus;</button>
+                <output data-count={opening.id} aria-live="polite" aria-label={`${opening.label} count`}>0</output>
+                <button type="button" data-step={opening.id} data-dir="1" aria-label={`One more ${opening.label}`}>+</button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </fieldset>
+
+      <fieldset class="est-block">
+        <legend>2 &middot; Material</legend>
+        <div class="est-choices">
+          {pricing.materials.map((material, index) => (
+            <label class="choice">
+              <input type="radio" name="est-material" value={material.id} checked={index === 0} />
+              <span>
+                <strong>{material.label}</strong>
+                <span class="est-hint">{material.blurb}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="est-block">
+        <legend>3 &middot; How much comes out</legend>
+        <div class="est-choices">
+          <label class="choice">
+            <input type="radio" name="est-method" value="insert" checked />
+            <span>
+              <strong>Insert &mdash; the frame stays</strong>
+              <span class="est-hint">Right when the existing frame is solid and square.</span>
+            </span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="est-method" value="mixed" />
+            <span>
+              <strong>Not sure / a mix</strong>
+              <span class="est-hint">Most houses. We tell you which openings need which.</span>
+            </span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="est-method" value="full-frame" />
+            <span>
+              <strong>Full-frame &mdash; back to the framing</strong>
+              <span class="est-hint">Needed where the frame is rotten or out of square.</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="est-block">
+        <legend>4 &middot; Anything else true?</legend>
+        <div class="est-choices">
+          {pricing.modifiers.map((modifier) => (
+            <label class="choice">
+              <input type="checkbox" name="est-modifier" value={modifier.id} />
+              <span>
+                <strong>{modifier.label}</strong>
+                <span class="est-hint">{modifier.blurb}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+
+    <aside class="estimator-result" data-result>
+      <p class="kicker">Your project</p>
+
+      <p class="est-empty" data-empty>
+        Count an opening and this fills in.
+      </p>
+
+      <div class="est-summary" data-summary hidden>
+        <ul class="est-lines" data-lines></ul>
+
+        <p class="est-scope" data-scope></p>
+
+        {showMoney ? (
+          <div class="est-range" data-range-block>
+            <p class="kicker">Estimated range</p>
+            <p class="est-number" data-range aria-live="polite"></p>
+            <p class="est-hint">
+              A Clark County range for this scope &mdash; not a quote. Every opening gets measured
+              before anything is ordered.
+            </p>
+          </div>
+        ) : (
+          <div class="est-range est-range-pending">
+            <p class="kicker">Scope, not a price</p>
+            <p class="est-hint">
+              We are not publishing dollar ranges until they are Mark's own numbers rather than
+              somebody's national average. Send the scope over and you will get a real figure for
+              your house.
+            </p>
+          </div>
+        )}
+
+        <div class="est-drivers" data-drivers-block hidden>
+          <p class="kicker">What moves this number</p>
+          <ul class="est-driver-list" data-drivers></ul>
+        </div>
+
+        <p class="est-actions">
+          <a class="btn btn-primary" href="/estimate" data-handoff>Send this scope to Mark</a>
+        </p>
+        <p class="fine-print">Nothing is sent until you fill in the form on the next page.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  type OpeningRow = { id: string; label: string; low: number; high: number };
+  type ModifierRow = { id: string; label: string; perOpening: boolean; low: number; high: number };
+  type Model = {
+    showMoney: boolean;
+    rounding: number;
+    openings: OpeningRow[];
+    materials: { id: string; label: string; multiplier: number }[];
+    fullFrame: { low: number; high: number };
+    modifiers: ModifierRow[];
+  };
+
+  function bindEstimator() {
+    const root = document.querySelector('[data-estimator]');
+    if (!(root instanceof HTMLElement) || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const model: Model = JSON.parse(root.dataset.model || '{}');
+    const counts = new Map<string, number>(model.openings.map((o) => [o.id, 0]));
+
+    const empty = root.querySelector('[data-empty]');
+    const summary = root.querySelector('[data-summary]');
+    const lines = root.querySelector('[data-lines]');
+    const scope = root.querySelector('[data-scope]');
+    const rangeEl = root.querySelector('[data-range]');
+    const driversBlock = root.querySelector('[data-drivers-block]');
+    const drivers = root.querySelector('[data-drivers]');
+    const handoff = root.querySelector('[data-handoff]');
+
+    const money = (value: number) => {
+      const step = model.rounding || 50;
+      return `$${(Math.round(value / step) * step).toLocaleString('en-US')}`;
+    };
+
+    const chosen = (name: string) => {
+      const el = root.querySelector(`input[name="${name}"]:checked`);
+      return el instanceof HTMLInputElement ? el.value : '';
+    };
+
+    const activeModifiers = () =>
+      [...root.querySelectorAll<HTMLInputElement>('input[name="est-modifier"]:checked')].map(
+        (el) => el.value,
+      );
+
+    function render() {
+      const picked = model.openings
+        .map((opening) => ({ ...opening, count: counts.get(opening.id) || 0 }))
+        .filter((opening) => opening.count > 0);
+
+      const total = picked.reduce((sum, o) => sum + o.count, 0);
+
+      if (empty instanceof HTMLElement) empty.hidden = total > 0;
+      if (summary instanceof HTMLElement) summary.hidden = total === 0;
+      if (total === 0) return;
+
+      const material =
+        model.materials.find((m) => m.id === chosen('est-material')) || model.materials[0];
+      const method = chosen('est-method') || 'insert';
+      const mods = activeModifiers();
+
+      // --- line items -----------------------------------------------------
+      if (lines instanceof HTMLElement) {
+        lines.innerHTML = '';
+        for (const opening of picked) {
+          const li = document.createElement('li');
+          const label = document.createElement('span');
+          label.textContent = opening.label;
+          const count = document.createElement('span');
+          count.textContent = `× ${opening.count}`;
+          li.append(label, count);
+          lines.append(li);
+        }
+      }
+
+      const methodWord =
+        method === 'insert' ? 'insert' : method === 'full-frame' ? 'full-frame' : 'a mix of methods';
+      if (scope instanceof HTMLElement) {
+        scope.textContent = `${total} opening${total === 1 ? '' : 's'} · ${material.label.toLowerCase()} · ${methodWord}`;
+      }
+
+      // --- range ----------------------------------------------------------
+      if (model.showMoney && rangeEl instanceof HTMLElement) {
+        let low = 0;
+        let high = 0;
+        for (const opening of picked) {
+          low += opening.low * opening.count * material.multiplier;
+          high += opening.high * opening.count * material.multiplier;
+        }
+
+        // "Mixed" assumes roughly a third of the openings need full-frame.
+        const fullFrameShare = method === 'full-frame' ? 1 : method === 'mixed' ? 0.34 : 0;
+        low += model.fullFrame.low * total * fullFrameShare;
+        high += model.fullFrame.high * total * fullFrameShare;
+
+        for (const id of mods) {
+          const modifier = model.modifiers.find((m) => m.id === id);
+          if (!modifier) continue;
+          const units = modifier.perOpening ? total : 1;
+          low += modifier.low * units;
+          high += modifier.high * units;
+        }
+
+        rangeEl.textContent = `${money(low)} – ${money(high)}`;
+      }
+
+      // --- what moves the number -----------------------------------------
+      const notes: string[] = [];
+      if (method === 'full-frame') {
+        notes.push('Full-frame on every opening is the expensive end. Some may only need an insert.');
+      } else if (method === 'mixed') {
+        notes.push('We assumed about a third need full-frame. The measure sorts out which.');
+      } else {
+        notes.push('Insert pricing assumes the existing frames are sound. Soft sills change that.');
+      }
+      if (material.id !== 'vinyl') {
+        notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);
+      }
+      if (mods.includes('second-story')) notes.push('Upstairs openings add staging time.');
+      if (mods.includes('oversize')) notes.push('Arches and transoms are custom-ordered.');
+      if (mods.includes('rot-repair')) {
+        notes.push('Rot is priced once the wall is open — it is not in any range on this page.');
+      }
+      if (total >= 8) notes.push('Whole-house jobs usually price better per opening than a few.');
+
+      if (drivers instanceof HTMLElement) {
+        drivers.innerHTML = '';
+        for (const note of notes) {
+          const li = document.createElement('li');
+          li.textContent = note;
+          drivers.append(li);
+        }
+      }
+      if (driversBlock instanceof HTMLElement) driversBlock.hidden = notes.length === 0;
+
+      // --- hand the scope to the estimate form ----------------------------
+      const noteText = [
+        `${total} opening${total === 1 ? '' : 's'}: ` +
+          picked.map((o) => `${o.count} ${o.label.toLowerCase()}`).join(', '),
+        `Material: ${material.label}`,
+        `Method: ${methodWord}`,
+        mods.length
+          ? `Also: ${mods
+              .map((id) => model.modifiers.find((m) => m.id === id)?.label || id)
+              .join(', ')}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join('. ');
+
+      try {
+        sessionStorage.setItem('clearveiw:scope', noteText);
+      } catch {
+        // Private browsing can refuse storage. The link below still works.
+      }
+      if (handoff instanceof HTMLAnchorElement) {
+        handoff.href = `/estimate?scope=${encodeURIComponent(noteText.slice(0, 400))}`;
+      }
+    }
+
+    root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.step || '';
+        const dir = Number(button.dataset.dir || 0);
+        const next = Math.max(0, Math.min(40, (counts.get(id) || 0) + dir));
+        counts.set(id, next);
+        const output = root.querySelector(`[data-count="${id}"]`);
+        if (output instanceof HTMLElement) output.textContent = String(next);
+        render();
+      });
+    });
+
+    root.addEventListener('change', (event) => {
+      if (event.target instanceof HTMLInputElement) render();
+    });
+
+    render();
+  }
+
+  bindEstimator();
+  document.addEventListener('astro:page-load', bindEstimator);
+</script>

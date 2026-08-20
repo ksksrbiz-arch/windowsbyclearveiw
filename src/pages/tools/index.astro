@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBar from '../../components/CtaBar.astro';
+import { pricingIsUsable } from '../../data/pricing';
+
+const showMoney = pricingIsUsable();
+---
+<BaseLayout
+  title="Free window tools"
+  description="Free tools for Clark County homeowners planning a window replacement — no email required."
+  path="/tools"
+  crumbs={[{ name: 'Tools', href: '/tools' }]}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Tools</p>
+      <h1>Work it out yourself first.</h1>
+      <p class="lede">
+        Free, no email, nothing sent anywhere. Use them, close the tab, and call whoever you
+        want — we would rather you understood the job than felt rushed into it.
+      </p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <div class="cards">
+        <article class="card">
+          <p class="kicker">Planning</p>
+          <h2>
+            <a href="/tools/window-replacement-cost-calculator">
+              {showMoney ? 'Window replacement cost calculator' : 'Window project planner'}
+            </a>
+          </h2>
+          <p>
+            Count your openings, choose insert or full-frame, and see where a Clark County
+            project lands before anyone comes out.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+  <CtaBar />
+</BaseLayout>

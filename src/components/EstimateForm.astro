@@ -84,6 +84,21 @@ import { site, telHref } from '../data/site';
     if (form.dataset.bound === 'true') return;
     form.dataset.bound = 'true';
 
+    // The cost calculator hands a scope over. Prefill the notes so nobody has
+    // to describe their project twice.
+    const notes = form.querySelector('[name="notes"]');
+    if (notes instanceof HTMLTextAreaElement && !notes.value) {
+      let scope = new URLSearchParams(window.location.search).get('scope');
+      if (!scope) {
+        try {
+          scope = sessionStorage.getItem('clearveiw:scope');
+        } catch {
+          scope = null;
+        }
+      }
+      if (scope) notes.value = scope;
+    }
+
     const button = form.querySelector('[data-submit]');
     const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
 

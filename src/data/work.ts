@@ -1,6 +1,6 @@
 import type { ImageMetadata } from 'astro';
 
-export type WorkKind = 'after' | 'interior' | 'process';
+export type WorkKind = 'after' | 'interior' | 'process' | 'new construction';
 
 export type WorkPhoto = {
   id: string;
@@ -28,6 +28,7 @@ import dormerSet from '../assets/work/dormer-set.jpg';
 import gableArchLadders from '../assets/work/gable-arch-ladders.jpg';
 import graySideSlider from '../assets/work/gray-side-slider.jpg';
 import greenCraftsmanUpper from '../assets/work/green-craftsman-upper.jpg';
+import newConstructionSheathed from '../assets/work/new-construction-sheathed.jpg';
 import newUnitInterior from '../assets/work/new-unit-interior.jpg';
 import pinkBungalow from '../assets/work/pink-bungalow.jpg';
 import pinkGable from '../assets/work/pink-gable.jpg';
@@ -88,13 +89,22 @@ export const workPhotos: WorkPhoto[] = [
     order: 5,
   },
   {
+    id: 'new-construction-sheathed',
+    image: newConstructionSheathed,
+    alt: 'Windows set and flashed in a sheathed two-story new build, taped seams, before siding',
+    caption: 'Set and flashed, ready for siding',
+    kind: 'new construction',
+    featured: true,
+    order: 6,
+  },
+  {
     id: 'blue-pair-installday',
     image: bluePairInstallday,
     alt: 'Pair of new white double-hung windows on blue siding with a caulk gun on the roof below',
     caption: 'Install day — sealing the pair',
     kind: 'process',
-    featured: true,
-    order: 6,
+    featured: false,
+    order: 7,
   },
   {
     id: 'tan-two-story',
@@ -103,7 +113,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Sliders on a two-story elevation',
     kind: 'after',
     featured: false,
-    order: 7,
+    order: 8,
   },
   {
     id: 'gable-arch-ladders',
@@ -112,7 +122,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Ladders up to the gable',
     kind: 'process',
     featured: false,
-    order: 8,
+    order: 9,
   },
   {
     id: 'slider-shutters',
@@ -121,7 +131,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Slider and shutters over the porch',
     kind: 'after',
     featured: false,
-    order: 9,
+    order: 10,
   },
   {
     id: 'blue-ladder',
@@ -130,7 +140,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'On the ladder, mid-install',
     kind: 'process',
     featured: false,
-    order: 10,
+    order: 11,
   },
   {
     id: 'new-unit-interior',
@@ -139,7 +149,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'New unit in the existing opening',
     kind: 'interior',
     featured: false,
-    order: 11,
+    order: 12,
   },
   {
     id: 'dormer-set',
@@ -148,7 +158,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Dormer and upper wall, set',
     kind: 'after',
     featured: false,
-    order: 12,
+    order: 13,
   },
   {
     id: 'bedroom-view',
@@ -157,7 +167,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Clear view from an upstairs room',
     kind: 'interior',
     featured: false,
-    order: 13,
+    order: 14,
   },
   {
     id: 'two-story-white',
@@ -166,7 +176,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Stacked openings, one job',
     kind: 'after',
     featured: false,
-    order: 14,
+    order: 15,
   },
   {
     id: 'ranch-slider',
@@ -175,7 +185,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Ranch slider, after',
     kind: 'after',
     featured: false,
-    order: 15,
+    order: 16,
   },
   {
     id: 'ranch-stairs',
@@ -184,7 +194,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Same house, from the stairs',
     kind: 'after',
     featured: false,
-    order: 16,
+    order: 17,
   },
   {
     id: 'tan-upper-slider',
@@ -193,7 +203,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Upper slider, tight trim',
     kind: 'after',
     featured: false,
-    order: 17,
+    order: 18,
   },
   {
     id: 'blue-slider',
@@ -202,7 +212,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Blue house slider',
     kind: 'after',
     featured: false,
-    order: 18,
+    order: 19,
   },
   {
     id: 'blue-hung-ladder',
@@ -211,7 +221,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Single-hung, just set',
     kind: 'process',
     featured: false,
-    order: 19,
+    order: 20,
   },
   {
     id: 'blue-hung',
@@ -220,7 +230,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Finished hung on the blue house',
     kind: 'after',
     featured: false,
-    order: 20,
+    order: 21,
   },
   {
     id: 'cream-side',
@@ -229,7 +239,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Side elevation during the job',
     kind: 'process',
     featured: false,
-    order: 21,
+    order: 22,
   },
   {
     id: 'cream-entry',
@@ -238,7 +248,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Install day at the entry',
     kind: 'process',
     featured: false,
-    order: 22,
+    order: 23,
   },
   {
     id: 'pink-bungalow',
@@ -247,7 +257,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Pink bungalow, after',
     kind: 'after',
     featured: false,
-    order: 23,
+    order: 24,
   },
   {
     id: 'pink-gable-ladder',
@@ -256,7 +266,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Gable opening from the ladder',
     kind: 'process',
     featured: false,
-    order: 24,
+    order: 25,
   },
   {
     id: 'pink-gable',
@@ -265,7 +275,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Gable window, set',
     kind: 'after',
     featured: false,
-    order: 25,
+    order: 26,
   },
 ];
 
@@ -274,6 +284,10 @@ const byOrder = (a: WorkPhoto, b: WorkPhoto) => a.order - b.order;
 export const featuredWork = workPhotos.filter((photo) => photo.featured).sort(byOrder);
 
 export const processWork = workPhotos.filter((photo) => photo.kind === 'process').sort(byOrder);
+
+export const newBuildWork = workPhotos
+  .filter((photo) => photo.kind === 'new construction')
+  .sort(byOrder);
 
 export const allWork = [...workPhotos].sort(byOrder);
 

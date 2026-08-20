@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CostEstimator from '../../components/CostEstimator.astro';
+import CtaBar from '../../components/CtaBar.astro';
+import { pricingIsUsable } from '../../data/pricing';
+import { site } from '../../data/site';
+
+const showMoney = pricingIsUsable();
+
+const title = showMoney
+  ? 'Window replacement cost calculator for Clark County, WA'
+  : 'Window replacement project planner for Clark County, WA';
+
+const description = showMoney
+  ? 'Count your openings and get an honest installed cost range for window replacement in Vancouver, Camas, Battle Ground, and the rest of Clark County. No email required.'
+  : 'Size up a window replacement project in Vancouver, WA and Clark County: count your openings, pick insert or full-frame, and send the scope straight to the installer. No email required.';
+
+const faq = [
+  {
+    question: 'What does window replacement cost in Vancouver, WA?',
+    answer:
+      'It depends far more on the opening than on the window. A straight insert replacement into a sound frame is the low end. Full-frame replacement, upstairs access, custom shapes, and any rot at the sill all move it up. The calculator on this page prices the scope you describe; a measure turns that into a real number.',
+  },
+  {
+    question: 'Why do you not just show one price per window?',
+    answer:
+      'Because a single number would be wrong for most houses. Two identical-looking windows can differ by hundreds of dollars once you account for whether the frame stays, how the opening is flashed, and what the trim has to match. Ranges are honest; one number is marketing.',
+  },
+  {
+    question: 'Is insert or full-frame replacement cheaper?',
+    answer:
+      'Insert is cheaper and less disruptive, and it is the right call when the existing frame is solid and square. Full-frame costs more because the frame comes out to the rough opening, but it is the only correct answer when the frame is rotten, out of square, or leaking. Paying for an insert into a bad frame wastes the money entirely.',
+  },
+  {
+    question: 'Do I have to give an email to see the estimate?',
+    answer:
+      'No. The calculator runs entirely in your browser and nothing is sent anywhere. If you want a real quote you can hand the scope to the estimate form, but that is your choice.',
+  },
+  {
+    question: 'Does the federal tax credit still cover windows?',
+    answer:
+      'No. The federal 25C energy-efficient home improvement credit ended for installs after December 31, 2025. Anyone still advertising it for a current project is quoting a dead program. Local utility rebates may still apply.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: title,
+      url: `${site.url}/tools/window-replacement-cost-calculator`,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Any',
+      description,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      provider: { '@id': `${site.url}/#business` },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+  ],
+};
+---
+<BaseLayout
+  title={title}
+  description={description}
+  path="/tools/window-replacement-cost-calculator"
+  crumbs={[
+    { name: 'Tools', href: '/tools' },
+    { name: 'Cost calculator', href: '/tools/window-replacement-cost-calculator' },
+  ]}
+  schema={schema}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Free tool &middot; no email</p>
+      <h1>{showMoney ? 'What will new windows actually cost?' : 'Plan your window project.'}</h1>
+      <p class="lede">
+        Count what you would replace, tell us how much has to come out, and see where your
+        project lands. Everything runs in your browser &mdash; nothing is sent until you choose
+        to send it.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <CostEstimator />
+    </div>
+  </section>
+
+  <section class="section section-muted">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">How to use it</p>
+        <h2>Walk the house first.</h2>
+        <p>
+          Start in the room that bothers you most and work outward. Count every opening you would
+          want done, even the ones you are unsure about &mdash; it costs nothing to include them
+          now and drop them later.
+        </p>
+        <p>
+          If you cannot tell a double-hung from a single-hung, look at the top sash. If it moves,
+          it is a double-hung. If only the bottom half slides up, it is a single-hung.
+        </p>
+      </div>
+      <ol class="steps">
+        <li><strong>Count the openings.</strong> By type, not by room.</li>
+        <li><strong>Pick a material.</strong> Vinyl is the Clark County default.</li>
+        <li><strong>Say how much comes out.</strong> Insert, full-frame, or a mix.</li>
+        <li><strong>Flag the complications.</strong> Upstairs, arches, soft sills.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap guide">
+      <h2>Common questions</h2>
+      <div class="faq">
+        {faq.map((item) => (
+          <details>
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </div>
+
+      <h2>Keep reading</h2>
+      <ul class="plain-list">
+        <li><a href="/guides/window-replacement-cost-washington">What drives window replacement cost in Washington</a></li>
+        <li><a href="/guides/full-frame-vs-insert">Full-frame vs insert replacement</a></li>
+        <li><a href="/guides/signs-you-need-new-windows">Six signs it is time to replace</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <CtaBar />
+</BaseLayout>
