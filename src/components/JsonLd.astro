@@ -1,7 +1,13 @@
 ---
 import { site } from '../data/site';
 
-const data = {
+interface Props {
+  extra?: Record<string, unknown>;
+}
+
+const { extra } = Astro.props;
+
+const business = {
   '@context': 'https://schema.org',
   '@type': 'HomeAndConstructionBusiness',
   name: site.legalName,
@@ -15,5 +21,7 @@ const data = {
   ...(site.phone ? { telephone: site.phone } : {}),
   ...(site.email ? { email: site.email } : {}),
 };
+
+const graph = extra ? [business, extra] : business;
 ---
-<script type="application/ld+json" set:html={JSON.stringify(data)} />
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />

@@ -37,4 +37,25 @@ const reviews = defineCollection({
   }),
 });
 
-export const collections = { cities, jobs, reviews };
+const guides = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    kicker: z.string().default('Guide'),
+    topic: z.string(),
+    published: z.boolean().default(true),
+    updated: z.coerce.date(),
+    order: z.number().default(99),
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      )
+      .default([]),
+  }),
+});
+
+export const collections = { cities, jobs, reviews, guides };
