@@ -1,18 +1,16 @@
 ---
 import { site, telHref } from '../data/site';
 ---
-<section class="section">
-  <div class="wrap">
-    <div class="cta-bar">
-      <div>
-        <p class="kicker">Next step</p>
-        <strong>Walk the openings with Mark.</strong>
-        <div>A written estimate after we see the glass, the sills, and the trim — not a number from a photo.</div>
-      </div>
-      <div class="cta-actions">
-        <a class="btn btn-light" href={telHref()}>{site.phone || 'Call Mark'}</a>
-        <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
-      </div>
+<section class="cta-band">
+  <div class="wrap cta-bar">
+    <div>
+      <p class="kicker">Next step</p>
+      <strong>Walk the openings with Mark.</strong>
+      <p>A written estimate after we see the glass, the sills, and the trim — not a number from a photo.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn btn-light" href={telHref()}>{site.phone || 'Call Mark'}</a>
+      <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
     </div>
   </div>
 </section>

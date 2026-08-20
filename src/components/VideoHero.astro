@@ -24,14 +24,13 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
     </div>
 
     <div class="wrap video-copy">
-      <p class="kicker">Vancouver, WA and nearby</p>
-      <h1>Clear glass. Tight openings. A house that feels finished.</h1>
+      <p class="kicker">Vancouver, WA</p>
+      <h1>Clear glass. Tight openings.</h1>
       <p class="lede">
-        {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
-        Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
+        Replacement and new-construction windows in Clark County.
       </p>
       <p class="hero-actions">
-        <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+        <a class="btn btn-light" href={telHref()}>{site.phone || 'Get an estimate'}</a>
         <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
       </p>
     </div>
@@ -40,15 +39,15 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
   <section class="photo-hero">
     <div class="wrap photo-hero-inner">
       <div class="photo-hero-copy">
-        <p class="kicker">Vancouver, WA and nearby</p>
-        <h1>Clear glass. Tight openings. A house that feels finished.</h1>
+        <p class="kicker">Vancouver, WA</p>
+        <h1>Clear glass. Tight openings.</h1>
         <p class="lede">
-          {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
-          Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
+          {site.shortName} replaces tired windows and sets new ones in Vancouver,
+          Camas, Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
         </p>
         <p class="hero-actions">
-          <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-          <a class="btn btn-ghost" href="#work">See the work</a>
+          <a class="btn btn-light" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+          <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
         </p>
       </div>
       <figure class="photo-hero-frame">
@@ -58,7 +57,7 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
           width="900"
           height="1200"
         />
-        <figcaption>After. Stone-and-siding replacement in Clark County.</figcaption>
+        <figcaption>After. Clark County replacement.</figcaption>
       </figure>
     </div>
   </section>

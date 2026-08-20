@@ -77,15 +77,16 @@ const signs = [
       <p class="kicker">Is it time?</p>
       <h2>Six signs the window is the problem</h2>
       <p class="lede">
-        If two of these are true in the same room, a measure is worth a morning. Each card opens
-        a short guide.
+        If two of these are true in the same room, a measure is worth a morning.
       </p>
-      <div class="cards signs">
+      <div class="spec-list">
         {signs.map((sign, index) => (
-          <a class="card sign" href={sign.href}>
-            <span class="sign-num">{String(index + 1).padStart(2, '0')}</span>
-            <h3>{sign.title}</h3>
-            <p>{sign.text}</p>
+          <a class="spec" href={sign.href}>
+            <span class="spec-num">{String(index + 1).padStart(2, '0')}</span>
+            <span>
+              <h3>{sign.title}</h3>
+              <p>{sign.text}</p>
+            </span>
           </a>
         ))}
       </div>
@@ -96,18 +97,18 @@ const signs = [
     <div class="wrap">
       <p class="kicker">What actually changes</p>
       <h2>Comfort first. Then the bill. Then the wall.</h2>
-      <div class="cards metrics">
-        <article class="card">
+      <div class="metric-row">
+        <article class="metric">
           <p class="kicker">Comfort</p>
           <h3>Sit next to the glass in January</h3>
           <p>New units raise the inside face of the glass and stop the draft at the lock. The room feels even before anyone talks about U-factor.</p>
         </article>
-        <article class="card">
+        <article class="metric">
           <p class="kicker">Moisture</p>
           <h3>Fog you cannot wipe is a failed unit</h3>
           <p>Haze between panes means the seal is gone. Room-side sweat is often humidity. We tell those apart on site. <a href="/guides/fogged-windows">How to look</a>.</p>
         </article>
-        <article class="card">
+        <article class="metric">
           <p class="kicker">Energy</p>
           <h3>Less work for a long heating season</h3>
           <p>Windows are a small share of the wall and a large share of heat loss. Savings are real on tired single-pane. They are modest if the glass is already decent.</p>
@@ -137,7 +138,7 @@ const signs = [
     <div class="wrap">
       <p class="kicker">From the truck</p>
       <h2>Recent work</h2>
-      <p class="lede">Real openings in Washington houses — not stock. More on the gallery, including install-day shots.</p>
+      <p class="lede">Real openings in Washington houses — not stock.</p>
       <div class="work-grid work-grid-home">
         {featuredWork.map((photo, index) => (
           <WorkCard
@@ -149,21 +150,21 @@ const signs = [
           />
         ))}
       </div>
-      <p><a href="/gallery">See the full gallery</a></p>
+      <p class="section-link"><a href="/gallery">See the full gallery</a></p>
     </div>
   </section>
 
   <section class="section">
     <div class="wrap">
       <p class="kicker">Learn first</p>
-      <h2>Guides for the questions before the call</h2>
-      <div class="cards">
+      <h2>Guides before the call</h2>
+      <div class="guide-rows">
         {guides.map((guide) => (
-          <article class="card">
-            <p class="kicker">{guide.data.topic}</p>
-            <h3><a href={`/guides/${guide.id}`}>{guide.data.title}</a></h3>
-            <p>{guide.data.description}</p>
-          </article>
+          <a class="guide-row" href={`/guides/${guide.id}`}>
+            <span class="kicker">{guide.data.topic}</span>
+            <strong>{guide.data.title}</strong>
+            <span>{guide.data.description}</span>
+          </a>
         ))}
       </div>
     </div>
