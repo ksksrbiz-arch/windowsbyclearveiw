@@ -4,7 +4,7 @@ city: Tacoma
 year: 2025
 summary: Sixteen units swapped in a 1920s bungalow, keeping the exterior casing lines.
 scope: Full-frame · vinyl · low-E dual pane
-featured: true
+featured: false
 placeholder: true
 ---
 

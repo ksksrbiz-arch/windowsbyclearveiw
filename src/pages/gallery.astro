@@ -1,29 +1,33 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import JobCard from '../components/JobCard.astro';
-
-const jobs = await getCollection('jobs');
+import WorkCard from '../components/WorkCard.astro';
+import CtaBar from '../components/CtaBar.astro';
+import { allWork } from '../data/work';
 ---
 <BaseLayout
   title="Project gallery"
-  description="Replacement window projects from Clearveiw Windows, LLC."
+  description="Real replacement jobs from Clearveiw Windows, LLC in Washington homes."
   path="/gallery"
 >
   <section class="wrap section">
     <p class="kicker">Gallery</p>
-    <h1>Work in Washington homes</h1>
-    <p class="notice">These are placeholder jobs so the page has structure. Swap in real photos and addresses Mark approves.</p>
-    <div class="cards">
-      {jobs.map((job) => (
-        <JobCard
-          title={job.data.title}
-          city={job.data.city}
-          year={job.data.year}
-          summary={job.data.summary}
-          scope={job.data.scope}
+    <h1>Mark’s work</h1>
+    <p class="lede">
+      Vinyl replacement in lived-in Washington houses — sliders, double-hungs, and
+      the ladder shots from install day. New-construction photos will land here
+      when the next framed opening is shot.
+    </p>
+    <div class="work-grid">
+      {allWork.map((photo) => (
+        <WorkCard
+          src={photo.src}
+          alt={photo.alt}
+          caption={photo.caption}
+          kind={photo.kind}
+          featured={photo.featured && photo.order <= 2}
         />
       ))}
     </div>
   </section>
+  <CtaBar />
 </BaseLayout>

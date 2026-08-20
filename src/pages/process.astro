@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { processWork } from '../data/work';
 ---
 <BaseLayout
   title="How installation works"
@@ -16,6 +18,11 @@ import CtaBar from '../components/CtaBar.astro';
       <li class="card"><h2>3. Install</h2><p>Old units come out. New units go in plumb and flashed. Interior and exterior finishes are closed up to match the house.</p></li>
       <li class="card"><h2>4. Walk the job</h2><p>We operate every sash with you, haul debris, and leave the rooms usable. Warranty paperwork stays with you.</p></li>
     </ol>
+    <div class="work-grid" style="margin-top:2rem;">
+      {processWork.map((photo) => (
+        <WorkCard src={photo.src} alt={photo.alt} caption={photo.caption} kind={photo.kind} />
+      ))}
+    </div>
     <p class="notice">Permits depend on the city and whether the opening changes. We handle that conversation before work starts.</p>
   </section>
   <CtaBar />

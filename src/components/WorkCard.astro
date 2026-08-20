@@ -1,0 +1,20 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  kind?: string;
+  featured?: boolean;
+}
+
+const { src, alt, caption, kind, featured = false } = Astro.props;
+---
+<figure class:list={['work-card', featured && 'is-featured']}>
+  <img src={src} alt={alt} loading="lazy" decoding="async" />
+  {(caption || kind) && (
+    <figcaption>
+      {caption && <span>{caption}</span>}
+      {kind && <span class="work-kind">{kind}</span>}
+    </figcaption>
+  )}
+</figure>
