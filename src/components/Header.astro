@@ -14,7 +14,7 @@ const links = [
   ['/about', 'About'],
 ];
 ---
-<header class="site-header" transition:persist>
+<header class="site-header" transition:persist data-scrolled="false">
   <div class="wrap header-inner">
     <Brand />
 
@@ -37,6 +37,7 @@ const links = [
       </button>
     </div>
   </div>
+  <div class="header-progress" aria-hidden="true"></div>
 </header>
 
 <script>
@@ -91,11 +92,246 @@ const links = [
     });
   }
 
+  // A header that never changes as you move down a 7000px page gives no sense
+  // of position. This condenses it and reveals a reading rail instead.
+  function trackScroll() {
+    const header = document.querySelector('.site-header');
+    if (!(header instanceof HTMLElement)) return;
+    if (header.dataset.scrollBound === 'true') return;
+    header.dataset.scrollBound = 'true';
+
+    const update = () => {
+      const y = window.scrollY;
+      header.dataset.scrolled = String(y > 24);
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? Math.min(1, y / scrollable) : 0;
+      header.style.setProperty('--scroll-progress', String(progress));
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+  }
+
   function setUpHeader() {
     bindNav();
     markCurrentPage();
+    trackScroll();
   }
 
   setUpHeader();
   document.addEventListener('astro:page-load', setUpHeader);
 </script>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     Header chrome, scoped. This is the one element present on every page, so
+     it is also the one that most needs to feel machined rather than merely
+     placed.
+
+     Two behaviours the previous header had none of: it condenses once you
+     leave the top of the page, and it carries a reading rail showing how far
+     through a long page you are. Both are driven from data attributes and a
+     custom property so nothing here depends on a class the markup might drop.
+     ─────────────────────────────────────────────────────────────────────── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--black) 92%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--dark-line);
+    transition:
+      background var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+
+  .site-header[data-scrolled='true'] {
+    background: color-mix(in srgb, var(--black) 97%, transparent);
+    border-bottom-color: var(--dark-line-strong);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    min-height: 72px;
+    transition: min-height var(--dur) var(--ease);
+  }
+
+  .site-header[data-scrolled='true'] .header-inner {
+    min-height: 60px;
+  }
+
+  /* Reading rail. Width comes from --scroll-progress, set on scroll. */
+  .header-progress {
+    height: 2px;
+    transform: scaleX(var(--scroll-progress, 0));
+    transform-origin: left;
+    background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+    transition: transform 90ms linear;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem var(--space-m);
+  }
+
+  .nav a {
+    position: relative;
+    color: var(--on-dark-soft);
+    text-decoration: none;
+    font-size: var(--step--1);
+    font-weight: 500;
+    padding: 0.35rem 0;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--accent-bright);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .nav a:hover,
+  .nav a:focus-visible {
+    color: var(--on-dark);
+  }
+
+  .nav a:hover::after,
+  .nav a:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* The old treatment dimmed the current page to 45% opacity, which read as
+     "disabled" rather than "you are here". */
+  .nav a[aria-current='page'] {
+    color: var(--on-dark);
+  }
+
+  .nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    background: var(--accent-bright);
+  }
+
+  .nav-estimate {
+    display: none;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .header-cta-short {
+    display: none;
+  }
+
+  .header-cta {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-toggle {
+    display: none;
+    border: 1px solid var(--dark-line-strong);
+    background: transparent;
+    color: var(--on-dark);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.8rem;
+    font: inherit;
+    font-weight: 500;
+    font-size: var(--step--1);
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  }
+
+  .nav-toggle:hover {
+    border-color: var(--accent-bright);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  @media (max-width: 900px) {
+    .header-inner,
+    .site-header[data-scrolled='true'] .header-inner {
+      position: relative;
+      min-height: 64px;
+    }
+
+    .nav {
+      display: none;
+      position: absolute;
+      top: calc(100% + 0.6rem);
+      right: 0;
+      left: auto;
+      flex-direction: column;
+      gap: 0;
+      padding: var(--space-xs) var(--space-s);
+      background: var(--black);
+      border: 1px solid var(--dark-line-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      min-width: 240px;
+    }
+
+    .nav.is-open {
+      display: flex;
+    }
+
+    .nav a {
+      padding: 0.6rem 0;
+      font-size: var(--step-0);
+    }
+
+    .nav a::after {
+      display: none;
+    }
+
+    .nav-toggle {
+      display: inline-flex;
+    }
+
+    .nav-estimate {
+      display: block;
+      margin-top: var(--space-2xs);
+      padding-top: var(--space-xs);
+      border-top: 1px solid var(--dark-line);
+      color: var(--accent-bright);
+      font-weight: 600;
+    }
+
+    /* Click-to-call is the highest-value action on a phone. Shrink it, never hide it. */
+    .header-cta {
+      padding: 0.55rem 0.85rem;
+    }
+
+    .header-cta-full {
+      display: none;
+    }
+
+    .header-cta-short {
+      display: inline;
+    }
+  }
+</style>

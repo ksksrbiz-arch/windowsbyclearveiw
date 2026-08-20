@@ -1,46 +1,206 @@
 ---
 import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
+
 const year = new Date().getFullYear();
+
+const columns = [
+  {
+    heading: 'Work',
+    links: [
+      ['/replacement', 'Replacement'],
+      ['/new-construction', 'New construction'],
+      ['/process', 'Process'],
+      ['/gallery', 'Gallery'],
+    ],
+  },
+  {
+    heading: 'Areas',
+    links: [
+      ['/areas', 'All areas'],
+      ['/areas/vancouver', 'Vancouver'],
+      ['/areas/camas', 'Camas'],
+      ['/areas/battle-ground', 'Battle Ground'],
+      ['/areas/brush-prairie', 'Brush Prairie'],
+      ['/areas/ridgefield', 'Ridgefield'],
+      ['/areas/portland', 'Portland, OR'],
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      ['/about', 'About Mark'],
+      ['/tools', 'Free tools'],
+      ['/guides', 'Guides'],
+      ['/reviews', 'Reviews'],
+      ['/estimate', 'Request an estimate'],
+    ],
+  },
+];
 ---
 <footer class="site-footer">
   <div class="wrap footer-grid">
     <div class="footer-brand">
       <Brand compact />
-      <p>Replacement and new-construction windows in Vancouver, WA and surrounding Clark County.</p>
-      <p><a href={telHref()}>{site.phoneDisplay}</a></p>
-      <p><a href={mailHref()}>{site.email}</a></p>
-      <p class="fine-print">
-        {site.lniNumber
-          ? `WA contractor registration ${site.lniNumber}`
-          : 'WA contractor registration number pending — ask Mark for it on the first call.'}
+      <p class="footer-blurb">
+        Replacement and new-construction windows in Vancouver, WA and surrounding
+        Clark County.
       </p>
+      <ul class="footer-contact">
+        <li>
+          <span class="footer-contact-label">Phone</span>
+          <a href={telHref()}>{site.phoneDisplay}</a>
+        </li>
+        <li>
+          <span class="footer-contact-label">Email</span>
+          <a href={mailHref()}>{site.email}</a>
+        </li>
+      </ul>
     </div>
-    <div>
-      <strong>Work</strong>
-      <a href="/replacement">Replacement</a>
-      <a href="/new-construction">New construction</a>
-      <a href="/process">Process</a>
-      <a href="/gallery">Gallery</a>
-    </div>
-    <div>
-      <strong>Areas</strong>
-      <a href="/areas">All areas</a>
-      <a href="/areas/vancouver">Vancouver</a>
-      <a href="/areas/camas">Camas</a>
-      <a href="/areas/battle-ground">Battle Ground</a>
-      <a href="/areas/brush-prairie">Brush Prairie</a>
-      <a href="/areas/ridgefield">Ridgefield</a>
-      <a href="/areas/portland">Portland, OR</a>
-    </div>
-    <div>
-      <strong>Company</strong>
-      <a href="/about">About Mark</a>
-      <a href="/tools">Free tools</a>
-      <a href="/guides">Guides</a>
-      <a href="/reviews">Reviews</a>
-      <a href="/estimate">Request an estimate</a>
-      <p class="fine-print">&copy; {year} {site.legalName}</p>
-    </div>
+
+    {columns.map((column) => (
+      <nav class="footer-column" aria-label={column.heading}>
+        <h2 class="footer-heading">{column.heading}</h2>
+        <ul>
+          {column.links.map(([href, label]) => (
+            <li><a href={href}>{label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    ))}
+  </div>
+
+  <div class="wrap footer-base">
+    <p class="fine-print">&copy; {year} {site.legalName}</p>
+    <p class="fine-print">
+      {site.lniNumber
+        ? `WA contractor registration ${site.lniNumber}`
+        : 'WA contractor registration number pending — ask Mark for it on the first call.'}
+    </p>
   </div>
 </footer>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     The footer was four unlabelled stacks of links sharing one generic `a`
+     rule. It is now a proper masthead: a brand block with real contact rows,
+     three labelled navs, and a base line carrying the legal text.
+
+     The registration line stays a plain statement of fact. Washington's
+     RCW 18.27.100 governs what a registered contractor may claim in
+     advertising, so nothing here is dressed up into a badge.
+     ─────────────────────────────────────────────────────────────────────── */
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    padding: var(--space-2xl) 0 var(--space-l);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: var(--space-xl) var(--space-l);
+  }
+
+  .footer-blurb {
+    max-width: 24rem;
+    margin: var(--space-s) 0 var(--space-m);
+    font-size: var(--step--1);
+  }
+
+  .footer-contact {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0;
+  }
+
+  .footer-contact li {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--space-2xs);
+    align-items: baseline;
+    padding: var(--space-2xs) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-contact li:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .footer-contact-label {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .footer-heading {
+    margin: 0 0 var(--space-xs);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--line);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .footer-column ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-column li + li {
+    margin-top: 0.4rem;
+  }
+
+  .site-footer a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--step--1);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .site-footer a:hover,
+  .site-footer a:focus-visible {
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-base p {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+  }
+</style>

@@ -165,59 +165,9 @@ p, li { text-wrap: pretty; }
 .wrap.is-narrow { width: min(52rem, calc(100% - var(--space-m) * 2)); }
 .wrap.is-wide { width: min(90rem, calc(100% - var(--space-m) * 2)); }
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--black);
-  border-bottom: 1px solid var(--dark-line);
-}
-
-.header-inner, .footer-grid, .split, .cards, .cta-bar {
+.split, .cards {
   display: flex;
 }
-
-.header-inner {
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 64px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  text-decoration: none;
-  color: var(--on-dark);
-}
-
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.1rem 1.35rem;
-}
-
-.nav a {
-  color: var(--on-dark);
-  text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 500;
-}
-
-.nav a[aria-current="page"] {
-  opacity: 0.45;
-}
-
-.nav-estimate { display: none; }
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.header-cta-short { display: none; }
 
 .btn {
   display: inline-flex;
@@ -304,10 +254,28 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 .section-dark p { color: var(--on-dark-soft); }
 .section-dark .kicker { color: var(--on-dark-faint); }
 
+/* Fourteen pages open with this band, so it does most of the work of making
+   the site feel like one thing. It gets the same accent field as the home
+   hero and a rule at its foot, rather than ending on a hard edge. */
 .page-hero {
-  background: var(--black);
+  position: relative;
+  background:
+    radial-gradient(
+      80% 120% at 92% 0%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 58%
+    ),
+    var(--black);
   color: var(--on-dark);
-  padding: 3.75rem 0 3.25rem;
+  padding: var(--space-2xl) 0 var(--space-xl);
+}
+
+.page-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-bright), transparent 45%);
 }
 
 .page-hero h1 {
@@ -316,12 +284,25 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 }
 
 .page-hero .kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   color: var(--on-dark-faint);
+}
+
+.page-hero .kicker::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  flex: none;
 }
 
 .page-hero .lede {
   color: var(--on-dark-soft);
   margin-bottom: 0;
+  max-width: 44rem;
 }
 
 .cards {
@@ -362,12 +343,6 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
   border-bottom: 1px solid var(--line);
 }
 
-.cta-bar {
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
 form {
   display: grid;
   gap: 0.8rem;
@@ -390,19 +365,6 @@ input:focus, textarea:focus, select:focus {
   border-bottom-color: var(--ink);
 }
 
-.site-footer {
-  border-top: 1px solid var(--line);
-  padding: 3.5rem 0 2.5rem;
-  color: var(--ink-soft);
-  background: var(--paper-raised);
-}
-
-.footer-grid {
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
 .fine-print { font-size: var(--step--1); color: var(--ink-soft); }
 
 .notice {
@@ -413,17 +375,6 @@ input:focus, textarea:focus, select:focus {
   padding: 1rem 0 0;
   margin-top: 2rem;
   font-size: 0.92rem;
-}
-
-.nav-toggle {
-  display: none;
-  border: 1px solid var(--dark-line-strong);
-  background: transparent;
-  color: var(--on-dark);
-  border-radius: 4px;
-  padding: 0.5rem 0.8rem;
-  font: inherit;
-  font-weight: 500;
 }
 
 .video-hero {
@@ -464,8 +415,6 @@ input:focus, textarea:focus, select:focus {
 }
 
 .video-copy .kicker { color: var(--on-dark-faint); }
-
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 
 .btn-light {
   background: var(--on-dark);
@@ -556,44 +505,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 800px) {
-  .split, .cta-bar { display: grid; }
-  .nav { display: none; }
-  .nav-toggle { display: inline-flex; }
-  .header-inner { position: relative; }
-  .nav {
-    position: absolute;
-    top: calc(100% + 0.4rem);
-    right: 0;
-    left: auto;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.9rem 1rem;
-    background: var(--ink);
-    border: 1px solid var(--dark-line);
-    border-radius: 4px;
-    min-width: 220px;
-  }
-  .nav.is-open { display: flex; }
-
-  .nav-estimate {
-    display: block;
-    margin-top: 0.55rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--dark-line);
-    font-weight: 600;
-  }
-
-  /* Click-to-call is the highest-value action on a phone. Shrink it, never hide it. */
-  .header-cta {
-    padding: 0.55rem 0.85rem;
-  }
-
-  .header-cta-full { display: none; }
-  .header-cta-short { display: inline; }
-}
-
-@media (max-width: 380px) {
-  .brand-sub { display: none; }
+  .split { display: grid; }
 }
 
 @media (prefers-reduced-motion: reduce) {
