@@ -151,6 +151,55 @@ a.sign:hover,
   max-width: 34rem;
 }
 
+.photo-hero {
+  padding: 2.75rem 0 1.25rem;
+}
+
+.photo-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.9fr);
+  gap: clamp(1.5rem, 4vw, 3.25rem);
+  align-items: center;
+}
+
+.photo-hero-copy h1 {
+  max-width: 13ch;
+}
+
+.photo-hero-copy .lede {
+  max-width: 36rem;
+}
+
+.photo-hero-frame {
+  margin: 0;
+  position: relative;
+  border-radius: calc(var(--radius) + 6px);
+  overflow: hidden;
+  background: #1b3344;
+  box-shadow: var(--shadow);
+  aspect-ratio: 4 / 5;
+}
+
+.photo-hero-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% 38%;
+}
+
+.photo-hero-frame figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 2.4rem 1rem 0.85rem;
+  background: linear-gradient(transparent, rgb(14 22 34 / 0.72));
+  color: var(--paper);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
 .footer-grid {
   align-items: start;
 }
@@ -158,6 +207,16 @@ a.sign:hover,
 @media (max-width: 800px) {
   .service-tiles {
     grid-template-columns: 1fr;
+  }
+
+  .photo-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  .photo-hero-frame {
+    aspect-ratio: 5 / 4;
+    max-height: 380px;
   }
 }
 

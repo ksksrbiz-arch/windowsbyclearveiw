@@ -4,9 +4,9 @@ import { site, telHref } from '../data/site';
 
 const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.url));
 ---
-<section class="video-hero">
-  <div class="video-stage" aria-hidden="true">
-    {hasVideo ? (
+{hasVideo ? (
+  <section class="video-hero">
+    <div class="video-stage" aria-hidden="true">
       <video
         class="hero-media"
         id="hero-video"
@@ -20,31 +20,49 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
         <source src="/video/hero.webm" type="video/webm" />
         <source src="/video/hero.mp4" type="video/mp4" />
       </video>
-    ) : (
-      <img
-        class="hero-media"
-        src="/work/stone-craftsman.jpg"
-        alt=""
-        width="1600"
-        height="2100"
-      />
-    )}
-    <div class="video-wash"></div>
-  </div>
+      <div class="video-wash"></div>
+    </div>
 
-  <div class="wrap video-copy">
-    <p class="kicker">Vancouver, WA and nearby</p>
-    <h1>Clear glass. Tight openings. A house that feels finished.</h1>
-    <p class="lede">
-      {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
-      Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
-    </p>
-    <p class="hero-actions">
-      <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-      <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
-    </p>
-  </div>
-</section>
+    <div class="wrap video-copy">
+      <p class="kicker">Vancouver, WA and nearby</p>
+      <h1>Clear glass. Tight openings. A house that feels finished.</h1>
+      <p class="lede">
+        {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
+        Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
+      </p>
+      <p class="hero-actions">
+        <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+        <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
+      </p>
+    </div>
+  </section>
+) : (
+  <section class="photo-hero">
+    <div class="wrap photo-hero-inner">
+      <div class="photo-hero-copy">
+        <p class="kicker">Vancouver, WA and nearby</p>
+        <h1>Clear glass. Tight openings. A house that feels finished.</h1>
+        <p class="lede">
+          {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
+          Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
+        </p>
+        <p class="hero-actions">
+          <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+          <a class="btn btn-ghost" href="#work">See the work</a>
+        </p>
+      </div>
+      <figure class="photo-hero-frame">
+        <img
+          src="/work/stone-craftsman.jpg"
+          alt="Two-story Washington house with stone veneer and cream vinyl windows after replacement"
+          width="900"
+          height="1200"
+        />
+        <figcaption>After. Stone-and-siding replacement in Clark County.</figcaption>
+      </figure>
+    </div>
+  </section>
+)}
 
 <script>
   const video = document.getElementById('hero-video');
