@@ -1,24 +1,19 @@
 ---
 import { site, telHref } from '../data/site';
+import Brand from './Brand.astro';
 
 const links = [
   ['/replacement', 'Replacement'],
+  ['/new-construction', 'New builds'],
   ['/process', 'Process'],
   ['/guides', 'Guides'],
   ['/gallery', 'Gallery'],
-  ['/areas', 'Areas'],
   ['/about', 'About'],
 ];
 ---
 <header class="site-header" transition:persist>
   <div class="wrap header-inner">
-    <a class="brand" href="/">
-      <span class="mark" aria-hidden="true"></span>
-      <span>
-        <strong>{site.shortName}</strong>
-        <div class="fine-print">Washington window installation</div>
-      </span>
-    </a>
+    <Brand />
     <button
       class="nav-toggle"
       type="button"

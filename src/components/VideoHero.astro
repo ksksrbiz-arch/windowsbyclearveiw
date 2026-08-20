@@ -10,7 +10,7 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
       <video
         class="hero-media"
         id="hero-video"
-        poster="/video/poster.svg"
+        poster="/work/stone-craftsman.jpg"
         muted
         playsinline
         loop
@@ -21,30 +21,28 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
         <source src="/video/hero.mp4" type="video/mp4" />
       </video>
     ) : (
-      <div class="hero-media hero-fallback">
-        <div class="install-scene">
-          <span class="scene-frame"></span>
-          <span class="scene-sash"></span>
-        </div>
-      </div>
+      <img
+        class="hero-media"
+        src="/work/stone-craftsman.jpg"
+        alt=""
+        width="1600"
+        height="2100"
+      />
     )}
     <div class="video-wash"></div>
   </div>
 
   <div class="wrap video-copy">
     <p class="kicker">Washington window installation</p>
-    <h1>If the window is the problem, replacing it is the fix.</h1>
+    <h1>Clear glass. Tight openings. A house that feels finished.</h1>
     <p class="lede">
-      Drafts, fogged glass, and soft sills are not a cleaning job. {site.shortName} measures,
-      orders, and installs replacement windows for Washington homes.
+      {site.shortName} replaces tired windows and sets new ones in framed openings.
+      Local crew. Honest measure. Rooms you can use the same day.
     </p>
     <p class="hero-actions">
       <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-      <a class="btn btn-ghost btn-on-dark" href="#signs">See if you need new windows</a>
+      <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
     </p>
-    {!hasVideo && (
-      <p class="fine-print hero-note">Hero video slot is ready. Add public/video/hero.mp4 when you have a clip.</p>
-    )}
   </div>
 </section>
 
