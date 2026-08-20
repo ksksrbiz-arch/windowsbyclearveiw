@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ReviewCard from '../components/ReviewCard.astro';
+
+const reviews = await getCollection('reviews');
+---
+<BaseLayout
+  title="Reviews"
+  description="What homeowners say about Clearveiw Windows installation work."
+  path="/reviews"
+>
+  <section class="wrap section">
+    <p class="kicker">Reviews</p>
+    <h1>Neighbors first, ratings second.</h1>
+    <p class="notice">Placeholder quotes only. Replace with Google reviews Mark has permission to republish.</p>
+    <div class="cards">
+      {reviews.map((review) => (
+        <ReviewCard
+          quote={review.data.quote}
+          name={review.data.name}
+          city={review.data.city}
+          source={review.data.source}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

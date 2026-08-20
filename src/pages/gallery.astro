@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import JobCard from '../components/JobCard.astro';
+
+const jobs = await getCollection('jobs');
+---
+<BaseLayout
+  title="Project gallery"
+  description="Replacement window projects from Clearveiw Windows, LLC."
+  path="/gallery"
+>
+  <section class="wrap section">
+    <p class="kicker">Gallery</p>
+    <h1>Work in Washington homes</h1>
+    <p class="notice">These are placeholder jobs so the page has structure. Swap in real photos and addresses Mark approves.</p>
+    <div class="cards">
+      {jobs.map((job) => (
+        <JobCard
+          title={job.data.title}
+          city={job.data.city}
+          year={job.data.year}
+          summary={job.data.summary}
+          scope={job.data.scope}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

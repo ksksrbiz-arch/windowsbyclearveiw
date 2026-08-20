@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBar from '../../components/CtaBar.astro';
+
+export async function getStaticPaths() {
+  const cities = await getCollection('cities', ({ data }) => data.published);
+  return cities.map((city) => ({
+    params: { slug: city.id },
+    props: { city },
+  }));
+}
+
+const { city } = Astro.props;
+const { Content } = await render(city);
+---
+<BaseLayout title={city.data.title} description={city.data.description} path={`/areas/${city.id}`}>
+  <section class="wrap section">
+    <p class="kicker">{city.data.region}</p>
+    <h1>{city.data.title}</h1>
+    <Content />
+  </section>
+  <CtaBar />
+</BaseLayout>

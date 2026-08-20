@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import { site } from '../data/site';
+---
+<BaseLayout
+  title="About"
+  description={`Meet ${site.owner} and ${site.legalName}, a Washington window installation company.`}
+  path="/about"
+>
+  <section class="wrap section split">
+    <div>
+      <p class="kicker">About</p>
+      <h1>A local crew, not a national sales office.</h1>
+      <p>
+        {site.legalName} is Mark’s window installation company. The site, the truck, and the
+        estimate all point back to the same person who is responsible for the opening in your wall.
+      </p>
+      <p>
+        This page is ready for a short origin story, years in the trade, manufacturer training,
+        and a photo of the crew. Until then, the promise is simple: show up, install it right,
+        and leave the house better than we found it.
+      </p>
+    </div>
+    <aside class="card">
+      <h2>Details to confirm</h2>
+      <ul>
+        <li>L&amp;I contractor number</li>
+        <li>Insurance and bond</li>
+        <li>Service counties</li>
+        <li>Brands and certifications</li>
+      </ul>
+    </aside>
+  </section>
+  <CtaBar />
+</BaseLayout>

@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import JobCard from '../components/JobCard.astro';
+import ReviewCard from '../components/ReviewCard.astro';
+import { site, telHref } from '../data/site';
+
+const jobs = (await getCollection('jobs')).filter((job) => job.data.featured).slice(0, 3);
+const reviews = (await getCollection('reviews')).slice(0, 3);
+---
+<BaseLayout title={site.shortName} description={site.description} path="/">
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="kicker">Washington · Window installation</p>
+      <h1>Windows that fit the house, the weather, and the way you live.</h1>
+      <p class="lede">
+        {site.shortName} is a local installation company for homeowners who want a tighter envelope,
+        quieter rooms, and a crew that treats the job site like it is still your home.
+      </p>
+      <p>
+        <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+        <a class="btn btn-ghost" href="/replacement">See replacement options</a>
+      </p>
+    </div>
+    <aside class="hero-panel">
+      <p class="kicker" style="color:#d7b48a;">Owner-led installs</p>
+      <div class="hero-window"></div>
+      <p>Measured, ordered, installed, and cleaned up by a local crew. Energy-smart glass for Washington’s marine and inland climates.</p>
+    </aside>
+  </section>
+
+  <section class="section section-muted">
+    <div class="wrap">
+      <h2>Why homeowners call a local installer</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Right product, not a pitch</h3>
+          <p>Vinyl, fiberglass, or a mix. Full-frame when the opening needs it. Insert when the existing frame is sound.</p>
+        </article>
+        <article class="card">
+          <h3>Built for this climate</h3>
+          <p>Western Washington wants low U-factor glass. East of the Cascades is a different conversation. We spec for where you live.</p>
+        </article>
+        <article class="card">
+          <h3>Clean work</h3>
+          <p>Flashing, trim, and a swept site matter as much as the glass. That is what you are actually paying for.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Recent work</h2>
+      <p class="lede">Starter gallery entries. Replace these with Mark’s real jobs and photos.</p>
+      <div class="cards">
+        {jobs.map((job) => (
+          <JobCard
+            title={job.data.title}
+            city={job.data.city}
+            year={job.data.year}
+            summary={job.data.summary}
+            scope={job.data.scope}
+          />
+        ))}
+      </div>
+      <p><a href="/gallery">View the gallery</a></p>
+    </div>
+  </section>
+
+  <section class="section section-muted">
+    <div class="wrap">
+      <h2>What customers notice</h2>
+      <div class="cards">
+        {reviews.map((review) => (
+          <ReviewCard
+            quote={review.data.quote}
+            name={review.data.name}
+            city={review.data.city}
+            source={review.data.source}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBar />
+</BaseLayout>

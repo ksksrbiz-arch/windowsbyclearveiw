@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EstimateForm from '../components/EstimateForm.astro';
+import { site, telHref } from '../data/site';
+---
+<BaseLayout
+  title="Request an estimate"
+  description="Request a free in-home window replacement estimate from Clearveiw Windows, LLC."
+  path="/estimate"
+>
+  <section class="wrap section split">
+    <div>
+      <p class="kicker">Estimate</p>
+      <h1>Tell us about the house.</h1>
+      <p class="lede">
+        A photo of the elevations and a rough window count is enough to start. We will follow up
+        to schedule a measure.
+      </p>
+      <p>
+        Prefer to talk? <a href={telHref()}>{site.phone || 'Add a phone number in site.ts'}</a>
+      </p>
+    </div>
+    <EstimateForm />
+  </section>
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const cities = (await getCollection('cities')).filter((city) => city.data.published);
+---
+<BaseLayout
+  title="Service areas"
+  description="Washington cities served by Clearveiw Windows, LLC."
+  path="/areas"
+>
+  <section class="wrap section">
+    <p class="kicker">Service areas</p>
+    <h1>Where we install</h1>
+    <p class="lede">Starter city pages for local SEO. Delete any city Mark does not serve.</p>
+    <div class="cards">
+      {cities.map((city) => (
+        <article class="card">
+          <h2><a href={`/areas/${city.id}`}>{city.data.name}</a></h2>
+          <p>{city.data.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
