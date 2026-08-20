@@ -16,15 +16,28 @@
   overflow: hidden;
 }
 
+.work-media {
+  overflow: hidden;
+}
+
 .work-card img {
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   background: var(--paper-2);
+  transition: transform 0.55s ease;
+}
+
+.work-card:hover img {
+  transform: scale(1.04);
 }
 
 .work-card.is-featured {
   grid-column: span 2;
+}
+
+.work-card.is-featured img {
+  aspect-ratio: 4 / 3;
 }
 
 .work-card figcaption {
@@ -50,5 +63,14 @@
   }
   .work-card.is-featured {
     grid-column: span 1;
+  }
+  .work-card.is-featured img {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card img {
+    transition: none;
   }
 }

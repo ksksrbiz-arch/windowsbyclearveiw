@@ -1,0 +1,170 @@
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  display: block;
+}
+
+.brand-type {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.brand-type strong {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.12rem;
+  letter-spacing: -0.03em;
+}
+
+.brand-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--glass-deep);
+  font-weight: 600;
+}
+
+.brand.is-compact .brand-mark {
+  width: 36px;
+  height: 36px;
+}
+
+.btn {
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-light {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.cta-bar {
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+
+.cta-bar .kicker {
+  color: #d7b48a;
+  margin: 0 0 0.35rem;
+}
+
+.cta-bar strong {
+  display: block;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.site-footer a {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+  margin-top: 0.35rem;
+}
+
+.site-footer a:hover {
+  color: var(--glass-deep);
+}
+
+.footer-brand p {
+  max-width: 22rem;
+}
+
+.service-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.service-tile {
+  position: relative;
+  display: block;
+  min-height: 280px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  color: var(--paper);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.service-tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.service-tile:hover img {
+  transform: scale(1.05);
+}
+
+.service-tile-copy {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 1.4rem 1.3rem 1.2rem;
+  background: linear-gradient(transparent, rgb(14 22 34 / 0.82));
+}
+
+.service-tile h2 {
+  margin: 0.2rem 0 0.35rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.service-tile p {
+  margin: 0;
+  color: color-mix(in srgb, var(--paper) 86%, transparent);
+}
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+a.sign:hover,
+.card:hover {
+  box-shadow: var(--shadow);
+}
+
+.signs .card {
+  border-top: 3px solid var(--glass);
+}
+
+.video-copy h1 {
+  max-width: 16ch;
+  text-shadow: 0 12px 40px rgb(14 22 34 / 0.45);
+}
+
+.video-copy .lede {
+  max-width: 34rem;
+}
+
+.footer-grid {
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .service-tiles {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .card,
+  .service-tile img {
+    transition: none;
+  }
+}
