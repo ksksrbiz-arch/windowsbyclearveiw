@@ -62,9 +62,9 @@ const signs = [
 <BaseLayout title={site.shortName} description={site.description} path="/">
   <VideoHero />
 
-  <section class="section">
-    <div class="wrap">
-      <p class="kicker">Two kinds of work</p>
+  <section class="section is-airy">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Two kinds of work</p>
       <h2>Replace what’s there. Set the new ones.</h2>
       <p class="lede">Homeowners and builders need different pages. Pick the one that matches the job.</p>
       <div class="service-tiles">
@@ -102,9 +102,9 @@ const signs = [
     </div>
   </section>
 
-  <section class="section" id="signs">
-    <div class="wrap">
-      <p class="kicker">Is it time?</p>
+  <section class="section section-sunk" id="signs">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Is it time?</p>
       <h2>Six signs the window is the problem</h2>
       <p class="lede">
         If two of these are true in the same room, a measure is worth a morning.
@@ -123,9 +123,9 @@ const signs = [
     </div>
   </section>
 
-  <section class="section section-muted">
-    <div class="wrap">
-      <p class="kicker">What actually changes</p>
+  <section class="section section-dark is-airy" id="what-changes">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">What actually changes</p>
       <h2>Comfort first. Then the bill. Then the wall.</h2>
       <div class="metric-row">
         <article class="metric">
@@ -148,9 +148,9 @@ const signs = [
   </section>
 
   <section class="section">
-    <div class="wrap split">
+    <div class="wrap split" data-reveal>
       <div>
-        <p class="kicker">How a job runs</p>
+        <p class="rule-label">How a job runs</p>
         <h2>Measure once. Install clean.</h2>
         <p>Walkthrough, written estimate, openings measured for insert or full-frame, then a crew that leaves the rooms usable.</p>
         <p><a href="/process">See the process</a> · <a href="/guides/full-frame-vs-insert">Insert vs full-frame</a></p>
@@ -164,9 +164,9 @@ const signs = [
     </div>
   </section>
 
-  <section class="section section-muted" id="work">
-    <div class="wrap">
-      <p class="kicker">From the truck</p>
+  <section class="section section-sunk is-airy" id="work">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">From the truck</p>
       <h2>Recent work</h2>
       <p class="lede">Real openings in Washington houses — not stock.</p>
       <div class="work-grid work-grid-home">
@@ -197,8 +197,8 @@ const signs = [
   </section>
 
   <section class="section">
-    <div class="wrap">
-      <p class="kicker">Learn first</p>
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Learn first</p>
       <h2>Guides before the call</h2>
       <div class="guide-rows">
         {guides.map((guide) => (
@@ -214,3 +214,296 @@ const signs = [
 
   <CtaBar />
 </BaseLayout>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     Homepage-specific styling. Scoped, so none of it can leak into the
+     seventeen other pages that used to share every selector on this site.
+
+     The problem being fixed: eight bands in a row, all paper-coloured, all
+     the same padding, all starting with a small grey label. The rhythm now
+     alternates surface and density, and each band gets a device of its own.
+     ─────────────────────────────────────────────────────────────────────── */
+
+  /* Service tiles ─────────────────────────────────────────────────────── */
+  .service-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    margin-top: var(--space-l);
+  }
+
+  .service-tile {
+    position: relative;
+    display: block;
+    min-height: clamp(360px, 42vw, 520px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    color: var(--on-dark);
+    text-decoration: none;
+    background: var(--black);
+  }
+
+  .service-tile img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .service-tile:hover img,
+  .service-tile:focus-visible img {
+    transform: scale(1.045);
+  }
+
+  .service-tile-copy {
+    position: absolute;
+    inset: auto 0 0;
+    padding: var(--space-2xl) var(--space-m) var(--space-m);
+    background: linear-gradient(transparent, rgb(11 12 14 / 0.86) 62%);
+  }
+
+  .service-tile .kicker {
+    margin-bottom: var(--space-3xs);
+    color: var(--accent-bright);
+  }
+
+  .service-tile h2 {
+    margin: 0 0 var(--space-3xs);
+    font-size: var(--step-3);
+    color: var(--on-dark);
+  }
+
+  .service-tile p {
+    margin: 0;
+    color: var(--on-dark-soft);
+    font-size: var(--step--1);
+  }
+
+  /* An accent rule that draws in on hover: the only motion on the tile that
+     is not the photo, so it reads as an affordance rather than decoration. */
+  .service-tile::after {
+    content: '';
+    position: absolute;
+    left: var(--space-m);
+    right: var(--space-m);
+    bottom: 0;
+    height: 2px;
+    background: var(--accent-bright);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .service-tile:hover::after,
+  .service-tile:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Six signs ─────────────────────────────────────────────────────────── */
+  .spec-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+
+  .spec {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.4rem minmax(0, 1fr);
+    gap: var(--space-s);
+    align-items: start;
+    padding: var(--space-m) var(--space-m) var(--space-m) 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--dur-fast) var(--ease);
+  }
+
+  .spec:nth-child(even) {
+    padding-left: var(--space-m);
+    border-left: 1px solid var(--line);
+  }
+
+  .spec:hover,
+  .spec:focus-visible {
+    background: var(--accent-wash);
+  }
+
+  /* The numeral is the device for this band. Big, light, and accent-tinted on
+     hover — it gives the list a spine that six identical rows never had. */
+  .spec-num {
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    color: var(--line-strong);
+    transition: color var(--dur-fast) var(--ease);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .spec:hover .spec-num,
+  .spec:focus-visible .spec-num {
+    color: var(--accent);
+  }
+
+  .spec h3 {
+    margin: 0 0 var(--space-3xs);
+    font-size: var(--step-1);
+  }
+
+  .spec p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* Metrics, on the dark band ─────────────────────────────────────────── */
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: var(--space-l);
+    border-top: 1px solid var(--dark-line-strong);
+  }
+
+  .metric {
+    padding: var(--space-m) var(--space-m) 0 0;
+    border-right: 1px solid var(--dark-line);
+  }
+
+  .metric:last-child {
+    border-right: 0;
+  }
+
+  .metric + .metric {
+    padding-left: var(--space-m);
+  }
+
+  .metric .kicker {
+    color: var(--accent-bright);
+  }
+
+  .metric h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+    color: var(--on-dark);
+  }
+
+  .metric p {
+    margin: 0;
+    color: var(--on-dark-soft);
+    font-size: var(--step--1);
+  }
+
+  .metric a {
+    color: var(--on-dark);
+    text-underline-offset: 0.2em;
+  }
+
+  /* Guides ────────────────────────────────────────────────────────────── */
+  .guide-rows {
+    margin-top: var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+
+  .guide-row {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 18rem) minmax(0, 1fr) 2rem;
+    gap: var(--space-m);
+    align-items: baseline;
+    padding: var(--space-m) 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .guide-row:hover,
+  .guide-row:focus-visible {
+    background: var(--accent-wash);
+    padding-left: var(--space-s);
+  }
+
+  .guide-row .kicker {
+    margin: 0;
+    color: var(--ink-faint);
+  }
+
+  .guide-row strong {
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+
+  .guide-row > span:last-of-type {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* A chevron that only exists once the row is a target. */
+  .guide-row::after {
+    content: '→';
+    justify-self: end;
+    color: var(--accent);
+    opacity: 0;
+    transform: translateX(-0.4rem);
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease-out);
+  }
+
+  .guide-row:hover::after,
+  .guide-row:focus-visible::after {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 900px) {
+    .service-tiles,
+    .spec-list,
+    .metric-row {
+      grid-template-columns: 1fr;
+    }
+
+    .spec,
+    .spec:nth-child(even) {
+      padding-left: 0;
+      padding-right: 0;
+      border-left: 0;
+    }
+
+    .spec:hover,
+    .spec:focus-visible {
+      background: transparent;
+    }
+
+    .metric {
+      padding: var(--space-m) 0 0;
+      border-right: 0;
+    }
+
+    .metric + .metric {
+      padding-left: 0;
+      border-top: 1px solid var(--dark-line);
+    }
+
+    .guide-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xs);
+      align-items: start;
+    }
+
+    .guide-row:hover,
+    .guide-row:focus-visible {
+      padding-left: 0;
+      background: transparent;
+    }
+
+    .guide-row::after {
+      display: none;
+    }
+  }
+</style>

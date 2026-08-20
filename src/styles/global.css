@@ -483,14 +483,51 @@ input:focus, textarea:focus, select:focus {
   list-style: none;
   display: grid;
   gap: 0;
+  counter-reset: step;
 }
 
+/* Numbered because they are a sequence. The list previously rendered as four
+   undifferentiated bordered rows, which read as bullets rather than order. */
 .steps li {
+  position: relative;
   background: transparent;
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
-  padding: 1.15rem 0;
+  padding: 1.15rem 0 1.15rem 3rem;
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1.35rem;
+  font-size: var(--step--1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.section-dark .steps li::before { color: var(--accent-bright); }
+
+.areas-inline {
+  margin-top: var(--space-m);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.areas-inline a {
+  white-space: nowrap;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--line-strong);
+}
+
+.areas-inline a:hover {
+  color: var(--accent-ink);
+  text-decoration-color: currentColor;
 }
 
 .steps li:last-child {
