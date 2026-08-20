@@ -128,10 +128,26 @@ Variables → Add secret*):
 | `RESEND_API_KEY` | Cron runs but skips the reminder email |
 | `ADMIN_TOKEN` | `PUT /` returns 401, so pricing can only change via the repo |
 
-Everything else works without them. To point the site at the worker, set
-`PUBLIC_PRICING_ENDPOINT` to the URL above in Cloudflare Pages → Settings →
-Environment variables. Leave it unset and the site simply uses its bundled
-numbers.
+Everything else works without them.
+
+### Which variable goes where
+
+Easy to get backwards, because the same key lives in two projects for two
+different reasons:
+
+| Variable | Project | Read at | Effect |
+| --- | --- | --- | --- |
+| `RESEND_API_KEY` | **Worker** | runtime | Cron sends the reminder email |
+| `RESEND_API_KEY` | **Pages** | runtime | Estimate form delivers leads |
+| `PUBLIC_PRICING_ENDPOINT` | **Pages** | **build** | Site upgrades pricing from the worker |
+| `ADMIN_TOKEN` | **Worker** | runtime | `PUT /` accepts new pricing |
+
+`PUBLIC_PRICING_ENDPOINT` is the one that trips people up: Astro inlines it at
+build time, so setting it does nothing until the site is rebuilt. Push a commit
+or hit *Retry deployment* in Pages. The runtime ones take effect immediately.
+
+Setting `PUBLIC_PRICING_ENDPOINT` on the Worker instead of on Pages has no
+effect — the worker never reads it.
 
 Redeploy after a code change:
 
