@@ -139,3 +139,139 @@ import { site, telHref } from '../data/site';
   bindEstimate();
   document.addEventListener('astro:page-load', bindEstimate);
 </script>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     The lead form is the only place on the site where a visitor commits to
+     anything, so it is worth looking like a considered object rather than a
+     stack of default inputs. The fields keep their underline treatment —
+     boxed inputs would fight the editorial rules used everywhere else — but
+     they get real focus states, room to breathe, and a submit that reads as
+     the end of the sequence.
+     ─────────────────────────────────────────────────────────────────────── */
+  .estimate-form {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Honeypot. Off-screen rather than display:none, which some bots skip. */
+  .estimate-form .hp {
+    position: absolute;
+    left: -9999px;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .estimate-form label {
+    display: grid;
+    gap: var(--space-3xs);
+    font-weight: 500;
+    font-size: var(--step--1);
+  }
+
+  .estimate-form input,
+  .estimate-form textarea {
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0.7rem 0;
+    font-size: var(--step-0);
+    font-weight: 400;
+    transition: border-color var(--dur-fast) var(--ease);
+  }
+
+  .estimate-form input:focus,
+  .estimate-form textarea:focus {
+    border-bottom-color: var(--accent);
+    box-shadow: 0 1px 0 0 var(--accent);
+  }
+
+  .field-group {
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin: 0;
+    padding: var(--space-xs) 0 var(--space-s);
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .field-group legend {
+    padding: 0;
+    font-weight: 500;
+    font-size: var(--step--1);
+    margin-bottom: var(--space-3xs);
+  }
+
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-weight: 400;
+    cursor: pointer;
+    padding: 0.3rem 0;
+  }
+
+  .choice input {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+
+  .field-hint {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: var(--step--2);
+  }
+
+  .estimate-form .btn {
+    justify-self: start;
+    padding: 0.9rem var(--space-l);
+    font-size: var(--step-0);
+  }
+
+  .form-status {
+    margin: 0;
+    color: var(--danger);
+    border-left: 2px solid var(--danger);
+    padding-left: var(--space-2xs);
+  }
+
+  /* The confirmation replaces the form in place, so it has to look like a
+     destination rather than an error box. */
+  .form-success {
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-success .kicker {
+    color: var(--accent);
+  }
+
+  .form-success h2 {
+    margin-top: 0;
+    font-size: var(--step-3);
+  }
+
+  .form-success p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 600px) {
+    .estimate-form,
+    .form-success {
+      padding: var(--space-m);
+    }
+
+    .estimate-form .btn {
+      justify-self: stretch;
+    }
+  }
+</style>
