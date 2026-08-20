@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBar from '../../components/CtaBar.astro';
 
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
@@ -10,6 +11,7 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
   title="Window replacement guides"
   description="Plain-language guides for Washington homeowners: signs it is time to replace windows, fogged glass, insert vs full-frame, and what a project costs."
   path="/guides"
+  crumbs={[{ name: 'Guides', href: '/guides' }]}
 >
   <section class="wrap section">
     <p class="kicker">Guides</p>
@@ -28,4 +30,6 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
       ))}
     </div>
   </section>
+
+  <CtaBar />
 </BaseLayout>

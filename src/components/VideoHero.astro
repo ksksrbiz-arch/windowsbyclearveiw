@@ -1,8 +1,18 @@
 ---
 import { existsSync } from 'node:fs';
+import { Image, getImage } from 'astro:assets';
 import { site, telHref } from '../data/site';
+import { heroPhoto } from '../data/work';
 
 const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.url));
+
+// The poster has to be a plain URL, so render one through the image pipeline.
+const poster = await getImage({
+  src: heroPhoto.image,
+  width: 1200,
+  format: 'webp',
+  quality: 70,
+});
 ---
 {hasVideo ? (
   <section class="video-hero">
@@ -10,11 +20,10 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
       <video
         class="hero-media"
         id="hero-video"
-        poster="/work/stone-craftsman.jpg"
+        poster={poster.src}
         muted
         playsinline
         loop
-        autoplay
         preload="metadata"
       >
         <source src="/video/hero.webm" type="video/webm" />
@@ -24,14 +33,14 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
     </div>
 
     <div class="wrap video-copy">
-      <p class="kicker">Vancouver, WA</p>
+      <p class="kicker">Vancouver, WA &middot; Clark County</p>
       <h1>Clear glass. Tight openings.</h1>
       <p class="lede">
-        Replacement and new-construction windows in Clark County.
+        Replacement and new-construction windows, installed by the person who quoted them.
       </p>
       <p class="hero-actions">
-        <a class="btn btn-light" href={telHref()}>{site.phoneDisplay}</a>
-        <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
+        <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
+        <a class="btn btn-ghost btn-on-dark" href="/estimate">Request an estimate</a>
       </p>
     </div>
   </section>
@@ -39,25 +48,35 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
   <section class="photo-hero">
     <div class="wrap photo-hero-inner">
       <div class="photo-hero-copy">
-        <p class="kicker">Vancouver, WA</p>
+        <p class="kicker">Vancouver, WA &middot; Clark County</p>
         <h1>Clear glass. Tight openings.</h1>
         <p class="lede">
-          {site.shortName} replaces tired windows and sets new ones in Vancouver,
-          Camas, Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
+          {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
+          Washougal, Battle Ground, Brush Prairie, Ridgefield, and the rest of Clark County.
         </p>
         <p class="hero-actions">
-          <a class="btn btn-light" href={telHref()}>{site.phoneDisplay}</a>
-          <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
+          <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
+          <a class="btn btn-ghost btn-on-dark" href="/estimate">Request an estimate</a>
         </p>
+        <p class="hero-note">Free measure. A written number before anything comes out of the wall.</p>
+        <ul class="trust-strip">
+          <li>Owner on the job</li>
+          <li>Replacement &amp; new construction</li>
+          <li>Vancouver, WA based</li>
+          <li>Free written estimate</li>
+        </ul>
       </div>
       <figure class="photo-hero-frame">
-        <img
-          src="/work/stone-craftsman.jpg"
-          alt="Two-story Washington house with stone veneer and cream vinyl windows after replacement"
-          width="450"
-          height="600"
+        <Image
+          src={heroPhoto.image}
+          alt={heroPhoto.alt}
+          widths={[450, 700, 900]}
+          sizes="(max-width: 800px) 100vw, 480px"
+          format="webp"
+          quality={78}
+          loading="eager"
           fetchpriority="high"
-          decoding="async"
+          decoding="sync"
         />
         <figcaption>After. Clark County replacement.</figcaption>
       </figure>
@@ -66,9 +85,18 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
 )}
 
 <script>
-  const video = document.getElementById('hero-video');
-  if (video instanceof HTMLVideoElement && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    video.removeAttribute('autoplay');
-    video.pause();
+  function calmHero() {
+    const video = document.getElementById('hero-video');
+    if (!(video instanceof HTMLVideoElement)) return;
+    // No autoplay attribute: a static one would start the clip before this
+    // check runs, and would play for people with JS off who never opted in.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      video.pause();
+      return;
+    }
+    video.play().catch(() => {});
   }
+
+  calmHero();
+  document.addEventListener('astro:page-load', calmHero);
 </script>

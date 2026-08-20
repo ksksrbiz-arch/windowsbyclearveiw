@@ -34,10 +34,13 @@
 
 .work-card.is-featured {
   grid-column: span 2;
+  grid-row: span 2;
 }
 
+/* Spans two rows, so match the 3/4 of its neighbours rather than going wider:
+   a shorter ratio leaves the tile floating above the row below it. */
 .work-card.is-featured img {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
 }
 
 .work-card figcaption {
@@ -62,10 +65,11 @@
     grid-template-columns: 1fr 1fr;
   }
   .work-card.is-featured {
-    grid-column: span 1;
+    grid-column: span 2;
+    grid-row: auto;
   }
   .work-card.is-featured img {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
   }
 }
 

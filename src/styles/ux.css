@@ -368,3 +368,77 @@
     transition: none;
   }
 }
+
+.field-group {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 0;
+  padding: 0.9rem 0 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field-group legend {
+  padding: 0;
+  font-weight: 500;
+  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.choice input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.field-hint {
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.hero-note {
+  margin: 1.2rem 0 0;
+  font-size: 0.85rem;
+  color: #b8b8b2;
+}
+
+.form-status {
+  border-left: 2px solid #8a3d2a;
+  padding-left: 0.75rem;
+}
+
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin: 0;
+  padding: 1.1rem 0 0;
+  list-style: none;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+}
+
+.trust-strip li {
+  font-size: 0.82rem;
+  color: #c4c4be;
+  letter-spacing: 0.02em;
+}
+
+.areas-inline {
+  margin-top: 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.areas-inline a {
+  white-space: nowrap;
+}

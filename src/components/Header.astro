@@ -16,45 +16,85 @@ const links = [
 <header class="site-header" transition:persist>
   <div class="wrap header-inner">
     <Brand />
-    <button
-      class="nav-toggle"
-      type="button"
-      aria-expanded="false"
-      aria-controls="site-nav"
-    >
-      Menu
-    </button>
+
     <nav class="nav" id="site-nav" aria-label="Primary">
       {links.map(([href, label]) => (
         <a href={href} aria-current={here === href ? 'page' : undefined}>{label}</a>
       ))}
+      <a class="nav-estimate" href="/estimate">Request an estimate</a>
     </nav>
-    <a class="btn btn-light header-cta" href={telHref()}>{site.phoneDisplay}</a>
+
+    <div class="header-actions">
+      <!-- Most visitors are on a phone. Keep click-to-call reachable at every width. -->
+      <a class="btn btn-light header-cta" href={telHref()}>
+        <span class="header-cta-full" aria-hidden="true">{site.phoneDisplay}</span>
+        <span class="header-cta-short" aria-hidden="true">Call</span>
+        <span class="visually-hidden">Call {site.phoneDisplay}</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        Menu
+      </button>
+    </div>
   </div>
 </header>
 
 <script>
+  // The header carries transition:persist, so it survives client-side
+  // navigation. Handlers must therefore be attached exactly once, while the
+  // current-page marker has to be recomputed on every load — the server-rendered
+  // aria-current belongs to whichever page happened to be loaded first.
   function bindNav() {
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.getElementById('site-nav');
     if (!(toggle instanceof HTMLButtonElement) || !nav) return;
+    if (nav.dataset.bound === 'true') return;
+    nav.dataset.bound = 'true';
 
-    const close = () => {
-      nav.classList.remove('is-open');
-      toggle.setAttribute('aria-expanded', 'false');
-    };
-
-    toggle.onclick = () => {
-      const open = toggle.getAttribute('aria-expanded') !== 'true';
-      toggle.setAttribute('aria-expanded', String(open));
+    const setOpen = (open: boolean) => {
       nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
     };
 
-    nav.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', close);
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+
+    // A menu you can only close by hitting the same small button is a trap on
+    // a phone. Let Escape and any outside tap dismiss it too.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || toggle.getAttribute('aria-expanded') !== 'true') return;
+      setOpen(false);
+      toggle.focus();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      if (event.target instanceof Node && nav.contains(event.target)) return;
+      setOpen(false);
     });
   }
 
-  bindNav();
-  document.addEventListener('astro:page-load', bindNav);
+  function markCurrentPage() {
+    const nav = document.getElementById('site-nav');
+    if (!nav) return;
+    const here = window.location.pathname.replace(/\/$/, '') || '/';
+    nav.querySelectorAll('a').forEach((link) => {
+      const target = link.getAttribute('href')?.replace(/\/$/, '') || '/';
+      if (target === here) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
+  function setUpHeader() {
+    bindNav();
+    markCurrentPage();
+  }
+
+  setUpHeader();
+  document.addEventListener('astro:page-load', setUpHeader);
 </script>

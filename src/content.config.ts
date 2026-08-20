@@ -13,19 +13,6 @@ const cities = defineCollection({
   }),
 });
 
-const jobs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/jobs' }),
-  schema: z.object({
-    title: z.string(),
-    city: z.string(),
-    year: z.number(),
-    summary: z.string(),
-    scope: z.string(),
-    featured: z.boolean().default(false),
-    placeholder: z.boolean().default(true),
-  }),
-});
-
 const reviews = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/reviews' }),
   schema: z.object({
@@ -33,7 +20,12 @@ const reviews = defineCollection({
     name: z.string(),
     city: z.string(),
     source: z.string().default('Customer'),
-    placeholder: z.boolean().default(true),
+    /**
+     * Off by default on purpose. Only real quotes Mark has permission to
+     * republish should ever reach the page — inventing testimonials is both a
+     * trust problem and an FTC one.
+     */
+    published: z.boolean().default(false),
   }),
 });
 
@@ -58,4 +50,4 @@ const guides = defineCollection({
   }),
 });
 
-export const collections = { cities, jobs, reviews, guides };
+export const collections = { cities, reviews, guides };
