@@ -6,7 +6,7 @@ const MAX = {
   notes: 2000,
 };
 
-const DEFAULT_NOTIFY = 'markrotar287@gmail.com';
+const DEFAULT_NOTIFY = 'mark.rotar1000@gmail.com';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

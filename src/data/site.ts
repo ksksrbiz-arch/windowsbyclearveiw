@@ -9,7 +9,7 @@ export const site = {
     'Clearveiw Windows, LLC installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.',
   owner: 'Mark',
   state: 'Washington',
-  email: 'markrotar287@gmail.com',
+  email: 'mark.rotar1000@gmail.com',
   phone: '(564) 208-0801',
   phoneDisplay: '(564) 208-0801',
   address: {
