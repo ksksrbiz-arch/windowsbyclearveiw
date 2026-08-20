@@ -1,0 +1,54 @@
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
+.work-grid-home {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.work-card {
+  margin: 0;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.work-card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: var(--paper-2);
+}
+
+.work-card.is-featured {
+  grid-column: span 2;
+}
+
+.work-card figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.7rem 0.85rem 0.85rem;
+  font-size: 0.88rem;
+}
+
+.work-kind {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--glass-deep);
+}
+
+@media (max-width: 800px) {
+  .work-grid-home {
+    grid-template-columns: 1fr 1fr;
+  }
+  .work-card.is-featured {
+    grid-column: span 1;
+  }
+}
