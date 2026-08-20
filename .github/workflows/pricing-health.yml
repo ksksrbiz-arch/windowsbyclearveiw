@@ -1,10 +1,10 @@
-# The pricing worker was meant to run this on its own cron trigger, but this
-# Cloudflare account is on Workers Free (5 cron triggers, all already in use by
-# `graph` and `day-trade-scheduler`). GitHub Actions does the same job for free,
-# and a failure is visible in the repo rather than only in an inbox.
+# The pricing worker's own monthly cron trigger runs directly on Cloudflare
+# (the [triggers] block in workers/pricing/wrangler.toml is live). This
+# workflow is a belt-and-suspenders check from GitHub Actions: a failure here
+# shows up in the repo even if the worker's own cron, or its reminder email,
+# ever silently stops firing.
 #
-# If the account moves to Workers Paid, uncomment the [triggers] block in
-# workers/pricing/wrangler.toml and this workflow becomes redundant.
+# Safe to delete if that redundancy isn't worth keeping.
 
 name: Pricing health
 
