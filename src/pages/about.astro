@@ -5,31 +5,30 @@ import { site } from '../data/site';
 ---
 <BaseLayout
   title="About"
-  description={`Meet ${site.owner} and ${site.legalName}, a Washington window installation company.`}
+  description={`Meet ${site.owner} and ${site.legalName}, a Vancouver, WA window installation company.`}
   path="/about"
 >
   <section class="wrap section split">
     <div>
       <p class="kicker">About</p>
-      <h1>A local crew, not a national sales office.</h1>
+      <h1>A Vancouver crew, not a national sales office.</h1>
       <p>
-        {site.legalName} is Mark’s window installation company. The site, the truck, and the
-        estimate all point back to the same person who is responsible for the opening in your wall.
+        {site.legalName} is Mark’s window company. We install in Vancouver and the towns around it —
+        Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.
       </p>
       <p>
-        This page is ready for a short origin story, years in the trade, manufacturer training,
-        and a photo of the crew. Until then, the promise is simple: show up, install it right,
-        and leave the house better than we found it.
+        The site, the truck, and the estimate all point back to the same person responsible for the
+        opening in your wall. Show up, install it right, leave the house better than we found it.
       </p>
     </div>
     <aside class="card">
-      <h2>Details to confirm</h2>
+      <h2>Where we work</h2>
       <ul>
-        <li>L&amp;I contractor number</li>
-        <li>Insurance and bond</li>
-        <li>Service counties</li>
-        <li>Brands and certifications</li>
+        {site.nearby.map((city) => (
+          <li>{city}</li>
+        ))}
       </ul>
+      <p class="fine-print">Still waiting on L&amp;I number, insurance, and brand list.</p>
     </aside>
   </section>
   <CtaBar />

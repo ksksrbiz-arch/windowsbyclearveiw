@@ -13,9 +13,19 @@ const business = {
   name: site.legalName,
   url: site.url,
   description: site.description,
-  areaServed: {
-    '@type': 'State',
-    name: 'Washington',
+  areaServed: site.nearby.map((name) => ({
+    '@type': 'City',
+    name,
+    containedInPlace: {
+      '@type': 'State',
+      name: 'Washington',
+    },
+  })),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: site.address.city,
+    addressRegion: site.address.region,
+    addressCountry: 'US',
   },
   priceRange: '$$',
   ...(site.phone ? { telephone: site.phone } : {}),
