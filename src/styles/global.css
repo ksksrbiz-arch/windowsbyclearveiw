@@ -31,6 +31,44 @@ img { max-width: 100%; display: block; }
 
 a { color: var(--ink); }
 
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+main:focus { outline: none; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 50;
+  padding: 0.7rem 1rem;
+  background: var(--black);
+  color: #f4f4f2;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
 h1, h2, h3, .display {
   font-family: Outfit, system-ui, sans-serif;
   font-weight: 500;
@@ -86,6 +124,16 @@ h1, h2, h3, .display {
 .nav a[aria-current="page"] {
   opacity: 0.45;
 }
+
+.nav-estimate { display: none; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.header-cta-short { display: none; }
 
 .btn {
   display: inline-flex;
@@ -361,7 +409,26 @@ input:focus, textarea:focus, select:focus {
     min-width: 220px;
   }
   .nav.is-open { display: flex; }
-  .header-cta { display: none; }
+
+  .nav-estimate {
+    display: block;
+    margin-top: 0.55rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+    font-weight: 600;
+  }
+
+  /* Click-to-call is the highest-value action on a phone. Shrink it, never hide it. */
+  .header-cta {
+    padding: 0.55rem 0.85rem;
+  }
+
+  .header-cta-full { display: none; }
+  .header-cta-short { display: inline; }
+}
+
+@media (max-width: 380px) {
+  .brand-sub { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

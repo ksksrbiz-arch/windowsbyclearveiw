@@ -4,8 +4,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { Image } from 'astro:assets';
 import { site } from '../data/site';
-import { featuredWork } from '../data/work';
+import { featuredWork, findWork } from '../data/work';
+
+const replacementTile = findWork('vaulted-grids')!;
+const newBuildTile = findWork('green-craftsman-upper')!;
+
+const serviceLinks = [
+  { slug: 'vancouver', label: 'Vancouver' },
+  { slug: 'camas', label: 'Camas' },
+  { slug: 'washougal', label: 'Washougal' },
+  { slug: 'battle-ground', label: 'Battle Ground' },
+  { slug: 'brush-prairie', label: 'Brush Prairie' },
+  { slug: 'ridgefield', label: 'Ridgefield' },
+  { slug: 'la-center', label: 'La Center' },
+  { slug: 'woodland', label: 'Woodland' },
+  { slug: 'portland', label: 'Portland, OR' },
+];
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
 );
@@ -53,7 +69,14 @@ const signs = [
       <p class="lede">Homeowners and builders need different pages. Pick the one that matches the job.</p>
       <div class="service-tiles">
         <a class="service-tile" href="/replacement">
-          <img src="/work/vaulted-grids.jpg" alt="" />
+          <Image
+            src={replacementTile.image}
+            alt=""
+            widths={[400, 640, 900]}
+            sizes="(max-width: 800px) 100vw, 50vw"
+            format="webp"
+            quality={72}
+          />
           <div class="service-tile-copy">
             <p class="kicker">Homeowners</p>
             <h2>Replacement</h2>
@@ -61,7 +84,14 @@ const signs = [
           </div>
         </a>
         <a class="service-tile" href="/new-construction">
-          <img src="/work/tan-two-story.jpg" alt="" />
+          <Image
+            src={newBuildTile.image}
+            alt=""
+            widths={[400, 640, 900]}
+            sizes="(max-width: 800px) 100vw, 50vw"
+            format="webp"
+            quality={72}
+          />
           <div class="service-tile-copy">
             <p class="kicker">Builders</p>
             <h2>New construction</h2>
@@ -140,17 +170,29 @@ const signs = [
       <h2>Recent work</h2>
       <p class="lede">Real openings in Washington houses — not stock.</p>
       <div class="work-grid work-grid-home">
-        {featuredWork.map((photo, index) => (
+        {featuredWork.map((photo) => (
           <WorkCard
-            src={photo.src}
+            image={photo.image}
             alt={photo.alt}
             caption={photo.caption}
             kind={photo.kind}
-            featured={index === 0}
           />
         ))}
       </div>
       <p class="section-link"><a href="/gallery">See the full gallery</a></p>
+      <p class="areas-inline">
+        Working in{' '}
+        {serviceLinks.map((place, index) => (
+          <>
+            <a href={`/areas/${place.slug}`}>{place.label}</a>
+            {index < serviceLinks.length - 2
+              ? ', '
+              : index === serviceLinks.length - 2
+                ? ', and '
+                : '.'}
+          </>
+        ))}
+      </p>
     </div>
   </section>
 

@@ -10,6 +10,7 @@ const cities = (await getCollection('cities')).filter((city) => city.data.publis
   title="Service areas"
   description="Window installation in Vancouver, WA and nearby Clark County: Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland."
   path="/areas"
+  crumbs={[{ name: 'Service areas', href: '/areas' }]}
 >
   <section class="wrap section">
     <p class="kicker">Service areas</p>

@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, telHref } from '../data/site';
+---
+<BaseLayout
+  title="Page not found"
+  description="That page does not exist. Find window replacement and new-construction work from Clearveiw Windows, LLC in Vancouver, WA."
+  path="/404"
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">404</p>
+      <h1>That page is not here.</h1>
+      <p class="lede">The link may be old. Everything below still works.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">Start here</p>
+        <ul class="plain-list">
+          <li><a href="/replacement">Window replacement</a></li>
+          <li><a href="/new-construction">New construction installs</a></li>
+          <li><a href="/gallery">Recent work</a></li>
+          <li><a href="/areas">Where we work</a></li>
+          <li><a href="/guides">Guides</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="kicker">Or just ask</p>
+        <h2><a href={telHref()}>{site.phoneDisplay}</a></h2>
+        <p><a class="btn btn-ghost" href="/estimate">Request an estimate</a></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -2,23 +2,76 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
+import { site } from '../../data/site';
 
 export async function getStaticPaths() {
   const cities = await getCollection('cities', ({ data }) => data.published);
   return cities.map((city) => ({
     params: { slug: city.id },
-    props: { city },
+    props: { city, cities },
   }));
 }
 
-const { city } = Astro.props;
+const { city, cities } = Astro.props;
 const { Content } = await render(city);
+
+// Link every city page to its neighbours. Cheap internal linking, and it is
+// genuinely useful for someone who is one town over from the page they landed on.
+const others = cities
+  .filter((entry) => entry.id !== city.id)
+  .sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'Window installation',
+  name: city.data.title,
+  description: city.data.description,
+  provider: { '@id': `${site.url}/#business` },
+  areaServed: {
+    '@type': 'City',
+    name: city.data.name,
+    containedInPlace: {
+      '@type': 'State',
+      name: city.data.region === 'Oregon' ? 'Oregon' : 'Washington',
+    },
+  },
+};
 ---
-<BaseLayout title={city.data.title} description={city.data.description} path={`/areas/${city.id}`}>
-  <section class="wrap section">
-    <p class="kicker">{city.data.region}</p>
-    <h1>{city.data.title}</h1>
-    <Content />
+<BaseLayout
+  title={city.data.title}
+  description={city.data.description}
+  path={`/areas/${city.id}`}
+  crumbs={[
+    { name: 'Service areas', href: '/areas' },
+    { name: city.data.name, href: `/areas/${city.id}` },
+  ]}
+  schema={schema}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">{city.data.region}</p>
+      <h1>{city.data.title}</h1>
+    </div>
   </section>
+
+  <section class="section">
+    <div class="wrap guide">
+      <div class="guide-body">
+        <Content />
+      </div>
+
+      <p class="areas-inline">
+        We also work in{' '}
+        {others.map((entry, index) => (
+          <>
+            <a href={`/areas/${entry.id}`}>{entry.data.name}</a>
+            {index < others.length - 2 ? ', ' : index === others.length - 2 ? ', and ' : '.'}
+          </>
+        ))}
+      </p>
+    </div>
+  </section>
+
   <CtaBar />
 </BaseLayout>

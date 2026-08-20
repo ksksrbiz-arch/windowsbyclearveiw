@@ -1,5 +1,8 @@
 ---
 import { site, telHref } from '../data/site';
+
+// Without JS the browser posts straight to the function, which answers with a
+// 303 to /estimate/sent. With JS we intercept and swap in the panel below.
 ---
 <form class="estimate-form" method="post" action="/api/estimate" id="estimate-form">
   <div class="hp" aria-hidden="true">
@@ -8,6 +11,19 @@ import { site, telHref } from '../data/site';
       <input name="company" type="text" tabindex="-1" autocomplete="off" />
     </label>
   </div>
+
+  <fieldset class="field-group">
+    <legend>Who is asking?</legend>
+    <label class="choice">
+      <input type="radio" name="role" value="Homeowner" checked />
+      <span>Homeowner — replacing what is there</span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="role" value="Builder / GC" />
+      <span>Builder or GC — setting them in a new build</span>
+    </label>
+  </fieldset>
+
   <label>
     Name
     <input name="name" type="text" required autocomplete="name" maxlength="120" />
@@ -17,38 +33,62 @@ import { site, telHref } from '../data/site';
     <input name="phone" type="tel" required autocomplete="tel" maxlength="40" />
   </label>
   <label>
-    Email
+    Email <span class="field-hint">optional, for a written copy</span>
     <input name="email" type="email" autocomplete="email" maxlength="160" />
   </label>
   <label>
     City
-    <input name="city" type="text" required maxlength="80" />
+    <input name="city" type="text" required autocomplete="address-level2" maxlength="80" />
   </label>
   <label>
     Project notes
-    <textarea name="notes" rows="4" maxlength="2000" placeholder="Number of windows, replacement or new construction, preferred materials..."></textarea>
+    <textarea
+      name="notes"
+      rows="4"
+      maxlength="2000"
+      placeholder="Roughly how many windows, which rooms, and anything you have already noticed — fogged glass, drafts, a sill that feels soft."
+    ></textarea>
   </label>
-  <button class="btn btn-primary" type="submit">Send estimate request</button>
-  <p class="form-status" data-status hidden></p>
+
+  <button class="btn btn-primary" type="submit" data-submit>Send estimate request</button>
+  <p class="form-status" data-status role="alert" hidden></p>
+  <p class="fine-print">
+    We use this to call you back about the work. No lists, no resale.
+  </p>
 </form>
 
 <div class="form-success" data-success hidden>
   <p class="kicker">Received</p>
   <h2>We have the request.</h2>
-  <p>Mark will follow up. If you want to talk now, call <a href={telHref()}>{site.phoneDisplay}</a>.</p>
+  <p>
+    Mark will follow up, usually the same day. If you would rather talk now, call
+    <a href={telHref()}>{site.phoneDisplay}</a>.
+  </p>
 </div>
 
 <script>
-  const form = document.getElementById('estimate-form');
-  const status = document.querySelector('[data-status]');
-  const success = document.querySelector('[data-success]');
+  function bindEstimate() {
+    const form = document.getElementById('estimate-form');
+    const status = document.querySelector('[data-status]');
+    const success = document.querySelector('[data-success]');
+    if (
+      !(form instanceof HTMLFormElement) ||
+      !(status instanceof HTMLElement) ||
+      !(success instanceof HTMLElement)
+    ) {
+      return;
+    }
 
-  if (form instanceof HTMLFormElement && status instanceof HTMLElement && success instanceof HTMLElement) {
+    const button = form.querySelector('[data-submit]');
+    const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       status.hidden = true;
-      const button = form.querySelector('button[type="submit"]');
-      if (button instanceof HTMLButtonElement) button.disabled = true;
+      if (button instanceof HTMLButtonElement) {
+        button.disabled = true;
+        button.textContent = 'Sending…';
+      }
 
       try {
         const response = await fetch('/api/estimate', {
@@ -62,13 +102,20 @@ import { site, telHref } from '../data/site';
         }
         form.hidden = true;
         success.hidden = false;
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } catch (error) {
         status.hidden = false;
-        status.textContent =
-          error instanceof Error ? `${error.message} Call (564) 208-0801.` : 'Could not send. Call (564) 208-0801.';
+        const reason = error instanceof Error ? error.message : 'Could not send.';
+        status.textContent = `${reason} You can always call (564) 208-0801.`;
       } finally {
-        if (button instanceof HTMLButtonElement) button.disabled = false;
+        if (button instanceof HTMLButtonElement) {
+          button.disabled = false;
+          button.textContent = idleLabel;
+        }
       }
     });
   }
+
+  bindEstimate();
+  document.addEventListener('astro:page-load', bindEstimate);
 </script>

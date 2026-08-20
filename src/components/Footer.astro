@@ -11,7 +11,9 @@ const year = new Date().getFullYear();
       <p><a href={telHref()}>{site.phoneDisplay}</a></p>
       <p><a href={mailHref()}>{site.email}</a></p>
       <p class="fine-print">
-        Contractor registration: {site.lniNumber || 'L&I number added before we advertise.'}
+        {site.lniNumber
+          ? `WA contractor registration ${site.lniNumber} · Licensed, bonded, and insured`
+          : 'WA contractor registration number pending — ask Mark for it on the first call.'}
       </p>
     </div>
     <div>
@@ -27,11 +29,15 @@ const year = new Date().getFullYear();
       <a href="/areas/vancouver">Vancouver</a>
       <a href="/areas/camas">Camas</a>
       <a href="/areas/battle-ground">Battle Ground</a>
+      <a href="/areas/brush-prairie">Brush Prairie</a>
+      <a href="/areas/ridgefield">Ridgefield</a>
+      <a href="/areas/portland">Portland, OR</a>
     </div>
     <div>
       <strong>Company</strong>
       <a href="/about">About Mark</a>
       <a href="/guides">Guides</a>
+      <a href="/reviews">Reviews</a>
       <a href="/estimate">Request an estimate</a>
       <p class="fine-print">&copy; {year} {site.legalName}</p>
     </div>

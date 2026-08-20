@@ -48,6 +48,10 @@ const schema = {
   title={guide.data.title}
   description={guide.data.description}
   path={`/guides/${guide.id}`}
+  crumbs={[
+    { name: 'Guides', href: '/guides' },
+    { name: guide.data.title, href: `/guides/${guide.id}` },
+  ]}
   schema={schema}
 >
   <article class="wrap section guide">

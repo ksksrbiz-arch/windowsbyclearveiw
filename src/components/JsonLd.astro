@@ -11,15 +11,17 @@ const digits = phoneDigits();
 const business = {
   '@context': 'https://schema.org',
   '@type': 'HomeAndConstructionBusiness',
+  '@id': `${site.url}/#business`,
   name: site.legalName,
+  alternateName: site.shortName,
   url: site.url,
   description: site.description,
-  areaServed: site.nearby.map((name) => ({
+  areaServed: site.nearby.map((place) => ({
     '@type': 'City',
-    name,
+    name: place.name,
     containedInPlace: {
       '@type': 'State',
-      name: 'Washington',
+      name: place.state,
     },
   })),
   address: {
@@ -29,8 +31,52 @@ const business = {
     addressCountry: 'US',
   },
   priceRange: '$$',
+  knowsAbout: [
+    'Replacement windows',
+    'New construction windows',
+    'Full-frame window replacement',
+    'Insert window replacement',
+    'Vinyl windows',
+    'Fiberglass windows',
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Window installation',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: 'Window replacement',
+          url: `${site.url}/replacement`,
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: 'New construction window installation',
+          url: `${site.url}/new-construction`,
+        },
+      },
+    ],
+  },
   ...(digits ? { telephone: `+1${digits}` } : {}),
   ...(site.email ? { email: site.email } : {}),
+  // Washington requires the contractor registration number in advertising.
+  // Publish it in the markup as soon as site.lniNumber is filled in.
+  ...(site.lniNumber
+    ? {
+        identifier: {
+          '@type': 'PropertyValue',
+          name: 'WA L&I contractor registration',
+          value: site.lniNumber,
+        },
+      }
+    : {}),
+  ...(Object.values(site.social).some(Boolean)
+    ? { sameAs: Object.values(site.social).filter(Boolean) }
+    : {}),
 };
 
 const graph = extra ? [business, extra] : business;

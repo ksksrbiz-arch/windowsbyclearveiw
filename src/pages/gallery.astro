@@ -8,6 +8,7 @@ import { allWork } from '../data/work';
   title="Project gallery"
   description="Real replacement jobs from Clearveiw Windows, LLC in Clark County homes."
   path="/gallery"
+  crumbs={[{ name: 'Gallery', href: '/gallery' }]}
 >
   <section class="page-hero">
     <div class="wrap">
@@ -23,11 +24,12 @@ import { allWork } from '../data/work';
       <div class="work-grid">
         {allWork.map((photo) => (
           <WorkCard
-            src={photo.src}
+            image={photo.image}
             alt={photo.alt}
             caption={photo.caption}
             kind={photo.kind}
-            featured={photo.featured && photo.order <= 2}
+            featured={photo.order === 1}
+            eager={photo.order <= 3}
           />
         ))}
       </div>

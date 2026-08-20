@@ -2,27 +2,71 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ReviewCard from '../components/ReviewCard.astro';
+import CtaBar from '../components/CtaBar.astro';
+import { site } from '../data/site';
 
-const reviews = await getCollection('reviews');
+const reviews = await getCollection('reviews', ({ data }) => data.published);
 ---
 <BaseLayout
   title="Reviews"
-  description="What homeowners say about Clearveiw Windows installation work."
+  description="What Clark County homeowners say about Clearveiw Windows installation work."
   path="/reviews"
+  crumbs={[{ name: 'Reviews', href: '/reviews' }]}
 >
-  <section class="wrap section">
-    <p class="kicker">Reviews</p>
-    <h1>Neighbors first, ratings second.</h1>
-    <p class="notice">Placeholder quotes only. Replace with Google reviews Mark has permission to republish.</p>
-    <div class="cards">
-      {reviews.map((review) => (
-        <ReviewCard
-          quote={review.data.quote}
-          name={review.data.name}
-          city={review.data.city}
-          source={review.data.source}
-        />
-      ))}
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Reviews</p>
+      <h1>Neighbors first, ratings second.</h1>
+      <p class="lede">
+        {reviews.length > 0
+          ? 'Quotes from Clark County customers, republished with their permission.'
+          : 'We would rather show an empty page than borrowed praise.'}
+      </p>
     </div>
   </section>
+
+  <section class="section">
+    <div class="wrap">
+      {reviews.length > 0 ? (
+        <div class="cards">
+          {reviews.map((review) => (
+            <ReviewCard
+              quote={review.data.quote}
+              name={review.data.name}
+              city={review.data.city}
+              source={review.data.source}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="split">
+          <div>
+            <h2>No reviews posted here yet.</h2>
+            <p>
+              {site.shortName} is Mark's own shop, and this site is new. Rather than fill the
+              page with invented quotes, we left it empty until real customers put their names
+              to something.
+            </p>
+            <p>
+              Ask for references when Mark comes out to measure — he will give you addresses in
+              your own town, and you can go look at the glass yourself.
+            </p>
+          </div>
+          <aside>
+            <p class="kicker">Already worked with us?</p>
+            <ul class="plain-list">
+              <li>Tell Mark you are happy to be quoted here</li>
+              <li>Or leave it on the Google Business Profile once it is live</li>
+            </ul>
+            <p class="fine-print">
+              Meanwhile, <a href="/gallery">the gallery</a> is all real jobs — Mark's photos, his
+              openings, no stock.
+            </p>
+          </aside>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <CtaBar />
 </BaseLayout>

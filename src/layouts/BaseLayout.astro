@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import { getImage } from 'astro:assets';
 import '../styles/global.css';
 import '../styles/work.css';
 import '../styles/ux.css';
@@ -7,17 +8,54 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { site } from '../data/site';
+import { heroPhoto } from '../data/work';
 
 interface Props {
   title: string;
   description?: string;
   path?: string;
   schema?: Record<string, unknown>;
+  /** Breadcrumb trail above this page, root excluded. */
+  crumbs?: { name: string; href: string }[];
 }
 
-const { title, description = site.description, path = Astro.url.pathname, schema } = Astro.props;
+const {
+  title,
+  description = site.description,
+  path = Astro.url.pathname,
+  schema,
+  crumbs = [],
+} = Astro.props;
+
 const canonical = new URL(path === '/' ? '/' : path, site.url).toString();
 const pageTitle = title.includes(site.shortName) ? title : `${title} | ${site.shortName}`;
+
+// One shared social card. Facebook is where a local installer actually gets
+// shared, and an unfurl with no image looks abandoned.
+const ogImage = await getImage({
+  src: heroPhoto.image,
+  width: 1200,
+  height: 630,
+  fit: 'cover',
+  position: 'center',
+  format: 'jpeg',
+  quality: 76,
+});
+const ogImageUrl = new URL(ogImage.src, site.url).toString();
+
+const breadcrumbSchema =
+  crumbs.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [{ name: 'Home', href: '/' }, ...crumbs].map((crumb, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: crumb.name,
+          item: new URL(crumb.href, site.url).toString(),
+        })),
+      }
+    : null;
 ---
 <!doctype html>
 <html lang="en">
@@ -27,22 +65,42 @@ const pageTitle = title.includes(site.shortName) ? title : `${title} | ${site.sh
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+
+    <meta property="og:site_name" content={site.shortName} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={heroPhoto.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
     <meta name="theme-color" content="#0b0c0e" />
+    <meta name="geo.region" content="US-WA" />
+    <meta name="geo.placename" content="Vancouver, Washington" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="preconnect" href="https://fonts.bunny.net" />
-    <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+    <link
+      href="https://fonts.bunny.net/css?family=outfit:400,500,600,700&display=swap"
+      rel="stylesheet"
+    />
     <ClientRouter />
     <JsonLd extra={schema} />
+    {breadcrumbSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    )}
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />

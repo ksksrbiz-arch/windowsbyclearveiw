@@ -34,10 +34,12 @@
 
 .work-card.is-featured {
   grid-column: span 2;
+  grid-row: span 2;
 }
 
+/* Span two rows as well, so the tall 3/4 neighbours stay flush with it. */
 .work-card.is-featured img {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 8 / 9;
 }
 
 .work-card figcaption {
@@ -62,10 +64,11 @@
     grid-template-columns: 1fr 1fr;
   }
   .work-card.is-featured {
-    grid-column: span 1;
+    grid-column: span 2;
+    grid-row: auto;
   }
   .work-card.is-featured img {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
   }
 }
 

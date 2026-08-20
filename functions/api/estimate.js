@@ -3,6 +3,7 @@ const MAX = {
   phone: 40,
   email: 160,
   city: 80,
+  role: 40,
   notes: 2000,
 };
 
@@ -28,6 +29,19 @@ function json(data, status = 200) {
       'cache-control': 'no-store',
     },
   });
+}
+
+/** Browsers without JS post the form directly; send them to a real page. */
+function redirect(request, path) {
+  const target = new URL(path, request.url);
+  return new Response(null, {
+    status: 303,
+    headers: { location: target.toString(), 'cache-control': 'no-store' },
+  });
+}
+
+function wantsJson(request) {
+  return (request.headers.get('accept') || '').includes('application/json');
 }
 
 function clean(value, max) {
@@ -59,38 +73,64 @@ async function sendTemplate(key, payload) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    console.error('resend-failed', body);
+    console.error('resend-failed', response.status, body);
     throw new Error('Could not deliver the request.');
   }
   return body;
 }
 
 export async function onRequestPost(context) {
+  const { request } = context;
+  const asJson = wantsJson(request);
+
   let form;
   try {
-    form = await context.request.formData();
+    form = await request.formData();
   } catch {
-    return json({ error: 'Send the form as multipart data.' }, 400);
+    return asJson
+      ? json({ error: 'Send the form as multipart data.' }, 400)
+      : redirect(request, '/estimate/problem');
   }
 
-  if (clean(form.get('company'), 80)) return json({ ok: true });
+  // Honeypot. Bots fill every field they see; people never see this one.
+  if (clean(form.get('company'), 80)) {
+    return asJson ? json({ ok: true }) : redirect(request, '/estimate/sent');
+  }
 
   const lead = {
     name: clean(form.get('name'), MAX.name),
     phone: clean(form.get('phone'), MAX.phone),
     email: clean(form.get('email'), MAX.email),
     city: clean(form.get('city'), MAX.city),
+    role: clean(form.get('role'), MAX.role),
     notes: clean(form.get('notes'), MAX.notes),
   };
 
   if (!lead.name || !lead.phone || !lead.city) {
-    return json({ error: 'Name, phone, and city are required.' }, 400);
+    return asJson
+      ? json({ error: 'Name, phone, and city are required.' }, 400)
+      : redirect(request, '/estimate/problem');
+  }
+
+  // A phone number with no digits is a typo or a bot, either way not callable.
+  const phoneDigits = lead.phone.replace(/\D/g, '');
+  if (phoneDigits.length < 7) {
+    return asJson
+      ? json({ error: 'That phone number looks incomplete.' }, 400)
+      : redirect(request, '/estimate/problem');
+  }
+
+  const emailLooksReal = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(lead.email);
+  if (lead.email && !emailLooksReal) {
+    return asJson
+      ? json({ error: 'That email address looks incomplete.' }, 400)
+      : redirect(request, '/estimate/problem');
   }
 
   const key = context.env?.RESEND_API_KEY;
   if (!key) {
     console.error('estimate-request missing RESEND_API_KEY', lead);
-    return json({ error: 'Mail is not configured yet.' }, 503);
+    return asJson ? json({ error: 'Mail is not configured yet.' }, 503) : redirect(request, '/estimate/problem');
   }
 
   const from = context.env?.RESEND_FROM || FROM;
@@ -108,14 +148,24 @@ export async function onRequestPost(context) {
           CUSTOMER_PHONE: lead.phone,
           CUSTOMER_EMAIL: lead.email || 'Not given',
           CITY: lead.city,
-          NOTES: lead.notes || 'No notes.',
+          NOTES: [lead.role && `[${lead.role}]`, lead.notes || 'No notes.']
+            .filter(Boolean)
+            .join(' '),
           RECEIVED_AT: receivedAt(),
         },
       },
     });
+  } catch {
+    return asJson
+      ? json({ error: 'Could not deliver the request.' }, 502)
+      : redirect(request, '/estimate/problem');
+  }
 
-    if (lead.email) {
-      await sendTemplate(key, {
+  // The customer receipt is a courtesy. Mark already has the lead, so never
+  // fail the request because the confirmation bounced.
+  if (lead.email && emailLooksReal) {
+    context.waitUntil(
+      sendTemplate(key, {
         from,
         to: [lead.email],
         template: {
@@ -127,18 +177,19 @@ export async function onRequestPost(context) {
         },
       }).catch((error) => {
         console.error('receipt-failed', error);
-      });
-    }
-  } catch {
-    return json({ error: 'Could not deliver the request.' }, 502);
+      }),
+    );
   }
 
-  return json({ ok: true });
+  return asJson ? json({ ok: true }) : redirect(request, '/estimate/sent');
 }
 
 export async function onRequestGet() {
-  return json({
-    error: 'POST a request from the estimate form.',
-    templates: TEMPLATES,
-  }, 405);
+  return json(
+    {
+      error: 'POST a request from the estimate form.',
+      templates: TEMPLATES,
+    },
+    405,
+  );
 }

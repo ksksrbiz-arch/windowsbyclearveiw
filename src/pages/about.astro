@@ -7,6 +7,7 @@ import { site } from '../data/site';
   title="About"
   description={`Meet ${site.owner} and ${site.legalName}, a Vancouver, WA window installation company.`}
   path="/about"
+  crumbs={[{ name: 'About', href: '/about' }]}
 >
   <section class="page-hero">
     <div class="wrap">
@@ -23,7 +24,8 @@ import { site } from '../data/site';
       <div>
         <p>
           {site.legalName} is Mark’s window company. We install in Vancouver and the towns around it —
-          Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.
+          Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — and
+          we cross the river into Portland.
         </p>
         <p>
           Show up, install it right, leave the house better than we found it.
@@ -32,8 +34,8 @@ import { site } from '../data/site';
       <aside>
         <p class="kicker">Where we work</p>
         <ul class="plain-list">
-          {site.nearby.map((city) => (
-            <li>{city}</li>
+          {site.nearby.map((place) => (
+            <li>{place.name}, {place.region}</li>
           ))}
         </ul>
         <p class="fine-print">Still waiting on L&amp;I number, insurance, and brand list.</p>
