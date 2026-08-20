@@ -1,17 +1,11 @@
 ---
 import { site, telHref } from '../data/site';
-
-const notify = site.email;
 ---
-<form class="estimate-form" method="post" action={`https://formsubmit.co/${notify}`} id="estimate-form">
-  <input type="hidden" name="_subject" value="Clearveiw Windows estimate request" />
-  <input type="hidden" name="_template" value="table" />
-  <input type="hidden" name="_url" value="https://windowsbyclearveiw.com/estimate" />
-  <input type="hidden" name="_captcha" value="false" />
+<form class="estimate-form" method="post" action="/api/estimate" id="estimate-form">
   <div class="hp" aria-hidden="true">
     <label>
       Company
-      <input name="_honey" type="text" tabindex="-1" autocomplete="off" />
+      <input name="company" type="text" tabindex="-1" autocomplete="off" />
     </label>
   </div>
   <label>
@@ -48,7 +42,6 @@ const notify = site.email;
   const form = document.getElementById('estimate-form');
   const status = document.querySelector('[data-status]');
   const success = document.querySelector('[data-success]');
-  const notify = 'mark.rotar1000@gmail.com';
 
   if (form instanceof HTMLFormElement && status instanceof HTMLElement && success instanceof HTMLElement) {
     form.addEventListener('submit', async (event) => {
@@ -57,33 +50,18 @@ const notify = site.email;
       const button = form.querySelector('button[type="submit"]');
       if (button instanceof HTMLButtonElement) button.disabled = true;
 
-      const payload = new FormData(form);
-
       try {
-        const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(notify)}`, {
+        const response = await fetch('/api/estimate', {
           method: 'POST',
           headers: { Accept: 'application/json' },
-          body: payload,
+          body: new FormData(form),
         });
         const result = await response.json().catch(() => ({}));
-        const message = typeof result.message === 'string' ? result.message : '';
-
-        if (!response.ok || result.success === false) {
-          throw new Error(message || 'Could not send.');
+        if (!response.ok) {
+          throw new Error(typeof result.error === 'string' ? result.error : 'Could not send.');
         }
-
         form.hidden = true;
         success.hidden = false;
-
-        if (/activat/i.test(message)) {
-          const note = success.querySelector('p:last-of-type');
-          if (note) {
-            note.textContent =
-              'First send from this inbox: check mark.rotar1000@gmail.com (and spam) for a FormSubmit activation link, then click it.';
-          }
-        }
-
-        fetch('/api/estimate', { method: 'POST', body: payload }).catch(() => {});
       } catch (error) {
         status.hidden = false;
         status.textContent =
