@@ -22,7 +22,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: #b8b8b2;
   font-weight: 500;
 }
 
@@ -85,6 +85,14 @@
   max-width: 22rem;
 }
 
+.footer-brand .brand {
+  color: var(--ink);
+}
+
+.footer-brand .brand-sub {
+  color: var(--ink-soft);
+}
+
 .service-tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -136,7 +144,7 @@
 .photo-hero {
   background: #0b0c0e;
   color: #f4f4f2;
-  padding: 4.5rem 0 5rem;
+  padding: 3.5rem 0 5rem;
 }
 
 .photo-hero-inner {
@@ -315,7 +323,7 @@
   }
 
   .photo-hero {
-    padding: 2.2rem 0 2.4rem;
+    padding: 1.8rem 0 2.2rem;
   }
 
   .photo-hero-inner {
