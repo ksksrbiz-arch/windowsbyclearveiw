@@ -1,59 +1,117 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
 import JobCard from '../components/JobCard.astro';
-import ReviewCard from '../components/ReviewCard.astro';
-import { site, telHref } from '../data/site';
+import { site } from '../data/site';
 
 const jobs = (await getCollection('jobs')).filter((job) => job.data.featured).slice(0, 3);
-const reviews = (await getCollection('reviews')).slice(0, 3);
+const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const signs = [
+  {
+    title: 'Drafts at a closed window',
+    text: 'Air at the lock or stool means the weatherstrip or frame has given up.',
+    href: '/guides/signs-you-need-new-windows',
+  },
+  {
+    title: 'Fog between the panes',
+    text: 'That haze is a failed sealed unit. Cleaning will not reach it.',
+    href: '/guides/fogged-windows',
+  },
+  {
+    title: 'Sashes that fight you',
+    text: 'Sticky, dropped, or unlocked sashes often mean the opening is no longer square.',
+    href: '/guides/signs-you-need-new-windows',
+  },
+  {
+    title: 'Soft or stained sills',
+    text: 'Washington rain finds the weak corner. Soft wood is water in the wall.',
+    href: '/guides/signs-you-need-new-windows',
+  },
+  {
+    title: 'A room that never evens out',
+    text: 'Cold glass makes a cold chair even when the thermostat is fine.',
+    href: '/guides/signs-you-need-new-windows',
+  },
+  {
+    title: 'A bill that does not add up',
+    text: 'Windows are a small wall and a large leak. Start with the openings you can feel.',
+    href: '/guides/window-replacement-cost-washington',
+  },
+];
 ---
 <BaseLayout title={site.shortName} description={site.description} path="/">
-  <section class="wrap hero">
-    <div class="hero-copy">
-      <p class="kicker">Washington · Window installation</p>
-      <h1>Windows that fit the house, the weather, and the way you live.</h1>
+  <VideoHero />
+
+  <section class="section" id="signs">
+    <div class="wrap">
+      <p class="kicker">Is it time?</p>
+      <h2>Six signs the window is the problem</h2>
       <p class="lede">
-        {site.shortName} is a local installation company for homeowners who want a tighter envelope,
-        quieter rooms, and a crew that treats the job site like it is still your home.
+        If two of these are true in the same room, a measure is worth a morning. Each card opens
+        a short guide.
       </p>
-      <p>
-        <a class="btn btn-primary" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-        <a class="btn btn-ghost" href="/replacement">See replacement options</a>
-      </p>
+      <div class="cards signs">
+        {signs.map((sign, index) => (
+          <a class="card sign" href={sign.href}>
+            <span class="sign-num">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{sign.title}</h3>
+            <p>{sign.text}</p>
+          </a>
+        ))}
+      </div>
     </div>
-    <aside class="hero-panel">
-      <p class="kicker" style="color:#d7b48a;">Owner-led installs</p>
-      <div class="hero-window"></div>
-      <p>Measured, ordered, installed, and cleaned up by a local crew. Energy-smart glass for Washington’s marine and inland climates.</p>
-    </aside>
   </section>
 
   <section class="section section-muted">
     <div class="wrap">
-      <h2>Why homeowners call a local installer</h2>
-      <div class="cards">
+      <p class="kicker">What actually changes</p>
+      <h2>Comfort first. Then the bill. Then the wall.</h2>
+      <div class="cards metrics">
         <article class="card">
-          <h3>Right product, not a pitch</h3>
-          <p>Vinyl, fiberglass, or a mix. Full-frame when the opening needs it. Insert when the existing frame is sound.</p>
+          <p class="kicker">Comfort</p>
+          <h3>Sit next to the glass in January</h3>
+          <p>New units raise the inside face of the glass and stop the draft at the lock. The room feels even before anyone talks about U-factor.</p>
         </article>
         <article class="card">
-          <h3>Built for this climate</h3>
-          <p>Western Washington wants low U-factor glass. East of the Cascades is a different conversation. We spec for where you live.</p>
+          <p class="kicker">Moisture</p>
+          <h3>Fog you cannot wipe is a failed unit</h3>
+          <p>Haze between panes means the seal is gone. Room-side sweat is often humidity. We tell those apart on site. <a href="/guides/fogged-windows">How to look</a>.</p>
         </article>
         <article class="card">
-          <h3>Clean work</h3>
-          <p>Flashing, trim, and a swept site matter as much as the glass. That is what you are actually paying for.</p>
+          <p class="kicker">Energy</p>
+          <h3>Less work for a long heating season</h3>
+          <p>Windows are a small share of the wall and a large share of heat loss. Savings are real on tired single-pane. They are modest if the glass is already decent.</p>
         </article>
       </div>
     </div>
   </section>
 
   <section class="section">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">How a job runs</p>
+        <h2>Measure once. Install clean.</h2>
+        <p>Walkthrough, written estimate, openings measured for insert or full-frame, then a crew that leaves the rooms usable.</p>
+        <p><a href="/process">See the process</a> · <a href="/guides/full-frame-vs-insert">Insert vs full-frame</a></p>
+      </div>
+      <ol class="steps">
+        <li><strong>Walkthrough.</strong> We look at glass, sills, and trim — not just a count.</li>
+        <li><strong>Order.</strong> Each opening is sized for the method that opening needs.</li>
+        <li><strong>Install.</strong> Old units out. New units plumb, flashed, and operable.</li>
+        <li><strong>Walk the job.</strong> You try every sash. Debris leaves with us.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section-muted">
     <div class="wrap">
       <h2>Recent work</h2>
-      <p class="lede">Starter gallery entries. Replace these with Mark’s real jobs and photos.</p>
+      <p class="lede">Placeholder jobs until Mark’s photos land. The layout is ready for real elevations.</p>
       <div class="cards">
         {jobs.map((job) => (
           <JobCard
@@ -65,21 +123,20 @@ const reviews = (await getCollection('reviews')).slice(0, 3);
           />
         ))}
       </div>
-      <p><a href="/gallery">View the gallery</a></p>
     </div>
   </section>
 
-  <section class="section section-muted">
+  <section class="section">
     <div class="wrap">
-      <h2>What customers notice</h2>
+      <p class="kicker">Learn first</p>
+      <h2>Guides for the questions before the call</h2>
       <div class="cards">
-        {reviews.map((review) => (
-          <ReviewCard
-            quote={review.data.quote}
-            name={review.data.name}
-            city={review.data.city}
-            source={review.data.source}
-          />
+        {guides.map((guide) => (
+          <article class="card">
+            <p class="kicker">{guide.data.topic}</p>
+            <h3><a href={`/guides/${guide.id}`}>{guide.data.title}</a></h3>
+            <p>{guide.data.description}</p>
+          </article>
         ))}
       </div>
     </div>

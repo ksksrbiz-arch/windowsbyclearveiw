@@ -40,6 +40,8 @@ No Cloudflare adapter is required while the site stays static.
 | City pages | `src/content/cities/` |
 | Gallery jobs | `src/content/jobs/` |
 | Reviews | `src/content/reviews/` |
+| Guides | `src/content/guides/` |
+| Homepage video | `public/video/hero.mp4` |
 
 City, job, and review entries are placeholders. Replace them before treating the site as live advertising. Washington requires the contractor L&I number on the website.
 
