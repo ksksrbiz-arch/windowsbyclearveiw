@@ -10,8 +10,8 @@ export const site = {
   owner: 'Mark',
   state: 'Washington',
   email: '',
-  phone: '',
-  phoneDisplay: 'Call for an estimate',
+  phone: '(564) 208-0801',
+  phoneDisplay: '(564) 208-0801',
   address: {
     line1: '',
     city: 'Vancouver',
@@ -39,7 +39,11 @@ export const site = {
   },
 } as const;
 
+export function phoneDigits() {
+  return site.phone.replace(/\D/g, '');
+}
+
 export function telHref() {
-  const digits = site.phone.replace(/\D/g, '');
+  const digits = phoneDigits();
   return digits ? `tel:+1${digits}` : '/estimate';
 }

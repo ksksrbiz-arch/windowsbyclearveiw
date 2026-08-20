@@ -1,11 +1,12 @@
 ---
-import { site } from '../data/site';
+import { site, phoneDigits } from '../data/site';
 
 interface Props {
   extra?: Record<string, unknown>;
 }
 
 const { extra } = Astro.props;
+const digits = phoneDigits();
 
 const business = {
   '@context': 'https://schema.org',
@@ -28,7 +29,7 @@ const business = {
     addressCountry: 'US',
   },
   priceRange: '$$',
-  ...(site.phone ? { telephone: site.phone } : {}),
+  ...(digits ? { telephone: `+1${digits}` } : {}),
   ...(site.email ? { email: site.email } : {}),
 };
 

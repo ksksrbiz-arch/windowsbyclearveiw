@@ -30,8 +30,8 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
         Replacement and new-construction windows in Clark County.
       </p>
       <p class="hero-actions">
-        <a class="btn btn-light" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-        <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
+        <a class="btn btn-light" href={telHref()}>{site.phoneDisplay}</a>
+        <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
       </p>
     </div>
   </section>
@@ -46,8 +46,8 @@ const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.u
           Camas, Washougal, Battle Ground, Ridgefield, and the rest of Clark County.
         </p>
         <p class="hero-actions">
-          <a class="btn btn-light" href={telHref()}>{site.phone || 'Get an estimate'}</a>
-          <a class="btn btn-ghost btn-on-dark" href="#work">See the work</a>
+          <a class="btn btn-light" href={telHref()}>{site.phoneDisplay}</a>
+          <a class="btn btn-ghost btn-on-dark" href="/estimate">Request estimate</a>
         </p>
       </div>
       <figure class="photo-hero-frame">

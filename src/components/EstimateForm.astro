@@ -1,40 +1,75 @@
 ---
-import { site } from '../data/site';
+import { site, telHref } from '../data/site';
 ---
-<form class="card" method="post" action="#" id="estimate-form">
-  <p class="notice">
-    Form backend is not wired yet. Until then, use the phone number in
-    <code>src/data/site.ts</code> or email {site.email || 'once an address is added'}.
-  </p>
+<form class="estimate-form" method="post" action="/api/estimate" id="estimate-form">
+  <div class="hp" aria-hidden="true">
+    <label>
+      Company
+      <input name="company" type="text" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
   <label>
     Name
-    <input name="name" type="text" required autocomplete="name" />
+    <input name="name" type="text" required autocomplete="name" maxlength="120" />
   </label>
   <label>
     Phone
-    <input name="phone" type="tel" required autocomplete="tel" />
+    <input name="phone" type="tel" required autocomplete="tel" maxlength="40" />
   </label>
   <label>
     Email
-    <input name="email" type="email" autocomplete="email" />
+    <input name="email" type="email" autocomplete="email" maxlength="160" />
   </label>
   <label>
     City
-    <input name="city" type="text" required />
+    <input name="city" type="text" required maxlength="80" />
   </label>
   <label>
     Project notes
-    <textarea name="notes" rows="4" placeholder="Number of windows, replacement or new construction, preferred materials..."></textarea>
+    <textarea name="notes" rows="4" maxlength="2000" placeholder="Number of windows, replacement or new construction, preferred materials..."></textarea>
   </label>
   <button class="btn btn-primary" type="submit">Send estimate request</button>
+  <p class="form-status" data-status hidden></p>
 </form>
+
+<div class="form-success" data-success hidden>
+  <p class="kicker">Received</p>
+  <h2>We have the request.</h2>
+  <p>Mark will follow up. If you want to talk now, call <a href={telHref()}>{site.phoneDisplay}</a>.</p>
+</div>
 
 <script>
   const form = document.getElementById('estimate-form');
-  form?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const data = new FormData(form);
-    const body = [...data.entries()].map(([key, value]) => `${key}: ${value}`).join('\n');
-    window.location.href = `mailto:?subject=Window estimate request&body=${encodeURIComponent(body)}`;
-  });
+  const status = document.querySelector('[data-status]');
+  const success = document.querySelector('[data-success]');
+  if (!(form instanceof HTMLFormElement) || !(status instanceof HTMLElement) || !(success instanceof HTMLElement)) {
+    // skip
+  } else {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      status.hidden = true;
+      const button = form.querySelector('button[type="submit"]');
+      if (button instanceof HTMLButtonElement) button.disabled = true;
+
+      try {
+        const response = await fetch('/api/estimate', {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(typeof payload.error === 'string' ? payload.error : 'Could not send.');
+        }
+        form.hidden = true;
+        success.hidden = false;
+      } catch (error) {
+        status.hidden = false;
+        status.textContent =
+          error instanceof Error ? error.message : 'Could not send. Call (564) 208-0801.';
+      } finally {
+        if (button instanceof HTMLButtonElement) button.disabled = false;
+      }
+    });
+  }
 </script>
