@@ -8,28 +8,37 @@ import { site } from '../data/site';
   description={`Meet ${site.owner} and ${site.legalName}, a Vancouver, WA window installation company.`}
   path="/about"
 >
-  <section class="wrap section split">
-    <div>
+  <section class="page-hero">
+    <div class="wrap">
       <p class="kicker">About</p>
       <h1>A Vancouver crew, not a national sales office.</h1>
-      <p>
-        {site.legalName} is Mark’s window company. We install in Vancouver and the towns around it —
-        Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.
-      </p>
-      <p>
+      <p class="lede">
         The site, the truck, and the estimate all point back to the same person responsible for the
-        opening in your wall. Show up, install it right, leave the house better than we found it.
+        opening in your wall.
       </p>
     </div>
-    <aside class="card">
-      <h2>Where we work</h2>
-      <ul>
-        {site.nearby.map((city) => (
-          <li>{city}</li>
-        ))}
-      </ul>
-      <p class="fine-print">Still waiting on L&amp;I number, insurance, and brand list.</p>
-    </aside>
+  </section>
+  <section class="section">
+    <div class="wrap split">
+      <div>
+        <p>
+          {site.legalName} is Mark’s window company. We install in Vancouver and the towns around it —
+          Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland.
+        </p>
+        <p>
+          Show up, install it right, leave the house better than we found it.
+        </p>
+      </div>
+      <aside>
+        <p class="kicker">Where we work</p>
+        <ul class="plain-list">
+          {site.nearby.map((city) => (
+            <li>{city}</li>
+          ))}
+        </ul>
+        <p class="fine-print">Still waiting on L&amp;I number, insurance, and brand list.</p>
+      </aside>
+    </div>
   </section>
   <CtaBar />
 </BaseLayout>

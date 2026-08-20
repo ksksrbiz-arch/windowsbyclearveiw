@@ -6,24 +6,30 @@ import { processWork } from '../data/work';
 ---
 <BaseLayout
   title="How installation works"
-  description="From first measure to final sweep: the Clearveiw Windows installation process for Washington homeowners."
+  description="From first measure to final sweep: the Clearveiw Windows installation process for Clark County homeowners."
   path="/process"
 >
-  <section class="wrap section">
-    <p class="kicker">Process</p>
-    <h1>Measure once. Install clean.</h1>
-    <ol class="cards" style="list-style:none;padding:0;">
-      <li class="card"><h2>1. Walkthrough</h2><p>We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.</p></li>
-      <li class="card"><h2>2. Measure and order</h2><p>Each opening is measured for the chosen method. Windows are ordered to those sizes. Lead times vary by manufacturer.</p></li>
-      <li class="card"><h2>3. Install</h2><p>Old units come out. New units go in plumb and flashed. Interior and exterior finishes are closed up to match the house.</p></li>
-      <li class="card"><h2>4. Walk the job</h2><p>We operate every sash with you, haul debris, and leave the rooms usable. Warranty paperwork stays with you.</p></li>
-    </ol>
-    <div class="work-grid" style="margin-top:2rem;">
-      {processWork.map((photo) => (
-        <WorkCard src={photo.src} alt={photo.alt} caption={photo.caption} kind={photo.kind} />
-      ))}
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Process</p>
+      <h1>Measure once. Install clean.</h1>
     </div>
-    <p class="notice">Permits depend on the city and whether the opening changes. We handle that conversation before work starts.</p>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <ol class="steps">
+        <li><strong>Walkthrough.</strong> We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.</li>
+        <li><strong>Measure and order.</strong> Each opening is measured for the chosen method. Windows are ordered to those sizes. Lead times vary by manufacturer.</li>
+        <li><strong>Install.</strong> Old units come out. New units go in plumb and flashed. Finishes close up to match the house.</li>
+        <li><strong>Walk the job.</strong> We operate every sash with you, haul debris, and leave the rooms usable.</li>
+      </ol>
+      <div class="work-grid" style="margin-top:2.5rem;">
+        {processWork.map((photo) => (
+          <WorkCard src={photo.src} alt={photo.alt} caption={photo.caption} kind={photo.kind} />
+        ))}
+      </div>
+      <p class="notice">Permits depend on the city and whether the opening changes. We handle that conversation before work starts.</p>
+    </div>
   </section>
   <CtaBar />
 </BaseLayout>

@@ -6,27 +6,31 @@ import { allWork } from '../data/work';
 ---
 <BaseLayout
   title="Project gallery"
-  description="Real replacement jobs from Clearveiw Windows, LLC in Washington homes."
+  description="Real replacement jobs from Clearveiw Windows, LLC in Clark County homes."
   path="/gallery"
 >
-  <section class="wrap section">
-    <p class="kicker">Gallery</p>
-    <h1>Mark’s work</h1>
-    <p class="lede">
-      Vinyl replacement in lived-in Washington houses — sliders, double-hungs, and
-      the ladder shots from install day. New-construction photos will land here
-      when the next framed opening is shot.
-    </p>
-    <div class="work-grid">
-      {allWork.map((photo) => (
-        <WorkCard
-          src={photo.src}
-          alt={photo.alt}
-          caption={photo.caption}
-          kind={photo.kind}
-          featured={photo.featured && photo.order <= 2}
-        />
-      ))}
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Gallery</p>
+      <h1>Mark’s work</h1>
+      <p class="lede">
+        Vinyl replacement in lived-in Washington houses — sliders, double-hungs, and the ladder shots from install day.
+      </p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <div class="work-grid">
+        {allWork.map((photo) => (
+          <WorkCard
+            src={photo.src}
+            alt={photo.alt}
+            caption={photo.caption}
+            kind={photo.kind}
+            featured={photo.featured && photo.order <= 2}
+          />
+        ))}
+      </div>
     </div>
   </section>
   <CtaBar />

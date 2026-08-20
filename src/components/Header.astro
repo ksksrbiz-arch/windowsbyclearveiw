@@ -2,6 +2,7 @@
 import { site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
   ['/replacement', 'Replacement'],
   ['/new-construction', 'New builds'],
@@ -25,10 +26,10 @@ const links = [
     </button>
     <nav class="nav" id="site-nav" aria-label="Primary">
       {links.map(([href, label]) => (
-        <a href={href}>{label}</a>
+        <a href={href} aria-current={here === href ? 'page' : undefined}>{label}</a>
       ))}
     </nav>
-    <a class="btn btn-primary header-cta" href={telHref()}>{site.phone || 'Get an estimate'}</a>
+    <a class="btn btn-light header-cta" href={telHref()}>{site.phone || 'Get an estimate'}</a>
   </div>
 </header>
 
