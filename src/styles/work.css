@@ -24,7 +24,7 @@
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
-  background: #ddd;
+  background: var(--paper-sunk);
   transition: transform 0.7s ease;
 }
 

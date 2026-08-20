@@ -28,6 +28,12 @@ const {
 } = Astro.props;
 
 const canonical = new URL(path === '/' ? '/' : path, site.url).toString();
+
+// A stable per-page hook. Without this there is no way to scope a style to one
+// page except by editing a shared selector, which is what made every page look
+// identical. Workers should prefer scoped <style> blocks, but this exists for
+// the cases that genuinely need an ancestor.
+const route = (path === '/' ? 'home' : path.replace(/^\/|\/$/g, '').replace(/\//g, '-')) || 'home';
 const pageTitle = title.includes(site.shortName) ? title : `${title} | ${site.shortName}`;
 
 // One shared social card. Facebook is where a local installer actually gets
@@ -100,9 +106,51 @@ const breadcrumbSchema =
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main id="main" tabindex="-1">
+    <main id="main" tabindex="-1" data-route={route}>
       <slot />
     </main>
     <Footer />
+    <script>
+      // Gate the hidden state on JS actually running: if this script never
+      // executes, `.reveal-ready` is never set and everything stays visible.
+      function initReveal() {
+        const targets = document.querySelectorAll('[data-reveal]:not(.is-revealed)');
+        if (!targets.length) return;
+
+        if (
+          !('IntersectionObserver' in window) ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          targets.forEach((el) => el.classList.add('is-revealed'));
+          return;
+        }
+
+        document.documentElement.classList.add('reveal-ready');
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-revealed');
+              observer.unobserve(entry.target);
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+        );
+
+        targets.forEach((el) => observer.observe(el));
+
+        // Anything already in view on load should not wait for a scroll.
+        requestAnimationFrame(() => {
+          targets.forEach((el) => {
+            const box = el.getBoundingClientRect();
+            if (box.top < window.innerHeight) el.classList.add('is-revealed');
+          });
+        });
+      }
+
+      initReveal();
+      document.addEventListener('astro:page-load', initReveal);
+    </script>
   </body>
 </html>
