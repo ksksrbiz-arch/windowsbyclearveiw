@@ -6,6 +6,8 @@ const MAX = {
   notes: 2000,
 };
 
+const DEFAULT_NOTIFY = 'markrotar287@gmail.com';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -57,7 +59,10 @@ export async function onRequestPost(context) {
   console.log('estimate-request', record);
 
   const webhook = context.env?.LEADS_WEBHOOK;
-  const notify = context.env?.NOTIFY_EMAIL;
+  const notify =
+    (typeof context.env?.NOTIFY_EMAIL === 'string' && context.env.NOTIFY_EMAIL.includes('@')
+      ? context.env.NOTIFY_EMAIL
+      : DEFAULT_NOTIFY);
   let delivered = false;
 
   if (typeof webhook === 'string' && webhook.startsWith('https://')) {
@@ -69,7 +74,7 @@ export async function onRequestPost(context) {
     delivered = hook.ok;
   }
 
-  if (!delivered && typeof notify === 'string' && notify.includes('@')) {
+  if (!delivered) {
     const mail = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(notify)}`, {
       method: 'POST',
       headers: {
@@ -89,10 +94,7 @@ export async function onRequestPost(context) {
   }
 
   if (!delivered) {
-    return json({
-      ok: true,
-      queued: true,
-    });
+    return json({ error: 'Could not deliver the request. Call (564) 208-0801.' }, 502);
   }
 
   return json({ ok: true });

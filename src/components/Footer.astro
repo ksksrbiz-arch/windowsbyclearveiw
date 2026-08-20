@@ -1,5 +1,5 @@
 ---
-import { site, telHref } from '../data/site';
+import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 const year = new Date().getFullYear();
 ---
@@ -9,6 +9,7 @@ const year = new Date().getFullYear();
       <Brand compact />
       <p>Replacement and new-construction windows in Vancouver, WA and surrounding Clark County.</p>
       <p><a href={telHref()}>{site.phoneDisplay}</a></p>
+      <p><a href={mailHref()}>{site.email}</a></p>
       <p class="fine-print">
         Contractor registration: {site.lniNumber || 'L&I number added before we advertise.'}
       </p>

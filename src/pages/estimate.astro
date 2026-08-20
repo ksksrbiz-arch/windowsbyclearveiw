@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EstimateForm from '../components/EstimateForm.astro';
-import { site, telHref } from '../data/site';
+import { mailHref, site, telHref } from '../data/site';
 ---
 <BaseLayout
   title="Request an estimate"
@@ -23,7 +23,10 @@ import { site, telHref } from '../data/site';
       <div>
         <p class="kicker">Prefer to talk</p>
         <h2><a href={telHref()}>{site.phoneDisplay}</a></h2>
-        <p>Mark answers from the truck. If it rings out, leave a name, city, and a window count.</p>
+        <p>
+          Mark answers from the truck. If it rings out, leave a name, city, and a window count,
+          or email <a href={mailHref()}>{site.email}</a>.
+        </p>
       </div>
       <EstimateForm />
     </div>
