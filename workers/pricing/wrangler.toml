@@ -7,10 +7,10 @@ compatibility_date = "2026-08-01"
 [triggers]
 crons = ["0 16 1 * *"]
 
-# Create with:  npx wrangler kv namespace create PRICING
+# Created 2026-08-20. Recreate with: npx wrangler kv namespace create PRICING
 [[kv_namespaces]]
 binding = "PRICING"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "d060f59b1fd7419ab40f08a84673cce5"
 
 [vars]
 NOTIFY_EMAIL = "mark.rotar1000@gmail.com"

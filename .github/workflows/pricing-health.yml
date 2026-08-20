@@ -1,0 +1,35 @@
+# The pricing worker was meant to run this on its own cron trigger, but this
+# Cloudflare account is on Workers Free (5 cron triggers, all already in use by
+# `graph` and `day-trade-scheduler`). GitHub Actions does the same job for free,
+# and a failure is visible in the repo rather than only in an inbox.
+#
+# If the account moves to Workers Paid, uncomment the [triggers] block in
+# workers/pricing/wrangler.toml and this workflow becomes redundant.
+
+name: Pricing health
+
+on:
+  schedule:
+    # 09:00 America/Los_Angeles on the 1st of each month (16:00 UTC).
+    - cron: '0 16 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ask the pricing worker how it is doing
+        env:
+          PRICING_ENDPOINT: https://clearveiw-pricing.skdev-371.workers.dev
+        run: |
+          set -euo pipefail
+          echo "Checking $PRICING_ENDPOINT/health"
+          curl -sS --max-time 20 "$PRICING_ENDPOINT/health" -o health.json
+          cat health.json
+          echo
+          python3 .github/scripts/check_pricing_health.py health.json

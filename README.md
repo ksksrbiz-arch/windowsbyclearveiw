@@ -116,19 +116,28 @@ authoritative. What it does:
 The site ships its own copy of the numbers and only *upgrades* from the worker,
 so an outage there can never blank out the estimator.
 
-Deploy:
+**Deployed.** Live at `https://clearveiw-pricing.skdev-371.workers.dev`, bound to
+the `clearveiw-pricing` KV namespace, with the monthly cron registered.
+
+Two things are still unset, both on purpose — they are secrets and belong in the
+dashboard rather than a transcript (*Workers → clearveiw-pricing → Settings →
+Variables → Add secret*):
+
+| Secret | Effect while unset |
+| --- | --- |
+| `RESEND_API_KEY` | Cron runs but skips the reminder email |
+| `ADMIN_TOKEN` | `PUT /` returns 401, so pricing can only change via the repo |
+
+Everything else works without them. To point the site at the worker, set
+`PUBLIC_PRICING_ENDPOINT` to the URL above in Cloudflare Pages → Settings →
+Environment variables. Leave it unset and the site simply uses its bundled
+numbers.
+
+Redeploy after a code change:
 
 ```bash
-cd workers/pricing
-npx wrangler kv namespace create PRICING   # paste the id into wrangler.toml
-npx wrangler secret put RESEND_API_KEY     # same key the estimate form uses
-npx wrangler secret put ADMIN_TOKEN        # any long random string
-npx wrangler deploy
+cd workers/pricing && npx wrangler deploy
 ```
-
-Then point the site at it by setting `PUBLIC_PRICING_ENDPOINT` in Cloudflare
-Pages → Settings → Environment variables to the worker's URL. Leave it unset and
-the site simply uses its bundled numbers.
 
 Push new pricing without a redeploy:
 
@@ -142,6 +151,19 @@ curl -X PUT https://clearveiw-pricing.<subdomain>.workers.dev \
 Validation (`shared/pricing-schema.mjs`, shared by the site and the worker)
 rejects inverted ranges, spreads wider than 5×, missing baselines, multipliers
 outside 0.5–3×, and future review dates.
+
+**Which copy wins.** The site renders its bundled numbers immediately, then
+upgrades from the worker only if the stored document's `basis.reviewedAt` is at
+least as recent as its own. So committing fresher numbers to the repo beats a
+stale copy sitting in KV, and a worker outage, a malformed response, or an empty
+KV can never blank out the estimator. An empty KV is a normal state meaning
+"the repo is the source of truth".
+
+`.github/workflows/pricing-health.yml` runs the same check monthly from GitHub
+Actions and fails the job when pricing is invalid or overdue. It needs no
+secrets, so it works even before `RESEND_API_KEY` is set — and a failure shows up
+in the repo rather than only in an inbox. Delete it if the worker's own email
+turns out to be enough.
 
 ## The estimate form
 

@@ -17,6 +17,7 @@ const openings = showMoney ? pricedOpenings() : pricing.openings;
 // one payload means Mark's pricing file is the only thing that ever changes.
 const model = {
   showMoney,
+  reviewedAt: pricing.basis.reviewedAt,
   rounding: pricing.displayRounding,
   openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high })),
   materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
@@ -171,6 +172,7 @@ const model = {
   type ModifierRow = { id: string; label: string; perOpening: boolean; low: number; high: number };
   type Model = {
     showMoney: boolean;
+    reviewedAt: string;
     rounding: number;
     openings: OpeningRow[];
     materials: { id: string; label: string; multiplier: number }[];
@@ -355,6 +357,13 @@ const model = {
         .then((response) => (response.ok ? response.json() : null))
         .then((live) => {
           if (!live || !Array.isArray(live.openings) || live.openings.length === 0) return;
+
+          // Whichever copy was reviewed most recently wins. Without this the
+          // stored copy would silently override fresher numbers committed to
+          // the repo, which is exactly backwards.
+          const liveDate = Date.parse(`${live.basis?.reviewedAt}T00:00:00Z`);
+          const ownDate = Date.parse(`${model.reviewedAt}T00:00:00Z`);
+          if (!Number.isFinite(liveDate) || liveDate < ownDate) return;
 
           const priced = live.openings.filter(
             (o: OpeningRow) => o && o.low > 0 && o.high >= o.low,
