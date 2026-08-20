@@ -8,6 +8,8 @@ const MAX = {
 
 const FROM = 'Clearveiw Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'mark.rotar1000@gmail.com';
+const LEAD_TEMPLATE = 'estimate-request';
+const RECEIPT_TEMPLATE = 'estimate-received';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -26,12 +28,32 @@ function clean(value, max) {
     .slice(0, max);
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function receivedAt() {
+  return new Date().toLocaleString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+async function sendTemplate(key, payload) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    console.error('resend-failed', body);
+    throw new Error('Could not deliver the request.');
+  }
+  return body;
 }
 
 export async function onRequestPost(context) {
@@ -42,8 +64,7 @@ export async function onRequestPost(context) {
     return json({ error: 'Send the form as multipart data.' }, 400);
   }
 
-  const honey = clean(form.get('company'), 80);
-  if (honey) return json({ ok: true });
+  if (clean(form.get('company'), 80)) return json({ ok: true });
 
   const lead = {
     name: clean(form.get('name'), MAX.name),
@@ -65,38 +86,45 @@ export async function onRequestPost(context) {
 
   const from = context.env?.RESEND_FROM || FROM;
   const to = context.env?.NOTIFY_EMAIL || TO;
-  const lines = [
-    `Name: ${lead.name}`,
-    `Phone: ${lead.phone}`,
-    `Email: ${lead.email || '—'}`,
-    `City: ${lead.city}`,
-    '',
-    lead.notes || 'No notes.',
-  ];
 
-  const resend = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    await sendTemplate(key, {
       from,
       to: [to],
       ...(lead.email ? { reply_to: lead.email } : {}),
-      subject: `Estimate request from ${lead.name} in ${lead.city}`,
-      text: lines.join('\n'),
-      html: `<p>${lines.map(escapeHtml).join('<br>')}</p>`,
-    }),
-  });
+      template: {
+        id: LEAD_TEMPLATE,
+        variables: {
+          CUSTOMER_NAME: lead.name,
+          CUSTOMER_PHONE: lead.phone,
+          CUSTOMER_EMAIL: lead.email || 'Not given',
+          CITY: lead.city,
+          NOTES: lead.notes || 'No notes.',
+          RECEIVED_AT: receivedAt(),
+        },
+      },
+    });
 
-  const payload = await resend.json().catch(() => ({}));
-  if (!resend.ok) {
-    console.error('resend-failed', payload);
+    if (lead.email) {
+      await sendTemplate(key, {
+        from,
+        to: [lead.email],
+        template: {
+          id: RECEIPT_TEMPLATE,
+          variables: {
+            CUSTOMER_NAME: lead.name,
+            CITY: lead.city,
+          },
+        },
+      }).catch((error) => {
+        console.error('receipt-failed', error);
+      });
+    }
+  } catch {
     return json({ error: 'Could not deliver the request.' }, 502);
   }
 
-  return json({ ok: true, id: payload.id || null });
+  return json({ ok: true });
 }
 
 export async function onRequestGet() {
