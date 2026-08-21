@@ -17,10 +17,12 @@ const openings = showMoney ? pricedOpenings() : pricing.openings;
 // one payload means Mark's pricing file is the only thing that ever changes.
 const model = {
   showMoney,
+  isAverage,
   reviewedAt: pricing.basis.reviewedAt,
   rounding: pricing.displayRounding,
-  openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high })),
+  openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high, isDoor: !!o.isDoor })),
   materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
+  brands: pricing.brands.map((b) => ({ id: b.id, label: b.label, low: b.low, high: b.high })),
   fullFrame: { low: pricing.fullFrame.low, high: pricing.fullFrame.high },
   modifiers: pricing.modifiers.map((m) => ({
     id: m.id,
@@ -78,7 +80,23 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">3</span>How much comes out</legend>
+        <legend><span class="est-step" aria-hidden="true">3</span>Window brand</legend>
+        <p class="est-hint">Applies to window openings only &mdash; doors keep their own pricing.</p>
+        <div class="est-choices">
+          {pricing.brands.map((brand, index) => (
+            <label class="choice">
+              <input type="radio" name="est-brand" value={brand.id} checked={index === 0} />
+              <span>
+                <strong>{brand.label}</strong>
+                <span class="est-hint">{brand.blurb}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="est-block">
+        <legend><span class="est-step" aria-hidden="true">4</span>How much comes out</legend>
         <div class="est-choices">
           <label class="choice">
             <input type="radio" name="est-method" value="insert" checked />
@@ -105,7 +123,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">4</span>Anything else true?</legend>
+        <legend><span class="est-step" aria-hidden="true">5</span>Anything else true?</legend>
         <div class="est-choices">
           {pricing.modifiers.map((modifier) => (
             <label class="choice">
@@ -168,14 +186,17 @@ const model = {
 </section>
 
 <script>
-  type OpeningRow = { id: string; label: string; low: number; high: number };
+  type OpeningRow = { id: string; label: string; low: number; high: number; isDoor?: boolean };
   type ModifierRow = { id: string; label: string; perOpening: boolean; low: number; high: number };
+  type BrandRow = { id: string; label: string; low: number; high: number };
   type Model = {
     showMoney: boolean;
+    isAverage: boolean;
     reviewedAt: string;
     rounding: number;
     openings: OpeningRow[];
     materials: { id: string; label: string; multiplier: number }[];
+    brands: BrandRow[];
     fullFrame: { low: number; high: number };
     modifiers: ModifierRow[];
   };
@@ -225,8 +246,10 @@ const model = {
 
       const material =
         model.materials.find((m) => m.id === chosen('est-material')) || model.materials[0];
+      const brand = model.brands.find((b) => b.id === chosen('est-brand')) || model.brands[0];
       const method = chosen('est-method') || 'insert';
       const mods = activeModifiers();
+      const windowCount = picked.filter((o) => !o.isDoor).reduce((sum, o) => sum + o.count, 0);
 
       // --- line items -----------------------------------------------------
       if (lines instanceof HTMLElement) {
@@ -244,8 +267,9 @@ const model = {
 
       const methodWord =
         method === 'insert' ? 'insert' : method === 'full-frame' ? 'full-frame' : 'a mix of methods';
+      const brandWord = windowCount > 0 && brand.id !== model.brands[0].id ? `${brand.label} ` : '';
       if (scope instanceof HTMLElement) {
-        scope.textContent = `${total} opening${total === 1 ? '' : 's'} · ${material.label.toLowerCase()} · ${methodWord}`;
+        scope.textContent = `${total} opening${total === 1 ? '' : 's'} · ${brandWord}${material.label.toLowerCase()} · ${methodWord}`;
       }
 
       // --- range ----------------------------------------------------------
@@ -256,6 +280,11 @@ const model = {
           low += opening.low * opening.count * material.multiplier;
           high += opening.high * opening.count * material.multiplier;
         }
+
+        // Brand is a window-line choice, not a door choice — only counts
+        // against windowCount, never the sliding/French door openings.
+        low += brand.low * windowCount;
+        high += brand.high * windowCount;
 
         // "Mixed" assumes roughly a third of the openings need full-frame.
         const fullFrameShare = method === 'full-frame' ? 1 : method === 'mixed' ? 0.34 : 0;
@@ -285,11 +314,23 @@ const model = {
       if (material.id !== 'vinyl') {
         notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);
       }
-      if (mods.includes('second-story')) notes.push('Upstairs openings add staging time.');
-      if (mods.includes('oversize')) notes.push('Arches and transoms are custom-ordered.');
+      if (windowCount > 0 && brand.id !== model.brands[0].id && (brand.low > 0 || brand.high > 0)) {
+        notes.push(
+          `${brand.label} adds ${money(brand.low)}–${money(brand.high)} per window over ${model.brands[0].label} — doors are not brand-specific.`,
+        );
+      }
+      if (mods.includes('third-story-plus')) notes.push('Third floor and up needs more staging than a typical second-story opening.');
+      if (mods.includes('oversize')) {
+        notes.push(
+          model.isAverage
+            ? 'Arches and transoms are custom-ordered — this line is still the regional average.'
+            : 'Arches and transoms are custom-ordered, so this line is the least certain one here.',
+        );
+      }
       if (mods.includes('rot-repair')) {
         notes.push('Rot is priced once the wall is open — it is not in any range on this page.');
       }
+      if (mods.includes('metal-removal')) notes.push('Old metal frames need extra cut-back before the new one goes in.');
       if (total >= 8) notes.push('Whole-house jobs usually price better per opening than a few.');
 
       if (drivers instanceof HTMLElement) {
@@ -307,6 +348,7 @@ const model = {
         `${total} opening${total === 1 ? '' : 's'}: ` +
           picked.map((o) => `${o.count} ${o.label.toLowerCase()}`).join(', '),
         `Material: ${material.label}`,
+        windowCount > 0 && brand.id !== model.brands[0].id ? `Window brand: ${brand.label}` : '',
         `Method: ${methodWord}`,
         mods.length
           ? `Also: ${mods

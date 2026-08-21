@@ -2,6 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
+import { pricingIsRegionalAverage } from '../data/pricing';
+
+const pricesAreAverages = pricingIsRegionalAverage();
 ---
 <BaseLayout
   title="About"
@@ -70,11 +73,22 @@ import { site } from '../data/site';
           </dd>
         </div>
         <div>
-          <dt>Prices are regional averages</dt>
+          <dt>{pricesAreAverages ? 'Prices are regional averages' : 'Prices are still ranges'}</dt>
           <dd>
-            The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs on
-            published Washington averages, clearly labelled as such, not on Clearveiw’s own
-            pricing. It is there to sanity-check any quote you get — including ours.
+            {pricesAreAverages ? (
+              <>
+                The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
+                on published Washington averages, clearly labelled as such, not on Clearveiw’s
+                own pricing. It is there to sanity-check any quote you get — including ours.
+              </>
+            ) : (
+              <>
+                The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
+                on Mark’s own installed pricing, but it still gives you a range rather than a
+                number. Anyone quoting a single figure before seeing your openings is guessing,
+                and so would we be.
+              </>
+            )}
           </dd>
         </div>
       </dl>

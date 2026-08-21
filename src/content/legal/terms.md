@@ -26,11 +26,13 @@ them.
 
 Specifically:
 
-- The calculator currently runs on **published regional averages for
-  Washington and the Portland metro area — not Clearveiw's own pricing.** This
-  is stated on the tool itself and remains true until that page says otherwise.
-- Its output is a range produced from what you typed in. It has no knowledge of
-  your house, your openings, your frames, or your access.
+- The calculator states on its own page whose figures it is using and when they
+  were last reviewed. Read that line — it is kept current with the data, and it
+  is the authoritative statement of what the tool is based on.
+- Its output is a **range**, produced from what you typed in. It has no
+  knowledge of your house, your openings, your frames, or your access. That is
+  true whether the underlying figures are regional averages or our own
+  pricing.
 - A real number requires a site visit. Mark measures every opening, identifies
   which ones take an insert and which need full-frame replacement, and puts the
   result in writing.

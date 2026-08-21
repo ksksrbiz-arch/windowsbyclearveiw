@@ -114,6 +114,26 @@ export function validatePricing(doc, now = new Date()) {
     }
   }
 
+  // --- brands ----------------------------------------------------------------
+  // Optional — older pricing documents (and the worker's stored copy, until
+  // it is next PUT) may not have this field yet, so an empty/missing array
+  // is not an error, just nothing to check.
+  const brands = Array.isArray(doc.brands) ? doc.brands : [];
+  if (brands.length > 0 && !brands.some((b) => b?.low === 0 && b?.high === 0)) {
+    problems.push('no brand has zero added cost — one must be the baseline');
+  }
+  for (const brand of brands) {
+    checkRange(
+      `brand ${brand?.id ?? '(no id)'}`,
+      brand?.low,
+      brand?.high,
+      LIMITS.modifier,
+      LIMITS.modifier,
+      problems,
+      { allowZero: true },
+    );
+  }
+
   // --- full frame ----------------------------------------------------------
   if (!doc.fullFrame) {
     problems.push('fullFrame is missing');
