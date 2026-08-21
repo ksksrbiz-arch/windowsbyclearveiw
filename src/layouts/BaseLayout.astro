@@ -104,13 +104,15 @@ const breadcrumbSchema =
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- The font host is a separate origin, so the connection has to be opened
-         before the stylesheet is even parsed or the first paint waits on it. -->
-    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
-    <link rel="preconnect" href="https://fonts.bunny.net" />
+    <!-- Same-origin and preloaded, so the face is usually in hand before first
+         paint and the metric-matched fallback absorbs the rest. No preconnect
+         needed: there is no longer a third-party origin to warm up. -->
     <link
-      href="https://fonts.bunny.net/css?family=outfit:400,500,600,700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/outfit-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <ClientRouter />
     <JsonLd extra={schema} />

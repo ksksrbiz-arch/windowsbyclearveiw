@@ -23,6 +23,11 @@
 /site.webmanifest
   Cache-Control: public, max-age=86400
 
+# The font filename is stable rather than fingerprinted, so a year is too long
+# to be safe — but it changes only when the typeface itself does.
+/fonts/*
+  Cache-Control: public, max-age=2592000, immutable
+
 # The lead form must never be answered from a cache.
 /api/estimate
   Cache-Control: no-store

@@ -47,14 +47,14 @@ close the tab.
 
 ## Requests your browser makes to other companies
 
-Loading a page here causes your browser to contact two third parties:
+Almost none. Every asset this site needs — the stylesheet, the typeface, the
+photographs, the icons — is served from this domain. There is no font CDN, no
+script CDN, and no tag manager.
 
-- **Bunny Fonts** (`fonts.bunny.net`) serves the typeface. It is used
-  specifically because it does not log IP addresses or set cookies.
-- **The Clearveiw pricing worker**, if configured, is contacted by the cost
-  calculator to check whether its published figures are current. The request
-  sends no information about you — it only asks for the current pricing
-  document.
+The one exception: **the Clearveiw pricing worker**, if configured, is
+contacted by the cost calculator to check whether its published figures are
+current. It runs on our own Cloudflare account, and the request sends no
+information about you — it only asks for the current pricing document.
 
 ## Who else sees your estimate request
 
