@@ -13,6 +13,9 @@ faq:
     answer: No. Many homeowners start with the worst rooms — bedrooms, the windward wall, or the fogged units — then finish the house when it fits the budget.
   - question: Is condensation on the room side a failed window?
     answer: Not always. Moisture on the room side of the glass is often indoor humidity hitting cold glass. Fog between the panes is a failed sealed unit.
+heroImage: ./img-signs-you-need-new-windows.jpg
+heroImageAlt: A weathered window frame with peeling paint and exposed wood, an example of the wear that signals a window is due for replacement.
+heroImageCredit: Stock photo — T / Unsplash (free license)
 ---
 
 Windows rarely fail all at once. They leak a little more air, collect a little more water, and get a little harder to live with. These are the signs that replacement is the honest next step.

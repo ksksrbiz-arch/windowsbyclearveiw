@@ -13,6 +13,9 @@ faq:
     answer: The Section 25C energy-efficient home improvement credit ended for property placed in service after December 31, 2025. Do not count on it for a 2026 install. Some Washington utilities still offer window rebates. Those change by fuel type and U-factor, so we check your utility at estimate time.
   - question: Why is a whole-house price so wide?
     answer: Ten small inserts in a ranch is a different job from fifteen full-frame units on a two-story with custom sizes. Count, method, material, and access swing the total more than the brand name on the glass.
+heroImage: ./img-window-replacement-cost-washington.jpg
+heroImageAlt: A calculator and pen next to a financial chart, illustrating budgeting for a window replacement project.
+heroImageCredit: Stock photo — Pixabay / Pexels (free license)
 ---
 
 A window price on the internet is a guess about someone else’s house. The number that matters is the one that follows a measure. This page is here so that number is not a surprise.
