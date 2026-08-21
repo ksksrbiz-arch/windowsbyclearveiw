@@ -12,9 +12,15 @@ aim at the Web Content Accessibility Guidelines (WCAG) 2.2, Level AA.
 
 ## What the site does
 
-- **Works without JavaScript.** Every page renders and every link works with
-  scripts blocked. The estimate form posts normally and lands on a real
-  confirmation page.
+- **Works without JavaScript.** Every page renders, navigation works, and the
+  estimate form posts normally and lands on a real confirmation page with
+  scripts blocked. The phone number stays a working call link throughout.
+
+  One exception, and it is not ours: our host rewrites email addresses into a
+  script-decoded form before the page is served, so with scripts blocked the
+  email link reads `[email protected]` instead of the address. Call, or use
+  the estimate form — both work without scripts. We are switching that
+  rewriting off.
 - **Keyboard reachable.** Every control can be reached and operated by
   keyboard, with a visible focus outline, and a skip link to the main content.
 - **Respects reduced motion.** With "reduce motion" set in your system
