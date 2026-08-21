@@ -8,13 +8,15 @@ import { site } from '../../data/site';
 const showMoney = pricingIsUsable();
 const isAverage = pricingIsRegionalAverage();
 
+// The layout appends " | Clearveiw Windows" (20 chars), so the base has to
+// stay under ~40 to survive Google's ~60-character title truncation.
 const title = showMoney
-  ? 'Window replacement cost calculator for Clark County, WA'
-  : 'Window replacement project planner for Clark County, WA';
+  ? 'Window replacement cost calculator'
+  : 'Window replacement project planner';
 
 const description = showMoney
-  ? 'Count your openings and get an honest installed cost range for window replacement in Vancouver, Camas, Battle Ground, and the rest of Clark County. No email required.'
-  : 'Size up a window replacement project in Vancouver, WA and Clark County: count your openings, pick insert or full-frame, and send the scope straight to the installer. No email required.';
+  ? 'Count your openings and get an honest installed cost range for window replacement in Vancouver, WA and Clark County. Free, no email required.'
+  : 'Size up a window replacement project in Vancouver, WA: count your openings, pick insert or full-frame, and send the scope straight to Mark. No email required.';
 
 const faq = [
   {

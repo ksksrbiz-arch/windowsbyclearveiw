@@ -1,6 +1,6 @@
 ---
 title: Signs you need new windows
-description: Six practical signs a Washington home is ready for window replacement — drafts, fogged glass, sticky sashes, soft sills, uneven rooms, and bills that do not make sense.
+description: Six practical signs a Washington home is ready for window replacement — drafts, fogged glass, sticky sashes, soft sills, and uneven rooms.
 kicker: Should you replace?
 topic: Diagnosis
 published: true

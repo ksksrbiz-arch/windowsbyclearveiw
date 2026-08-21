@@ -2,7 +2,7 @@
 name: Battle Ground
 region: Clark County
 title: Window replacement in Battle Ground, WA
-description: Replacement window installation for Battle Ground, Washington homes.
+description: Replacement and new-construction window installation for Battle Ground, WA homes — insert and full-frame, measured on site with a written estimate.
 published: true
 ---
 

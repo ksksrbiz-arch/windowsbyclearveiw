@@ -2,7 +2,7 @@
 name: La Center
 region: Clark County
 title: Window replacement in La Center, WA
-description: Replacement windows for La Center, Washington homes.
+description: Replacement windows for La Center, WA homes and acreage — insert and full-frame installs, measured on site with a written estimate before anything is ordered.
 published: true
 ---
 

@@ -5,8 +5,18 @@ export const site = {
   domain: 'windowsbyclearveiw.com',
   url: 'https://windowsbyclearveiw.com',
   tagline: 'Replacement windows for Vancouver, WA and nearby.',
+  /**
+   * Long form, for the JSON-LD business entity where length does not matter.
+   */
   description:
     'Clearveiw Windows, LLC installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
+  /**
+   * Short form, for the homepage <meta name="description">. Google truncates
+   * around 160 characters and the long version was 253, so the service-area
+   * list — the part that actually earns the click — was being cut off.
+   */
+  metaDescription:
+    'Replacement and new-construction windows in Vancouver, WA and Clark County — Camas, Washougal, Battle Ground and nearby. Free measure, written estimate.',
   owner: 'Mark',
   state: 'Washington',
   email: 'mark.rotar1000@gmail.com',
