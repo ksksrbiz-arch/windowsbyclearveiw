@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
+import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
+import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -43,6 +45,15 @@ const schema = {
   '@context': 'https://schema.org',
   '@graph': faqPage ? [article, faqPage] : [article],
 };
+
+const updated = guide.data.updated.toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric',
+});
+
+// Rendered markdown is not available here, so estimate from the source body.
+// 200 wpm, floored at one minute — it is a reading cue, not a measurement.
+const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 ---
 <BaseLayout
   title={guide.data.title}
@@ -54,35 +65,286 @@ const schema = {
   ]}
   schema={schema}
 >
-  <article class="wrap section guide">
-    <p class="kicker">{guide.data.kicker}</p>
-    <h1>{guide.data.title}</h1>
-    <p class="lede">{guide.data.description}</p>
-    <div class="guide-body">
-      <Content />
+  <section class="page-hero article-hero">
+    <div class="wrap is-narrow">
+      <p class="kicker">{guide.data.kicker}</p>
+      <h1>{guide.data.title}</h1>
+      <p class="lede">{guide.data.description}</p>
+      <p class="article-meta">
+        <span>{guide.data.topic}</span>
+        <span>Updated {updated}</span>
+        <span>{minutes} min read</span>
+      </p>
     </div>
-    {guide.data.faq.length > 0 && (
-      <section class="faq">
-        <h2>Common questions</h2>
-        {guide.data.faq.map((item) => (
-          <details>
-            <summary>{item.question}</summary>
-            <p>{item.answer}</p>
-          </details>
-        ))}
-      </section>
-    )}
-    <section>
-      <h2>Keep reading</h2>
-      <div class="cards">
-        {related.map((item) => (
-          <article class="card">
-            <p class="kicker">{item.data.topic}</p>
-            <h3><a href={`/guides/${item.id}`}>{item.data.title}</a></h3>
-          </article>
-        ))}
+  </section>
+
+  {guide.data.diagram && (
+    <section class="section is-tight section-sunk">
+      <div class="wrap" data-reveal>
+        {guide.data.diagram === 'insert-vs-full-frame' && (
+          <InsertVsFullFrame heading={null} />
+        )}
+        {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
       </div>
     </section>
+  )}
+
+  <article class="section">
+    <div class="wrap is-narrow guide-body" data-reveal>
+      <Content />
+    </div>
+
+    {guide.data.faq.length > 0 && (
+      <div class="wrap is-narrow" data-reveal>
+        <section class="faq">
+          <p class="rule-label">Common questions</p>
+          {guide.data.faq.map((item) => (
+            <details>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
+        </section>
+      </div>
+    )}
+
+    <div class="wrap is-narrow" data-reveal>
+      <section class="related">
+        <p class="rule-label">Keep reading</p>
+        <ul class="related-list">
+          {related.map((item) => (
+            <li>
+              <a href={`/guides/${item.id}`}>
+                <span class="related-topic">{item.data.topic}</span>
+                <strong>{item.data.title}</strong>
+                <span class="related-blurb">{item.data.description}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   </article>
   <CtaBar />
 </BaseLayout>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     Guide pages were the weakest type on the site: an h1 dropped onto paper
+     with no hero, no measure, and body copy set at the same weight as the
+     rest of the page. These are the pages that earn organic traffic, so they
+     get proper article typography — a real masthead, a held measure, and
+     enough hierarchy that a long answer is skimmable.
+     ─────────────────────────────────────────────────────────────────────── */
+  .article-hero h1 {
+    max-width: 20ch;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    margin: var(--space-m) 0 0;
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--dark-line);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--on-dark-faint);
+  }
+
+  .article-meta span + span::before {
+    content: '·';
+    margin-right: var(--space-s);
+  }
+
+  /* Markdown output is rendered by <Content />, so its elements never carry
+     this component's scope attribute. :global() inside a scoped parent is the
+     supported way to reach them without leaking the rules site-wide. */
+  .guide-body :global(p),
+  .guide-body :global(li) {
+    font-size: var(--step-0);
+    line-height: 1.65;
+  }
+
+  .guide-body :global(h2) {
+    margin: var(--space-xl) 0 var(--space-xs);
+    font-size: var(--step-3);
+  }
+
+  .guide-body :global(h3) {
+    margin: var(--space-l) 0 var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  /* An opening paragraph set slightly larger does more for readability than a
+     drop cap, and does not break when the first character is a quote mark. */
+  .guide-body :global(> p:first-of-type) {
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .guide-body :global(blockquote) {
+    margin: var(--space-l) 0;
+    padding: 0 0 0 var(--space-m);
+    border-left: 2px solid var(--accent);
+    font-size: var(--step-1);
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  .guide-body :global(blockquote p) {
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .guide-body :global(a) {
+    color: var(--accent-ink);
+    text-underline-offset: 0.2em;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .guide-body :global(a:hover) {
+    text-decoration-color: currentColor;
+  }
+
+  .guide-body :global(ul),
+  .guide-body :global(ol) {
+    padding-left: var(--space-m);
+  }
+
+  .guide-body :global(li) {
+    margin-bottom: var(--space-2xs);
+  }
+
+  .guide-body :global(li::marker) {
+    color: var(--accent);
+  }
+
+  .guide-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-l) 0;
+    font-size: var(--step--1);
+  }
+
+  .guide-body :global(th),
+  .guide-body :global(td) {
+    text-align: left;
+    padding: var(--space-2xs) var(--space-s) var(--space-2xs) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .guide-body :global(th) {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  /* FAQ ───────────────────────────────────────────────────────────────── */
+  .faq {
+    margin-top: var(--space-2xl);
+  }
+
+  .faq details {
+    border-top: 1px solid var(--line);
+    padding: 0;
+  }
+
+  .faq details:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq summary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    padding: var(--space-s) 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: var(--step-0);
+    list-style: none;
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary::before {
+    content: '';
+    width: 0.7rem;
+    height: 1px;
+    flex: none;
+    translate: 0 -0.3rem;
+    background: var(--accent);
+    transition: rotate var(--dur) var(--ease-out);
+  }
+
+  .faq details[open] summary::before {
+    rotate: 90deg;
+  }
+
+  .faq summary:hover {
+    color: var(--accent-ink);
+  }
+
+  .faq details p {
+    margin: 0 0 var(--space-s);
+    padding-left: calc(0.7rem + var(--space-2xs));
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* Related ───────────────────────────────────────────────────────────── */
+  .related {
+    margin-top: var(--space-2xl);
+  }
+
+  .related-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .related-list li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .related-list a {
+    display: grid;
+    gap: 0.2rem;
+    padding: var(--space-s) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .related-list a:hover,
+  .related-list a:focus-visible {
+    padding-left: var(--space-2xs);
+    background: var(--accent-wash);
+  }
+
+  .related-topic {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .related-list strong {
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .related-blurb {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+</style>

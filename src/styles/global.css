@@ -483,23 +483,6 @@ input:focus, textarea:focus, select:focus {
   border-bottom: 1px solid var(--line);
 }
 
-.guide { max-width: 760px; }
-
-.guide-body p,
-.guide-body li { max-width: 42rem; }
-
-.guide-body h2 { margin-top: 2.2rem; }
-
-.faq details {
-  border-top: 1px solid var(--line);
-  padding: 0.9rem 0;
-}
-
-.faq summary {
-  cursor: pointer;
-  font-weight: 500;
-}
-
 .section-link {
   margin-top: 1.5rem;
 }
@@ -566,3 +549,30 @@ html.reveal-ready [data-reveal].is-revealed {
 
 .section-dark .rule-label { color: var(--on-dark-faint); }
 .section-dark .rule-label::after { background: var(--dark-line); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Work grid.
+
+   Shared, because four pages lay photos out this way. The tile itself is
+   styled inside WorkCard; only the arrangement lives here.
+   ───────────────────────────────────────────────────────────────────────── */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xs);
+}
+
+.work-grid-home {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* A single tall new-build shot should not stretch to fill the row. */
+.work-grid-newbuild {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 800px) {
+  .work-grid-home {
+    grid-template-columns: 1fr 1fr;
+  }
+}

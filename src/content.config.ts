@@ -39,6 +39,11 @@ const guides = defineCollection({
     published: z.boolean().default(true),
     updated: z.coerce.date(),
     order: z.number().default(99),
+    /**
+     * Optional diagram rendered above the body. Keyed rather than hardcoded in
+     * the template so a new guide can claim one from its own frontmatter.
+     */
+    diagram: z.enum(['insert-vs-full-frame', 'flashing-order']).optional(),
     faq: z
       .array(
         z.object({
