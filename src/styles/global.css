@@ -48,7 +48,12 @@
   /* Ink and paper ------------------------------------------------------- */
   --ink: #111214;
   --ink-soft: #5c5e63;
-  --ink-faint: #8d8d87;
+  /* Darkened from #8d8d87, which failed WCAG AA on all three paper surfaces
+     (3.34 / 3.03 / 2.78 against raised, paper, and sunk). This is the darkest
+     value on the same hue that clears 4.5:1 everywhere it is used: 5.43 /
+     4.93 / 4.52. It carries the small uppercase labels, which are real text
+     and were the single largest source of contrast failures on the site. */
+  --ink-faint: #6a6a66;
   --paper: #f4f4f2;
   --paper-raised: #ffffff;
   --paper-sunk: #eceae5;
@@ -71,6 +76,12 @@
 
   --line: color-mix(in srgb, var(--ink) 12%, transparent);
   --line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
+
+  /* Oversized index numerals. They are meant to sit back from the text they
+     label, but they are still text, so they get their own token at the 3:1
+     large-text bar rather than borrowing a border colour — which is what they
+     did before, at 1.68:1. */
+  --ink-numeral: #85857f;
 
   /* Fluid type ramp. The old scale collapsed in the middle — h3 1.15 / lede
      1.05 / body 1.0 meant everything below the h2 read as body copy. */

@@ -69,6 +69,28 @@ const schema = {
   </article>
 </BaseLayout>
 
+<script>
+  // Markdown emits a bare <table>; wrap it so the scroll container is a real
+  // focusable region with an accessible name, rather than a div a keyboard
+  // user cannot reach.
+  function makeTablesScrollable() {
+    document.querySelectorAll('.legal-body table').forEach((table) => {
+      if (table.parentElement?.classList.contains('table-scroll')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'table-scroll';
+      wrap.tabIndex = 0;
+      wrap.setAttribute('role', 'region');
+      const caption = table.querySelector('caption')?.textContent?.trim();
+      wrap.setAttribute('aria-label', caption || 'Table, scrollable');
+      table.replaceWith(wrap);
+      wrap.append(table);
+    });
+  }
+
+  makeTablesScrollable();
+  document.addEventListener('astro:page-load', makeTablesScrollable);
+</script>
+
 <style>
   .legal-meta {
     margin: var(--space-m) 0 0;
@@ -94,10 +116,23 @@ const schema = {
     color: var(--ink);
   }
 
-  .legal-body :global(table) {
+  /* A horizontally scrolling region has to be reachable by keyboard, or the
+     content past the right edge is simply unavailable without a mouse. The
+     tabindex is applied by script below, since the table comes from markdown. */
+  .legal-body :global(.table-scroll) {
     display: block;
     overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .legal-body :global(.table-scroll:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .legal-body :global(.table-scroll table) {
     white-space: nowrap;
+    margin: var(--space-l) 0;
   }
 
   .legal-nav {

@@ -98,6 +98,12 @@ const total = allWork.length;
 <style>
   /* A jump index in the hero: 26 tiles down one page is a long scroll for a
      builder who only wants the framing shots. */
+  /* The link list re-wraps when Outfit replaces the fallback — metric matching
+     keeps block heights honest but cannot hold line breaks in place, since the
+     glyph widths differ. Measured at 0.016 CLS, which is well inside the 0.1
+     "good" threshold. Reserving the container height and restructuring to a
+     grid were both tried and changed nothing, because the links still reflow
+     within whatever box they are given. Left alone deliberately. */
   .gallery-index {
     display: flex;
     align-items: baseline;

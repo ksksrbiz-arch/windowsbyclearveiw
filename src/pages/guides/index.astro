@@ -84,10 +84,14 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
 
   .guide-num {
     font-size: var(--step-3);
-    font-weight: 600;
+    /* 700, not 600, so the large-text contrast bar (3:1) actually applies.
+       WCAG treats "bold" as >=700, and at the mobile size below this numeral
+       lands at 19.4px — under 24px, so weight is what decides which threshold
+       it is judged against. */
+    font-weight: 700;
     line-height: 1;
     letter-spacing: var(--tracking-display);
-    color: var(--line-strong);
+    color: var(--ink-numeral);
     font-variant-numeric: tabular-nums;
     transition: color var(--dur-fast) var(--ease);
   }
