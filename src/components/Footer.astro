@@ -72,6 +72,13 @@ const columns = [
 
   <div class="wrap footer-base">
     <p class="fine-print">&copy; {year} {site.legalName}</p>
+
+    <nav class="footer-legal" aria-label="Legal">
+      <a href="/legal/privacy">Privacy</a>
+      <a href="/legal/terms">Terms</a>
+      <a href="/legal/accessibility">Accessibility</a>
+    </nav>
+
     <p class="fine-print">
       {site.lniNumber
         ? `WA contractor registration ${site.lniNumber}`
@@ -185,6 +192,17 @@ const columns = [
 
   .footer-base p {
     margin: 0;
+  }
+
+  .footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  .footer-legal a {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
   }
 
   @media (max-width: 900px) {
