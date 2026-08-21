@@ -7,29 +7,38 @@ import { allWork } from '../data/work';
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip
 // straight to framing shots.
+// Every source photo is 450x600, so tiles cannot be made wider without
+// upscaling — a two-column span would ask a 450px file to fill ~800px. Scale
+// therefore varies between groups rather than within them: the elevations run
+// large and tall, the interiors square and mid-sized, install day dense like a
+// contact sheet. Nothing renders above its source width.
 const groups = [
   {
     id: 'elevations',
     label: 'Finished elevations',
     blurb: 'What the street sees once the job is done.',
+    density: 'is-large',
     photos: allWork.filter((photo) => photo.kind === 'after'),
   },
   {
     id: 'interiors',
     label: 'From inside the room',
     blurb: 'The side you actually live with.',
+    density: 'is-square',
     photos: allWork.filter((photo) => photo.kind === 'interior'),
   },
   {
     id: 'install-day',
     label: 'Install day',
     blurb: 'Ladders, openings, and the part most sites leave out.',
+    density: 'is-dense',
     photos: allWork.filter((photo) => photo.kind === 'process'),
   },
   {
     id: 'new-construction',
     label: 'New construction',
     blurb: 'Set and flashed, handed back to the builder.',
+    density: 'is-large',
     photos: allWork.filter((photo) => photo.kind === 'new construction'),
   },
 ].filter((group) => group.photos.length > 0);
@@ -74,7 +83,9 @@ const total = allWork.length;
           </div>
           <p class="group-count">{group.photos.length} {group.photos.length === 1 ? 'photo' : 'photos'}</p>
         </div>
-        <div class="work-grid">
+        {/* A lone photo in a three-column grid is not a large tile, it is a
+            hole with a picture in the corner. Constrain it instead. */}
+        <div class:list={['work-grid', group.photos.length === 1 ? 'is-single' : group.density]}>
           {group.photos.map((photo, index) => (
             <WorkCard
               image={photo.image}
@@ -134,6 +145,55 @@ const total = allWork.length;
     text-decoration-color: currentColor;
   }
 
+  /* Per-group scale. The column counts keep every tile at or below the 450px
+     source width at the widths this page is read at. */
+  .work-grid.is-large {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .work-grid.is-square {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .work-grid.is-dense {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2xs);
+  }
+
+  .work-grid.is-single {
+    grid-template-columns: minmax(0, 22rem);
+  }
+
+  /* Interiors are room shots, which survive a square crop better than an
+     elevation does — an elevation cropped short loses the roofline that makes
+     it legible. */
+  .work-grid.is-square :global(.work-card img) {
+    aspect-ratio: 1 / 1;
+  }
+
+  @media (max-width: 900px) {
+    .work-grid.is-large,
+    .work-grid.is-square {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work-grid.is-dense {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .work-grid.is-large,
+    .work-grid.is-square,
+    .work-grid.is-dense {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work-grid.is-single {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   .group-head {
     display: flex;
     align-items: end;
@@ -159,7 +219,56 @@ const total = allWork.length;
   }
 
   @media (max-width: 700px) {
-    .group-head {
+    /* Per-group scale. The column counts keep every tile at or below the 450px
+     source width at the widths this page is read at. */
+  .work-grid.is-large {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .work-grid.is-square {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .work-grid.is-dense {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2xs);
+  }
+
+  .work-grid.is-single {
+    grid-template-columns: minmax(0, 22rem);
+  }
+
+  /* Interiors are room shots, which survive a square crop better than an
+     elevation does — an elevation cropped short loses the roofline that makes
+     it legible. */
+  .work-grid.is-square :global(.work-card img) {
+    aspect-ratio: 1 / 1;
+  }
+
+  @media (max-width: 900px) {
+    .work-grid.is-large,
+    .work-grid.is-square {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work-grid.is-dense {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .work-grid.is-large,
+    .work-grid.is-square,
+    .work-grid.is-dense {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work-grid.is-single {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .group-head {
       display: grid;
       gap: var(--space-2xs);
     }

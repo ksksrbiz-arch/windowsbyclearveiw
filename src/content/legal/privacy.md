@@ -74,7 +74,7 @@ Your form submission is handled by exactly three companies, each doing one job:
 | --- | --- | --- |
 | Cloudflare | Runs the function that receives the form | The submitted fields, in transit |
 | Resend | Delivers the two emails | The submitted fields, in the message body |
-| Google (Gmail) | Hosts the inbox the lead arrives in | The submitted fields, in the message |
+| Google Workspace | Hosts the business mailbox the lead arrives in | The submitted fields, in the message |
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
@@ -101,7 +101,7 @@ otherwise. Either way, tell us to stop and we will stop.
 
 ## How long we keep it
 
-Your request lives as an email in Mark's inbox. We keep correspondence for
+Your request lives as an email in the business mailbox Mark reads. We keep correspondence for
 active and recent jobs so we can honour what we agreed to. If you ask us to
 delete your information and you are not a current customer with an open job, we
 will delete the correspondence.
@@ -119,7 +119,7 @@ Whatever state you live in, you can ask us to:
 - delete it, or
 - stop contacting you.
 
-Email [mark.rotar1000@gmail.com](mailto:mark.rotar1000@gmail.com) or call
+Email [admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com) or call
 (564) 208-0801. We will not charge you, and we will not treat you differently
 for asking. There is nothing to opt out of regarding sale or targeted
 advertising, because we do neither.
@@ -132,7 +132,7 @@ you believe a child has sent us information, contact us and we will delete it.
 
 ## Security
 
-Traffic to this site is encrypted in transit. Access to the inbox holding your
+Traffic to this site is encrypted in transit. Access to the mailbox holding your
 request is limited to Mark. No method of transmission or storage is completely
 secure, and we do not claim otherwise.
 
@@ -144,5 +144,5 @@ Material changes will be reflected here before they take effect.
 ## Contact
 
 - Clearveiw Windows, LLC, Vancouver, Washington
-- [mark.rotar1000@gmail.com](mailto:mark.rotar1000@gmail.com)
+- [admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com)
 - (564) 208-0801

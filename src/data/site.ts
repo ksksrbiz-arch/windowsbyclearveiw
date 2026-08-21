@@ -19,7 +19,13 @@ export const site = {
     'Replacement and new-construction windows in Vancouver, WA and Clark County — Camas, Washougal, Battle Ground and nearby. Free measure, written estimate.',
   owner: 'Mark',
   state: 'Washington',
-  email: 'mark.rotar1000@gmail.com',
+  /**
+   * The address published on the site — footer, legal pages, and the JSON-LD
+   * business entity. Deliberately not the same mailbox estimate requests land
+   * in: this one is public and will attract scrapers, and leads should not
+   * share an inbox with whatever that brings.
+   */
+  email: 'admin@windowsbyclearveiw.com',
   phone: '(564) 208-0801',
   phoneDisplay: '(564) 208-0801',
   address: {

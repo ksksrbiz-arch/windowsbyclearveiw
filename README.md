@@ -193,7 +193,7 @@ Environment variables it reads:
 | Variable | Required | Default |
 | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — |
-| `NOTIFY_EMAIL` | no | `mark.rotar1000@gmail.com` |
+| `NOTIFY_EMAIL` | no | `owner@windowsbyclearveiw.com` |
 | `RESEND_FROM` | no | `Clearveiw Windows <estimates@windowsbyclearveiw.com>` |
 
 With JavaScript the page swaps in a confirmation panel. Without it, the function

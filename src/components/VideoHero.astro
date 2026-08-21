@@ -2,7 +2,11 @@
 import { existsSync } from 'node:fs';
 import { Image, getImage } from 'astro:assets';
 import { site, telHref } from '../data/site';
-import { heroPhoto } from '../data/work';
+import { heroPhoto, findWork } from '../data/work';
+
+// The finished elevation says what you get. This says who does it — which is
+// the claim the trust strip makes one column to the left.
+const insetPhoto = findWork('blue-pair-installday');
 
 const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.url));
 
@@ -81,6 +85,20 @@ const poster = await getImage({
             decoding="sync"
           />
         </div>
+        {insetPhoto && (
+          <div class="photo-hero-inset">
+            <Image
+              src={insetPhoto.image}
+              alt={insetPhoto.alt}
+              widths={[220, 440]}
+              sizes="220px"
+              format="webp"
+              quality={74}
+              loading="lazy"
+            />
+          </div>
+        )}
+
         <figcaption>
           <span class="photo-hero-tag">After</span>
           Clark County replacement
@@ -282,6 +300,32 @@ const poster = await getImage({
     object-position: 52% 38%;
   }
 
+  /* A second, smaller frame overlapping the first. Two photos at honest size
+     read as a composition; one photo in the same space reads as a gap that
+     needed filling. It sits inside the frame's own box so it can never push
+     the page wider — the overlap is achieved with the offset below, not by
+     spilling into the copy column. */
+  .photo-hero-inset {
+    position: absolute;
+    left: -1.75rem;
+    bottom: 2.25rem;
+    z-index: 2;
+    width: 42%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: var(--radius);
+    border: 3px solid var(--black);
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.5);
+  }
+
+  .photo-hero-inset img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 50% 45%;
+  }
+
   .photo-hero-frame figcaption {
     position: relative;
     z-index: 1;
@@ -324,6 +368,12 @@ const poster = await getImage({
 
     .photo-hero-plate img {
       object-position: 52% 34%;
+    }
+
+    /* Dropped on phones rather than shrunk. The hero is already tall there,
+       and lazy + display:none means the file is never fetched. */
+    .photo-hero-inset {
+      display: none;
     }
 
     .trust-strip {
