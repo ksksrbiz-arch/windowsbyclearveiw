@@ -31,28 +31,40 @@ const reviews = defineCollection({
 
 const guides = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    kicker: z.string().default('Guide'),
-    topic: z.string(),
-    published: z.boolean().default(true),
-    updated: z.coerce.date(),
-    order: z.number().default(99),
-    /**
-     * Optional diagram rendered above the body. Keyed rather than hardcoded in
-     * the template so a new guide can claim one from its own frontmatter.
-     */
-    diagram: z.enum(['insert-vs-full-frame', 'flashing-order']).optional(),
-    faq: z
-      .array(
-        z.object({
-          question: z.string(),
-          answer: z.string(),
-        }),
-      )
-      .default([]),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      kicker: z.string().default('Guide'),
+      topic: z.string(),
+      published: z.boolean().default(true),
+      updated: z.coerce.date(),
+      order: z.number().default(99),
+      /**
+       * Optional diagram rendered above the body. Keyed rather than hardcoded in
+       * the template so a new guide can claim one from its own frontmatter.
+       */
+      diagram: z.enum(['insert-vs-full-frame', 'flashing-order']).optional(),
+      /**
+       * Optional topical stock photo for the same slot the diagram uses —
+       * never both on one guide. Never a real Clearveiw job photo (those live
+       * in src/assets/work and only appear in the Gallery and homepage, where
+       * the "after" claim is true). Sourced under a license that permits
+       * commercial use with no attribution required; heroImageCredit records
+       * source + license for the record even though display isn't required.
+       */
+      heroImage: image().optional(),
+      heroImageAlt: z.string().optional(),
+      heroImageCredit: z.string().optional(),
+      faq: z
+        .array(
+          z.object({
+            question: z.string(),
+            answer: z.string(),
+          }),
+        )
+        .default([]),
+    }),
 });
 
 const legal = defineCollection({
