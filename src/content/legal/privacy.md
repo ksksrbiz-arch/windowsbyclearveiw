@@ -3,7 +3,7 @@ title: Privacy policy
 description: What Clearveiw Windows, LLC collects when you use this website, who processes it, and how to have it deleted.
 updated: 2026-08-21
 order: 1
-summary: This site has no analytics, no advertising trackers, and no cookies. The only personal information it collects is what you type into the estimate form.
+summary: No cookies, no advertising trackers, and no cross-site profiling. Traffic is counted with a privacy-preserving analytics tool that cannot identify you. The only personal information collected is what you type into the estimate form.
 ---
 
 Clearveiw Windows, LLC ("Clearveiw", "we", "us") operates windowsbyclearveiw.com.
@@ -30,10 +30,20 @@ Cloudflare Pages. Like any web host, Cloudflare's edge network processes your
 IP address and browser user-agent in order to deliver the page and to block
 abusive traffic. We do not receive, store, or analyse those logs ourselves.
 
-**We do not collect** analytics, page-view statistics, heatmaps, session
-recordings, advertising identifiers, or location beyond the city you type in.
-There is no Google Analytics, no Meta pixel, and no advertising network on this
-site.
+**Traffic counting.** The site uses Cloudflare Web Analytics to count page
+views. It records the page visited, the referring site, your browser and
+operating system, your country, and how quickly the page loaded. It uses no
+cookies, sets no identifier on your device, and does not fingerprint you —
+which means it cannot follow you between visits or across other websites, and
+we cannot tell that any two page views came from the same person.
+
+We use it to see which pages are worth writing and which are not. That is the
+whole purpose.
+
+**We do not collect** heatmaps, session recordings, advertising identifiers,
+mouse or scroll tracking, or location beyond the city you type in. There is no
+Google Analytics, no Meta pixel, no tag manager, and no advertising network on
+this site.
 
 ## Cookies and local storage
 
@@ -51,10 +61,10 @@ Almost none. Every asset this site needs — the stylesheet, the typeface, the
 photographs, the icons — is served from this domain. There is no font CDN, no
 script CDN, and no tag manager.
 
-The one exception: **the Clearveiw pricing worker**, if configured, is
-contacted by the cost calculator to check whether its published figures are
-current. It runs on our own Cloudflare account, and the request sends no
-information about you — it only asks for the current pricing document.
+The one exception is the **Cloudflare Web Analytics** script described above,
+which loads from `static.cloudflareinsights.com`. Cloudflare already handles
+every request to this site as its host, so this does not introduce a company
+that was not already in the path.
 
 ## Who else sees your estimate request
 
