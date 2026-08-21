@@ -93,6 +93,11 @@ const total = allWork.length;
               caption={photo.caption}
               kind={photo.kind}
               eager={groupIndex === 0 && index < 3}
+              sizes={
+                group.density === 'is-dense'
+                  ? '(max-width: 560px) 45vw, (max-width: 900px) 31vw, 340px'
+                  : '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px'
+              }
             />
           ))}
         </div>

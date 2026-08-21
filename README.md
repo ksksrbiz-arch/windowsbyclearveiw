@@ -203,3 +203,31 @@ redirects to `/estimate/sent` or `/estimate/problem`, so the form still works.
 
 The legal / domain spelling **Clearveiw** is used throughout. Public copy can still
 say "Clearview" if you decide that is the brand.
+
+## Images: why WebP, and why not Cloudflare Transformations
+
+Cloudflare Image Transformations is enabled on the zone. It is deliberately
+not used, and AVIF is deliberately not generated. Both were measured rather
+than assumed, on this site's own photos:
+
+| | Result |
+| --- | --- |
+| Worst-case page image weight | `/gallery`, 26 photos, **182 KB** after a full scroll at 1280px |
+| Homepage image weight | **101 KB** |
+| AVIF q50 vs WebP q72 | 36% smaller — **but measurably lower quality** (higher RMSE against the lossless original on all four photos tested) |
+| AVIF q60 vs WebP q72 | quality-matched, and only **10% smaller** (161 KB across all 26 photos at every width) |
+| AVIF encode cost | **1866 ms/image** vs 55 ms for WebP — roughly 34x, which would take the build from ~4 s to several minutes |
+
+So AVIF buys about 5 KB per page at equivalent quality, for a build that is
+orders of magnitude slower. Transformations would mainly buy the same AVIF via
+`format=auto`, while moving images off immutable fingerprinted `/_astro/` URLs
+onto edge-transformed ones and introducing a 5,000/month quota where there is
+currently none.
+
+Leaving Transformations enabled costs nothing while unused, so it stays on for
+any future need. It just is not wired into this site.
+
+**The real ceiling is the source photos.** Every one is 450x600 from a phone.
+Tiles are sized never to exceed that (measured: 450px at a 1440px viewport,
+397px at 1280px), but a retina display still wants 900px and there is no such
+file. No format or CDN fixes that — only a reshoot does.

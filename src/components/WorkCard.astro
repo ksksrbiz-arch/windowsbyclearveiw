@@ -9,13 +9,27 @@ interface Props {
   kind?: string;
   /** First tile on a page paints above the fold — skip lazy loading there. */
   eager?: boolean;
+  /**
+   * How wide this tile actually renders. Grids differ per page and per group,
+   * and a `sizes` that under-declares makes the browser pick a smaller file
+   * and upscale it. Measured slot widths, not guesses.
+   */
+  sizes?: string;
 }
 
-const { image, alt, caption, kind, eager = false } = Astro.props;
+const {
+  image,
+  alt,
+  caption,
+  kind,
+  eager = false,
+  // Default suits a three-across grid in the standard wrap. Measured: tiles
+  // render at 450px on a 1440px viewport, 397px at 1280px.
+  sizes = '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px',
+} = Astro.props;
 
-// Never wider than the 450px source. Asking for more only upscales.
-const widths = [280, 400, 560];
-const sizes = '(max-width: 800px) 50vw, 300px';
+// 450 is the source width. Astro clamps anything larger, so nothing upscales.
+const widths = [240, 340, 450];
 ---
 <figure class="work-card">
   <div class="work-media">
