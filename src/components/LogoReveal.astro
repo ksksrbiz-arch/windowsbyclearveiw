@@ -1,0 +1,102 @@
+---
+/**
+ * The Clearveiw logo animation: 6 seconds, 1280x720, silent.
+ *
+ * Deliberately not on the homepage. A logo reveal ahead of the content a
+ * visitor came for is the classic annoyance, and it would compete with the
+ * hero for LCP on the page that matters most for both conversion and search.
+ * It belongs at a moment of completion instead, where there is nothing else
+ * to look at and nothing is being delayed.
+ *
+ * The clip has no audio track at all, which is what makes autoplay legitimate
+ * here — there is no sound to surprise anyone with.
+ */
+interface Props {
+  /** Rendered under the clip. Omit for no caption. */
+  caption?: string;
+}
+const { caption } = Astro.props;
+---
+<figure class="logo-reveal">
+  <video
+    class="logo-reveal-video"
+    poster="/video/logo-poster.svg"
+    width="1280"
+    height="720"
+    muted
+    playsinline
+    preload="none"
+    aria-label="Clearveiw Windows logo animation"
+  >
+    <source src="/video/logo-reveal.mp4" type="video/mp4" />
+  </video>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  // No autoplay attribute: a static one starts the clip before the
+  // reduced-motion check can run, and plays for people who opted out of
+  // motion entirely. The poster stands in for them — it is the final frame's
+  // subject, so nothing is lost.
+  function playLogoReveal() {
+    const video = document.querySelector('.logo-reveal-video');
+    if (!(video instanceof HTMLVideoElement)) return;
+    if (video.dataset.bound === 'true') return;
+    video.dataset.bound = 'true';
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      video.setAttribute('controls', '');
+      return;
+    }
+
+    // Only spend the download once it is actually on screen.
+    const start = () => {
+      video.preload = 'auto';
+      video.play().catch(() => {
+        // Autoplay refused: leave the poster and give a way to play it.
+        video.setAttribute('controls', '');
+      });
+    };
+
+    if (!('IntersectionObserver' in window)) return start();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.disconnect();
+          start();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(video);
+  }
+
+  playLogoReveal();
+  document.addEventListener('astro:page-load', playLogoReveal);
+</script>
+
+<style>
+  .logo-reveal {
+    margin: 0;
+  }
+
+  .logo-reveal-video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    background: var(--black);
+    border: 1px solid var(--line);
+  }
+
+  .logo-reveal figcaption {
+    margin-top: var(--space-2xs);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+</style>
