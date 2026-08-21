@@ -6,6 +6,8 @@ description: Window replacement for Woodland, Washington — just north of Clark
 published: true
 ---
 
-Woodland is the north edge of the usual drive: Cowlitz County, still close enough for a Vancouver crew. Replacement is the typical job. New-construction sets are available when the calendar works.
+Woodland is the north edge of the usual drive: Cowlitz County, still close enough for a Vancouver crew. It sits on the Lewis River and has a real flood history — the town is diked for it — which is part of why the older housing stock here is what it is. Replacement is the typical job rather than new construction; the newest subdivisions are the exception, not the rule.
 
 If you are farther north in Kalama or Longview, ask. We quote those case by case.
+
+Nearby: [Ridgefield](/areas/ridgefield) and [Vancouver](/areas/vancouver).
