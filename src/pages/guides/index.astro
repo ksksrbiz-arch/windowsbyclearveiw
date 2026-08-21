@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 
@@ -32,6 +33,37 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
           <li>
             <a href={`/guides/${guide.id}`}>
               <span class="guide-num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+
+              {/* Three of the four guides carry a photo; the fourth leads with a
+                  drawn cross-section instead. Rather than leave a hole in the
+                  row, that one gets a typographic tile — a deliberate object,
+                  not a missing image. */}
+              {guide.data.heroImage ? (
+                <span class="guide-thumb">
+                  <Image
+                    src={guide.data.heroImage}
+                    alt=""
+                    widths={[160, 320]}
+                    sizes="160px"
+                    format="webp"
+                    quality={70}
+                    loading="lazy"
+                  />
+                </span>
+              ) : (
+                <span class="guide-thumb guide-thumb-drawn" aria-hidden="true">
+                  <svg viewBox="0 0 64 48" role="presentation" focusable="false">
+                    <rect x="4" y="6" width="10" height="36" class="t-wall" />
+                    <rect x="50" y="6" width="10" height="36" class="t-wall" />
+                    <rect x="14" y="6" width="6" height="36" class="t-keep" />
+                    <rect x="44" y="6" width="6" height="36" class="t-keep" />
+                    <rect x="20" y="10" width="24" height="28" class="t-unit" />
+                    <line x1="32" y1="10" x2="32" y2="38" class="t-unit-line" />
+                  </svg>
+                  <span class="guide-thumb-label">Drawn</span>
+                </span>
+              )}
+
               <span class="guide-text">
                 <span class="guide-topic">{guide.data.topic}</span>
                 <strong>{guide.data.title}</strong>
@@ -67,8 +99,8 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
 
   .guide-index a {
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
-    gap: var(--space-s);
+    grid-template-columns: 3.5rem 9rem minmax(0, 1fr);
+    gap: var(--space-m);
     align-items: start;
     padding: var(--space-m) 0;
     text-decoration: none;
@@ -127,10 +159,78 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
     max-width: var(--measure);
   }
 
+  /* Thumbnails ─────────────────────────────────────────────────────────── */
+  .guide-thumb {
+    display: block;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-sunk);
+  }
+
+  .guide-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .guide-index a:hover .guide-thumb img,
+  .guide-index a:focus-visible .guide-thumb img {
+    transform: scale(1.05);
+  }
+
+  .guide-thumb-drawn {
+    display: grid;
+    place-items: center;
+    background: var(--accent-wash);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  .guide-thumb-drawn svg {
+    width: 62%;
+    height: auto;
+  }
+
+  .t-wall { fill: color-mix(in srgb, var(--ink) 14%, transparent); }
+  .t-keep { fill: color-mix(in srgb, var(--accent) 45%, transparent); }
+  .t-unit { fill: var(--paper-raised); stroke: var(--ink); stroke-width: 2; }
+  .t-unit-line { stroke: var(--ink); stroke-width: 2; }
+
+  .guide-thumb-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.2rem 0.45rem 0.3rem;
+    background: color-mix(in srgb, var(--paper-raised) 82%, transparent);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--accent-ink);
+  }
+
   @media (max-width: 700px) {
     .guide-index a {
       grid-template-columns: 2.5rem minmax(0, 1fr);
-      gap: var(--space-2xs);
+      gap: var(--space-2xs) var(--space-s);
+      align-items: center;
+    }
+
+    /* The thumbnail spans under the number so the title keeps the full width
+       rather than being squeezed into a third of a phone screen. */
+    .guide-thumb {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      aspect-ratio: 16 / 7;
+      margin-top: var(--space-2xs);
+    }
+
+    .guide-text {
+      align-self: center;
     }
 
     .guide-num {

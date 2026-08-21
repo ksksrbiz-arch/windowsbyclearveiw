@@ -697,3 +697,145 @@ html.reveal-ready [data-reveal].is-revealed {
   color: var(--ink-faint);
   font-weight: 500;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Print.
+
+   This exists because of a real defect, not for tidiness. The scroll-reveal
+   holds un-viewed sections at opacity 0 until the observer fires, and
+   printing does not scroll — so loading a guide and hitting print produced
+   a page with the entire article body invisible. Measured: three of four
+   revealed sections on /guides/fogged-windows printed blank.
+
+   Beyond that fix, printing is a real use for this site: a homeowner prints
+   a guide or a cost breakdown to argue about at the kitchen table, or to
+   hand to another contractor. So the printed page drops the chrome, stops
+   spending ink on dark bands, and keeps the phone number.
+   ───────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* The fix. Without this the page prints blank below the fold. */
+  html.reveal-ready [data-reveal],
+  html.reveal-ready [data-reveal].is-revealed {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  :root {
+    --paper: #fff;
+    --paper-raised: #fff;
+    --paper-sunk: #fff;
+    --black: #fff;
+    --on-dark: #111214;
+    --on-dark-soft: #333;
+    --on-dark-faint: #555;
+    --dark-line: #ccc;
+    --dark-line-strong: #999;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  /* Dark bands become paper. Backgrounds are not printed by default in most
+     browsers anyway, so light text on them would otherwise vanish. */
+  .page-hero,
+  .section-dark,
+  .cta-band {
+    background: #fff !important;
+    color: #000 !important;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .page-hero::after,
+  .cta-rule,
+  .header-progress,
+  .photo-hero-grain {
+    display: none !important;
+  }
+
+  /* Navigation is meaningless on paper. */
+  .site-header,
+  .site-footer .footer-column,
+  .nav,
+  .nav-toggle,
+  .skip-link,
+  .cta-actions,
+  .est-actions,
+  .estimate-form button,
+  .btn {
+    display: none !important;
+  }
+
+  /* One line of provenance so a printed page can be traced back. */
+  .site-footer::after {
+    content: 'windowsbyclearveiw.com · Clearveiw Windows, LLC · Vancouver, WA · (564) 208-0801';
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 9pt;
+    color: #000;
+  }
+
+  .section,
+  .section.is-tight,
+  .section.is-airy,
+  .page-hero {
+    padding: 0.6cm 0;
+  }
+
+  .wrap,
+  .wrap.is-narrow,
+  .wrap.is-wide {
+    width: 100%;
+    max-width: none;
+  }
+
+  h1 { font-size: 22pt; }
+  h2 { font-size: 15pt; }
+  h3 { font-size: 12pt; }
+
+  h1, h2, h3, h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  p, li, figure, .work-card, .detail-panel, .flash-steps li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* A printed link is useless unless you can see where it goes — but only
+     for real destinations, not in-page anchors. */
+  .prose a[href^='http']::after,
+  .prose a[href^='/']::after {
+    content: ' (' attr(href) ')';
+    font-size: 9pt;
+    color: #444;
+    word-break: break-all;
+  }
+
+  img {
+    max-width: 100% !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* A portrait hero at full height ate most of the first sheet and pushed the
+     article to page two. Cap it so the reader gets the picture and the opening
+     paragraphs together. */
+  .guide-photo img,
+  .photo-hero-plate img {
+    max-height: 9cm;
+    object-fit: cover;
+  }
+}

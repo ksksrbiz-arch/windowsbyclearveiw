@@ -60,6 +60,9 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   title={guide.data.title}
   description={guide.data.description}
   path={`/guides/${guide.id}`}
+  {...(guide.data.heroImage
+    ? { ogImageSrc: guide.data.heroImage, ogImageAlt: guide.data.heroImageAlt ?? guide.data.title }
+    : {})}
   crumbs={[
     { name: 'Guides', href: '/guides' },
     { name: guide.data.title, href: `/guides/${guide.id}` },
