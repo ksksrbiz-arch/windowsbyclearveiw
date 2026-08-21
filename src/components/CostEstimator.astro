@@ -45,7 +45,6 @@ const model = {
   class="estimator"
   data-estimator
   data-model={JSON.stringify(model)}
-  data-pricing-endpoint={import.meta.env.PUBLIC_PRICING_ENDPOINT || ''}
 >
   <div class="estimator-grid">
     <div class="estimator-inputs">
@@ -401,47 +400,6 @@ const model = {
     });
 
     render();
-
-    // The bundled numbers have already rendered. If the pricing worker is
-    // configured and reachable, quietly upgrade to whatever it is serving.
-    // Any failure leaves the shipped numbers in place — the estimator must
-    // never depend on a network call to show a figure.
-    const endpoint = root.dataset.pricingEndpoint;
-    if (model.showMoney && endpoint) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
-      fetch(endpoint, { signal: controller.signal, headers: { accept: 'application/json' } })
-        .then((response) => (response.ok ? response.json() : null))
-        .then((live) => {
-          if (!live || !Array.isArray(live.openings) || live.openings.length === 0) return;
-
-          // Whichever copy was reviewed most recently wins. Without this the
-          // stored copy would silently override fresher numbers committed to
-          // the repo, which is exactly backwards.
-          const liveDate = Date.parse(`${live.basis?.reviewedAt}T00:00:00Z`);
-          const ownDate = Date.parse(`${model.reviewedAt}T00:00:00Z`);
-          if (!Number.isFinite(liveDate) || liveDate < ownDate) return;
-
-          const priced = live.openings.filter(
-            (o: OpeningRow) => o && o.low > 0 && o.high >= o.low,
-          );
-          if (priced.length === 0) return;
-
-          // Only accept types the page already renders a counter for — the
-          // markup is static, so a new type here would have nowhere to go.
-          const known = new Set(model.openings.map((o) => o.id));
-          model.openings = priced.filter((o: OpeningRow) => known.has(o.id));
-          if (Array.isArray(live.materials) && live.materials.length) {
-            model.materials = live.materials;
-          }
-          if (live.fullFrame) model.fullFrame = live.fullFrame;
-          if (Array.isArray(live.modifiers)) model.modifiers = live.modifiers;
-
-          render();
-        })
-        .catch(() => {})
-        .finally(() => clearTimeout(timeout));
-    }
   }
 
   bindEstimator();

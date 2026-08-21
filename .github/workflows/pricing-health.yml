@@ -1,10 +1,12 @@
-# The pricing worker's own monthly cron trigger runs directly on Cloudflare
-# (the [triggers] block in workers/pricing/wrangler.toml is live). This
-# workflow is a belt-and-suspenders check from GitHub Actions: a failure here
-# shows up in the repo even if the worker's own cron, or its reminder email,
-# ever silently stops firing.
+# Mark's installed pricing lives in src/data/pricing.ts and goes stale. This
+# checks the numbers the site actually ships — it builds the site and validates
+# the pricing model the calculator serialises into the page, which is the same
+# document the estimator prices from.
 #
-# Safe to delete if that redundancy isn't worth keeping.
+# It used to poll a Cloudflare Worker that held a copy of the pricing. That
+# worker was never wired to the site and never had anything stored, so it was
+# deleted; the freshness reminder it existed to provide is worth keeping, and
+# does not need a worker to work.
 
 name: Pricing health
 
@@ -13,6 +15,10 @@ on:
     # 09:00 America/Los_Angeles on the 1st of each month (16:00 UTC).
     - cron: '0 16 1 * *'
   workflow_dispatch:
+  push:
+    paths:
+      - 'src/data/pricing.ts'
+      - 'shared/pricing-schema.mjs'
 
 permissions:
   contents: read
@@ -23,13 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ask the pricing worker how it is doing
-        env:
-          PRICING_ENDPOINT: https://clearveiw-pricing.skdev-371.workers.dev
-        run: |
-          set -euo pipefail
-          echo "Checking $PRICING_ENDPOINT/health"
-          curl -sS --max-time 20 "$PRICING_ENDPOINT/health" -o health.json
-          cat health.json
-          echo
-          python3 .github/scripts/check_pricing_health.py health.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build so the shipped pricing model can be read back
+        run: npm run build
+
+      - name: Validate the pricing the site actually serves
+        run: node .github/scripts/check-pricing.mjs
