@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
@@ -89,6 +90,26 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     </section>
   )}
 
+  {!guide.data.diagram && guide.data.heroImage && (
+    <section class="section is-tight section-sunk">
+      <div class="wrap is-narrow" data-reveal>
+        <figure class="guide-photo">
+          <Image
+            src={guide.data.heroImage}
+            alt={guide.data.heroImageAlt ?? ''}
+            widths={[480, 760, 1140]}
+            sizes="(max-width: 800px) 100vw, 760px"
+            format="webp"
+            quality={72}
+            loading="eager"
+            fetchpriority="high"
+          />
+          <figcaption>Stock photo for illustration — not a Clearveiw job.</figcaption>
+        </figure>
+      </div>
+    </section>
+  )}
+
   <article class="section">
     <div class="wrap is-narrow prose" data-reveal>
       <Content />
@@ -156,6 +177,26 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   .article-meta span + span::before {
     content: '·';
     margin-right: var(--space-s);
+  }
+
+  /* Guide photo ───────────────────────────────────────────────────────── */
+  .guide-photo {
+    margin: 0;
+  }
+
+  .guide-photo img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    background: var(--paper-raised);
+  }
+
+  .guide-photo figcaption {
+    margin-top: var(--space-2xs);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
   }
 
   /* FAQ ───────────────────────────────────────────────────────────────── */
