@@ -1,21 +1,23 @@
 /**
  * Pricing for the cost estimator.
  *
- * ── What these numbers currently are ────────────────────────────────────────
- * Published Washington / Portland-metro averages from industry cost guides —
- * NOT Mark's own pricing. The site says so plainly wherever a figure appears,
- * because quoting somebody else's average as if it were ours would be the same
- * dishonesty as inventing reviews.
+ * ── What these numbers are ──────────────────────────────────────────────────
+ * Mark's own installed pricing, as of `basis.reviewedAt` below. The one
+ * exception is the "oversize or custom shapes" modifier, which is still the
+ * regional average — Mark hasn't priced that one himself yet, and its own
+ * blurb says so. Everything else on this page is his real number.
  *
- * ── Replacing them with Mark's real numbers ─────────────────────────────────
- * Change the figures below, set `basis.source` to 'clearveiw', and update
- * `basis.reviewedAt`. That is the whole job — nothing else in the codebase
- * knows about money. The estimator copy switches automatically.
+ * ── Keeping them current ─────────────────────────────────────────────────────
+ * Change the figures below and update `basis.reviewedAt`. That is the whole
+ * job — nothing else in the codebase knows about money. If the numbers ever
+ * go back to being someone else's averages instead of Mark's, set
+ * `basis.source` back to 'averages' and the estimator copy switches itself.
  *
- * Every opening figure is INSTALLED cost per opening: unit, labour, and normal
- * finish work, for a standard-size ground-floor opening, in vinyl, as an insert.
- * Fiberglass, full-frame, upstairs access, and custom shapes are modifiers
- * further down — never bake them into the baseline or they double-count.
+ * Every opening figure is INSTALLED cost per opening: unit, labour, and a
+ * block install (no trim, just re-caulk), for a standard-size ground-floor
+ * opening, in vinyl, as an insert. Fiberglass, full-frame, upper-floor access,
+ * custom shapes, and trim are modifiers further down — never bake them into
+ * the baseline or they double-count.
  */
 
 export type PricingBasis = {
@@ -39,13 +41,13 @@ export type OpeningType = {
 
 export const pricing = {
   basis: {
-    source: 'averages',
+    source: 'clearveiw',
     region: 'Washington / Portland metro',
-    reviewedAt: '2026-08-20',
+    reviewedAt: '2026-08-21',
     maxAgeDays: 180,
     notes:
-      'Compiled from published 2026 Washington and Portland-metro window cost guides. ' +
-      'Replace with Clearveiw pricing when available.',
+      "Mark's own installed pricing, given directly for this site. The oversize/custom-shape " +
+      'modifier is still the regional average until he has a firm number for it — see that line.',
   } satisfies PricingBasis,
 
   /** Rounded on the way out so a range never reads as a promise. */
@@ -56,50 +58,64 @@ export const pricing = {
       id: 'slider',
       label: 'Slider',
       blurb: 'Two sashes, one slides sideways past the other.',
-      low: 525,
-      high: 950,
+      low: 1000,
+      high: 2500,
     },
     {
       id: 'double-hung',
       label: 'Double-hung',
       blurb: 'Top and bottom sash both move. Usually tilts in to clean.',
-      low: 575,
-      high: 1050,
+      low: 900,
+      high: 1500,
     },
     {
       id: 'single-hung',
       label: 'Single-hung',
       blurb: 'Only the bottom sash moves. The top half is fixed.',
-      low: 475,
-      high: 875,
+      low: 850,
+      high: 1500,
     },
     {
       id: 'picture',
       label: 'Picture / fixed',
       blurb: 'Does not open. Just glass in a frame.',
-      low: 525,
-      high: 1000,
+      low: 700,
+      high: 2000,
     },
     {
       id: 'casement',
       label: 'Casement',
       blurb: 'Hinged at the side, cranks outward.',
-      low: 650,
-      high: 1200,
+      low: 1000,
+      high: 1500,
     },
     {
       id: 'awning',
       label: 'Awning',
       blurb: 'Hinged at the top, cranks out from the bottom.',
-      low: 600,
-      high: 1125,
+      low: 1000,
+      high: 2000,
     },
     {
       id: 'bay-bow',
       label: 'Bay or bow',
       blurb: 'Projects out from the wall. Its own framing and roof work.',
-      low: 2200,
-      high: 5500,
+      low: 2000,
+      high: 8000,
+    },
+    {
+      id: 'sliding-door',
+      label: 'Sliding patio door',
+      blurb: 'Glass door, one panel slides past the other. Its own opening, not a window.',
+      low: 3000,
+      high: 7000,
+    },
+    {
+      id: 'french-door',
+      label: 'French door',
+      blurb: 'Hinged pair of glass doors, swings open from the center.',
+      low: 3000,
+      high: 5000,
     },
   ] satisfies OpeningType[],
 
@@ -115,31 +131,35 @@ export const pricing = {
       id: 'fiberglass',
       label: 'Fiberglass',
       blurb: 'Stiffer, holds paint, costs more. Worth it on big openings.',
-      multiplier: 1.3,
+      multiplier: 1.4,
     },
   ],
 
   /** Added per opening that has to come out to the rough framing. */
   fullFrame: {
     label: 'Full-frame replacement',
-    blurb: 'Frame and all comes out. Needed when the frame is rotten or out of square.',
-    low: 300,
-    high: 650,
+    blurb:
+      'Frame and all comes out. Needed when the frame is rotten or out of square — how bad the ' +
+      'damage is moves the price.',
+    low: 800,
+    high: 2000,
   },
 
   modifiers: [
     {
-      id: 'second-story',
-      label: 'Second-story openings',
-      blurb: 'Ladders, staging, and a slower set.',
+      id: 'third-story-plus',
+      label: 'Third story or higher',
+      blurb: 'Second-story access is already priced in. Third floor and up needs more staging.',
       perOpening: true,
-      low: 75,
-      high: 175,
+      low: 100,
+      high: 200,
     },
     {
       id: 'oversize',
       label: 'Oversize or custom shapes',
-      blurb: 'Arches, transoms, and anything past standard sizing.',
+      blurb:
+        'Arches, transoms, and anything past standard sizing. Still the regional average here — ' +
+        "not yet Mark's own figure.",
       perOpening: true,
       low: 150,
       high: 450,
@@ -157,10 +177,18 @@ export const pricing = {
     {
       id: 'trim',
       label: 'New interior or exterior trim',
-      blurb: 'Wrapping, casing, or matching an existing profile.',
+      blurb: 'Wrapping, casing, or matching an existing profile — a flat rate on top of a block install.',
       perOpening: true,
-      low: 75,
+      low: 250,
       high: 250,
+    },
+    {
+      id: 'metal-removal',
+      label: 'Removing old metal-frame windows',
+      blurb: 'Cutting back the siding or stucco to pull an old aluminum or steel frame first.',
+      perOpening: true,
+      low: 150,
+      high: 150,
     },
   ],
 } as const;
