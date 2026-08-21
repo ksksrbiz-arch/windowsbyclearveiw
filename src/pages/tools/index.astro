@@ -22,22 +22,123 @@ const showMoney = pricingIsUsable();
     </div>
   </section>
   <section class="section">
-    <div class="wrap">
-      <div class="cards">
-        <article class="card">
-          <p class="kicker">Planning</p>
+    <div class="wrap" data-reveal>
+      <a class="tool-feature" href="/tools/window-replacement-cost-calculator">
+        <div class="tool-copy">
+          <p class="rule-label">Planning</p>
           <h2>
-            <a href="/tools/window-replacement-cost-calculator">
-              {showMoney ? 'Window replacement cost calculator' : 'Window project planner'}
-            </a>
+            {showMoney ? 'Window replacement cost calculator' : 'Window project planner'}
           </h2>
           <p>
             Count your openings, choose insert or full-frame, and see where a Clark County
-            project lands before anyone comes out.
+            project lands before anyone comes out. It runs entirely in your browser — nothing
+            is sent anywhere unless you decide to send it.
           </p>
-        </article>
-      </div>
+          <p class="tool-go">Open the tool <span aria-hidden="true">&rarr;</span></p>
+        </div>
+
+        <ul class="tool-facts">
+          <li><strong>Free</strong><span>No account, no email</span></li>
+          <li><strong>Private</strong><span>Runs in your browser</span></li>
+          <li><strong>Honest</strong><span>Ranges, not one fake number</span></li>
+        </ul>
+      </a>
+
+      <p class="fine-print tool-note">
+        More tools will land here as they earn their place. We would rather ship one that
+        works than four that flatter.
+      </p>
     </div>
   </section>
-  <CtaBar />
+
+  <CtaBar
+    heading="Worked it out? Get it measured."
+    body="The calculator gets the order of magnitude right. Only a measure gets your number right."
+  />
 </BaseLayout>
+
+<style>
+  /* One tool in a three-across card grid looked like two had failed to load.
+     Given the whole band, it reads as the offer it actually is. */
+  .tool-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .tool-feature:hover,
+  .tool-feature:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .tool-copy h2 {
+    margin: 0 0 var(--space-xs);
+    font-size: var(--step-3);
+  }
+
+  .tool-copy p {
+    max-width: var(--measure);
+    color: var(--ink-soft);
+  }
+
+  .tool-go {
+    margin: var(--space-m) 0 0;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+
+  .tool-feature:hover .tool-go span {
+    display: inline-block;
+    transform: translateX(0.25rem);
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .tool-facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    align-self: center;
+    border-top: 1px solid var(--line);
+  }
+
+  .tool-facts li {
+    display: grid;
+    gap: 0.1rem;
+    padding: var(--space-2xs) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tool-facts strong {
+    font-size: var(--step-0);
+    font-weight: 600;
+  }
+
+  .tool-facts span {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .tool-note {
+    margin-top: var(--space-m);
+  }
+
+  @media (max-width: 900px) {
+    .tool-feature {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+      padding: var(--space-m);
+    }
+  }
+</style>

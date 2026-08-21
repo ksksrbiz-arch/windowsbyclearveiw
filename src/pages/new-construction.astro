@@ -3,13 +3,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { newBuildWork } from '../data/work';
+import { newBuildWork, findWork } from '../data/work';
+
+const ogPhoto = findWork('new-construction-sheathed')!;
 ---
 <BaseLayout
   title="New construction windows"
   description="Window setting for new Clark County builds: flashed openings, nailing-fin units, and a crew that works with your GC."
   path="/new-construction"
   crumbs={[{ name: 'New construction', href: '/new-construction' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
 >
   <section class="page-hero">
     <div class="wrap">

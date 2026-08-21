@@ -10,14 +10,16 @@ import { site, telHref } from '../data/site';
   <section class="page-hero">
     <div class="wrap">
       <p class="kicker">404</p>
-      <h1>That page is not here.</h1>
-      <p class="lede">The link may be old. Everything below still works.</p>
+      <h1>That opening is boarded up.</h1>
+      <p class="lede">
+        The link may be old, or the page may never have existed. Everything below still works.
+      </p>
     </div>
   </section>
   <section class="section">
     <div class="wrap split">
       <div>
-        <p class="kicker">Start here</p>
+        <p class="rule-label">Start here</p>
         <ul class="plain-list">
           <li><a href="/replacement">Window replacement</a></li>
           <li><a href="/new-construction">New construction installs</a></li>
@@ -27,10 +29,31 @@ import { site, telHref } from '../data/site';
         </ul>
       </div>
       <div>
-        <p class="kicker">Or just ask</p>
-        <h2><a href={telHref()}>{site.phoneDisplay}</a></h2>
-        <p><a class="btn btn-ghost" href="/estimate">Request an estimate</a></p>
+        <p class="rule-label">Or just ask</p>
+        <p class="lost-phone">
+          <a href={telHref()}>{site.phoneDisplay}</a>
+        </p>
+        <p>Mark answers from the truck. A window count and a city is enough to start.</p>
+        <p><a class="btn btn-primary" href="/estimate">Request an estimate</a></p>
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .lost-phone {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lost-phone a {
+    text-decoration: none;
+  }
+
+  .lost-phone a:hover {
+    color: var(--accent-ink);
+  }
+</style>

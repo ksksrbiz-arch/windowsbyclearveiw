@@ -14,23 +14,70 @@ import { processWork } from '../data/work';
     <div class="wrap">
       <p class="kicker">Process</p>
       <h1>Measure once. Install clean.</h1>
+      <p class="lede">
+        Four steps, in this order, on every job. Nothing here is a surprise on install day —
+        that is the whole point of writing it down.
+      </p>
     </div>
   </section>
+
   <section class="section">
-    <div class="wrap">
-      <ol class="steps">
+    <div class="wrap is-narrow" data-reveal>
+      <ol class="steps process-steps">
         <li><strong>Walkthrough.</strong> We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.</li>
         <li><strong>Measure and order.</strong> Each opening is measured for the chosen method. Windows are ordered to those sizes. Lead times vary by manufacturer.</li>
         <li><strong>Install.</strong> Old units come out. New units go in plumb and flashed. Finishes close up to match the house.</li>
         <li><strong>Walk the job.</strong> We operate every sash with you, haul debris, and leave the rooms usable.</li>
       </ol>
-      <div class="work-grid" style="margin-top:2.5rem;">
+      <p class="notice">
+        Permits depend on the city and whether the opening changes. We handle that
+        conversation before work starts.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">Install day</p>
+      <h2>What that actually looks like.</h2>
+      <div class="work-grid">
         {processWork.map((photo) => (
           <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={photo.kind} />
         ))}
       </div>
-      <p class="notice">Permits depend on the city and whether the opening changes. We handle that conversation before work starts.</p>
     </div>
   </section>
-  <CtaBar />
+
+  <CtaBar
+    heading="Start at step one."
+    body="A walkthrough costs nothing and ends with a written estimate you can hold anyone else to."
+  />
 </BaseLayout>
+
+<style>
+  /* The shared .steps device, given room to be the page rather than a list
+     tucked beside a paragraph. */
+  .process-steps li {
+    padding-top: var(--space-m);
+    padding-bottom: var(--space-m);
+  }
+
+  .process-steps li strong {
+    display: block;
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--space-3xs);
+  }
+
+  .notice {
+    border: 0;
+    border-left: 2px solid var(--accent);
+    background: var(--accent-wash);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: var(--space-s) var(--space-m);
+    margin-top: var(--space-xl);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+</style>

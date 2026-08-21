@@ -576,3 +576,97 @@ html.reveal-ready [data-reveal].is-revealed {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Prose.
+
+   Applied to the wrapper around rendered markdown. Deliberately global:
+   <Content /> output carries no component scope attribute, so a scoped rule
+   would need :global() on every selector and would then be duplicated in
+   each template that renders markdown.
+   ───────────────────────────────────────────────────────────────────────── */
+.prose {
+  max-width: var(--measure);
+}
+
+.prose p,
+.prose li {
+  font-size: var(--step-0);
+  line-height: 1.65;
+}
+
+.prose > p:first-of-type {
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.prose h2 {
+  margin: var(--space-xl) 0 var(--space-xs);
+  font-size: var(--step-3);
+}
+
+.prose h3 {
+  margin: var(--space-l) 0 var(--space-2xs);
+  font-size: var(--step-1);
+}
+
+.prose blockquote {
+  margin: var(--space-l) 0;
+  padding: 0 0 0 var(--space-m);
+  border-left: 2px solid var(--accent);
+  font-size: var(--step-1);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.prose blockquote p {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.prose a {
+  color: var(--accent-ink);
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: var(--space-m);
+}
+
+.prose li {
+  margin-bottom: var(--space-2xs);
+}
+
+.prose li::marker {
+  color: var(--accent);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-l) 0;
+  font-size: var(--step--1);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--space-2xs) var(--space-s) var(--space-2xs) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.prose th {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+  font-weight: 500;
+}

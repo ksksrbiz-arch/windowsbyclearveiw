@@ -39,34 +39,106 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
           ))}
         </div>
       ) : (
-        <div class="split">
-          <div>
-            <h2>No reviews posted here yet.</h2>
-            <p>
+        <div class="empty" data-reveal>
+          <div class="empty-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="empty-copy">
+            <h2>Nothing here yet, and that is on purpose.</h2>
+            <p class="lede">
               {site.shortName} is Mark's own shop, and this site is new. Rather than fill the
               page with invented quotes, we left it empty until real customers put their names
               to something.
             </p>
             <p>
-              Ask Mark for references when he comes out to measure. He can put you in touch with
-              past customers who have said they are happy to talk about their project.
+              A fabricated testimonial is not just tacky — since 2024 it is against federal
+              rules. Plenty of contractor sites carry five glowing reviews written the week the
+              domain was registered. This one will carry none until they are real.
+            </p>
+            <p>
+              Ask Mark for references when he comes out to measure. He can put you in touch
+              with past customers who have said they are happy to talk about their project.
             </p>
           </div>
-          <aside>
-            <p class="kicker">Already worked with us?</p>
-            <ul class="plain-list">
-              <li>Tell Mark you are happy to be quoted here</li>
-              <li>Or leave it on the Google Business Profile once it is live</li>
-            </ul>
-            <p class="fine-print">
-              Meanwhile, <a href="/gallery">the gallery</a> is all real jobs — Mark's photos, his
-              openings, no stock.
-            </p>
-          </aside>
         </div>
       )}
     </div>
   </section>
 
+  {reviews.length === 0 && (
+    <section class="section section-sunk">
+      <div class="wrap split" data-reveal>
+        <div>
+          <p class="rule-label">Already worked with us?</p>
+          <h2>We would rather have one real one.</h2>
+          <ul class="plain-list">
+            <li>Tell Mark you are happy to be quoted here</li>
+            <li>Or leave it on the Google Business Profile once it is live</li>
+          </ul>
+        </div>
+        <div>
+          <p class="rule-label">In the meantime</p>
+          <p>
+            <a href="/gallery">The gallery</a> is all real jobs — Mark's photos, his openings,
+            no stock. It is the closest thing to proof this site can honestly offer today.
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+
   <CtaBar />
 </BaseLayout>
+
+<style>
+  /* An empty page is the whole argument here, so it gets composed rather than
+     apologised for. The mark is five outlined stars — outlined because none
+     have been earned yet, and drawing them filled would be the exact thing
+     this page refuses to do. */
+  .empty {
+    display: grid;
+    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .empty-mark {
+    display: flex;
+    gap: var(--space-3xs);
+  }
+
+  .empty-mark span {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--line);
+    clip-path: polygon(
+      50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%
+    );
+  }
+
+  .empty-copy h2 {
+    margin-top: 0;
+    font-size: var(--step-3);
+  }
+
+  .empty-copy .lede {
+    max-width: none;
+  }
+
+  .empty-copy p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 800px) {
+    .empty {
+      grid-template-columns: 1fr;
+      gap: var(--space-m);
+    }
+  }
+</style>
