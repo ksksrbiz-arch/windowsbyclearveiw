@@ -85,7 +85,7 @@ number from `src/data/pricing.ts`. Nothing else in the codebase knows about mone
 
 Each opening figure is **installed cost per opening**: unit, labour, and normal
 finish work, for a standard-size ground-floor opening, **in vinyl, as an insert**.
-Fiberglass, full-frame, second-story access, and custom shapes are modifiers —
+Full-frame, second-story access, and custom shapes are modifiers —
 never fold them into the baseline or they get counted twice.
 
 To switch from regional averages to Mark's real pricing:

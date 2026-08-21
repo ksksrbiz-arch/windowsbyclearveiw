@@ -22,7 +22,7 @@ A window price on the internet is a guess about someone else’s house. The numb
 Four things move the bid:
 
 1. **Method.** [Insert vs full-frame](/guides/full-frame-vs-insert) changes labor and finish work more than most product upgrades.
-2. **Material.** Vinyl is the common Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units.
+2. **Window line.** Vinyl is the Washington workhorse and what we install, but lines differ. A step up in the window itself costs more per opening for the same install labour.
 3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or code.
 4. **Access.** A first-floor slider is not a third-story picture window over a roof.
 

@@ -13,6 +13,14 @@ const isAverage = pricingIsRegionalAverage();
 // under-quote the whole job.
 const openings = showMoney ? pricedOpenings() : pricing.openings;
 
+// A radio group with one option is not a choice. Clearveiw installs vinyl
+// only, so the material step is dropped rather than shown with nothing to
+// pick — and the remaining steps renumber themselves instead of skipping a
+// number, which would look like a rendering bug.
+const showMaterialStep = pricing.materials.length > 1;
+let stepNumber = 0;
+const nextStep = () => ++stepNumber;
+
 // Everything the client script needs, serialised once. Keeping the numbers in
 // one payload means Mark's pricing file is the only thing that ever changes.
 const model = {
@@ -42,7 +50,7 @@ const model = {
   <div class="estimator-grid">
     <div class="estimator-inputs">
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">1</span>Count your openings</legend>
+        <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>Count your openings</legend>
         <p class="est-hint">
           Walk the house and count what you would replace. Not sure what a window is called?
           Each one says what it does.
@@ -64,23 +72,25 @@ const model = {
         </ul>
       </fieldset>
 
-      <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">2</span>Material</legend>
-        <div class="est-choices">
-          {pricing.materials.map((material, index) => (
-            <label class="choice">
-              <input type="radio" name="est-material" value={material.id} checked={index === 0} />
-              <span>
-                <strong>{material.label}</strong>
-                <span class="est-hint">{material.blurb}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      {showMaterialStep && (
+        <fieldset class="est-block">
+          <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>Material</legend>
+          <div class="est-choices">
+            {pricing.materials.map((material, index) => (
+              <label class="choice">
+                <input type="radio" name="est-material" value={material.id} checked={index === 0} />
+                <span>
+                  <strong>{material.label}</strong>
+                  <span class="est-hint">{material.blurb}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">3</span>Window brand</legend>
+        <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>Window brand</legend>
         <p class="est-hint">Applies to window openings only &mdash; doors keep their own pricing.</p>
         <div class="est-choices">
           {pricing.brands.map((brand, index) => (
@@ -96,7 +106,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">4</span>How much comes out</legend>
+        <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>How much comes out</legend>
         <div class="est-choices">
           <label class="choice">
             <input type="radio" name="est-method" value="insert" checked />
@@ -123,7 +133,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">5</span>Anything else true?</legend>
+        <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>Anything else true?</legend>
         <div class="est-choices">
           {pricing.modifiers.map((modifier) => (
             <label class="choice">
@@ -244,6 +254,8 @@ const model = {
       if (summary instanceof HTMLElement) summary.hidden = total === 0;
       if (total === 0) return;
 
+      // With a single material the step is not rendered, so nothing is checked
+      // and this falls through to the only entry — vinyl, multiplier 1.
       const material =
         model.materials.find((m) => m.id === chosen('est-material')) || model.materials[0];
       const brand = model.brands.find((b) => b.id === chosen('est-brand')) || model.brands[0];
