@@ -285,11 +285,12 @@ const model = {
       if (material.id !== 'vinyl') {
         notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);
       }
-      if (mods.includes('second-story')) notes.push('Upstairs openings add staging time.');
-      if (mods.includes('oversize')) notes.push('Arches and transoms are custom-ordered.');
+      if (mods.includes('third-story-plus')) notes.push('Third floor and up needs more staging than a typical second-story opening.');
+      if (mods.includes('oversize')) notes.push('Arches and transoms are custom-ordered — this line is still the regional average.');
       if (mods.includes('rot-repair')) {
         notes.push('Rot is priced once the wall is open — it is not in any range on this page.');
       }
+      if (mods.includes('metal-removal')) notes.push('Old metal frames need extra cut-back before the new one goes in.');
       if (total >= 8) notes.push('Whole-house jobs usually price better per opening than a few.');
 
       if (drivers instanceof HTMLElement) {
