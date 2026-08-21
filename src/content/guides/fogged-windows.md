@@ -13,6 +13,9 @@ faq:
     answer: That is usually room-side condensation. Indoor air is wetter than the cold glass. Bath fans, a tighter house, and warmer glass all help. It is not automatically a failed window.
   - question: Does fogged glass mean I need every window replaced?
     answer: Only the failed units are required. We often replace a few now and plan the rest of the house as a second trip.
+heroImage: ./img-fogged-windows.jpg
+heroImageAlt: Condensation beaded on the inside of a window pane, the kind of moisture that signals a failed seal between panes.
+heroImageCredit: Stock photo — Genet Schneider / Unsplash (free license)
 ---
 
 Not all “foggy windows” are the same job. One kind is a failed window. The other is your house telling you it is damp.
