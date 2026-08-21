@@ -51,6 +51,21 @@ function clean(value, max) {
     .slice(0, max);
 }
 
+/**
+ * A tel: URI has to be a dialable string, not a formatted one. The lead email
+ * previously built `tel:(564) 208-0801` straight from the display value, which
+ * several mail clients refuse to linkify — breaking the single most important
+ * action in the whole message.
+ */
+function telUri(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  // Anything else is already unusual; hand over the bare digits rather than a
+  // guessed country code.
+  return digits;
+}
+
 function receivedAt() {
   return new Date().toLocaleString('en-US', {
     timeZone: 'America/Los_Angeles',
@@ -146,6 +161,7 @@ export async function onRequestPost(context) {
         variables: {
           CUSTOMER_NAME: lead.name,
           CUSTOMER_PHONE: lead.phone,
+          CUSTOMER_PHONE_HREF: telUri(lead.phone),
           CUSTOMER_EMAIL: lead.email || 'Not given',
           CITY: lead.city,
           NOTES: [lead.role && `[${lead.role}]`, lead.notes || 'No notes.']
