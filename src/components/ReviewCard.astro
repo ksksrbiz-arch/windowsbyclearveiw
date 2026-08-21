@@ -15,3 +15,27 @@ const { quote, name, city, source = 'Customer' } = Astro.props;
     <div class="fine-print">{city} · {source}</div>
   </footer>
 </blockquote>
+
+<style>
+  /* This used to share a rule with a generic .card that no page uses any
+     more. A quote is not a card — it gets the accent rule that marks
+     everything else on the site as an attributable claim. */
+  .review {
+    margin: 0;
+    padding: var(--space-s) 0 var(--space-s) var(--space-m);
+    border-left: 2px solid var(--accent);
+    background: transparent;
+  }
+
+  .review p {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step-1);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .review footer strong {
+    display: block;
+    font-weight: 600;
+  }
+</style>

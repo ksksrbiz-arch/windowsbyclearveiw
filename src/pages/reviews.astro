@@ -28,7 +28,7 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
   <section class="section">
     <div class="wrap">
       {reviews.length > 0 ? (
-        <div class="cards">
+        <div class="review-list">
           {reviews.map((review) => (
             <ReviewCard
               quote={review.data.quote}
@@ -95,6 +95,20 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
 </BaseLayout>
 
 <style>
+  /* Once there are real quotes, they sit in a two-column measure rather than
+     a flexible card row — a testimonial reads as text, not as a product. */
+  .review-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-l) var(--space-xl);
+  }
+
+  @media (max-width: 800px) {
+    .review-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
   /* An empty page is the whole argument here, so it gets composed rather than
      apologised for. The mark is five outlined stars — outlined because none
      have been earned yet, and drawing them filled would be the exact thing
