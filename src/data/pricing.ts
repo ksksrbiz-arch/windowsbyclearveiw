@@ -37,6 +37,18 @@ export type OpeningType = {
   blurb: string;
   low: number;
   high: number;
+  /** True for door-type openings (patio, French). The window-brand choice
+   *  below does not apply to these — Cascade/Milgard is a window line. */
+  isDoor?: boolean;
+};
+
+export type WindowBrand = {
+  id: string;
+  label: string;
+  blurb: string;
+  /** Added per WINDOW opening (not doors) on top of everything else. */
+  low: number;
+  high: number;
 };
 
 export const pricing = {
@@ -109,6 +121,7 @@ export const pricing = {
       blurb: 'Glass door, one panel slides past the other. Its own opening, not a window.',
       low: 3000,
       high: 7000,
+      isDoor: true,
     },
     {
       id: 'french-door',
@@ -116,6 +129,7 @@ export const pricing = {
       blurb: 'Hinged pair of glass doors, swings open from the center.',
       low: 3000,
       high: 5000,
+      isDoor: true,
     },
   ] satisfies OpeningType[],
 
@@ -134,6 +148,25 @@ export const pricing = {
       multiplier: 1.4,
     },
   ],
+
+  /** Which window line, on top of material. Doors are not brand-specific —
+   *  the choice below only ever applies to window openings. */
+  brands: [
+    {
+      id: 'cascade',
+      label: 'Cascade',
+      blurb: 'The standard window Clearveiw installs on most jobs.',
+      low: 0,
+      high: 0,
+    },
+    {
+      id: 'milgard',
+      label: 'Milgard',
+      blurb: 'A step up in the window itself, same install — runs more per opening than Cascade.',
+      low: 100,
+      high: 200,
+    },
+  ] satisfies WindowBrand[],
 
   /** Added per opening that has to come out to the rough framing. */
   fullFrame: {
@@ -195,6 +228,7 @@ export const pricing = {
 
 export type PricingModifier = (typeof pricing.modifiers)[number];
 export type PricingMaterial = (typeof pricing.materials)[number];
+export type PricingBrand = (typeof pricing.brands)[number];
 
 /** Opening types we can actually price. Anything unpriced is hidden, never
  *  silently counted as $0 — that would quietly under-quote a whole job. */
