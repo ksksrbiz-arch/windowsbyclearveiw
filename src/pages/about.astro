@@ -2,6 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
+import { pricingIsRegionalAverage } from '../data/pricing';
+
+const pricesAreAverages = pricingIsRegionalAverage();
 ---
 <BaseLayout
   title="About"
@@ -20,27 +23,114 @@ import { site } from '../data/site';
     </div>
   </section>
   <section class="section">
-    <div class="wrap split">
-      <div>
+    <div class="wrap split" data-reveal>
+      <div class="prose">
         <p>
-          {site.legalName} is Mark’s window company. We install in Vancouver and the towns around it —
-          Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — and
-          we cross the river into Portland.
+          {site.legalName} is Mark’s window company. We install in Vancouver and the towns
+          around it — Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center,
+          and Woodland — and we cross the river into Portland.
+        </p>
+        <p>
+          The person who measures your openings is the person who installs them. That is not
+          a marketing line about service; it is just how a shop this size works, and it is the
+          reason you will not be handed between a salesperson, a scheduler, and a subcontractor
+          who has never seen the house.
         </p>
         <p>
           Show up, install it right, leave the house better than we found it.
         </p>
       </div>
       <aside>
-        <p class="kicker">Where we work</p>
+        <p class="rule-label">Where we work</p>
         <ul class="plain-list">
           {site.nearby.map((place) => (
             <li>{place.name}, {place.region}</li>
           ))}
         </ul>
-        <p class="fine-print">Still waiting on L&amp;I number, insurance, and brand list.</p>
       </aside>
     </div>
   </section>
-  <CtaBar />
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Straight answers</p>
+      <h2>What this site does not claim.</h2>
+      <dl class="honest">
+        <div>
+          <dt>No reviews yet</dt>
+          <dd>
+            The company is new. Rather than fill a page with invented quotes, the
+            <a href="/reviews">reviews page</a> stays empty until real customers put their
+            names to something. Ask Mark for references when he comes out.
+          </dd>
+        </div>
+        <div>
+          <dt>Registration number pending</dt>
+          <dd>
+            The Washington contractor registration number is not published here yet. Ask for
+            it on the first call and verify it yourself at the L&amp;I contractor lookup —
+            you should do that with anyone you let near your walls.
+          </dd>
+        </div>
+        <div>
+          <dt>{pricesAreAverages ? 'Prices are regional averages' : 'Prices are still ranges'}</dt>
+          <dd>
+            {pricesAreAverages ? (
+              <>
+                The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
+                on published Washington averages, clearly labelled as such, not on Clearveiw’s
+                own pricing. It is there to sanity-check any quote you get — including ours.
+              </>
+            ) : (
+              <>
+                The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
+                on Mark’s own installed pricing, but it still gives you a range rather than a
+                number. Anyone quoting a single figure before seeing your openings is guessing,
+                and so would we be.
+              </>
+            )}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Talk to the person doing the work."
+    body="No call centre, no appointment setter. Mark answers from the truck."
+  />
 </BaseLayout>
+
+<style>
+  /* Naming the gaps outright is the strongest thing a new company can do on
+     an About page, and it keeps the site's claims inside what RCW 18.27.100
+     allows a registered contractor to advertise. */
+  .honest {
+    margin: var(--space-l) 0 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .honest > div {
+    padding: var(--space-m) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .honest dt {
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--space-3xs);
+  }
+
+  .honest dd {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    max-width: var(--measure);
+  }
+
+  .honest a {
+    color: var(--accent-ink);
+    text-underline-offset: 0.2em;
+  }
+</style>

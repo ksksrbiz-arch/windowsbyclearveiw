@@ -1,0 +1,227 @@
+---
+/**
+ * The lap order at a new-construction opening, drawn as a numbered sequence.
+ *
+ * Builders already know this. Homeowners do not, and it is the difference
+ * between an opening that sheds water and one that collects it behind the
+ * siding — which is exactly the kind of thing a photo of a finished wall
+ * cannot show.
+ */
+const steps = [
+  {
+    n: 1,
+    title: 'Sill pan first',
+    text: 'A pan or pan flashing goes in before the window, sloped out, with the back dam turned up.',
+  },
+  {
+    n: 2,
+    title: 'Window set into the pan',
+    text: 'Shimmed plumb and square, fins landing flat on the sheathing. Never caulk the sill fin closed.',
+  },
+  {
+    n: 3,
+    title: 'Jamb flashing over the fins',
+    text: 'Sides go on next, lapping over the sill flashing so any water is handed downward.',
+  },
+  {
+    n: 4,
+    title: 'Head flashing last',
+    text: 'The head laps over the jambs, and the housewrap laps over the head. Shingle order, top over bottom.',
+  },
+];
+---
+<figure class="flash">
+  <svg
+    class="flash-svg"
+    viewBox="0 0 320 240"
+    role="img"
+    aria-label="A window opening showing flashing lap order: sill pan first, then the window, then jamb flashing over the fins, then head flashing with the housewrap lapped over it."
+  >
+    <!-- Sheathing field -->
+    <rect x="0" y="0" width="320" height="240" class="f-sheathing" />
+
+    <!-- Housewrap, lapped over the head flashing at the end. -->
+    <path d="M12 40 H308" class="f-wrap" />
+    <text x="16" y="32" class="f-note">Housewrap laps over the head</text>
+
+    <!-- Head flashing (4) -->
+    <path d="M74 62 H246" class="f-flash f-head" />
+    <circle cx="60" cy="62" r="11" class="f-pip" />
+    <text x="60" y="66" class="f-pip-text">4</text>
+
+    <!-- Jamb flashing (3) -->
+    <path d="M78 62 V186" class="f-flash" />
+    <path d="M242 62 V186" class="f-flash" />
+    <circle cx="60" cy="124" r="11" class="f-pip" />
+    <text x="60" y="128" class="f-pip-text">3</text>
+
+    <!-- Window (2) -->
+    <rect x="90" y="74" width="140" height="104" class="f-window" />
+    <line x1="160" y1="74" x2="160" y2="178" class="f-window-line" />
+    <line x1="90" y1="126" x2="230" y2="126" class="f-window-line" />
+    <circle cx="256" cy="90" r="11" class="f-pip" />
+    <text x="256" y="94" class="f-pip-text">2</text>
+    <line x1="245" y1="90" x2="232" y2="86" class="f-leader" />
+
+    <!-- Sill pan (1), sloped out with a back dam. -->
+    <path d="M78 186 H242 L246 194 H74 Z" class="f-pan" />
+    <path d="M78 186 V178" class="f-pan-dam" />
+    <path d="M242 186 V178" class="f-pan-dam" />
+    <circle cx="60" cy="190" r="11" class="f-pip" />
+    <text x="60" y="194" class="f-pip-text">1</text>
+
+    <text x="160" y="216" class="f-note f-note-center">Water is handed downward at every lap</text>
+  </svg>
+
+  <ol class="flash-steps">
+    {steps.map((step) => (
+      <li>
+        <span class="flash-num" aria-hidden="true">{step.n}</span>
+        <span>
+          <strong>{step.title}</strong>
+          <span>{step.text}</span>
+        </span>
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .flash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: center;
+    margin: 0;
+  }
+
+  .flash-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--paper-sunk);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+
+  .f-sheathing {
+    fill: none;
+  }
+
+  .f-wrap {
+    stroke: color-mix(in srgb, var(--ink) 26%, transparent);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+
+  .f-flash {
+    stroke: var(--accent);
+    stroke-width: 5;
+    stroke-linecap: square;
+    fill: none;
+  }
+
+  .f-head {
+    stroke: var(--accent-bright);
+  }
+
+  .f-window {
+    fill: var(--paper-raised);
+    stroke: var(--ink);
+    stroke-width: 2.5;
+  }
+
+  .f-window-line {
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+
+  .f-pan {
+    fill: color-mix(in srgb, var(--accent) 30%, transparent);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .f-pan-dam {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+
+  .f-pip {
+    fill: var(--ink);
+  }
+
+  .f-leader {
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+
+  .f-pip-text {
+    fill: var(--paper);
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+
+  .f-note {
+    fill: var(--ink-faint);
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .f-note-center {
+    text-anchor: middle;
+  }
+
+  .flash-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0;
+  }
+
+  .flash-steps li {
+    display: grid;
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    gap: var(--space-xs);
+    align-items: start;
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .flash-steps li:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .flash-num {
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .flash-steps strong {
+    display: block;
+    font-size: var(--step-0);
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+  }
+
+  .flash-steps span span {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    .flash {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+  }
+</style>

@@ -1,12 +1,54 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
+import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { replacementWork, findWork } from '../data/work';
+
+const ogPhoto = findWork('vaulted-grids')!;
+
+const decision = [
+  {
+    question: 'Is the existing frame sound and square?',
+    insert: 'Only if it is',
+    full: 'Works either way',
+    note: 'A frame that is rotten, racked, or leaking cannot host an insert. Paying for one wastes the whole job.',
+  },
+  {
+    question: 'Do you want to keep the interior trim?',
+    insert: 'Keeps it',
+    full: 'Replaces it',
+    note: 'Insert work leaves the casing and stool alone. Full-frame means new interior finish.',
+  },
+  {
+    question: 'Are you changing the exterior look?',
+    insert: 'Cannot change it',
+    full: 'New trim and sightline',
+    note: 'New exterior trim, a different sightline, or a change of style all need the frame out.',
+  },
+  {
+    question: 'How much glass do you get back?',
+    insert: 'An inch or two less',
+    full: 'The whole opening',
+    note: 'An insert sets inside the old frame, so the visible glass shrinks by an inch or two per side.',
+  },
+];
+
+const spec = [
+  ['Materials', 'Vinyl and fiberglass, in the sizes Clark County houses actually have'],
+  ['Glass', 'Double- and triple-pane insulated units'],
+  ['Coatings', 'Low-E matched to a Pacific Northwest heating season'],
+  ['Styles', 'Picture, slider, single- and double-hung, casement, awning'],
+  ['Openings', 'Standard, arched, and gable shapes measured individually'],
+];
 ---
 <BaseLayout
   title="Window replacement"
   description="Replacement windows for Vancouver and Clark County homes: full-frame and insert installs, from measure to finish."
   path="/replacement"
   crumbs={[{ name: 'Window replacement', href: '/replacement' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
 >
   <section class="page-hero">
     <div class="wrap">
@@ -18,32 +60,211 @@ import CtaBar from '../components/CtaBar.astro';
       </p>
     </div>
   </section>
+
   <section class="section">
-    <div class="wrap split">
-      <article>
-        <h2>Full-frame replacement</h2>
-        <p>
-          The old window and frame come out to the rough opening. This is the right call when the
-          frame is rotten, out of square, or you want to change the look of the exterior trim.
-        </p>
-        <h2>Insert / pocket replacement</h2>
-        <p>
-          A new sash and frame set into a sound existing frame. Faster, less disruption, and often
-          less cost when the opening is still structurally good.
-        </p>
-      </article>
-      <article>
-        <p class="kicker">Typical install</p>
-        <ul class="plain-list">
-          <li>Vinyl replacement windows</li>
-          <li>Fiberglass when the opening and budget want it</li>
-          <li>Double- and triple-pane insulated glass</li>
-          <li>Low-E coatings matched to your climate</li>
-          <li>Picture, slider, single-hung, and casement</li>
-        </ul>
-        <p class="fine-print">Brand list goes here once Mark confirms manufacturers.</p>
-      </article>
+    <div class="wrap" data-reveal>
+      <p class="rule-label">The one decision that sets the price</p>
+      <InsertVsFullFrame heading="Insert, or back to the rough opening?" />
     </div>
   </section>
-  <CtaBar />
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Which one is yours</p>
+      <h2>Four questions, answered on site.</h2>
+      <p class="lede">
+        Nobody can tell you this from a photo. These are the things Mark checks at the
+        opening, and they decide the method before they decide the number.
+      </p>
+
+      <div class="decide">
+        {decision.map((row) => (
+          <article class="decide-row">
+            <h3>{row.question}</h3>
+            <dl class="decide-answers">
+              <div>
+                <dt class="tag tag-insert">Insert</dt>
+                <dd>{row.insert}</dd>
+              </div>
+              <div>
+                <dt class="tag tag-full">Full-frame</dt>
+                <dd>{row.full}</dd>
+              </div>
+            </dl>
+            <p class="decide-note">{row.note}</p>
+          </article>
+        ))}
+      </div>
+
+      <p class="section-link">
+        <a href="/guides/full-frame-vs-insert">The long version, with what each one costs</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split" data-reveal>
+      <div>
+        <p class="rule-label">What we install</p>
+        <h2>Ordinary materials, measured properly.</h2>
+        <p>
+          There is no secret window. The difference between a good replacement and a bad one
+          is almost entirely in how the opening is measured, prepared, and flashed — which is
+          why this page spends its space on method rather than on brand names.
+        </p>
+        <p class="fine-print">Brand list goes here once Mark confirms manufacturers.</p>
+      </div>
+      <dl class="spec-table">
+        {spec.map(([term, description]) => (
+          <div class="spec-pair">
+            <dt>{term}</dt>
+            <dd>{description}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">Replacement work</p>
+      <h2>Clark County openings, finished.</h2>
+      <div class="work-grid">
+        {replacementWork.slice(0, 6).map((photo) => (
+          <WorkCard
+            image={photo.image}
+            alt={photo.alt}
+            caption={photo.caption}
+            kind={photo.kind}
+          />
+        ))}
+      </div>
+      <p class="section-link"><a href="/gallery">See the full gallery</a></p>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Get the method decided before the price."
+    body="Mark measures every opening, tells you which ones take an insert and which do not, and writes it down."
+  />
 </BaseLayout>
+
+<style>
+  /* The decision table is the spine of this page: it is what a homeowner
+     actually needs, and it is the reason the page is no longer a single
+     paragraph band between two dark strips. */
+  .decide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+
+  .decide-row {
+    padding: var(--space-m) var(--space-m) var(--space-m) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .decide-row:nth-child(even) {
+    padding-left: var(--space-m);
+    border-left: 1px solid var(--line);
+  }
+
+  .decide-row h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  .decide-answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xs) var(--space-s);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .decide-answers > div {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: start;
+  }
+
+  .decide-answers dd {
+    margin: 0;
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .tag {
+    padding: 0.2rem 0.55rem;
+    border-radius: 2px;
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .tag-insert {
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent-ink);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  .tag-full {
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--danger);
+    border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
+  }
+
+  .decide-note {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .spec-table {
+    margin: 0;
+  }
+
+  .spec-pair {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: var(--space-s);
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .spec-pair:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .spec-pair dt {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .spec-pair dd {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    .decide {
+      grid-template-columns: 1fr;
+    }
+
+    .decide-row,
+    .decide-row:nth-child(even) {
+      padding-left: 0;
+      padding-right: 0;
+      border-left: 0;
+    }
+
+    .spec-pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+  }
+</style>

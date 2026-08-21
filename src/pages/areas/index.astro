@@ -12,19 +12,96 @@ const cities = (await getCollection('cities')).filter((city) => city.data.publis
   path="/areas"
   crumbs={[{ name: 'Service areas', href: '/areas' }]}
 >
-  <section class="wrap section">
-    <p class="kicker">Service areas</p>
-    <h1>Vancouver, WA and nearby</h1>
-    <p class="lede">{site.serviceAreaNote}</p>
-    <div class="cards">
-      {cities.map((city) => (
-        <article class="card">
-          <p class="kicker">{city.data.region}</p>
-          <h2><a href={`/areas/${city.id}`}>{city.data.name}</a></h2>
-          <p>{city.data.description}</p>
-        </article>
-      ))}
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Service areas</p>
+      <h1>Vancouver, WA and nearby</h1>
+      <p class="lede">{site.serviceAreaNote}</p>
     </div>
   </section>
-  <CtaBar />
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">{cities.length} towns</p>
+      <ul class="area-list">
+        {cities.map((city) => (
+          <li>
+            <a href={`/areas/${city.id}`}>
+              <span class="area-region">{city.data.region}</span>
+              <strong>{city.data.name}</strong>
+              <span class="area-blurb">{city.data.description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <CtaBar
+    heading="Not sure if we come out that far?"
+    body="Call and ask. Mark will tell you straight rather than book a drive he cannot make work."
+  />
 </BaseLayout>
+
+<style>
+  /* A card grid made nine towns look like nine products. An index reads as
+     coverage, which is what the page is actually claiming. */
+  .area-list {
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .area-list li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .area-list a {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 14rem) minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: baseline;
+    padding: var(--space-m) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .area-list a:hover,
+  .area-list a:focus-visible {
+    padding-left: var(--space-s);
+    background: var(--accent-wash);
+  }
+
+  .area-region {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .area-list strong {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+  }
+
+  .area-blurb {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    .area-list a {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+
+    .area-list a:hover,
+    .area-list a:focus-visible {
+      padding-left: 0;
+      background: transparent;
+    }
+  }
+</style>

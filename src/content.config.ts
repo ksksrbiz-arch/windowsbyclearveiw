@@ -39,6 +39,11 @@ const guides = defineCollection({
     published: z.boolean().default(true),
     updated: z.coerce.date(),
     order: z.number().default(99),
+    /**
+     * Optional diagram rendered above the body. Keyed rather than hardcoded in
+     * the template so a new guide can claim one from its own frontmatter.
+     */
+    diagram: z.enum(['insert-vs-full-frame', 'flashing-order']).optional(),
     faq: z
       .array(
         z.object({
@@ -50,4 +55,17 @@ const guides = defineCollection({
   }),
 });
 
-export const collections = { cities, reviews, guides };
+const legal = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/legal' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    /** Shown on the page and used for the "last updated" line. */
+    updated: z.coerce.date(),
+    order: z.number().default(99),
+    /** Appears above the body, before the legal text proper. */
+    summary: z.string(),
+  }),
+});
+
+export const collections = { cities, reviews, guides, legal };

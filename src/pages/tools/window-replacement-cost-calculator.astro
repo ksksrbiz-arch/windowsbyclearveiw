@@ -90,16 +90,16 @@ const schema = {
     </div>
   </section>
 
-  <section class="section">
+  <section class="section is-tight">
     <div class="wrap">
       <CostEstimator />
     </div>
   </section>
 
-  <section class="section section-muted">
-    <div class="wrap split">
+  <section class="section section-sunk">
+    <div class="wrap split" data-reveal>
       <div>
-        <p class="kicker">How to use it</p>
+        <p class="rule-label">How to use it</p>
         <h2>Walk the house first.</h2>
         <p>
           Start in the room that bothers you most and work outward. Count every opening you would
@@ -121,13 +121,24 @@ const schema = {
   </section>
 
   <section class="section">
-    <div class="wrap guide">
-      {showMoney && isAverage && (
+    <div class="wrap is-narrow guide" data-reveal>
+      {showMoney && (
         <p class="notice">
-          <strong>Whose numbers are these?</strong> Published 2026 Washington and
-          Portland-metro averages, compiled from industry cost guides &mdash; not Clearveiw&rsquo;s
-          own pricing. They are here so you can sanity-check any quote you get, from us or
-          anyone else. Mark gives you a real figure after measuring.
+          <strong>Whose numbers are these?</strong>{' '}
+          {isAverage ? (
+            <>
+              Published 2026 Washington and Portland-metro averages, compiled from industry
+              cost guides &mdash; not Clearveiw&rsquo;s own pricing. They are here so you can
+              sanity-check any quote you get, from us or anyone else.
+            </>
+          ) : (
+            <>
+              Clearveiw&rsquo;s own installed pricing &mdash; what Mark actually charges for
+              this work in Clark County, not a national average. It is still a range, because
+              the opening decides the number and nobody has seen yours yet.
+            </>
+          )}{' '}
+          Mark gives you a real figure after measuring.
           Last reviewed {pricing.basis.reviewedAt}.
         </p>
       )}
@@ -151,5 +162,84 @@ const schema = {
     </div>
   </section>
 
-  <CtaBar />
+  <CtaBar
+    heading="Turn the range into a number."
+    body="The calculator gets you to the right order of magnitude. A measure gets you the figure you can actually plan around."
+  />
 </BaseLayout>
+
+<style>
+  /* The disclosure about whose numbers these are is the most important text
+     on the page after the total. It should read as a stated position, not as
+     a warning box bolted to the bottom. */
+  .notice {
+    border: 0;
+    border-left: 2px solid var(--accent);
+    background: var(--accent-wash);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: var(--space-s) var(--space-m);
+    margin: 0 0 var(--space-xl);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .notice strong {
+    color: var(--ink);
+  }
+
+  .faq {
+    margin-bottom: var(--space-xl);
+  }
+
+  .faq details {
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+    padding: 0;
+  }
+
+  .faq details:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq summary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    padding: var(--space-s) 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: var(--step-0);
+    list-style: none;
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A rotating rule reads better than a caret at this weight and keeps the
+     open state legible without colour alone. */
+  .faq summary::before {
+    content: '';
+    width: 0.7rem;
+    height: 1px;
+    flex: none;
+    translate: 0 -0.3rem;
+    background: var(--accent);
+    transition: rotate var(--dur) var(--ease-out);
+  }
+
+  .faq details[open] summary::before {
+    rotate: 90deg;
+  }
+
+  .faq summary:hover {
+    color: var(--accent-ink);
+  }
+
+  .faq details p {
+    margin: 0 0 var(--space-s);
+    padding-left: calc(0.7rem + var(--space-2xs));
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+</style>

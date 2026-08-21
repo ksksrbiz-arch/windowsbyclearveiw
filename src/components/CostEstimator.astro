@@ -17,6 +17,7 @@ const openings = showMoney ? pricedOpenings() : pricing.openings;
 // one payload means Mark's pricing file is the only thing that ever changes.
 const model = {
   showMoney,
+  isAverage,
   reviewedAt: pricing.basis.reviewedAt,
   rounding: pricing.displayRounding,
   openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high, isDoor: !!o.isDoor })),
@@ -41,7 +42,7 @@ const model = {
   <div class="estimator-grid">
     <div class="estimator-inputs">
       <fieldset class="est-block">
-        <legend>1 &middot; Count your openings</legend>
+        <legend><span class="est-step" aria-hidden="true">1</span>Count your openings</legend>
         <p class="est-hint">
           Walk the house and count what you would replace. Not sure what a window is called?
           Each one says what it does.
@@ -64,7 +65,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend>2 &middot; Material</legend>
+        <legend><span class="est-step" aria-hidden="true">2</span>Material</legend>
         <div class="est-choices">
           {pricing.materials.map((material, index) => (
             <label class="choice">
@@ -79,8 +80,8 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend>3 &middot; Window brand</legend>
-        <p class="est-hint">Applies to window openings only — doors keep their own pricing.</p>
+        <legend><span class="est-step" aria-hidden="true">3</span>Window brand</legend>
+        <p class="est-hint">Applies to window openings only &mdash; doors keep their own pricing.</p>
         <div class="est-choices">
           {pricing.brands.map((brand, index) => (
             <label class="choice">
@@ -95,7 +96,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend>4 &middot; How much comes out</legend>
+        <legend><span class="est-step" aria-hidden="true">4</span>How much comes out</legend>
         <div class="est-choices">
           <label class="choice">
             <input type="radio" name="est-method" value="insert" checked />
@@ -122,7 +123,7 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend>5 &middot; Anything else true?</legend>
+        <legend><span class="est-step" aria-hidden="true">5</span>Anything else true?</legend>
         <div class="est-choices">
           {pricing.modifiers.map((modifier) => (
             <label class="choice">
@@ -190,6 +191,7 @@ const model = {
   type BrandRow = { id: string; label: string; low: number; high: number };
   type Model = {
     showMoney: boolean;
+    isAverage: boolean;
     reviewedAt: string;
     rounding: number;
     openings: OpeningRow[];
@@ -318,7 +320,13 @@ const model = {
         );
       }
       if (mods.includes('third-story-plus')) notes.push('Third floor and up needs more staging than a typical second-story opening.');
-      if (mods.includes('oversize')) notes.push('Arches and transoms are custom-ordered — this line is still the regional average.');
+      if (mods.includes('oversize')) {
+        notes.push(
+          model.isAverage
+            ? 'Arches and transoms are custom-ordered — this line is still the regional average.'
+            : 'Arches and transoms are custom-ordered, so this line is the least certain one here.',
+        );
+      }
       if (mods.includes('rot-repair')) {
         notes.push('Rot is priced once the wall is open — it is not in any range on this page.');
       }
@@ -369,6 +377,9 @@ const model = {
         counts.set(id, next);
         const output = root.querySelector(`[data-count="${id}"]`);
         if (output instanceof HTMLElement) output.textContent = String(next);
+        // Mark the row so a chosen opening is visible while scanning the list,
+        // rather than the count being the only difference between twelve rows.
+        button.closest('.counter')?.classList.toggle('is-chosen', next > 0);
         render();
       });
     });
@@ -424,3 +435,335 @@ const model = {
   bindEstimator();
   document.addEventListener('astro:page-load', bindEstimator);
 </script>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     The calculator is the one thing on this site nobody else in Clark County
+     offers, so it is the one thing that should not look like a form. It is
+     built as two objects: a worksheet you fill in, and a result panel that
+     stays with you while you fill it.
+
+     Everything here was previously in a shared stylesheet where any change
+     risked the other sixteen pages. Scoped, it can be as specific as a tool
+     deserves.
+     ─────────────────────────────────────────────────────────────────────── */
+  .estimator {
+    display: block;
+  }
+
+  .estimator-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .estimator-inputs {
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .est-block {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .est-block + .est-block {
+    margin-top: var(--space-l);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--line);
+  }
+
+  .est-block legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: 0;
+    margin-bottom: var(--space-2xs);
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  /* A numbered chip beats "1 · " in the string: it survives translation, it
+     is not read out by a screen reader as punctuation, and it gives the
+     worksheet a visible sequence. */
+  .est-step {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-dark);
+    font-size: var(--step--2);
+    font-weight: 600;
+    flex: none;
+  }
+
+  .est-hint {
+    display: block;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    font-weight: 400;
+    margin: 0.15rem 0 0;
+  }
+
+  .est-block > .est-hint {
+    margin-bottom: var(--space-s);
+  }
+
+  .counter-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) 0;
+    border-bottom: 1px solid var(--line);
+    border-left: 2px solid transparent;
+    transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  }
+
+  .counter.is-chosen {
+    border-left-color: var(--accent);
+    background: var(--accent-wash);
+    padding-left: var(--space-2xs);
+  }
+
+  .counter-copy strong {
+    display: block;
+    font-weight: 500;
+  }
+
+  .counter-copy span {
+    display: block;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .counter-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex: none;
+  }
+
+  .counter-controls button {
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 1px solid var(--line-strong);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition:
+      background var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+  }
+
+  .counter-controls button:hover {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+    color: var(--accent-ink);
+  }
+
+  .counter-controls output {
+    min-width: 2.6rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step-0);
+    font-weight: 600;
+  }
+
+  /* Choices ───────────────────────────────────────────────────────────── */
+  .est-choices {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .est-choices .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2xs);
+    padding: var(--space-2xs);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  }
+
+  .est-choices .choice:hover {
+    border-color: var(--line-strong);
+  }
+
+  /* A checked option that looks identical to an unchecked one makes the whole
+     panel feel inert. :has() gives the row a state without any extra JS. */
+  .est-choices .choice:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+  }
+
+  .est-choices .choice input {
+    width: auto;
+    margin: 0.3rem 0 0;
+    accent-color: var(--accent);
+    flex: none;
+  }
+
+  .est-choices .choice strong {
+    font-weight: 500;
+  }
+
+  /* Result panel ──────────────────────────────────────────────────────── */
+  .estimator-result {
+    position: sticky;
+    top: 88px;
+    background:
+      radial-gradient(
+        110% 80% at 90% 0%,
+        color-mix(in srgb, var(--accent) 26%, transparent),
+        transparent 62%
+      ),
+      var(--black);
+    color: var(--on-dark);
+    padding: var(--space-m);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .estimator-result .kicker {
+    color: var(--accent-bright);
+  }
+
+  .est-empty,
+  .estimator-result .est-hint {
+    color: var(--on-dark-faint);
+  }
+
+  .est-lines {
+    list-style: none;
+    margin: 0 0 var(--space-s);
+    padding: 0;
+  }
+
+  /* These <li>s are created by the script at runtime, so they never receive
+     Astro's scope attribute and a plain `.est-lines li` selector silently
+     stops matching. :global() on the child keeps the parent scoped. */
+  .est-lines :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-3xs) 0;
+    border-bottom: 1px solid var(--dark-line);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .est-scope {
+    margin: 0 0 var(--space-m);
+    color: var(--on-dark-soft);
+    font-size: var(--step--1);
+  }
+
+  .est-range {
+    border-top: 1px solid var(--dark-line-strong);
+    padding-top: var(--space-s);
+    margin-bottom: var(--space-m);
+  }
+
+  .est-number {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-4);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    color: var(--on-dark);
+    text-wrap: nowrap;
+  }
+
+  .est-driver-list {
+    list-style: none;
+    margin: var(--space-2xs) 0 var(--space-m);
+    padding: 0;
+  }
+
+  /* Runtime-created, same as .est-lines above. */
+  .est-driver-list :global(li) {
+    position: relative;
+    padding: 0.35rem 0 0.35rem var(--space-s);
+    color: var(--on-dark-soft);
+    font-size: var(--step--1);
+  }
+
+  .est-driver-list :global(li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.95em;
+    width: 8px;
+    height: 1px;
+    background: var(--accent-bright);
+  }
+
+  .est-actions {
+    margin: 0 0 var(--space-2xs);
+  }
+
+  .est-actions .btn {
+    width: 100%;
+    background: var(--on-dark);
+    color: var(--ink);
+  }
+
+  .est-actions .btn:hover {
+    background: var(--accent-bright);
+    color: var(--black);
+  }
+
+  .estimator-result .fine-print {
+    color: var(--on-dark-faint);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .estimator-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+
+    .estimator-inputs {
+      padding: var(--space-m);
+      order: 2;
+    }
+
+    /* On a phone the natural order is count first, then read the total — but
+       keep the panel pinned so the running summary stays in view while
+       tapping. */
+    .estimator-result {
+      position: sticky;
+      top: 76px;
+      order: 1;
+      z-index: 2;
+    }
+
+    .est-number {
+      font-size: var(--step-3);
+    }
+  }
+</style>

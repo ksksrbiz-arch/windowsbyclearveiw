@@ -5,7 +5,11 @@ interface Props {
 const { compact = false } = Astro.props;
 const skyId = compact ? 'brand-sky-compact' : 'brand-sky';
 ---
-<a class:list={['brand', compact && 'is-compact']} href="/" aria-label="Clearveiw Windows home">
+<a
+  class:list={['brand', compact && 'is-compact']}
+  href="/"
+  aria-label="Clearveiw Windows home"
+>
   <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
     <rect x="3" y="3" width="42" height="42" rx="4" fill="#f6f1e8" stroke="#122033" stroke-width="2.4" />
     <rect x="7" y="7" width="16.4" height="34" fill={`url(#${skyId})`} />
@@ -27,3 +31,69 @@ const skyId = compact ? 'brand-sky-compact' : 'brand-sky';
     <span class="brand-sub">Vancouver, WA</span>
   </span>
 </a>
+
+<style>
+  /* The mark and wordmark travel together, so they are styled here rather
+     than by whichever parent happens to contain them. The compact variant is
+     the footer's — Astro scoping means a parent cannot reach in to restyle
+     these elements, which is the point. */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: var(--on-dark);
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    display: block;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .brand:hover .brand-mark {
+    transform: translateY(-1px) rotate(-1.5deg);
+  }
+
+  .brand-type {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+
+  .brand-type strong {
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .brand-sub {
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--on-dark-faint);
+    font-weight: 500;
+  }
+
+  .brand.is-compact {
+    color: var(--ink);
+  }
+
+  .brand.is-compact .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand.is-compact .brand-sub {
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 380px) {
+    .brand:not(.is-compact) .brand-sub {
+      display: none;
+    }
+  }
+</style>

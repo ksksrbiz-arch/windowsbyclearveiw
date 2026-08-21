@@ -1,0 +1,142 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../data/site';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('legal');
+  return pages.map((page) => ({ params: { slug: page.id }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+
+const others = (await getCollection('legal'))
+  .filter((entry) => entry.id !== page.id)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const updated = page.data.updated.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: page.data.title,
+  description: page.data.description,
+  dateModified: page.data.updated.toISOString(),
+  publisher: { '@id': `${site.url}/#business` },
+};
+---
+<BaseLayout
+  title={page.data.title}
+  description={page.data.description}
+  path={`/legal/${page.id}`}
+  crumbs={[{ name: page.data.title, href: `/legal/${page.id}` }]}
+  schema={schema}
+>
+  <section class="page-hero">
+    <div class="wrap is-narrow">
+      <p class="kicker">Legal</p>
+      <h1>{page.data.title}</h1>
+      <p class="lede">{page.data.summary}</p>
+      <p class="legal-meta">Last updated {updated}</p>
+    </div>
+  </section>
+
+  <article class="section">
+    <div class="wrap is-narrow prose legal-body" data-reveal>
+      <Content />
+    </div>
+
+    <div class="wrap is-narrow" data-reveal>
+      <nav class="legal-nav" aria-label="Other legal pages">
+        <p class="rule-label">Also here</p>
+        <ul>
+          {others.map((entry) => (
+            <li>
+              <a href={`/legal/${entry.id}`}>
+                <strong>{entry.data.title}</strong>
+                <span>{entry.data.summary}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal-meta {
+    margin: var(--space-m) 0 0;
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--dark-line);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--on-dark-faint);
+  }
+
+  /* Legal text is read in fragments, by someone looking for one clause. The
+     headings need to be findable at a glance more than they need to be big. */
+  .legal-body :global(h2) {
+    margin-top: var(--space-2xl);
+    font-size: var(--step-2);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legal-body :global(> p:first-of-type) {
+    font-size: var(--step-0);
+    color: var(--ink);
+  }
+
+  .legal-body :global(table) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .legal-nav {
+    margin-top: var(--space-2xl);
+  }
+
+  .legal-nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .legal-nav li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legal-nav a {
+    display: grid;
+    gap: 0.15rem;
+    padding: var(--space-s) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .legal-nav a:hover,
+  .legal-nav a:focus-visible {
+    padding-left: var(--space-2xs);
+    background: var(--accent-wash);
+  }
+
+  .legal-nav strong {
+    font-size: var(--step-0);
+    font-weight: 600;
+  }
+
+  .legal-nav span {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+</style>

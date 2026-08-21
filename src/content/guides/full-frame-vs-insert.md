@@ -13,6 +13,7 @@ faq:
     answer: A little. The new frame sits inside the old one, so you lose a strip of glass around the edge. On most houses it is hard to notice. On a small bathroom window it can matter.
   - question: Can you mix methods on one house?
     answer: Yes. A rotten kitchen sink window may need full-frame while the bedrooms take inserts. The elevations should still read as one house.
+diagram: insert-vs-full-frame
 ---
 
 There are two honest ways to put a new window in an old opening. The right one depends on the frame that is already there, not on a sales package.

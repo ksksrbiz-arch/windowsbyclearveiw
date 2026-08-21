@@ -46,10 +46,11 @@ const poster = await getImage({
   </section>
 ) : (
   <section class="photo-hero">
+    <div class="photo-hero-grain" aria-hidden="true"></div>
     <div class="wrap photo-hero-inner">
       <div class="photo-hero-copy">
-        <p class="kicker">Vancouver, WA &middot; Clark County</p>
-        <h1>Clear glass. Tight openings.</h1>
+        <p class="hero-eyebrow"><span aria-hidden="true"></span>Vancouver, WA &middot; Clark County</p>
+        <h1>Clear glass.<br /><em>Tight openings.</em></h1>
         <p class="lede">
           {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
           Washougal, Battle Ground, Brush Prairie, Ridgefield, and the rest of Clark County.
@@ -60,25 +61,30 @@ const poster = await getImage({
         </p>
         <p class="hero-note">Free measure. A written number before anything comes out of the wall.</p>
         <ul class="trust-strip">
-          <li>Owner on the job</li>
-          <li>Replacement &amp; new construction</li>
-          <li>Vancouver, WA based</li>
-          <li>Free written estimate</li>
+          <li><strong>Owner</strong><span>on the job, start to finish</span></li>
+          <li><strong>Both</strong><span>replacement &amp; new construction</span></li>
+          <li><strong>Local</strong><span>Vancouver, WA based</span></li>
+          <li><strong>Free</strong><span>written estimate, no pressure</span></li>
         </ul>
       </div>
       <figure class="photo-hero-frame">
-        <Image
-          src={heroPhoto.image}
-          alt={heroPhoto.alt}
-          widths={[450, 700, 900]}
-          sizes="(max-width: 800px) 100vw, 480px"
-          format="webp"
-          quality={78}
-          loading="eager"
-          fetchpriority="high"
-          decoding="sync"
-        />
-        <figcaption>After. Clark County replacement.</figcaption>
+        <div class="photo-hero-plate">
+          <Image
+            src={heroPhoto.image}
+            alt={heroPhoto.alt}
+            widths={[450, 700, 900]}
+            sizes="(max-width: 800px) 100vw, 480px"
+            format="webp"
+            quality={78}
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+          />
+        </div>
+        <figcaption>
+          <span class="photo-hero-tag">After</span>
+          Clark County replacement
+        </figcaption>
       </figure>
     </div>
   </section>
@@ -100,3 +106,238 @@ const poster = await getImage({
   calmHero();
   document.addEventListener('astro:page-load', calmHero);
 </script>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     The hero carries the whole first impression, so it owns its styling
+     outright rather than borrowing shared selectors. Everything here is
+     scoped to this component.
+
+     The constraint that shapes it: the source photo is 450px wide. Blown up
+     full-bleed it reads as soft. Framed at an honest size, against a large
+     dark field and large type, it reads as deliberate.
+     ─────────────────────────────────────────────────────────────────────── */
+  .photo-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        120% 90% at 82% 12%,
+        color-mix(in srgb, var(--accent) 26%, transparent),
+        transparent 62%
+      ),
+      var(--black);
+    color: var(--on-dark);
+    padding: var(--space-2xl) 0 var(--space-3xl);
+  }
+
+  /* A very faint diagonal ruling. It gives the flat black field a surface,
+     which is what stops the hero reading as an empty box. */
+  .photo-hero-grain {
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    opacity: 0.5;
+    background-image: repeating-linear-gradient(
+      118deg,
+      transparent 0 22px,
+      rgb(255 255 255 / 0.022) 22px 23px
+    );
+    pointer-events: none;
+  }
+
+  .photo-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: clamp(2rem, 5vw, 5.5rem);
+    align-items: center;
+  }
+
+  .photo-hero-copy,
+  .photo-hero-frame {
+    min-width: 0;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 var(--space-s);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--on-dark-faint);
+  }
+
+  .hero-eyebrow span {
+    width: 0.44rem;
+    height: 0.44rem;
+    border-radius: 50%;
+    background: var(--accent-bright);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-bright) 22%, transparent);
+  }
+
+  .photo-hero-copy h1 {
+    max-width: 12ch;
+    color: var(--on-dark);
+    font-size: var(--step-6);
+  }
+
+  /* The second line is the promise, so it gets the accent. `em` rather than a
+     span because it is genuinely an emphasis, not decoration. */
+  .photo-hero-copy h1 em {
+    font-style: normal;
+    color: color-mix(in srgb, var(--accent-bright) 78%, var(--on-dark));
+  }
+
+  .photo-hero-copy .lede {
+    max-width: 34rem;
+    color: var(--on-dark-soft);
+    margin-bottom: var(--space-m);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin: 0;
+  }
+
+  .hero-note {
+    margin: var(--space-s) 0 0;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  /* Four claims, each a value and a qualifier. The previous version was a row
+     of undifferentiated 13px phrases that scanned as filler. */
+  .trust-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--dark-line-strong);
+  }
+
+  .trust-strip li {
+    display: grid;
+    gap: 0.15rem;
+    padding: var(--space-s) var(--space-s) 0 0;
+    border-right: 1px solid var(--dark-line);
+  }
+
+  .trust-strip li:last-child {
+    border-right: 0;
+  }
+
+  .trust-strip strong {
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--on-dark);
+  }
+
+  .trust-strip span {
+    font-size: var(--step--2);
+    line-height: 1.4;
+    color: var(--on-dark-faint);
+  }
+
+  /* The photo sits on a plate with an offset accent rule behind it, so the
+     image has an edge and a shadow instead of bleeding into the black. */
+  .photo-hero-frame {
+    position: relative;
+    margin: 0;
+    width: 100%;
+  }
+
+  .photo-hero-frame::before {
+    content: '';
+    position: absolute;
+    inset: 1.1rem -1.1rem -1.1rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--accent-bright) 55%, transparent);
+    border-radius: var(--radius);
+    z-index: 0;
+  }
+
+  .photo-hero-plate {
+    position: relative;
+    z-index: 1;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--black) 88%, white);
+    box-shadow: 0 30px 70px rgb(0 0 0 / 0.55);
+  }
+
+  .photo-hero-plate img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 52% 38%;
+  }
+
+  .photo-hero-frame figcaption {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: var(--space-2xs) 0 0;
+    color: var(--on-dark-faint);
+    font-size: var(--step--2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .photo-hero-tag {
+    padding: 0.15rem 0.45rem;
+    border: 1px solid color-mix(in srgb, var(--accent-bright) 55%, transparent);
+    border-radius: 2px;
+    color: var(--accent-bright);
+    letter-spacing: var(--tracking-label);
+  }
+
+  @media (max-width: 900px) {
+    .photo-hero {
+      padding: var(--space-xl) 0 var(--space-2xl);
+    }
+
+    .photo-hero-inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+
+    .photo-hero-copy h1 {
+      max-width: none;
+    }
+
+    .photo-hero-plate {
+      aspect-ratio: 5 / 4;
+    }
+
+    .photo-hero-plate img {
+      object-position: 52% 34%;
+    }
+
+    .trust-strip {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .trust-strip li:nth-child(2n) {
+      border-right: 0;
+      padding-left: var(--space-s);
+    }
+
+    .trust-strip li:nth-child(n + 3) {
+      border-top: 1px solid var(--dark-line);
+      margin-top: var(--space-2xs);
+    }
+  }
+</style>

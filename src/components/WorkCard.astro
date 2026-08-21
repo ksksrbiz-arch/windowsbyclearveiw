@@ -7,20 +7,17 @@ interface Props {
   alt: string;
   caption?: string;
   kind?: string;
-  featured?: boolean;
   /** First tile on a page paints above the fold — skip lazy loading there. */
   eager?: boolean;
 }
 
-const { image, alt, caption, kind, featured = false, eager = false } = Astro.props;
+const { image, alt, caption, kind, eager = false } = Astro.props;
 
-// Featured tiles run double width, so ask for a wider source on those.
-const widths = featured ? [400, 640, 900] : [280, 400, 560];
-const sizes = featured
-  ? '(max-width: 800px) 50vw, 620px'
-  : '(max-width: 800px) 50vw, 300px';
+// Never wider than the 450px source. Asking for more only upscales.
+const widths = [280, 400, 560];
+const sizes = '(max-width: 800px) 50vw, 300px';
 ---
-<figure class:list={['work-card', featured && 'is-featured']}>
+<figure class="work-card">
   <div class="work-media">
     <Image
       src={image}
@@ -36,8 +33,75 @@ const sizes = featured
   </div>
   {(caption || kind) && (
     <figcaption>
-      {caption && <span>{caption}</span>}
+      {caption && <span class="work-caption">{caption}</span>}
       {kind && <span class="work-kind">{kind}</span>}
     </figcaption>
   )}
 </figure>
+
+<style>
+  /* ───────────────────────────────────────────────────────────────────────
+     Every source photo here is 450px wide, shot on a phone. That is the hard
+     ceiling on this site and no CSS lifts it. What CSS can do is make the
+     constraint look chosen: a consistent crop, a real frame, and a caption
+     system that treats each tile as a catalogued job rather than a thumbnail
+     floating on the page.
+     ─────────────────────────────────────────────────────────────────────── */
+  .work-card {
+    margin: 0;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .work-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .work-media {
+    overflow: hidden;
+    background: var(--paper-sunk);
+  }
+
+  .work-card img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .work-card:hover img {
+    transform: scale(1.035);
+  }
+
+  .work-card figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2xs);
+    align-items: baseline;
+    padding: var(--space-2xs) var(--space-xs) var(--space-xs);
+    font-size: var(--step--2);
+  }
+
+  .work-caption {
+    color: var(--ink);
+  }
+
+  .work-kind {
+    flex: none;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-card img {
+      transition: none;
+    }
+  }
+</style>

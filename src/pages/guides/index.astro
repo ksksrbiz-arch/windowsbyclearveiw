@@ -13,23 +13,130 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
   path="/guides"
   crumbs={[{ name: 'Guides', href: '/guides' }]}
 >
-  <section class="wrap section">
-    <p class="kicker">Guides</p>
-    <h1>Understand the opening before you buy a window.</h1>
-    <p class="lede">
-      Short answers to the questions people ask before they call. Written for Washington weather,
-      not a national sales script.
-    </p>
-    <div class="cards">
-      {guides.map((guide) => (
-        <article class="card">
-          <p class="kicker">{guide.data.topic}</p>
-          <h2><a href={`/guides/${guide.id}`}>{guide.data.title}</a></h2>
-          <p>{guide.data.description}</p>
-        </article>
-      ))}
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Guides</p>
+      <h1>Understand the opening before you buy a window.</h1>
+      <p class="lede">
+        Short answers to the questions people ask before they call. Written for Washington
+        weather, not a national sales script.
+      </p>
     </div>
   </section>
 
-  <CtaBar />
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">{guides.length} guides</p>
+      <ol class="guide-index">
+        {guides.map((guide, index) => (
+          <li>
+            <a href={`/guides/${guide.id}`}>
+              <span class="guide-num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <span class="guide-text">
+                <span class="guide-topic">{guide.data.topic}</span>
+                <strong>{guide.data.title}</strong>
+                <span class="guide-blurb">{guide.data.description}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Read enough? Get it measured."
+    body="The guides get you to the right questions. A measure gets you the answer for your house."
+  />
 </BaseLayout>
+
+<style>
+  /* Numbered, because they are meant to be read in order by someone working
+     out whether they have a problem. A card grid implied they were
+     interchangeable. */
+  .guide-index {
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .guide-index li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .guide-index a {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: var(--space-s);
+    align-items: start;
+    padding: var(--space-m) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .guide-index a:hover,
+  .guide-index a:focus-visible {
+    padding-left: var(--space-s);
+    background: var(--accent-wash);
+  }
+
+  .guide-num {
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    color: var(--line-strong);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .guide-index a:hover .guide-num,
+  .guide-index a:focus-visible .guide-num {
+    color: var(--accent);
+  }
+
+  .guide-text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .guide-topic {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .guide-text strong {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+  }
+
+  .guide-blurb {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    max-width: var(--measure);
+  }
+
+  @media (max-width: 700px) {
+    .guide-index a {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      gap: var(--space-2xs);
+    }
+
+    .guide-num {
+      font-size: var(--step-1);
+    }
+
+    .guide-index a:hover,
+    .guide-index a:focus-visible {
+      padding-left: 0;
+      background: transparent;
+    }
+  }
+</style>

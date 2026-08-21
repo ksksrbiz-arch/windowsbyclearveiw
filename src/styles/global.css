@@ -165,61 +165,7 @@ p, li { text-wrap: pretty; }
 .wrap.is-narrow { width: min(52rem, calc(100% - var(--space-m) * 2)); }
 .wrap.is-wide { width: min(90rem, calc(100% - var(--space-m) * 2)); }
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--black);
-  border-bottom: 1px solid var(--dark-line);
-}
-
-.header-inner, .footer-grid, .split, .cards, .cta-bar {
-  display: flex;
-}
-
-.header-inner {
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 64px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  text-decoration: none;
-  color: var(--on-dark);
-}
-
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.1rem 1.35rem;
-}
-
-.nav a {
-  color: var(--on-dark);
-  text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 500;
-}
-
-.nav a[aria-current="page"] {
-  opacity: 0.45;
-}
-
-.nav-estimate { display: none; }
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.header-cta-short { display: none; }
-
-.btn {
+.split, .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -291,7 +237,6 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 .section { padding: var(--space-2xl) 0; }
 .section.is-tight { padding: var(--space-xl) 0; }
 .section.is-airy { padding: var(--space-3xl) 0; }
-.section-muted { background: var(--paper-raised); }
 .section-sunk { background: var(--paper-sunk); }
 .section-dark {
   background: var(--black);
@@ -304,10 +249,28 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 .section-dark p { color: var(--on-dark-soft); }
 .section-dark .kicker { color: var(--on-dark-faint); }
 
+/* Fourteen pages open with this band, so it does most of the work of making
+   the site feel like one thing. It gets the same accent field as the home
+   hero and a rule at its foot, rather than ending on a hard edge. */
 .page-hero {
-  background: var(--black);
+  position: relative;
+  background:
+    radial-gradient(
+      80% 120% at 92% 0%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 58%
+    ),
+    var(--black);
   color: var(--on-dark);
-  padding: 3.75rem 0 3.25rem;
+  padding: var(--space-2xl) 0 var(--space-xl);
+}
+
+.page-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-bright), transparent 45%);
 }
 
 .page-hero h1 {
@@ -316,32 +279,29 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 }
 
 .page-hero .kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   color: var(--on-dark-faint);
+}
+
+.page-hero .kicker::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  flex: none;
 }
 
 .page-hero .lede {
   color: var(--on-dark-soft);
   margin-bottom: 0;
+  max-width: 44rem;
 }
-
-.cards {
-  gap: 0;
-  flex-wrap: wrap;
-}
-
-.card, .review {
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  padding: 1.3rem 0;
-  box-shadow: none;
-}
-
-.card { flex: 1 1 240px; }
 
 .split {
-  gap: 4rem;
+  gap: var(--space-xl);
   align-items: start;
 }
 
@@ -360,12 +320,6 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 
 .plain-list li:last-child {
   border-bottom: 1px solid var(--line);
-}
-
-.cta-bar {
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
 }
 
 form {
@@ -390,19 +344,6 @@ input:focus, textarea:focus, select:focus {
   border-bottom-color: var(--ink);
 }
 
-.site-footer {
-  border-top: 1px solid var(--line);
-  padding: 3.5rem 0 2.5rem;
-  color: var(--ink-soft);
-  background: var(--paper-raised);
-}
-
-.footer-grid {
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
 .fine-print { font-size: var(--step--1); color: var(--ink-soft); }
 
 .notice {
@@ -413,17 +354,6 @@ input:focus, textarea:focus, select:focus {
   padding: 1rem 0 0;
   margin-top: 2rem;
   font-size: 0.92rem;
-}
-
-.nav-toggle {
-  display: none;
-  border: 1px solid var(--dark-line-strong);
-  background: transparent;
-  color: var(--on-dark);
-  border-radius: 4px;
-  padding: 0.5rem 0.8rem;
-  font: inherit;
-  font-weight: 500;
 }
 
 .video-hero {
@@ -465,8 +395,6 @@ input:focus, textarea:focus, select:focus {
 
 .video-copy .kicker { color: var(--on-dark-faint); }
 
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
-
 .btn-light {
   background: var(--on-dark);
   color: var(--ink);
@@ -483,35 +411,55 @@ input:focus, textarea:focus, select:focus {
   list-style: none;
   display: grid;
   gap: 0;
+  counter-reset: step;
 }
 
+/* Numbered because they are a sequence. The list previously rendered as four
+   undifferentiated bordered rows, which read as bullets rather than order. */
 .steps li {
+  position: relative;
   background: transparent;
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
-  padding: 1.15rem 0;
+  padding: 1.15rem 0 1.15rem 3rem;
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1.35rem;
+  font-size: var(--step--1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.section-dark .steps li::before { color: var(--accent-bright); }
+
+.areas-inline {
+  margin-top: var(--space-m);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.areas-inline a {
+  white-space: nowrap;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--line-strong);
+}
+
+.areas-inline a:hover {
+  color: var(--accent-ink);
+  text-decoration-color: currentColor;
 }
 
 .steps li:last-child {
   border-bottom: 1px solid var(--line);
-}
-
-.guide { max-width: 760px; }
-
-.guide-body p,
-.guide-body li { max-width: 42rem; }
-
-.guide-body h2 { margin-top: 2.2rem; }
-
-.faq details {
-  border-top: 1px solid var(--line);
-  padding: 0.9rem 0;
-}
-
-.faq summary {
-  cursor: pointer;
-  font-weight: 500;
 }
 
 .section-link {
@@ -519,44 +467,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 800px) {
-  .split, .cta-bar { display: grid; }
-  .nav { display: none; }
-  .nav-toggle { display: inline-flex; }
-  .header-inner { position: relative; }
-  .nav {
-    position: absolute;
-    top: calc(100% + 0.4rem);
-    right: 0;
-    left: auto;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.9rem 1rem;
-    background: var(--ink);
-    border: 1px solid var(--dark-line);
-    border-radius: 4px;
-    min-width: 220px;
-  }
-  .nav.is-open { display: flex; }
-
-  .nav-estimate {
-    display: block;
-    margin-top: 0.55rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--dark-line);
-    font-weight: 600;
-  }
-
-  /* Click-to-call is the highest-value action on a phone. Shrink it, never hide it. */
-  .header-cta {
-    padding: 0.55rem 0.85rem;
-  }
-
-  .header-cta-full { display: none; }
-  .header-cta-short { display: inline; }
-}
-
-@media (max-width: 380px) {
-  .brand-sub { display: none; }
+  .split { display: grid; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -617,3 +528,124 @@ html.reveal-ready [data-reveal].is-revealed {
 
 .section-dark .rule-label { color: var(--on-dark-faint); }
 .section-dark .rule-label::after { background: var(--dark-line); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Work grid.
+
+   Shared, because four pages lay photos out this way. The tile itself is
+   styled inside WorkCard; only the arrangement lives here.
+   ───────────────────────────────────────────────────────────────────────── */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xs);
+}
+
+.work-grid-home {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* A single tall new-build shot should not stretch to fill the row. */
+.work-grid-newbuild {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 800px) {
+  .work-grid-home {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Prose.
+
+   Applied to the wrapper around rendered markdown. Deliberately global:
+   <Content /> output carries no component scope attribute, so a scoped rule
+   would need :global() on every selector and would then be duplicated in
+   each template that renders markdown.
+   ───────────────────────────────────────────────────────────────────────── */
+.prose {
+  max-width: var(--measure);
+}
+
+.prose p,
+.prose li {
+  font-size: var(--step-0);
+  line-height: 1.65;
+}
+
+.prose > p:first-of-type {
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.prose h2 {
+  margin: var(--space-xl) 0 var(--space-xs);
+  font-size: var(--step-3);
+}
+
+.prose h3 {
+  margin: var(--space-l) 0 var(--space-2xs);
+  font-size: var(--step-1);
+}
+
+.prose blockquote {
+  margin: var(--space-l) 0;
+  padding: 0 0 0 var(--space-m);
+  border-left: 2px solid var(--accent);
+  font-size: var(--step-1);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.prose blockquote p {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.prose a {
+  color: var(--accent-ink);
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: var(--space-m);
+}
+
+.prose li {
+  margin-bottom: var(--space-2xs);
+}
+
+.prose li::marker {
+  color: var(--accent);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-l) 0;
+  font-size: var(--step--1);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--space-2xs) var(--space-s) var(--space-2xs) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.prose th {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+  font-weight: 500;
+}
