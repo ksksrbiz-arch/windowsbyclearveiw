@@ -32,7 +32,7 @@ aim at the Web Content Accessibility Guidelines (WCAG) 2.2, Level AA.
 - **Described images.** Job photographs carry alternative text describing the
   work shown. Decorative images are marked so a screen reader skips them.
 - **Described diagrams.** The installation diagrams carry text descriptions of
-  what they show, and never use colour as the only way of telling two things
+  what they show, and never use color as the only way of telling two things
   apart.
 
 ## Where it is honestly still short
