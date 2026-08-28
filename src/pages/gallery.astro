@@ -2,7 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
-import { allWork } from '../data/work';
+import { allWork, findWork } from '../data/work';
+
+const ogPhoto = findWork('green-craftsman-upper')!;
 
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip
@@ -50,6 +52,8 @@ const total = allWork.length;
   description="Real window replacement and new-construction jobs in Vancouver, WA and Clark County — finished elevations, interiors, and install-day photos."
   path="/gallery"
   crumbs={[{ name: 'Gallery', href: '/gallery' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
 >
   <section class="page-hero">
     <div class="wrap">

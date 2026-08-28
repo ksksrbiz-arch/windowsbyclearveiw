@@ -3,9 +3,13 @@ import { site, phoneDigits } from '../data/site';
 
 interface Props {
   extra?: Record<string, unknown>;
+  /** Absolute URL of a representative photo. BaseLayout already computes one
+   *  per page (the OG image); reusing it here means the business entity
+   *  always points at a real job photo instead of nothing. */
+  image?: string;
 }
 
-const { extra } = Astro.props;
+const { extra, image } = Astro.props;
 const digits = phoneDigits();
 
 const business = {
@@ -17,6 +21,7 @@ const business = {
   url: site.url,
   description: site.description,
   slogan: site.tagline,
+  ...(image ? { image } : {}),
   areaServed: site.nearby.map((place) => ({
     '@type': 'City',
     name: place.name,
