@@ -6,7 +6,10 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 <InternalLayout title="Quote">
   <div class="qv-toolbar" data-toolbar hidden>
     <a class="qv-back" href="/internal/quotes">&larr; All quotes</a>
-    <button class="btn btn-primary" type="button" data-print-btn>Print</button>
+    <div class="qv-toolbar-actions">
+      <a class="btn btn-ghost" data-edit-link hidden href="#">Edit quote</a>
+      <button class="btn btn-primary" type="button" data-print-btn>Print</button>
+    </div>
   </div>
 
   <p data-loading>Loading…</p>
@@ -85,6 +88,16 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
         </div>
       </div>
 
+      <div data-sig-pen-confirm hidden class="sig-pad-block no-print">
+        <p class="est-hint">Print this, get it signed, then confirm here — the quote stays editable until you do.</p>
+        <label>
+          Signed by (printed name)
+          <input type="text" data-sig-pen-name maxlength="200" />
+        </label>
+        <button type="button" class="btn btn-primary" data-sig-pen-confirm-btn>Confirm it's signed</button>
+        <p class="qv-error" data-sig-pen-error hidden role="alert"></p>
+      </div>
+
       <div data-sig-digital-pending hidden class="sig-pad-block">
         <label>
           Printed name
@@ -101,7 +114,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
       <div data-sig-signed hidden class="sig-signed-block">
         <div class="sig-signed-image" data-sig-svg-host></div>
-        <p class="sig-caption">
+        <p class="sig-caption" data-sig-signed-caption>
           <span data-sig-signed-name></span> &middot; signed <span data-sig-signed-at></span>
         </p>
       </div>
@@ -154,6 +167,16 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       if (toolbar instanceof HTMLElement) toolbar.hidden = false;
       root.hidden = false;
 
+      const editLink = document.querySelector('[data-edit-link]');
+      if (editLink instanceof HTMLAnchorElement) {
+        if (quote.status === 'draft') {
+          editLink.hidden = false;
+          editLink.href = `/internal/quotes/new?edit=${encodeURIComponent(quote.id)}`;
+        } else {
+          editLink.hidden = true;
+        }
+      }
+
       const set = (selector: string, value: string) => {
         const el = root.querySelector(selector);
         if (el) el.textContent = value;
@@ -196,13 +219,16 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
     function renderSignatureState(quote: any) {
       const penBlock = root.querySelector('[data-sig-pen]');
+      const penConfirmBlock = root.querySelector('[data-sig-pen-confirm]');
       const pendingBlock = root.querySelector('[data-sig-digital-pending]');
       const signedBlock = root.querySelector('[data-sig-signed]');
-      [penBlock, pendingBlock, signedBlock].forEach((el) => {
+      [penBlock, penConfirmBlock, pendingBlock, signedBlock].forEach((el) => {
         if (el instanceof HTMLElement) el.hidden = true;
       });
 
-      if (quote.status === 'finalized' && quote.signature_method === 'digital' && quote.signature_svg) {
+      const finalized = quote.status === 'finalized';
+
+      if (finalized && quote.signature_method === 'digital' && quote.signature_svg) {
         if (signedBlock instanceof HTMLElement) {
           signedBlock.hidden = false;
           const host = signedBlock.querySelector('[data-sig-svg-host]');
@@ -212,6 +238,19 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
           if (nameEl) nameEl.textContent = quote.signature_name || '';
           if (atEl) atEl.textContent = quote.signed_at ? new Date(quote.signed_at).toLocaleString('en-US') : '';
         }
+      } else if (finalized && quote.signature_method === 'pen') {
+        // No drawn signature to render — the customer signed the printed
+        // page, and this quote row is just recording that it happened.
+        if (penBlock instanceof HTMLElement) penBlock.hidden = false;
+        if (signedBlock instanceof HTMLElement) {
+          signedBlock.hidden = false;
+          const host = signedBlock.querySelector('[data-sig-svg-host]');
+          if (host) host.innerHTML = '';
+          const nameEl = signedBlock.querySelector('[data-sig-signed-name]');
+          const atEl = signedBlock.querySelector('[data-sig-signed-at]');
+          if (nameEl) nameEl.textContent = quote.signature_name ? `Signed by hand — ${quote.signature_name}` : 'Signed by hand';
+          if (atEl) atEl.textContent = quote.signed_at ? new Date(quote.signed_at).toLocaleString('en-US') : '';
+        }
       } else if (quote.signature_method === 'digital') {
         if (pendingBlock instanceof HTMLElement) {
           pendingBlock.hidden = false;
@@ -219,7 +258,51 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
         }
       } else {
         if (penBlock instanceof HTMLElement) penBlock.hidden = false;
+        if (penConfirmBlock instanceof HTMLElement) {
+          penConfirmBlock.hidden = false;
+          setupPenConfirm(quote);
+        }
       }
+    }
+
+    function setupPenConfirm(quote: any) {
+      const btn = root.querySelector('[data-sig-pen-confirm-btn]');
+      if (!(btn instanceof HTMLButtonElement) || btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
+
+      const nameInput = root.querySelector('[data-sig-pen-name]');
+      const errorEl = root.querySelector('[data-sig-pen-error]');
+
+      btn.addEventListener('click', async () => {
+        if (!(errorEl instanceof HTMLElement)) return;
+        errorEl.hidden = true;
+
+        const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : '';
+        if (!name) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Enter the name of the person who signed.';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        try {
+          const response = await fetch(`/internal/api/quotes/${encodeURIComponent(quote.id)}`, {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ confirmPen: true, signatureName: name }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not confirm the signature.');
+          load();
+        } catch (error) {
+          errorEl.hidden = false;
+          errorEl.textContent = error instanceof Error ? error.message : 'Could not confirm the signature.';
+          btn.disabled = false;
+          btn.textContent = "Confirm it's signed";
+        }
+      });
     }
 
     function setupSignaturePad(quote: any) {
@@ -360,6 +443,12 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--space-m);
+    gap: var(--space-s);
+  }
+
+  .qv-toolbar-actions {
+    display: flex;
+    gap: var(--space-xs);
   }
 
   .qv-back {
@@ -480,6 +569,14 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     font-size: var(--step--1);
   }
 
+  /* Several rules above set display: flex/grid on elements that also get
+     toggled with the plain [hidden] attribute from script. Author styles
+     beat the browser's own [hidden] rule regardless of selector specificity,
+     so without this an element JS marked hidden could still render. */
+  [hidden] {
+    display: none !important;
+  }
+
   .contract-total-final {
     font-size: var(--step-1);
     font-weight: 600;
@@ -570,6 +667,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     }
 
     .sig-pad-block,
+    .no-print,
     .qv-toolbar {
       display: none !important;
     }
