@@ -196,12 +196,10 @@ async function logInteraction(env, entry) {
         entry.refused ? 1 : 0,
       )
       .run();
-    return null;
   } catch (err) {
     // Logging is best-effort visibility, never a reason to fail a chat turn.
-    const msg = String(err?.message || err);
-    console.error('ask_logs insert failed:', msg);
-    return msg;
+    // Errors go to the Function's own console, never to the visitor.
+    console.error('ask_logs insert failed:', err?.message || err);
   }
 }
 
@@ -269,7 +267,7 @@ export async function onRequestPost(context) {
   const sources = [...new Map([...guideSources, ...webSources].map((s) => [s.url, s])).values()];
   const toolsUsed = [...new Set(trace.map((t) => t.name))];
 
-  const logError = await logInteraction(env, {
+  await logInteraction(env, {
     question: message,
     answer,
     modelUsed,
@@ -279,7 +277,5 @@ export async function onRequestPost(context) {
     refused: /don't have that|isn't available/i.test(answer),
   });
 
-  // TEMPORARY: surfaces a D1 write failure for diagnosis. Remove once
-  // ask_logs is confirmed reliably capturing production traffic.
-  return json({ answer, sources, ...(logError ? { logError } : {}) });
+  return json({ answer, sources });
 }
