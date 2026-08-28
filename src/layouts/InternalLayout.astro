@@ -1,0 +1,112 @@
+---
+import '../styles/global.css';
+
+/**
+ * Shell for the internal quoting tool. Deliberately not BaseLayout: that one
+ * carries public nav, a customer-facing phone CTA, and marketing chrome that
+ * would be actively confusing wrapped around a screen where Mark is typing a
+ * customer's address into a contract. This shares the design tokens (global.css)
+ * for visual consistency, but owns its own minimal header and no footer at all.
+ *
+ * noindex is set three ways, deliberately redundant: this meta tag, the
+ * X-Robots-Tag header the middleware adds, and exclusion from the sitemap.
+ * None of the three is the actual access control — the session cookie is —
+ * but a tool holding customer names, addresses, and signatures should not be
+ * one crawler bug away from showing up in search results.
+ */
+interface Props {
+  title: string;
+  /** Set false on the login page — there is no session to log out of yet. */
+  showLogout?: boolean;
+}
+const { title, showLogout = true } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Clearveiw internal</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="internal">
+    <header class="internal-header">
+      <div class="internal-header-inner">
+        <span class="internal-brand">Clearveiw <span>Internal</span></span>
+        {showLogout && (
+          <form method="post" action="/internal/api/logout">
+            <button class="internal-logout" type="submit">Log out</button>
+          </form>
+        )}
+      </div>
+    </header>
+    <main class="internal-main">
+      <slot />
+    </main>
+
+    <style>
+      .internal {
+        background: var(--paper);
+        min-height: 100vh;
+      }
+
+      .internal-header {
+        background: var(--black);
+        color: var(--on-dark);
+        border-bottom: 1px solid var(--dark-line);
+      }
+
+      .internal-header-inner {
+        max-width: 60rem;
+        margin-inline: auto;
+        padding: var(--space-s) var(--space-m);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .internal-brand {
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .internal-brand span {
+        color: var(--accent-bright);
+        font-weight: 500;
+      }
+
+      .internal-logout {
+        background: transparent;
+        border: 1px solid var(--dark-line-strong);
+        color: var(--on-dark-soft);
+        border-radius: var(--radius);
+        padding: 0.4rem 0.8rem;
+        font: inherit;
+        font-size: var(--step--1);
+        cursor: pointer;
+      }
+
+      .internal-logout:hover {
+        border-color: var(--accent-bright);
+        color: var(--on-dark);
+      }
+
+      .internal-main {
+        max-width: 60rem;
+        margin-inline: auto;
+        padding: var(--space-l) var(--space-m) var(--space-3xl);
+      }
+
+      @media print {
+        .internal-header {
+          display: none;
+        }
+        .internal-main {
+          max-width: none;
+          padding: 0;
+        }
+      }
+    </style>
+  </body>
+</html>

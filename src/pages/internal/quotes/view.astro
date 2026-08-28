@@ -1,0 +1,577 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+import { site, telHref, mailHref } from '../../../data/site';
+import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
+---
+<InternalLayout title="Quote">
+  <div class="qv-toolbar" data-toolbar hidden>
+    <a class="qv-back" href="/internal/quotes">&larr; All quotes</a>
+    <button class="btn btn-primary" type="button" data-print-btn>Print</button>
+  </div>
+
+  <p data-loading>Loading…</p>
+  <p class="qv-error" data-error hidden role="alert"></p>
+
+  <article class="contract" data-contract hidden>
+    <header class="contract-head">
+      <div>
+        <p class="contract-brand">{site.legalName}</p>
+        <p class="contract-brand-sub">
+          {site.phoneDisplay} &middot; <a href={mailHref()}>{site.email}</a>
+          {site.lniNumber && <> &middot; WA L&amp;I {site.lniNumber}</>}
+        </p>
+      </div>
+      <div class="contract-meta">
+        <p><strong data-quote-id></strong></p>
+        <p data-quote-date></p>
+      </div>
+    </header>
+
+    {!site.lniNumber && (
+      <p class="contract-lni-warning" data-reveal={undefined}>
+        No WA L&amp;I registration number is set in src/data/site.ts. Washington requires it on a
+        contractor's contract, not just advertising — add it before this is used for a real job.
+      </p>
+    )}
+
+    <section class="contract-section">
+      <h2>Customer</h2>
+      <dl class="contract-dl">
+        <div><dt>Name</dt><dd data-c-name></dd></div>
+        <div><dt>Phone</dt><dd data-c-phone></dd></div>
+        <div><dt>Address</dt><dd data-c-address></dd></div>
+        <div><dt>Email</dt><dd data-c-email></dd></div>
+      </dl>
+    </section>
+
+    <section class="contract-section">
+      <h2>Scope of work</h2>
+      <table class="contract-items">
+        <thead><tr><th>Line</th><th>Qty</th><th>Unit</th><th>Total</th></tr></thead>
+        <tbody data-contract-items></tbody>
+      </table>
+      <div class="contract-totals">
+        <div><span>Subtotal</span><span data-t-subtotal></span></div>
+        <div data-discount-row hidden><span data-discount-label>Discount</span><span data-t-discount></span></div>
+        <div class="contract-total-final"><span>Total</span><span data-t-total></span></div>
+      </div>
+    </section>
+
+    <section class="contract-section contract-terms">
+      <h2>Terms</h2>
+      <p>{contractTerms.paymentTerms}</p>
+      <p>{contractTerms.changeOrders}</p>
+      <p>{contractTerms.warranty}</p>
+      <p>{contractTerms.delays}</p>
+      <p>{contractTerms.governingLaw}</p>
+
+      <h3>{contractTerms.rightToCancel.heading}</h3>
+      {contractTerms.rightToCancel.body.map((para) => <p>{para}</p>)}
+
+      <p class="contract-ack">{contractTerms.acknowledgement}</p>
+    </section>
+
+    <section class="contract-section contract-signature">
+      <h2>Signature</h2>
+
+      <div data-sig-pen hidden>
+        <div class="sig-line-block">
+          <div class="sig-line"></div>
+          <p class="sig-caption">Customer signature</p>
+        </div>
+        <div class="sig-line-block">
+          <div class="sig-line"></div>
+          <p class="sig-caption">Date</p>
+        </div>
+      </div>
+
+      <div data-sig-digital-pending hidden class="sig-pad-block">
+        <label>
+          Printed name
+          <input type="text" data-sig-name maxlength="200" />
+        </label>
+        <canvas data-sig-canvas width="600" height="180"></canvas>
+        <p class="est-hint">Sign above with a finger, stylus, or mouse.</p>
+        <div class="sig-pad-actions">
+          <button type="button" class="btn btn-ghost" data-sig-clear>Clear</button>
+          <button type="button" class="btn btn-primary" data-sig-save>Save signature</button>
+        </div>
+        <p class="qv-error" data-sig-error hidden role="alert"></p>
+      </div>
+
+      <div data-sig-signed hidden class="sig-signed-block">
+        <div class="sig-signed-image" data-sig-svg-host></div>
+        <p class="sig-caption">
+          <span data-sig-signed-name></span> &middot; signed <span data-sig-signed-at></span>
+        </p>
+      </div>
+    </section>
+
+    <p class="contract-footer">
+      {site.legalName} &middot; {site.phoneDisplay} &middot; {site.email}
+    </p>
+  </article>
+</InternalLayout>
+
+<script>
+  function initQuoteView() {
+    const root = document.querySelector('[data-contract]');
+    if (!(root instanceof HTMLElement) || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const id = new URLSearchParams(location.search).get('id');
+    const loading = document.querySelector('[data-loading]');
+    const errorEl = document.querySelector('[data-error]');
+    const toolbar = document.querySelector('[data-toolbar]');
+
+    function fail(message: string) {
+      if (loading instanceof HTMLElement) loading.hidden = true;
+      if (errorEl instanceof HTMLElement) {
+        errorEl.hidden = false;
+        errorEl.textContent = message;
+      }
+    }
+
+    if (!id) {
+      fail('No quote id in the URL.');
+      return;
+    }
+
+    const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+    async function load() {
+      const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id!)}`);
+      if (!response.ok) {
+        fail(response.status === 404 ? 'No quote with that id.' : 'Could not load this quote.');
+        return;
+      }
+      const { quote, items } = await response.json();
+      render(quote, items);
+    }
+
+    function render(quote: any, items: any[]) {
+      if (loading instanceof HTMLElement) loading.hidden = true;
+      if (toolbar instanceof HTMLElement) toolbar.hidden = false;
+      root.hidden = false;
+
+      const set = (selector: string, value: string) => {
+        const el = root.querySelector(selector);
+        if (el) el.textContent = value;
+      };
+
+      set('[data-quote-id]', quote.id);
+      set('[data-quote-date]', new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+      set('[data-c-name]', quote.customer_name || '—');
+      set('[data-c-phone]', quote.customer_phone || '—');
+      set('[data-c-address]', [quote.customer_address, quote.customer_city].filter(Boolean).join(', ') || '—');
+      set('[data-c-email]', quote.customer_email || '—');
+
+      const itemsBody = root.querySelector('[data-contract-items]');
+      if (itemsBody instanceof HTMLElement) {
+        itemsBody.innerHTML = '';
+        for (const item of items) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${escapeHtml(item.label)}</td><td>${item.quantity}</td><td>${money(item.unit_price_cents)}</td><td>${money(item.line_total_cents)}</td>`;
+          itemsBody.append(row);
+        }
+      }
+
+      set('[data-t-subtotal]', money(quote.subtotal_cents));
+      set('[data-t-total]', money(quote.total_cents));
+      if (quote.discount_cents > 0) {
+        const row = root.querySelector('[data-discount-row]');
+        if (row instanceof HTMLElement) row.hidden = false;
+        set('[data-discount-label]', quote.discount_reason ? `Discount (${quote.discount_reason})` : 'Discount');
+        set('[data-t-discount]', `-${money(quote.discount_cents)}`);
+      }
+
+      renderSignatureState(quote);
+    }
+
+    function escapeHtml(s: string) {
+      const div = document.createElement('div');
+      div.textContent = s ?? '';
+      return div.innerHTML;
+    }
+
+    function renderSignatureState(quote: any) {
+      const penBlock = root.querySelector('[data-sig-pen]');
+      const pendingBlock = root.querySelector('[data-sig-digital-pending]');
+      const signedBlock = root.querySelector('[data-sig-signed]');
+      [penBlock, pendingBlock, signedBlock].forEach((el) => {
+        if (el instanceof HTMLElement) el.hidden = true;
+      });
+
+      if (quote.status === 'finalized' && quote.signature_method === 'digital' && quote.signature_svg) {
+        if (signedBlock instanceof HTMLElement) {
+          signedBlock.hidden = false;
+          const host = signedBlock.querySelector('[data-sig-svg-host]');
+          if (host) host.innerHTML = quote.signature_svg;
+          const nameEl = signedBlock.querySelector('[data-sig-signed-name]');
+          const atEl = signedBlock.querySelector('[data-sig-signed-at]');
+          if (nameEl) nameEl.textContent = quote.signature_name || '';
+          if (atEl) atEl.textContent = quote.signed_at ? new Date(quote.signed_at).toLocaleString('en-US') : '';
+        }
+      } else if (quote.signature_method === 'digital') {
+        if (pendingBlock instanceof HTMLElement) {
+          pendingBlock.hidden = false;
+          setupSignaturePad(quote);
+        }
+      } else {
+        if (penBlock instanceof HTMLElement) penBlock.hidden = false;
+      }
+    }
+
+    function setupSignaturePad(quote: any) {
+      const canvas = root.querySelector('[data-sig-canvas]');
+      if (!(canvas instanceof HTMLCanvasElement) || canvas.dataset.bound === 'true') return;
+      canvas.dataset.bound = 'true';
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Drawn at device pixel ratio for a crisp line, but strokes are
+      // recorded in the canvas's own logical coordinate space (600x180) so
+      // the exported SVG viewBox matches regardless of screen density.
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = 600 * ratio;
+      canvas.height = 180 * ratio;
+      canvas.style.width = '600px';
+      canvas.style.height = '180px';
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#111214';
+
+      let strokes: Array<Array<[number, number]>> = [];
+      let currentStroke: Array<[number, number]> | null = null;
+      let drawing = false;
+
+      function pointFromEvent(event: PointerEvent): [number, number] {
+        const rect = canvas.getBoundingClientRect();
+        return [event.clientX - rect.left, event.clientY - rect.top];
+      }
+
+      canvas.addEventListener('pointerdown', (event) => {
+        drawing = true;
+        canvas.setPointerCapture(event.pointerId);
+        currentStroke = [pointFromEvent(event)];
+        strokes.push(currentStroke);
+        const [x, y] = currentStroke[0];
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      });
+
+      canvas.addEventListener('pointermove', (event) => {
+        if (!drawing || !currentStroke) return;
+        const point = pointFromEvent(event);
+        currentStroke.push(point);
+        ctx.lineTo(point[0], point[1]);
+        ctx.stroke();
+      });
+
+      const stopDrawing = () => {
+        drawing = false;
+        currentStroke = null;
+      };
+      canvas.addEventListener('pointerup', stopDrawing);
+      canvas.addEventListener('pointerleave', stopDrawing);
+      canvas.addEventListener('pointercancel', stopDrawing);
+      // A signature pad has to consume the gesture, or a touch drag scrolls
+      // the page instead of drawing a line.
+      canvas.style.touchAction = 'none';
+
+      function toSvg(): string {
+        const paths = strokes
+          .filter((stroke) => stroke.length > 0)
+          .map((stroke) => {
+            const d = stroke.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+            return `<path d="${d}" fill="none" stroke="#111214" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+          })
+          .join('');
+        return `<svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+      }
+
+      const clearBtn = root.querySelector('[data-sig-clear]');
+      clearBtn?.addEventListener('click', () => {
+        strokes = [];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      const saveBtn = root.querySelector('[data-sig-save]');
+      const errorEl = root.querySelector('[data-sig-error]');
+      const nameInput = root.querySelector('[data-sig-name]');
+
+      saveBtn?.addEventListener('click', async () => {
+        if (!(errorEl instanceof HTMLElement)) return;
+        errorEl.hidden = true;
+
+        const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : '';
+        if (!name) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Enter the printed name that goes with this signature.';
+          return;
+        }
+        if (strokes.length === 0) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Draw a signature above first.';
+          return;
+        }
+
+        if (saveBtn instanceof HTMLButtonElement) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Saving…';
+        }
+
+        try {
+          const response = await fetch(`/internal/api/quotes/${encodeURIComponent(quote.id)}`, {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ signatureSvg: toSvg(), signatureName: name }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not save the signature.');
+          load();
+        } catch (error) {
+          errorEl.hidden = false;
+          errorEl.textContent = error instanceof Error ? error.message : 'Could not save the signature.';
+          if (saveBtn instanceof HTMLButtonElement) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save signature';
+          }
+        }
+      });
+    }
+
+    const printBtn = document.querySelector('[data-print-btn]');
+    printBtn?.addEventListener('click', () => window.print());
+
+    load();
+  }
+
+  initQuoteView();
+  document.addEventListener('astro:page-load', initQuoteView);
+</script>
+
+<style>
+  .qv-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-m);
+  }
+
+  .qv-back {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .qv-error {
+    color: var(--danger);
+    border-left: 2px solid var(--danger);
+    padding-left: var(--space-2xs);
+  }
+
+  .contract {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: var(--space-l);
+  }
+
+  .contract-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    padding-bottom: var(--space-s);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .contract-brand {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 600;
+  }
+
+  .contract-brand-sub {
+    margin: 0.2rem 0 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .contract-meta {
+    text-align: right;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .contract-lni-warning {
+    margin: var(--space-s) 0 0;
+    padding: var(--space-xs) var(--space-s);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    border-left: 2px solid var(--danger);
+    font-size: var(--step--1);
+  }
+
+  .contract-section {
+    margin-top: var(--space-l);
+  }
+
+  .contract-section h2 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .contract-section h3 {
+    font-size: var(--step-0);
+    margin: var(--space-s) 0 var(--space-2xs);
+  }
+
+  .contract-dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs) var(--space-l);
+    margin: 0;
+  }
+
+  .contract-dl dt {
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+
+  .contract-dl dd {
+    margin: 0;
+  }
+
+  .contract-items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .contract-items th {
+    text-align: left;
+    padding: 0.35rem 0.4rem;
+    border-bottom: 1px solid var(--ink);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .contract-items td {
+    padding: 0.35rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .contract-totals {
+    margin-top: var(--space-s);
+    display: grid;
+    gap: 0.2rem;
+    max-width: 20rem;
+    margin-left: auto;
+  }
+
+  .contract-totals > div {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--step--1);
+  }
+
+  .contract-total-final {
+    font-size: var(--step-1);
+    font-weight: 600;
+    padding-top: 0.3rem;
+    border-top: 1px solid var(--ink);
+  }
+
+  .contract-terms p {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    margin: 0 0 0.6rem;
+  }
+
+  .contract-ack {
+    font-weight: 500;
+    color: var(--ink) !important;
+  }
+
+  .sig-line-block {
+    margin-bottom: var(--space-m);
+  }
+
+  .sig-line {
+    border-bottom: 1px solid var(--ink);
+    height: 2.5rem;
+  }
+
+  .sig-caption {
+    margin: 0.2rem 0 0;
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .sig-pad-block label {
+    display: grid;
+    gap: 0.2rem;
+    font-size: var(--step--1);
+    font-weight: 500;
+    max-width: 20rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .sig-pad-block input {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    font: inherit;
+  }
+
+  [data-sig-canvas] {
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--paper-sunk);
+    display: block;
+    cursor: crosshair;
+  }
+
+  .sig-pad-actions {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+  }
+
+  .sig-signed-image {
+    max-width: 20rem;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .sig-signed-image :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .contract-footer {
+    margin-top: var(--space-l);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--line);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  @media print {
+    .contract {
+      border: 0;
+      padding: 0;
+    }
+
+    .sig-pad-block,
+    .qv-toolbar {
+      display: none !important;
+    }
+  }
+</style>

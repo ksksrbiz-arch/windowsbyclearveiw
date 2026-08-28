@@ -1,0 +1,98 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Log in" showLogout={false}>
+  <div class="login-card">
+    <p class="kicker">Clearveiw internal</p>
+    <h1>Quotes &amp; contracts</h1>
+    <p class="lede">One password, shared. Ask Mark if you need it.</p>
+
+    <p class="login-error" role="alert" data-login-error hidden></p>
+
+    <form method="post" action="/internal/api/login">
+      <input type="hidden" name="next" data-next-field value="/internal/quotes" />
+      <label>
+        Password
+        <input type="password" name="password" required autofocus autocomplete="current-password" />
+      </label>
+      <button class="btn btn-primary" type="submit">Log in</button>
+    </form>
+  </div>
+</InternalLayout>
+
+<script>
+  // This page is static — prerendered once at build time — so it cannot read
+  // the ?error=/?next= query string on the server the way a dynamic route
+  // could. The login Function still communicates through those params (a
+  // 303 redirect back here is the only channel it has), so this page reads
+  // them itself once it loads in the browser.
+  const params = new URLSearchParams(location.search);
+  const error = params.get('error');
+  const next = params.get('next');
+
+  const MESSAGES: Record<string, string> = {
+    'wrong-password': 'That password did not match.',
+    'not-configured':
+      'The internal tool is not set up yet — INTERNAL_PASSWORD and INTERNAL_SESSION_SECRET need to be set in the Cloudflare Pages environment.',
+    'bad-request': 'Something went wrong submitting the form. Try again.',
+  };
+
+  if (error && MESSAGES[error]) {
+    const el = document.querySelector('[data-login-error]');
+    if (el) {
+      el.textContent = MESSAGES[error];
+      el.removeAttribute('hidden');
+    }
+  }
+
+  if (next) {
+    const field = document.querySelector('[data-next-field]');
+    if (field instanceof HTMLInputElement) field.value = next;
+  }
+</script>
+
+<style>
+  .login-card {
+    max-width: 24rem;
+    margin: var(--space-2xl) auto 0;
+  }
+
+  .login-error {
+    margin: var(--space-s) 0 0;
+    padding: var(--space-xs) var(--space-s);
+    border-left: 2px solid var(--danger);
+    background: color-mix(in srgb, var(--danger) 8%, transparent);
+    font-size: var(--step--1);
+  }
+
+  form {
+    display: grid;
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+  }
+
+  label {
+    display: grid;
+    gap: var(--space-3xs);
+    font-weight: 500;
+    font-size: var(--step--1);
+  }
+
+  input {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.7rem;
+    font-size: var(--step-0);
+    font: inherit;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-wash);
+  }
+
+  .btn {
+    justify-self: start;
+  }
+</style>
