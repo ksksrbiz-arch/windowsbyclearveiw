@@ -334,4 +334,12 @@ const links = [
       display: inline;
     }
   }
+
+  @media (max-width: 640px) {
+    /* Below this width the fixed mobile CTA bar owns click-to-call, so the
+       header pill would just be a second, smaller copy of the same action. */
+    .header-cta {
+      display: none;
+    }
+  }
 </style>
