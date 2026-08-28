@@ -88,7 +88,12 @@ async function callGemini(messages, apiKey) {
       body: JSON.stringify({
         systemInstruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
         contents: turns,
-        generationConfig: { temperature: 0.3, maxOutputTokens: 400 },
+        // Without thinkingLevel this model spends several hundred tokens on
+        // hidden reasoning before any visible answer, which was truncating
+        // every response to half a sentence even at maxOutputTokens: 600.
+        // "low" still uses ~350-400 thinking tokens (confirmed by testing,
+        // not documented anywhere obvious), hence the generous ceiling below.
+        generationConfig: { temperature: 0.3, maxOutputTokens: 1000, thinkingConfig: { thinkingLevel: 'low' } },
       }),
     },
   );
