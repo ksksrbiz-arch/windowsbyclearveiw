@@ -129,6 +129,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
             </details>
           ))}
         </section>
+        <p class="faq-ask"><a href="/ask">Still have a question? Ask our guide assistant &rarr;</a></p>
       </div>
     )}
 
@@ -254,6 +255,15 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     padding-left: calc(0.7rem + var(--space-2xs));
     color: var(--ink-soft);
     font-size: var(--step--1);
+  }
+
+  .faq-ask {
+    margin-top: var(--space-m);
+    font-size: var(--step--1);
+  }
+
+  .faq-ask a {
+    font-weight: 500;
   }
 
   /* Related ───────────────────────────────────────────────────────────── */

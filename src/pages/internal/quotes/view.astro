@@ -599,7 +599,9 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     letter-spacing: 0.04em;
   }
 
-  .contract-items td {
+  /* Rows are built at runtime from the fetched line items, so they never
+     get Astro's scoping attribute — :global() or this never matches. */
+  :global(.contract-items td) {
     padding: 0.35rem 0.4rem;
     border-bottom: 1px solid var(--line);
   }

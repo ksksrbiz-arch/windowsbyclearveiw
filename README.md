@@ -29,6 +29,10 @@ window installation in Vancouver, WA and the rest of Clark County.
       contract + signature tool) needs `QUOTES_DB`, `INTERNAL_PASSWORD`, and
       `INTERNAL_SESSION_SECRET` set in Cloudflare Pages → Settings → Bindings
       before it works in production. See [internal/README.md](internal/README.md).
+- [ ] **`GROQ_API_KEY` and `GEMINI_API_KEY`** set in Cloudflare Pages →
+      Settings → Environment variables. Without them `/ask` still loads but
+      answers "The assistant isn't available right now" instead of crashing.
+      See [Ask, the guides chatbot](#ask-the-guides-chatbot) below.
 
 ## Local development
 
@@ -202,6 +206,56 @@ Environment variables it reads:
 
 With JavaScript the page swaps in a confirmation panel. Without it, the function
 redirects to `/estimate/sent` or `/estimate/problem`, so the form still works.
+
+## Ask, the guides chatbot
+
+`/ask` is a public RAG chatbot grounded in the `/guides` articles plus a short
+list of basic business facts (phone, service area, hours) — never the pricing
+data or anything not explicitly given to it. It exists so a visitor's actual
+question gets answered instead of them digging through guide pages, without
+ever inventing a claim the business hasn't made itself.
+
+**Retrieval is build-time, not live.** `scripts/build-guides-index.mjs` reads
+every published guide, splits it into one chunk per `##` section, embeds each
+chunk with Gemini's free `text-embedding-004`, and writes
+`functions/ask/_data/guides-index.json` — committed to the repo, not generated
+on deploy. That is deliberate: retrieval quality shouldn't depend on Gemini
+being reachable at build time, and guide content changes rarely enough that
+regenerating by hand is no burden. Run it after editing a guide:
+
+```bash
+GEMINI_API_KEY=... node scripts/build-guides-index.mjs
+```
+
+Get a free key at <https://aistudio.google.com/apikey>.
+
+**Answering is live, at request time**, from `functions/ask/api/chat.js`:
+
+1. Embed the visitor's question (Gemini, same model as the index) and rank
+   the guide chunks by cosine similarity, right there in the Function — the
+   corpus is under 30 chunks, so no vector database is needed.
+2. Hand the matched excerpts (or, if nothing scores well, just the business
+   facts) to **Groq** (`llama-3.3-70b-versatile`) for a fast answer.
+3. If Groq is unavailable, fall back to **Gemini** (`gemini-2.0-flash`) with
+   the same prompt. If both fail, or `GEMINI_API_KEY` is unset entirely, the
+   page still loads — it just answers with a message pointing to the phone
+   number and `/estimate` instead of crashing or hanging.
+
+Set both `GROQ_API_KEY` (free at <https://console.groq.com>) and
+`GEMINI_API_KEY` in Cloudflare Pages → Settings → Environment variables.
+`GEMINI_API_KEY` alone is enough for the feature to work (Gemini serves as
+its own fallback); `GROQ_API_KEY` is what makes the common case fast.
+
+**The system prompt is the actual safety mechanism**, not a suggestion: it
+tells the model to answer only from what it was handed, never claim "bonded
+and insured" or state an L&I number, never quote a firm price (always point
+to `/estimate` or the cost calculator), never discuss competitors or give
+legal advice, and to treat the visitor's message as a question rather than an
+instruction — a basic prompt-injection guard. There is no rate limiting on
+`/ask/api/chat` beyond message-length and history caps; the worst case of
+abuse is hitting Groq/Gemini's own free-tier limits, at which point the
+fallback chain (and, ultimately, the graceful "unavailable" message) takes
+over. Revisit if that turns out to matter.
 
 ## Notes
 
