@@ -8,8 +8,10 @@ sitemap and `robots.txt`, and every page carries `noindex, nofollow`.
 What it does: Mark logs in with one shared password, builds a firm-price
 quote starting from `src/data/pricing.ts` (fully editable per line), and gets
 it signed — either on-screen with a finger/mouse signature pad, or printed
-and signed by hand. The signed quote doubles as the contract, with the terms
-from `src/data/contractTerms.ts`.
+and signed by hand (he confirms it back in the tool once it's actually
+signed). The signed quote doubles as the contract, with the terms from
+`src/data/contractTerms.ts`. A quote stays a fully editable draft — customer
+info, line items, discount, everything — right up until it's signed.
 
 ## Before this works in production
 
@@ -63,9 +65,12 @@ guarding.
   top. The right-to-cancel language follows the FTC Cooling-Off Rule model
   language, but it has not been checked by a Washington attorney. Do not
   treat the printed contract as legally bulletproof until someone has.
-- **No edit-after-finalize.** Once a quote is signed, there is no UI or API
-  path to change it — a mistake means starting a new quote. This is
-  deliberate: a signed contract shouldn't be silently editable.
+- **No edit-after-finalize.** A draft quote (built but not yet signed —
+  either path) can be edited freely from its "Edit quote" link. Once it's
+  finalized (a digital signature attached, or a printed copy confirmed
+  signed), there is no UI or API path to change it — a mistake at that
+  point means starting a new quote. This is deliberate: a signed contract
+  shouldn't be silently editable.
 - **Single shared password.** There's no per-user login, audit log of who
   created which quote, or password reset flow. Fine for one person (Mark);
   revisit if a second person needs access.

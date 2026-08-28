@@ -1,16 +1,4 @@
-// Kept in sync with src/data/contractTerms.ts by hand, not by import.
-// Pages Functions in this repo never import from src/ — functions/api/estimate.js
-// sets this precedent, duplicating its FROM address rather than reaching into
-// src/data/site.ts — because the Functions bundler's handling of a cross-boundary
-// TypeScript import was untested and not worth risking on something this central.
-const TERMS_VERSION = '2026-08-28';
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-  });
-}
+import { TERMS_VERSION, json, parseQuoteBody } from '../../_lib/quotes.mjs';
 
 function newQuoteId() {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -18,8 +6,6 @@ function newQuoteId() {
   const suffix = [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
   return `Q-${date}-${suffix}`;
 }
-
-const clean = (v, max = 500) => String(v ?? '').trim().slice(0, max);
 
 /** List recent quotes. Summary fields only — line items and signatures load
  *  on the individual quote page, not in the list. */
@@ -42,50 +28,17 @@ export async function onRequestPost(context) {
     return json({ error: 'Body must be JSON.' }, 400);
   }
 
-  const customer = body.customer || {};
-  const name = clean(customer.name, 200);
-  const phone = clean(customer.phone, 40);
-  if (!name || !phone) {
-    return json({ error: 'Customer name and phone are required.' }, 400);
-  }
-
-  const items = Array.isArray(body.items) ? body.items : [];
-  if (items.length === 0) {
-    return json({ error: 'At least one line item is required.' }, 400);
-  }
-
-  const cleanItems = [];
-  for (const [index, raw] of items.entries()) {
-    const label = clean(raw?.label, 300);
-    const quantity = Number(raw?.quantity);
-    const unitPriceCents = Math.round(Number(raw?.unitPriceCents));
-    if (!label || !Number.isFinite(quantity) || quantity <= 0) {
-      return json({ error: `Line ${index + 1}: label and a positive quantity are required.` }, 400);
-    }
-    if (!Number.isFinite(unitPriceCents) || unitPriceCents < 0) {
-      return json({ error: `Line ${index + 1}: unit price is invalid.` }, 400);
-    }
-    cleanItems.push({
-      label,
-      description: clean(raw?.description, 500),
-      quantity,
-      unitPriceCents,
-      lineTotalCents: quantity * unitPriceCents,
-    });
-  }
-
-  // The total is computed here from the line items, never trusted from the
-  // client — a stray transcription bug in the browser should never become
-  // the number printed on a signed contract.
-  const subtotalCents = cleanItems.reduce((sum, item) => sum + item.lineTotalCents, 0);
-  const discountCents = Math.max(0, Math.min(subtotalCents, Math.round(Number(body.discountCents) || 0)));
-  const totalCents = subtotalCents - discountCents;
+  const parsed = parseQuoteBody(body);
+  if (parsed.error) return json({ error: parsed.error }, 400);
+  const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
 
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
-  // A pen-signed quote has nothing left to capture, so it is finalized on
-  // creation. A digital-signature quote stays a draft until the signature
-  // is actually drawn and PATCHed in.
-  const status = signatureMethod === 'pen' ? 'finalized' : 'draft';
+  // Both paths start as a draft: nothing is actually signed yet the moment
+  // this row is created, and a draft can still be edited (PUT) to fix a
+  // typo before anyone signs anything. A digital quote is finalized when
+  // the drawn signature is PATCHed in; a pen quote is finalized when Mark
+  // confirms the printed copy actually got signed.
+  const status = 'draft';
   const now = new Date().toISOString();
   const id = newQuoteId();
 
@@ -99,9 +52,9 @@ export async function onRequestPost(context) {
       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     ).bind(
       id, now, now, status,
-      name, phone, clean(customer.email, 200), clean(customer.address, 300), clean(customer.city, 120),
-      clean(customer.role, 40), clean(body.notes, 4000),
-      subtotalCents, discountCents, clean(body.discountReason, 200), totalCents,
+      name, phone, email, address, city,
+      role, notes,
+      subtotalCents, discountCents, discountReason, totalCents,
       TERMS_VERSION, signatureMethod, 'mark',
     ),
     ...cleanItems.map((item, index) =>

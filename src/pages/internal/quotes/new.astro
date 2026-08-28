@@ -15,16 +15,17 @@ const catalog = {
 ---
 <InternalLayout title="New quote">
   <p class="kicker">Clearveiw internal</p>
-  <h1>New quote</h1>
-  <p class="lede">Build the scope, get a firm number, then sign or print.</p>
+  <h1 data-heading>New quote</h1>
+  <p class="lede" data-lede>Build the scope, get a firm number, then sign or print.</p>
+  <p class="qb-status" data-load-error hidden role="alert"></p>
 
   <form id="quote-form" data-catalog={JSON.stringify(catalog)}>
     <fieldset class="qb-block">
       <legend>Customer</legend>
       <div class="qb-grid-2">
-        <label>Name<input type="text" name="name" required maxlength="200" /></label>
-        <label>Phone<input type="tel" name="phone" required maxlength="40" /></label>
-        <label>Email<input type="email" name="email" maxlength="200" /></label>
+        <label>Name<input type="text" name="name" required maxlength="200" autocomplete="name" /></label>
+        <label>Phone<input type="tel" inputmode="tel" name="phone" required maxlength="40" autocomplete="tel" /></label>
+        <label>Email<input type="email" inputmode="email" name="email" maxlength="200" autocomplete="email" /></label>
         <label>City<input type="text" name="city" maxlength="120" /></label>
       </div>
       <label>Address<input type="text" name="address" maxlength="300" /></label>
@@ -55,7 +56,7 @@ const catalog = {
           </select>
         </label>
         <label>Qty
-          <input type="number" data-catalog-qty value="1" min="1" step="1" />
+          <input type="number" inputmode="numeric" data-catalog-qty value="1" min="1" step="1" />
         </label>
         <button type="button" class="btn btn-ghost" data-catalog-add>Add line</button>
       </div>
@@ -69,10 +70,10 @@ const catalog = {
           <input type="text" data-custom-label placeholder="e.g. Trim, rot repair, discount" maxlength="300" />
         </label>
         <label>Qty
-          <input type="number" data-custom-qty value="1" min="1" step="1" />
+          <input type="number" inputmode="numeric" data-custom-qty value="1" min="1" step="1" />
         </label>
         <label>Unit price ($)
-          <input type="number" data-custom-price value="0" step="1" />
+          <input type="number" inputmode="decimal" data-custom-price value="0" step="0.01" min="0" />
         </label>
         <button type="button" class="btn btn-ghost" data-custom-add>Add line</button>
       </div>
@@ -91,7 +92,7 @@ const catalog = {
       <div class="qb-totals">
         <label class="qb-discount">
           Discount ($)
-          <input type="number" data-discount value="0" min="0" step="1" />
+          <input type="number" inputmode="decimal" data-discount value="0" min="0" step="0.01" />
         </label>
         <label class="qb-discount">
           Reason
@@ -141,6 +142,8 @@ const catalog = {
     const form = document.getElementById('quote-form');
     if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
     form.dataset.bound = 'true';
+
+    const editId = new URLSearchParams(location.search).get('edit');
 
     const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
     const items: LineItem[] = [];
@@ -229,6 +232,7 @@ const catalog = {
         const qtyCell = document.createElement('td');
         const qtyInputEl = document.createElement('input');
         qtyInputEl.type = 'number';
+        qtyInputEl.inputMode = 'numeric';
         qtyInputEl.min = '1';
         qtyInputEl.step = '1';
         qtyInputEl.value = String(item.quantity);
@@ -241,7 +245,9 @@ const catalog = {
         const priceCell = document.createElement('td');
         const priceInputEl = document.createElement('input');
         priceInputEl.type = 'number';
-        priceInputEl.step = '1';
+        priceInputEl.inputMode = 'decimal';
+        priceInputEl.step = '0.01';
+        priceInputEl.min = '0';
         priceInputEl.value = String(item.unitPrice);
         priceInputEl.addEventListener('input', () => {
           items[index].unitPrice = Number(priceInputEl.value) || 0;
@@ -323,6 +329,77 @@ const catalog = {
 
     const status = form.querySelector('[data-status]');
     const submitBtn = form.querySelector('[data-submit]');
+    const headingEl = document.querySelector('[data-heading]');
+    const ledeEl = document.querySelector('[data-lede]');
+    const loadErrorEl = document.querySelector('[data-load-error]');
+
+    function setField(name: string, value: string) {
+      const el = form.elements.namedItem(name);
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.value = value ?? '';
+    }
+    function setRadio(name: string, value: string) {
+      const el = form.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (el instanceof HTMLInputElement) el.checked = true;
+    }
+
+    async function loadForEdit(id: string) {
+      form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) {
+          el.disabled = true;
+        }
+      });
+
+      try {
+        const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id)}`);
+        if (!response.ok) throw new Error('Could not load that quote.');
+        const { quote, items: loadedItems } = await response.json();
+        if (quote.status !== 'draft') {
+          throw new Error('This quote is already finalized and can no longer be edited.');
+        }
+
+        if (headingEl) headingEl.textContent = `Edit quote ${quote.id}`;
+        if (ledeEl) ledeEl.textContent = 'Fix anything below, then save — nothing is signed yet.';
+        if (submitBtn instanceof HTMLButtonElement) submitBtn.textContent = 'Save changes';
+
+        setField('name', quote.customer_name);
+        setField('phone', quote.customer_phone);
+        setField('email', quote.customer_email);
+        setField('address', quote.customer_address);
+        setField('city', quote.customer_city);
+        setField('notes', quote.notes);
+        if (quote.customer_role) setRadio('role', quote.customer_role);
+        setRadio('signatureMethod', quote.signature_method);
+
+        items.length = 0;
+        for (const item of loadedItems) {
+          items.push({
+            label: item.label,
+            description: item.description || '',
+            quantity: item.quantity,
+            unitPrice: item.unit_price_cents / 100,
+          });
+        }
+        discountInput.value = String((quote.discount_cents || 0) / 100);
+        const discountReasonEl = form.querySelector('[data-discount-reason]');
+        if (discountReasonEl instanceof HTMLInputElement) discountReasonEl.value = quote.discount_reason || '';
+        render();
+
+        form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+          if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) {
+            el.disabled = false;
+          }
+        });
+        syncBrandVisibility();
+      } catch (error) {
+        if (loadErrorEl instanceof HTMLElement) {
+          loadErrorEl.hidden = false;
+          loadErrorEl.textContent = error instanceof Error ? error.message : 'Could not load that quote.';
+        }
+        form.hidden = true;
+      }
+    }
+
+    if (editId) loadForEdit(editId);
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -364,20 +441,24 @@ const catalog = {
       }
 
       try {
-        const response = await fetch('/internal/api/quotes', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+        const response = await fetch(
+          editId ? `/internal/api/quotes/${encodeURIComponent(editId)}` : '/internal/api/quotes',
+          {
+            method: editId ? 'PUT' : 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        );
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || 'Could not save the quote.');
-        window.location.href = `/internal/quotes/view?id=${encodeURIComponent(result.id)}`;
+        const id = editId || result.id;
+        window.location.href = `/internal/quotes/view?id=${encodeURIComponent(id)}`;
       } catch (error) {
         status.hidden = false;
         status.textContent = error instanceof Error ? error.message : 'Could not save the quote.';
         if (submitBtn instanceof HTMLButtonElement) {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Save & continue';
+          submitBtn.textContent = editId ? 'Save changes' : 'Save & continue';
         }
       }
     });
