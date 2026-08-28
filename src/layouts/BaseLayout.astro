@@ -116,7 +116,7 @@ const breadcrumbSchema =
       crossorigin
     />
     <ClientRouter />
-    <JsonLd extra={schema} />
+    <JsonLd extra={schema} image={ogImageUrl} />
     {breadcrumbSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     )}

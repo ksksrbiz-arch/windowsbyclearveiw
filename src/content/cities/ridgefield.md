@@ -2,7 +2,7 @@
 name: Ridgefield
 region: Clark County
 title: Window replacement in Ridgefield, WA
-description: Window replacement and new-construction installs for Ridgefield, Washington.
+description: Window replacement and new-construction installs for Ridgefield, WA — one of the fastest-growing cities in Washington, from the historic downtown to new-build subdivisions.
 published: true
 ---
 
