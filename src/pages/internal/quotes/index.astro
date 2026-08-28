@@ -1,0 +1,143 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Quotes">
+  <div class="ql-head">
+    <div>
+      <p class="kicker">Clearveiw internal</p>
+      <h1>Quotes</h1>
+    </div>
+    <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
+  </div>
+
+  <p data-loading>Loading…</p>
+  <p class="ql-error" data-error hidden role="alert"></p>
+  <p data-empty hidden>No quotes yet. Start with New quote above.</p>
+
+  <table class="ql-table" data-table hidden>
+    <thead>
+      <tr><th>Date</th><th>Customer</th><th>City</th><th>Total</th><th>Status</th></tr>
+    </thead>
+    <tbody data-rows></tbody>
+  </table>
+</InternalLayout>
+
+<script>
+  function initQuoteList() {
+    const table = document.querySelector('[data-table]');
+    if (!(table instanceof HTMLElement) || table.dataset.bound === 'true') return;
+    table.dataset.bound = 'true';
+
+    const loading = document.querySelector('[data-loading]');
+    const errorEl = document.querySelector('[data-error]');
+    const emptyEl = document.querySelector('[data-empty]');
+    const rows = document.querySelector('[data-rows]');
+
+    const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const STATUS_LABEL: Record<string, string> = {
+      draft: 'Awaiting signature',
+      finalized: 'Finalized',
+    };
+
+    async function load() {
+      try {
+        const response = await fetch('/internal/api/quotes');
+        if (!response.ok) throw new Error();
+        const { quotes } = await response.json();
+
+        if (loading instanceof HTMLElement) loading.hidden = true;
+
+        if (!quotes.length) {
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          return;
+        }
+
+        if (table instanceof HTMLElement) table.hidden = false;
+        if (rows instanceof HTMLElement) {
+          rows.innerHTML = '';
+          for (const q of quotes) {
+            const row = document.createElement('tr');
+            const date = new Date(q.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            row.innerHTML = `
+              <td>${date}</td>
+              <td><a href="/internal/quotes/view?id=${encodeURIComponent(q.id)}">${escapeHtml(q.customer_name)}</a></td>
+              <td>${escapeHtml(q.customer_city || '—')}</td>
+              <td>${money(q.total_cents)}</td>
+              <td><span class="ql-status ql-status-${q.status}">${STATUS_LABEL[q.status] || q.status}</span></td>
+            `;
+            rows.append(row);
+          }
+        }
+      } catch {
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        if (errorEl instanceof HTMLElement) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Could not load quotes.';
+        }
+      }
+    }
+
+    function escapeHtml(s: string) {
+      const div = document.createElement('div');
+      div.textContent = s ?? '';
+      return div.innerHTML;
+    }
+
+    load();
+  }
+
+  initQuoteList();
+  document.addEventListener('astro:page-load', initQuoteList);
+</script>
+
+<style>
+  .ql-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: var(--space-l);
+  }
+
+  .ql-error {
+    color: var(--danger);
+  }
+
+  .ql-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .ql-table th {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--ink);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+
+  .ql-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ql-status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: var(--step--2);
+    font-weight: 500;
+  }
+
+  .ql-status-draft {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+  }
+
+  .ql-status-finalized {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent-ink);
+  }
+</style>

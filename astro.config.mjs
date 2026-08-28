@@ -24,7 +24,9 @@ export default defineConfig({
       // Outcome pages for the estimate form — no search value, and /problem
       // reads like a broken page if someone lands on it cold.
       filter: (page) =>
-        !page.includes('/estimate/sent') && !page.includes('/estimate/problem'),
+        !page.includes('/estimate/sent') &&
+        !page.includes('/estimate/problem') &&
+        !page.includes('/internal/'),
     }),
   ],
   trailingSlash: 'never',

@@ -25,6 +25,10 @@ window installation in Vancouver, WA and the rest of Clark County.
 - [ ] **Pricing.** The cost estimator currently runs on published Washington /
       Portland-metro averages, labelled as such on the page. Mark's own ranges
       convert better — see [Pricing](#pricing) below.
+- [ ] **Internal quoting tool bindings.** `/internal/*` (Mark's quote +
+      contract + signature tool) needs `QUOTES_DB`, `INTERNAL_PASSWORD`, and
+      `INTERNAL_SESSION_SECRET` set in Cloudflare Pages → Settings → Bindings
+      before it works in production. See [internal/README.md](internal/README.md).
 
 ## Local development
 
