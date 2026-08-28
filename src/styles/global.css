@@ -127,6 +127,7 @@
   --radius-lg: 6px;
   --max: 1240px;
   --measure: 68ch;
+  --mobile-cta-h: 3.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -518,6 +519,16 @@ input:focus, textarea:focus, select:focus {
   .split { display: grid; }
 }
 
+@media (max-width: 640px) {
+  /* Room for the fixed mobile CTA bar so it never sits over the last thing
+     on the page — most often the footer's legal line. Scoped away from
+     body.internal: the internal quoting tool uses its own layout and never
+     renders the bar, so it would otherwise lose space to a phantom one. */
+  body:not(.internal) {
+    padding-bottom: calc(var(--mobile-cta-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
@@ -773,8 +784,13 @@ html.reveal-ready [data-reveal].is-revealed {
   .cta-actions,
   .est-actions,
   .estimate-form button,
+  .mobile-cta-bar,
   .btn {
     display: none !important;
+  }
+
+  body {
+    padding-bottom: 0;
   }
 
   /* One line of provenance so a printed page can be traced back. */
