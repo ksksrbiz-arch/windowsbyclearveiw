@@ -17,7 +17,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const GUIDES_DIR = join(__dirname, '../src/content/guides');
 const OUTPUT_DIR = join(__dirname, '../functions/ask/_data');
 const OUTPUT_FILE = join(OUTPUT_DIR, 'guides-index.json');
-const EMBED_MODEL = 'text-embedding-004';
+// Must match EMBED_MODEL in functions/ask/api/chat.js — the index and the
+// live query embedding have to come from the same model or cosine
+// similarity between them is meaningless.
+const EMBED_MODEL = 'gemini-embedding-001';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {

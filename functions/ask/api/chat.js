@@ -2,9 +2,12 @@ import { topMatches } from '../_lib/rag.mjs';
 import { BUSINESS_FACTS } from '../_lib/facts.mjs';
 import guidesIndex from '../_data/guides-index.json';
 
-const EMBED_MODEL = 'text-embedding-004';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
-const GEMINI_CHAT_MODEL = 'gemini-2.0-flash';
+// Verified against each provider's own /models list on 2026-08-28 — model
+// names in this space drift fast, so if either of these starts 404ing
+// again, re-check with GET /ask/api/models rather than guessing a new name.
+const EMBED_MODEL = 'gemini-embedding-001';
+const GROQ_MODEL = 'openai/gpt-oss-120b';
+const GEMINI_CHAT_MODEL = 'gemini-3.6-flash';
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_HISTORY_MESSAGES = 6;
@@ -118,16 +121,13 @@ export async function onRequestPost(context) {
     return json({ answer: UNAVAILABLE_ANSWER, sources: [] });
   }
 
-  const debug = {};
-
   let matches = [];
   try {
     const queryEmbedding = await embedQuery(message, env.GEMINI_API_KEY);
     matches = topMatches(queryEmbedding, guidesIndex.chunks, 4, 0.5);
-  } catch (err) {
+  } catch {
     // Retrieval failing doesn't have to end the conversation — fall through
     // and answer from business facts alone, same as a genuine no-match.
-    debug.embedError = String(err?.message || err);
   }
 
   const referenceText = matches.length
@@ -141,16 +141,11 @@ export async function onRequestPost(context) {
   let answer;
   try {
     answer = await callGroq(messages, env.GROQ_API_KEY);
-  } catch (groqErr) {
-    debug.groqError = String(groqErr?.message || groqErr);
+  } catch {
     try {
       answer = await callGemini(messages, env.GEMINI_API_KEY);
-    } catch (geminiErr) {
-      debug.geminiError = String(geminiErr?.message || geminiErr);
-      // TEMPORARY: echoes provider error text (never key values) to help
-      // diagnose a live "unavailable" response from the outside. Remove
-      // once /ask is confirmed working end to end.
-      return json({ answer: UNAVAILABLE_ANSWER, sources: [], debug }, 200);
+    } catch {
+      return json({ answer: UNAVAILABLE_ANSWER, sources: [] });
     }
   }
 

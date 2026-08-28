@@ -1,8 +1,9 @@
-// TEMPORARY diagnostic route. Lists available model ids from Groq and
-// Gemini using the real keys server-side, so the hardcoded model names in
-// chat.js can be corrected to whatever is actually current — never
-// returns the key values themselves. Remove once chat.js is confirmed
-// working end to end.
+// Lists available model ids from Groq and Gemini using the real keys
+// server-side — never the key values themselves. Kept permanently, not
+// removed after the model-name fix in chat.js: this space drifts fast
+// (both Groq's chat model and two different Gemini model names 404'd
+// within months of being picked), so when chat.js starts answering
+// "unavailable" again, check here first before guessing at a new name.
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
