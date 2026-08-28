@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "build:guides-index": "node scripts/build-guides-index.mjs"
+    "build:guides-index": "node scripts/build-guides-index.mjs",
+    "eval:ask": "node scripts/eval-ask.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

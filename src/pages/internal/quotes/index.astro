@@ -7,7 +7,10 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       <p class="kicker">Clearveiw internal</p>
       <h1>Quotes</h1>
     </div>
-    <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
+    <div class="ql-head-actions">
+      <a class="btn btn-ghost" href="/internal/ask-logs">Ask activity</a>
+      <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
+    </div>
   </div>
 
   <p data-loading>Loading…</p>
@@ -127,6 +130,11 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     justify-content: space-between;
     align-items: end;
     margin-bottom: var(--space-l);
+  }
+
+  .ql-head-actions {
+    display: flex;
+    gap: var(--space-xs);
   }
 
   .ql-error {
