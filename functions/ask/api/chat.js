@@ -63,7 +63,7 @@ async function callGroq(messages, apiKey) {
     headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({ model: GROQ_MODEL, messages, temperature: 0.3, max_tokens: 400 }),
   });
-  if (!res.ok) throw new Error(`Groq ${res.status}`);
+  if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
   const answer = data.choices?.[0]?.message?.content?.trim();
   if (!answer) throw new Error('Groq returned no answer');
@@ -89,7 +89,7 @@ async function callGemini(messages, apiKey) {
       }),
     },
   );
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
+  if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
   const answer = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
   if (!answer) throw new Error('Gemini returned no answer');
@@ -118,13 +118,16 @@ export async function onRequestPost(context) {
     return json({ answer: UNAVAILABLE_ANSWER, sources: [] });
   }
 
+  const debug = {};
+
   let matches = [];
   try {
     const queryEmbedding = await embedQuery(message, env.GEMINI_API_KEY);
     matches = topMatches(queryEmbedding, guidesIndex.chunks, 4, 0.5);
-  } catch {
+  } catch (err) {
     // Retrieval failing doesn't have to end the conversation — fall through
     // and answer from business facts alone, same as a genuine no-match.
+    debug.embedError = String(err?.message || err);
   }
 
   const referenceText = matches.length
@@ -138,11 +141,16 @@ export async function onRequestPost(context) {
   let answer;
   try {
     answer = await callGroq(messages, env.GROQ_API_KEY);
-  } catch {
+  } catch (groqErr) {
+    debug.groqError = String(groqErr?.message || groqErr);
     try {
       answer = await callGemini(messages, env.GEMINI_API_KEY);
-    } catch {
-      return json({ answer: UNAVAILABLE_ANSWER, sources: [] });
+    } catch (geminiErr) {
+      debug.geminiError = String(geminiErr?.message || geminiErr);
+      // TEMPORARY: echoes provider error text (never key values) to help
+      // diagnose a live "unavailable" response from the outside. Remove
+      // once /ask is confirmed working end to end.
+      return json({ answer: UNAVAILABLE_ANSWER, sources: [], debug }, 200);
     }
   }
 
