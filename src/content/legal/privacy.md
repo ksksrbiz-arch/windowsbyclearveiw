@@ -28,7 +28,7 @@ Nothing else on the site asks you for personal information.
 **Automatically, as a consequence of hosting.** The site is served by
 Cloudflare Pages. Like any web host, Cloudflare's edge network processes your
 IP address and browser user-agent in order to deliver the page and to block
-abusive traffic. We do not receive, store, or analyse those logs ourselves.
+abusive traffic. We do not receive, store, or analyze those logs ourselves.
 
 **Traffic counting.** The site uses Cloudflare Web Analytics to count page
 views. It records the page visited, the referring site, your browser and
@@ -89,7 +89,7 @@ We use your information for one purpose: to contact you about the window work
 you asked about, and to carry out that work if you hire us.
 
 **We do not sell your personal information. We do not share it for
-cross-context behavioural advertising. We do not add you to a mailing list, a
+cross-context behavioral advertising. We do not add you to a mailing list, a
 newsletter, or an automated follow-up sequence.** We have never done any of
 these things and this site is not built to.
 
