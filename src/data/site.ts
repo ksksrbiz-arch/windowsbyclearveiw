@@ -4,7 +4,7 @@ export const site = {
   legalName: 'Clearveiw Windows, LLC',
   domain: 'windowsbyclearveiw.com',
   url: 'https://windowsbyclearveiw.com',
-  tagline: 'Replacement windows for Vancouver, WA and nearby.',
+  tagline: 'Great prices. Clean work. Clear windows.',
   /**
    * Long form, for the JSON-LD business entity where length does not matter.
    */
