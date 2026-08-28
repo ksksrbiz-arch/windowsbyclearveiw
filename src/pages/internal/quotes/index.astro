@@ -170,12 +170,15 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     color: var(--ink-faint);
   }
 
-  .ql-table td {
+  :global(.ql-table td) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--line);
   }
 
-  .ql-status {
+  /* Every row (and this badge inside it) is built at runtime from the
+     fetched quote list, so these never receive Astro's scoping attribute —
+     has to be :global() or the rule silently never matches anything. */
+  :global(.ql-status) {
     display: inline-block;
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
@@ -183,12 +186,12 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     font-weight: 500;
   }
 
-  .ql-status-draft {
+  :global(.ql-status-draft) {
     background: color-mix(in srgb, var(--danger) 12%, transparent);
     color: var(--danger);
   }
 
-  .ql-status-finalized {
+  :global(.ql-status-finalized) {
     background: color-mix(in srgb, var(--accent) 15%, transparent);
     color: var(--accent-ink);
   }

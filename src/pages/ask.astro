@@ -1,0 +1,330 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { site, telHref } from '../data/site';
+
+// A handful of starter questions pulled from the guides' own FAQ
+// frontmatter — real questions we already have real answers for, so the
+// first thing a visitor sees is never a guess about what the bot can do.
+const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const starters = guides
+  .flatMap((g) => g.data.faq.slice(0, 1).map((item) => item.question))
+  .slice(0, 5);
+---
+
+<BaseLayout
+  title="Ask a window question"
+  description="Ask Clearveiw's guide assistant about window replacement, methods, glass, and cost in Vancouver, WA."
+  path="/ask"
+  crumbs={[{ name: 'Ask', href: '/ask' }]}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Ask</p>
+      <h1>Ask a window question.</h1>
+      <p class="lede">
+        Answers come from our own guides and basic business info — not a formal quote. For a firm
+        price, <a href="/estimate">request an estimate</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap ask-layout" data-reveal>
+      <div class="ask-panel">
+        <div class="ask-transcript" data-transcript role="log" aria-live="polite">
+          <div class="ask-msg ask-msg-assistant">
+            <p>
+              Hi — ask me about window replacement methods, glass, cost, or how we work in Clark
+              County. I'll say so if it's something I don't have a good answer for.
+            </p>
+          </div>
+        </div>
+
+        {starters.length > 0 && (
+          <div class="ask-starters" data-starters>
+            {starters.map((q) => (
+              <button type="button" class="ask-chip" data-starter>{q}</button>
+            ))}
+          </div>
+        )}
+
+        <p class="ask-error" data-ask-error hidden role="alert"></p>
+
+        <form class="ask-form" data-ask-form>
+          <label class="visually-hidden" for="ask-input">Your question</label>
+          <textarea
+            id="ask-input"
+            data-ask-input
+            rows="2"
+            maxlength="500"
+            placeholder="e.g. Is insert replacement cheaper than full-frame?"
+            required
+          ></textarea>
+          <button class="btn btn-primary" type="submit" data-ask-submit>Ask</button>
+        </form>
+      </div>
+
+      <aside class="ask-aside">
+        <p class="rule-label">Prefer to talk</p>
+        <p class="ask-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
+        <p>Mark answers from the truck. This assistant is a shortcut, not a replacement for him.</p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  type Message = { role: 'user' | 'assistant'; content: string };
+
+  function initAsk() {
+    const form = document.querySelector('[data-ask-form]');
+    if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    const input = document.querySelector('[data-ask-input]');
+    const submitBtn = document.querySelector('[data-ask-submit]');
+    const transcript = document.querySelector('[data-transcript]');
+    const errorEl = document.querySelector('[data-ask-error]');
+    const starters = document.querySelector('[data-starters]');
+
+    if (!(input instanceof HTMLTextAreaElement) || !(transcript instanceof HTMLElement)) return;
+
+    const conversation: Message[] = [];
+
+    function appendMessage(role: 'user' | 'assistant', content: string, sources?: { title: string; url: string }[]) {
+      if (!(transcript instanceof HTMLElement)) return;
+      const bubble = document.createElement('div');
+      bubble.className = `ask-msg ask-msg-${role}`;
+      const p = document.createElement('p');
+      p.textContent = content;
+      bubble.append(p);
+
+      if (sources && sources.length > 0) {
+        const sourcesEl = document.createElement('p');
+        sourcesEl.className = 'ask-sources';
+        sourcesEl.textContent = 'Based on: ';
+        sources.forEach((s, i) => {
+          if (i > 0) sourcesEl.append(', ');
+          const a = document.createElement('a');
+          a.href = s.url;
+          a.textContent = s.title;
+          sourcesEl.append(a);
+        });
+        bubble.append(sourcesEl);
+      }
+
+      transcript.append(bubble);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    async function ask(question: string) {
+      if (!(errorEl instanceof HTMLElement)) return;
+      errorEl.hidden = true;
+      if (starters instanceof HTMLElement) starters.hidden = true;
+
+      appendMessage('user', question);
+      const history = conversation.slice(-6);
+      conversation.push({ role: 'user', content: question });
+
+      if (submitBtn instanceof HTMLButtonElement) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Asking…';
+      }
+      input.disabled = true;
+
+      try {
+        const response = await fetch('/ask/api/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ message: question, history }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Something went wrong.');
+
+        const answer = result.answer || "Sorry — I didn't get an answer for that.";
+        appendMessage('assistant', answer, result.sources);
+        conversation.push({ role: 'assistant', content: answer });
+      } catch (error) {
+        errorEl.hidden = false;
+        errorEl.textContent = error instanceof Error ? error.message : 'Something went wrong. Try again in a moment.';
+      } finally {
+        if (submitBtn instanceof HTMLButtonElement) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ask';
+        }
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+      input.value = '';
+      ask(question);
+    });
+
+    // Enter submits, shift+Enter makes a new line.
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    if (starters instanceof HTMLElement) {
+      starters.querySelectorAll('[data-starter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn instanceof HTMLButtonElement) ask(btn.textContent || '');
+        });
+      });
+    }
+  }
+
+  initAsk();
+  document.addEventListener('astro:page-load', initAsk);
+</script>
+
+<style>
+  .ask-layout {
+    display: grid;
+    grid-template-columns: 1fr 18rem;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .ask-panel {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+    padding: var(--space-m);
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .ask-transcript {
+    display: grid;
+    gap: var(--space-s);
+    max-height: 28rem;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+  }
+
+  /* .ask-msg and its children are also built at runtime in the <script>
+     below (one bubble per chat turn) — those elements never receive
+     Astro's scoping attribute, so these rules have to be :global() or they
+     silently only style the one static greeting bubble in the markup. */
+  :global(.ask-msg) {
+    max-width: 34rem;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--radius);
+    font-size: var(--step--1);
+  }
+
+  :global(.ask-msg p) {
+    margin: 0;
+  }
+
+  :global(.ask-msg-assistant) {
+    background: var(--paper-sunk);
+    justify-self: start;
+  }
+
+  :global(.ask-msg-user) {
+    background: var(--accent-wash);
+    justify-self: end;
+  }
+
+  :global(.ask-sources) {
+    margin-top: 0.4rem !important;
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .ask-starters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .ask-chip {
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font-size: var(--step--2);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .ask-chip:hover {
+    background: var(--paper-sunk);
+  }
+
+  .ask-error {
+    color: var(--danger);
+    border-left: 2px solid var(--danger);
+    padding-left: var(--space-2xs);
+    margin: 0;
+  }
+
+  .ask-form {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: end;
+  }
+
+  @media (max-width: 640px) {
+    /* The fixed mobile Call/Estimate bar sits over whatever is at the
+       bottom of the viewport — including the ask form itself, since this
+       panel is tall enough to put it right at the fold. scroll-margin
+       makes both scrollIntoView() and normal scrolling stop with the form
+       clear of the bar, instead of tucked underneath it. */
+    .ask-form {
+      scroll-margin-bottom: calc(var(--mobile-cta-h) + var(--space-m));
+    }
+  }
+
+  .ask-form textarea {
+    flex: 1;
+    resize: vertical;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.6rem;
+    font: inherit;
+    font-size: var(--step-0);
+  }
+
+  .ask-aside {
+    border-left: 1px solid var(--line);
+    padding-left: var(--space-l);
+  }
+
+  .ask-phone a {
+    font-size: var(--step-2);
+    font-weight: 600;
+  }
+
+  @media (max-width: 800px) {
+    .ask-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .ask-aside {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      padding-left: 0;
+      padding-top: var(--space-m);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ask-transcript {
+      max-height: 16rem;
+    }
+  }
+</style>

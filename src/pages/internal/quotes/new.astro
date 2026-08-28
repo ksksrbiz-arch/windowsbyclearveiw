@@ -562,25 +562,29 @@ const catalog = {
     font-size: var(--step--2);
   }
 
-  .qb-items td {
+  /* The tbody rows below are built at runtime from the items array (one
+     render() per add/edit/remove), so they never get Astro's scoping
+     attribute — these rules have to be :global() or they silently only
+     ever match zero elements. */
+  :global(.qb-items td) {
     padding: 0.3rem 0.4rem;
     border-bottom: 1px solid var(--line);
   }
 
-  .qb-items td:first-child input {
+  :global(.qb-items td:first-child input) {
     width: 100%;
   }
 
-  .qb-items td input[type='number'] {
+  :global(.qb-items td input[type='number']) {
     width: 5rem;
   }
 
-  .qb-line-total {
+  :global(.qb-line-total) {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
-  .qb-remove {
+  :global(.qb-remove) {
     background: transparent;
     border: 1px solid var(--line);
     border-radius: var(--radius);
