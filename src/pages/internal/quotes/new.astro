@@ -143,7 +143,9 @@ const catalog = {
     if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
     form.dataset.bound = 'true';
 
-    const editId = new URLSearchParams(location.search).get('edit');
+    const searchParams = new URLSearchParams(location.search);
+    const editId = searchParams.get('edit');
+    const duplicateId = editId ? null : searchParams.get('duplicate');
 
     const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
     const items: LineItem[] = [];
@@ -342,7 +344,7 @@ const catalog = {
       if (el instanceof HTMLInputElement) el.checked = true;
     }
 
-    async function loadForEdit(id: string) {
+    async function loadForEdit(id: string, mode: 'edit' | 'duplicate') {
       form.querySelectorAll('input, select, textarea, button').forEach((el) => {
         if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) {
           el.disabled = true;
@@ -353,13 +355,18 @@ const catalog = {
         const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id)}`);
         if (!response.ok) throw new Error('Could not load that quote.');
         const { quote, items: loadedItems } = await response.json();
-        if (quote.status !== 'draft') {
+        if (mode === 'edit' && quote.status !== 'draft') {
           throw new Error('This quote is already finalized and can no longer be edited.');
         }
 
-        if (headingEl) headingEl.textContent = `Edit quote ${quote.id}`;
-        if (ledeEl) ledeEl.textContent = 'Fix anything below, then save — nothing is signed yet.';
-        if (submitBtn instanceof HTMLButtonElement) submitBtn.textContent = 'Save changes';
+        if (mode === 'edit') {
+          if (headingEl) headingEl.textContent = `Edit quote ${quote.id}`;
+          if (ledeEl) ledeEl.textContent = 'Fix anything below, then save — nothing is signed yet.';
+          if (submitBtn instanceof HTMLButtonElement) submitBtn.textContent = 'Save changes';
+        } else {
+          if (headingEl) headingEl.textContent = 'New quote (copied)';
+          if (ledeEl) ledeEl.textContent = `Copied from ${quote.id} — check the customer details before you save.`;
+        }
 
         setField('name', quote.customer_name);
         setField('phone', quote.customer_phone);
@@ -399,7 +406,8 @@ const catalog = {
       }
     }
 
-    if (editId) loadForEdit(editId);
+    if (editId) loadForEdit(editId, 'edit');
+    else if (duplicateId) loadForEdit(duplicateId, 'duplicate');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();

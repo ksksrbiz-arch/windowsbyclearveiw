@@ -69,6 +69,30 @@ export async function onRequestPut(context) {
 }
 
 /**
+ * Voids an abandoned draft — a customer who walks away mid-quote, a wrong
+ * customer picked from muscle memory, a duplicate started by accident.
+ * Only ever a draft: a finalized quote is a record of what was agreed to,
+ * not a scratch file, so this always 409s once a quote is signed.
+ */
+export async function onRequestDelete(context) {
+  const { env, params } = context;
+  const id = String(params.id || '');
+
+  const quote = await env.QUOTES_DB.prepare('SELECT status FROM quotes WHERE id = ?').bind(id).first();
+  if (!quote) return json({ error: 'Not found.' }, 404);
+  if (quote.status !== 'draft') {
+    return json({ error: 'Only a draft can be deleted — a finalized quote is a record, not a scratch file.' }, 409);
+  }
+
+  await env.QUOTES_DB.batch([
+    env.QUOTES_DB.prepare('DELETE FROM quote_items WHERE quote_id = ?').bind(id),
+    env.QUOTES_DB.prepare('DELETE FROM quotes WHERE id = ?').bind(id),
+  ]);
+
+  return json({ ok: true });
+}
+
+/**
  * The only two mutations a draft quote gets on the way to being signed:
  * attaching a drawn digital signature, or confirming that a printed copy
  * actually got signed by hand. Either one finalizes the quote. There is no

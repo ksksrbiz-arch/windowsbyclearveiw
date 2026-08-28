@@ -7,10 +7,13 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
   <div class="qv-toolbar" data-toolbar hidden>
     <a class="qv-back" href="/internal/quotes">&larr; All quotes</a>
     <div class="qv-toolbar-actions">
+      <a class="btn btn-ghost" data-duplicate-link href="#">Duplicate</a>
       <a class="btn btn-ghost" data-edit-link hidden href="#">Edit quote</a>
+      <button class="btn btn-ghost qv-danger" type="button" data-delete-btn hidden>Delete draft</button>
       <button class="btn btn-primary" type="button" data-print-btn>Print</button>
     </div>
   </div>
+  <p class="qv-error" data-delete-error hidden role="alert"></p>
 
   <p data-loading>Loading…</p>
   <p class="qv-error" data-error hidden role="alert"></p>
@@ -175,6 +178,17 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
         } else {
           editLink.hidden = true;
         }
+      }
+
+      const duplicateLink = document.querySelector('[data-duplicate-link]');
+      if (duplicateLink instanceof HTMLAnchorElement) {
+        duplicateLink.href = `/internal/quotes/new?duplicate=${encodeURIComponent(quote.id)}`;
+      }
+
+      const deleteBtn = document.querySelector('[data-delete-btn]');
+      if (deleteBtn instanceof HTMLButtonElement) {
+        deleteBtn.hidden = quote.status !== 'draft';
+        setupDelete(quote);
       }
 
       const set = (selector: string, value: string) => {
@@ -427,6 +441,36 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       });
     }
 
+    function setupDelete(quote: any) {
+      const btn = document.querySelector('[data-delete-btn]');
+      if (!(btn instanceof HTMLButtonElement) || btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
+
+      const errorEl = document.querySelector('[data-delete-error]');
+
+      btn.addEventListener('click', async () => {
+        const ok = window.confirm(`Delete this draft quote for ${quote.customer_name || 'this customer'}? This can't be undone.`);
+        if (!ok) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Deleting…';
+
+        try {
+          const response = await fetch(`/internal/api/quotes/${encodeURIComponent(quote.id)}`, { method: 'DELETE' });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not delete this quote.');
+          window.location.href = '/internal/quotes';
+        } catch (error) {
+          if (errorEl instanceof HTMLElement) {
+            errorEl.hidden = false;
+            errorEl.textContent = error instanceof Error ? error.message : 'Could not delete this quote.';
+          }
+          btn.disabled = false;
+          btn.textContent = 'Delete draft';
+        }
+      });
+    }
+
     const printBtn = document.querySelector('[data-print-btn]');
     printBtn?.addEventListener('click', () => window.print());
 
@@ -449,6 +493,11 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
   .qv-toolbar-actions {
     display: flex;
     gap: var(--space-xs);
+  }
+
+  .qv-danger {
+    color: var(--danger);
+    border-color: var(--danger);
   }
 
   .qv-back {
