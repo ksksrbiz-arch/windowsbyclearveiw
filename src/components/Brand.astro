@@ -3,30 +3,21 @@ interface Props {
   compact?: boolean;
 }
 const { compact = false } = Astro.props;
-const glassId = compact ? 'brand-glass-compact' : 'brand-glass';
 ---
 <a
   class:list={['brand', compact && 'is-compact']}
   href="/"
   aria-label="Clearveiw Windows home"
 >
-  <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-    <path
-      d="M8 41 L8 20 A16 16 0 0 1 40 20 L40 41 Z"
-      fill={`url(#${glassId})`}
-      stroke="#122033"
-      stroke-width="2.6"
-      stroke-linejoin="round"
-    />
-    <path d="M8 20h32M24 20v21" stroke="#122033" stroke-width="2.3" stroke-linecap="round" />
-    <path d="M13.5 12 L22 18.5" stroke="#f6f1e8" stroke-width="2.6" stroke-linecap="round" opacity="0.55" />
-    <defs>
-      <linearGradient id={glassId} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#d9efec" />
-        <stop offset="1" stop-color="#1f6f73" />
-      </linearGradient>
-    </defs>
-  </svg>
+  <img
+    class="brand-mark"
+    src="/logo/icon-mark@256.png"
+    width="256"
+    height="256"
+    alt=""
+    loading="eager"
+    decoding="async"
+  />
   <span class="brand-type">
     <strong>Clearveiw</strong>
     <span class="brand-sub">Vancouver, WA</span>
@@ -51,6 +42,7 @@ const glassId = compact ? 'brand-glass-compact' : 'brand-glass';
     height: 38px;
     flex: none;
     display: block;
+    object-fit: contain;
     transition: transform var(--dur) var(--ease-out);
   }
 
