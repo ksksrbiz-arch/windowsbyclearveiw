@@ -142,6 +142,14 @@
 
 html { scroll-behavior: smooth; }
 
+/* A default blue selection on an otherwise tokenised page is the fastest tell
+   that nobody looked at the last 1%. Tint it with the accent instead — text
+   colour is left alone so this reads correctly on both light and dark
+   sections rather than fixing one and breaking the other. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
 body {
   margin: 0;
   color: var(--ink);
@@ -236,7 +244,12 @@ p, li { text-wrap: pretty; }
 }
 
 .btn:hover { transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover,
+  .btn:active { transform: none; }
+}
 
 .btn-primary {
   background: var(--ink);

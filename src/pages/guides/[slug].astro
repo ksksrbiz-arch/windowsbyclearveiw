@@ -125,7 +125,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
           {guide.data.faq.map((item) => (
             <details>
               <summary>{item.question}</summary>
-              <p>{item.answer}</p>
+              <div class="faq-body"><p>{item.answer}</p></div>
             </details>
           ))}
         </section>
@@ -152,6 +152,85 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   </article>
   <CtaBar />
 </BaseLayout>
+
+<script>
+  // Native <details> snaps open and closed instantly — the content model
+  // hides everything with `display: none` the moment it collapses, which
+  // CSS transitions cannot touch. This intercepts the toggle and animates
+  // the element's own height with the Web Animations API instead, so the
+  // FAQ matches the considered-reveal feel used everywhere else on the
+  // site. JS off, or reduced motion, falls back to the native instant toggle.
+  function initFaqAccordion() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll<HTMLDetailsElement>('.faq details').forEach((details) => {
+      if (details.dataset.animBound === 'true' || reduceMotion) return;
+      details.dataset.animBound = 'true';
+
+      const summary = details.querySelector('summary');
+      const body = details.querySelector('.faq-body');
+      if (!(summary instanceof HTMLElement) || !(body instanceof HTMLElement)) return;
+
+      let animation: Animation | null = null;
+      let closing = false;
+      let opening = false;
+      // A click's expand() runs a frame late (see below). If a second click
+      // lands in that single-frame gap, this tells the stale callback to
+      // stand down rather than overriding the click that superseded it.
+      let generation = 0;
+
+      const finish = (open: boolean) => {
+        details.open = open;
+        animation = null;
+        closing = false;
+        opening = false;
+        details.style.height = details.style.overflow = '';
+      };
+
+      const shrink = () => {
+        closing = true;
+        animation?.cancel();
+        animation = details.animate(
+          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight}px`] },
+          { duration: 220, easing: 'ease-out' },
+        );
+        animation.onfinish = () => finish(false);
+        animation.oncancel = () => { closing = false; };
+      };
+
+      const expand = () => {
+        opening = true;
+        animation?.cancel();
+        animation = details.animate(
+          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight + body.offsetHeight}px`] },
+          { duration: 220, easing: 'ease-out' },
+        );
+        animation.onfinish = () => finish(true);
+        animation.oncancel = () => { opening = false; };
+      };
+
+      summary.addEventListener('click', (event) => {
+        event.preventDefault();
+        generation += 1;
+        const thisClick = generation;
+        details.style.overflow = 'hidden';
+        if (closing || !details.open) {
+          opening = true;
+          details.style.height = `${details.offsetHeight}px`;
+          details.open = true;
+          requestAnimationFrame(() => {
+            if (thisClick !== generation) return;
+            expand();
+          });
+        } else if (opening || details.open) {
+          shrink();
+        }
+      });
+    });
+  }
+
+  initFaqAccordion();
+  document.addEventListener('astro:page-load', initFaqAccordion);
+</script>
 
 <style>
   /* ───────────────────────────────────────────────────────────────────────
@@ -211,6 +290,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   .faq details {
     border-top: 1px solid var(--line);
     padding: 0;
+    overflow: hidden;
   }
 
   .faq details:last-of-type {
@@ -250,7 +330,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     color: var(--accent-ink);
   }
 
-  .faq details p {
+  .faq-body p {
     margin: 0 0 var(--space-s);
     padding-left: calc(0.7rem + var(--space-2xs));
     color: var(--ink-soft);
