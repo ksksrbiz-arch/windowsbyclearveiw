@@ -1,8 +1,14 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { processWork } from '../data/work';
+import processHeroSrc from '../assets/hero/process.png';
+
+// Full-bleed hero background. AI-generated, not a real install, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: processHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="How installation works"
@@ -10,7 +16,7 @@ import { processWork } from '../data/work';
   path="/process"
   crumbs={[{ name: 'Process', href: '/process' }]}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Process</p>
       <h1>Measure once. Install clean.</h1>
@@ -18,6 +24,7 @@ import { processWork } from '../data/work';
         Four steps, in this order, on every job — so nothing on install day is a surprise.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearveiw job or job site</p>
   </section>
 
   <section class="section">
@@ -54,6 +61,24 @@ import { processWork } from '../data/work';
 </BaseLayout>
 
 <style>
+  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
+     not a photo of a real install — hence the small credit line. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* The shared .steps device, given room to be the page rather than a list
      tucked beside a paragraph. */
   .process-steps li {

@@ -14,6 +14,7 @@ faq:
   - question: Can you mix methods on one house?
     answer: Yes. A rotten kitchen sink window may need full-frame while the bedrooms take inserts. The elevations should still read as one house.
 diagram: insert-vs-full-frame
+secondaryDiagram: flashing-order
 ---
 
 There are two honest ways to put a new window in an old opening. The right one depends on the frame that is already there, not on a sales package.

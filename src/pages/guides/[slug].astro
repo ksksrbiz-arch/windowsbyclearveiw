@@ -7,6 +7,7 @@ import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
+import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -122,6 +123,15 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     <div class="wrap is-narrow prose" data-reveal>
       <Content />
     </div>
+
+    {guide.data.secondaryDiagram && (
+      <div class="wrap is-narrow" data-reveal>
+        <section class="section-tight secondary-diagram">
+          {guide.data.secondaryDiagram === 'flashing-order' && <FlashingOrder />}
+          {guide.data.secondaryDiagram === 'cost-build-up' && <EstimateBuildUp />}
+        </section>
+      </div>
+    )}
 
     {guide.data.faq.length > 0 && (
       <div class="wrap is-narrow" data-reveal>
@@ -287,6 +297,16 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     margin-top: var(--space-2xs);
     font-size: var(--step--2);
     color: var(--ink-faint);
+  }
+
+  /* Secondary diagram ───────────────────────────────────────────────────
+     A second, more detailed visual after the body copy has set up the
+     context to use it — the cost guide's build-up chart, or the flashing
+     sequence after the full-frame explanation. */
+  .secondary-diagram {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--line);
   }
 
   /* FAQ ───────────────────────────────────────────────────────────────── */

@@ -1,11 +1,17 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { newBuildWork, findWork } from '../data/work';
+import newConstructionHeroSrc from '../assets/hero/new-construction.png';
 
 const ogPhoto = findWork('new-construction-sheathed')!;
+
+// Full-bleed hero background. AI-generated, not a real job site, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="New construction windows"
@@ -15,7 +21,7 @@ const ogPhoto = findWork('new-construction-sheathed')!;
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Services</p>
       <h1>New construction installs</h1>
@@ -24,6 +30,7 @@ const ogPhoto = findWork('new-construction-sheathed')!;
         crew shows up.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearveiw job or job site</p>
   </section>
   <section class="section">
     <div class="wrap" data-reveal>
@@ -96,6 +103,24 @@ const ogPhoto = findWork('new-construction-sheathed')!;
 </BaseLayout>
 
 <style>
+  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
+     not a photo of a real job site — hence the small credit line. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* A single tall framing shot needs a partner, not a full-width grid row of
      its own — stretched across the page it read as a missing image. */
   .newbuild-band {

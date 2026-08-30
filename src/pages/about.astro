@@ -3,8 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
 import { pricingIsRegionalAverage } from '../data/pricing';
+import { getImage } from 'astro:assets';
+import aboutHeroSrc from '../assets/hero/about.png';
 
 const pricesAreAverages = pricingIsRegionalAverage();
+
+// Full-bleed hero background. AI-generated, not a real job site, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="About"
@@ -12,7 +18,7 @@ const pricesAreAverages = pricingIsRegionalAverage();
   path="/about"
   crumbs={[{ name: 'About', href: '/about' }]}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker about-kicker">
         <img class="about-kicker-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
@@ -24,6 +30,7 @@ const pricesAreAverages = pricingIsRegionalAverage();
         opening in your wall.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearveiw property</p>
   </section>
   <section class="section">
     <div class="wrap split" data-reveal>
@@ -105,6 +112,22 @@ const pricesAreAverages = pricingIsRegionalAverage();
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   .about-kicker {
     display: flex;
     align-items: center;

@@ -1,4 +1,5 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
@@ -6,8 +7,13 @@ import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
+import featuresHeroSrc from '../assets/hero/window-features.png';
 
 const ogPhoto = findWork('stone-craftsman')!;
+
+// Full-bleed hero background. AI-generated macro detail shot, not a real
+// Clearveiw unit, so it is captioned as such.
+const heroBg = await getImage({ src: featuresHeroSrc, width: 2400, format: 'webp', quality: 76 });
 
 const materials = pricing.materials;
 const brands = pricing.brands;
@@ -31,7 +37,7 @@ const stylePhotos = [
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Window features</p>
       <h1>The window, not just the price.</h1>
@@ -40,6 +46,7 @@ const stylePhotos = [
         glass, the brand Mark orders it from, and the shape it comes in.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearveiw unit</p>
   </section>
 
   <section class="section">
@@ -195,6 +202,24 @@ const stylePhotos = [
 </BaseLayout>
 
 <style>
+  /* Full-bleed photo hero. The image is AI-generated macro detail, not a
+     photo of a real Clearveiw unit — hence the small credit line. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* Two comparisons on this page — material and brand — share this device: a
      pair of cards rather than prose, because the choice is genuinely binary
      and a reader scanning for "which one" should not have to parse a

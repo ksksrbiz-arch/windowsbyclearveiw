@@ -1,11 +1,17 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { replacementWork, findWork } from '../data/work';
+import replacementHeroSrc from '../assets/hero/replacement.png';
 
 const ogPhoto = findWork('vaulted-grids')!;
+
+// Full-bleed hero background. AI-generated, not a real elevation, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: replacementHeroSrc, width: 2400, format: 'webp', quality: 76 });
 
 const decision = [
   {
@@ -50,7 +56,7 @@ const spec = [
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Services</p>
       <h1>Window replacement</h1>
@@ -59,6 +65,7 @@ const spec = [
         without wrecking the siding or the interior finish.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearveiw job or job site</p>
   </section>
 
   <section class="section">
@@ -155,6 +162,25 @@ const spec = [
 </BaseLayout>
 
 <style>
+  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
+     not a photo of a real job — hence the small credit line — so it earns
+     no "after" tag the way the real work photos elsewhere on the site do. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* The decision table is the spine of this page: it is what a homeowner
      actually needs, and it is the reason the page is no longer a single
      paragraph band between two dark strips. */

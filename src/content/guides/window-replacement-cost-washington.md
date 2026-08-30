@@ -17,6 +17,7 @@ heroImage: ./img-window-replacement-cost-washington.png
 heroImageAlt: Illustration of a tape measure and a clipboard with an estimate sheet resting on a window sill, representing the measure a real quote starts from.
 heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearveiw job or job site
 heroImageFocus: 62% 62%
+secondaryDiagram: cost-build-up
 ---
 
 A window price on the internet is a guess about someone else’s house. The number that matters is the one that follows a measure. This page is here so that number is not a surprise.
