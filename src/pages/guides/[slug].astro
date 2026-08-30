@@ -6,6 +6,7 @@ import CtaBar from '../../components/CtaBar.astro';
 import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
+import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -91,6 +92,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
         )}
         {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
         {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
+        {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
       </div>
     </section>
   )}

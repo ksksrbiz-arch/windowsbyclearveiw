@@ -6,6 +6,7 @@ topic: Diagnosis
 published: true
 updated: 2026-08-30
 order: 1
+diagram: signs-checklist
 faq:
   - question: Can I just recaulk a drafty window?
     answer: Fresh caulk helps a sound unit. If the sash rattles, the glass is fogged between panes, or the frame is soft, caulk is a delay, not a repair.

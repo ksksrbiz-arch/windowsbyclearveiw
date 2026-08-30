@@ -44,7 +44,7 @@ const guides = defineCollection({
        * Optional diagram rendered above the body. Keyed rather than hardcoded in
        * the template so a new guide can claim one from its own frontmatter.
        */
-      diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy']).optional(),
+      diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist']).optional(),
       /**
        * Optional topical stock photo for the same slot the diagram uses —
        * never both on one guide. Never a real Clearveiw job photo (those live
