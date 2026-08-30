@@ -4,6 +4,8 @@ import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
+import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
+import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
 
@@ -69,6 +71,9 @@ const stylePhotos = [
           </article>
         ))}
       </div>
+      <div class="diagram-slot">
+        <FrameMaterials />
+      </div>
       <p class="fine-print">
         Mark installs both. Which one makes sense depends on the opening size and what you want
         out of it — vinyl for most standard openings, fiberglass where a wide slider or picture
@@ -111,6 +116,9 @@ const stylePhotos = [
         A cloudy or fogged pane is a different problem entirely — a failed seal, not a coating
         choice. <a href="/guides/fogged-windows">How to tell the difference</a>.
       </p>
+      <div class="diagram-slot">
+        <UFactorGauge />
+      </div>
     </div>
   </section>
 
@@ -196,6 +204,10 @@ const stylePhotos = [
     grid-template-columns: 1fr 1fr;
     gap: var(--space-m);
     margin: var(--space-l) 0 var(--space-m);
+  }
+
+  .diagram-slot {
+    margin: var(--space-l) 0;
   }
 
   .compare-card {

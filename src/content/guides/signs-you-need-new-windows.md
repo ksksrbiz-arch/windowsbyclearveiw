@@ -4,7 +4,7 @@ description: Six practical signs a Washington home is ready for window replaceme
 kicker: Should you replace?
 topic: Diagnosis
 published: true
-updated: 2026-08-19
+updated: 2026-08-30
 order: 1
 faq:
   - question: Can I just recaulk a drafty window?
@@ -43,6 +43,16 @@ Old single-pane and tired aluminum frames create cold glass. The furnace runs, t
 ## 6. The bill went up and nothing else changed
 
 Windows are a small part of the wall and a large part of heat loss. If insulation and the heating system are already decent, leaky glass is a common leftover. Replacement will not make a leaky attic disappear — but it will stop the openings you can feel.
+
+## How urgent is each sign
+
+Not every sign on this list needs action this season. A rough way to sort them:
+
+- **Act this year:** soft or stained sills (water damage compounds), fog between panes on a window you use daily.
+- **Plan for it:** drafts, sticky sashes, a bill that keeps climbing — real, but a slower-moving cost.
+- **Watch it:** one uncomfortable room, if the rest of the house is otherwise fine — worth a measure, not necessarily a rush.
+
+A soft sill left two more winters usually costs more to fix than the window itself would have.
 
 ## What to do with this list
 

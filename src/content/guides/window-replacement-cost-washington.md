@@ -4,7 +4,7 @@ description: What drives the price of replacement windows in Washington — meth
 kicker: Planning the budget
 topic: Cost
 published: true
-updated: 2026-08-19
+updated: 2026-08-30
 order: 4
 faq:
   - question: How much does one window cost in Washington?
@@ -51,6 +51,17 @@ If someone promises a two-year payback from energy alone, ask them to show the m
 ## Rebates in 2026
 
 The federal 25C window credit is over for new 2026 installs. Some utilities in Washington still rebate qualifying U-factors, especially when you are replacing single-pane or very poor metal-frame units. Programs differ by city and fuel. We will not print a rebate on an estimate unless it still exists for your meter.
+
+## Comparing two bids that don't match
+
+The single biggest cause of "why is this quote double the other one" is not markup — it's scope. Before comparing numbers, check that both bids include the same:
+
+- **Method per opening.** An insert quote and a full-frame quote for the same window are not the same job, even at the same price.
+- **Glass package.** Double-pane Low-E and triple-pane are not interchangeable line items.
+- **Haul-away and disposal.** Some bids quietly exclude it.
+- **Permits, if the scope needs one.** A lower bid that skips a required permit is not actually lower.
+
+Ask each bidder to write the method and glass spec per opening, not just a total. That is the only way two numbers become comparable.
 
 ## What an estimate from us includes
 
