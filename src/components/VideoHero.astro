@@ -1,5 +1,6 @@
 ---
 import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { Image, getImage } from 'astro:assets';
 import { site, telHref } from '../data/site';
 import { heroPhoto, findWork } from '../data/work';
@@ -8,7 +9,13 @@ import { heroPhoto, findWork } from '../data/work';
 // the claim the trust strip makes one column to the left.
 const insetPhoto = findWork('blue-pair-installday');
 
-const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.url));
+// import.meta.url is not safe here: Astro's production build renders this
+// component from a bundled chunk under dist/, not from its source location,
+// so a URL relative to import.meta.url resolves to the wrong tree entirely
+// (silently returning false and falling back to the photo hero). The
+// project root — where "public/" always lives — is process.cwd() in both
+// `astro dev` and `astro build`.
+const hasVideo = existsSync(join(process.cwd(), 'public/video/hero.mp4'));
 
 // The poster has to be a plain URL, so render one through the image pipeline.
 const poster = await getImage({
