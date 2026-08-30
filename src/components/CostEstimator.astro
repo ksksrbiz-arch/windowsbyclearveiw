@@ -380,17 +380,38 @@ const model = {
       }
     }
 
+    // Keep the minus/plus pair honest about the bounds: a button that stays
+    // full-strength at 0 or 40 invites a click that visibly does nothing,
+    // which reads as broken rather than clamped.
+    const syncStepper = (id: string) => {
+      const count = counts.get(id) || 0;
+      const row = root.querySelector(`[data-count="${id}"]`)?.closest('.counter');
+      const minus = row?.querySelector<HTMLButtonElement>('[data-dir="-1"]');
+      const plus = row?.querySelector<HTMLButtonElement>('[data-dir="1"]');
+      if (minus) minus.disabled = count <= 0;
+      if (plus) plus.disabled = count >= 40;
+    };
+
     root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((button) => {
+      syncStepper(button.dataset.step || '');
       button.addEventListener('click', () => {
         const id = button.dataset.step || '';
         const dir = Number(button.dataset.dir || 0);
         const next = Math.max(0, Math.min(40, (counts.get(id) || 0) + dir));
         counts.set(id, next);
         const output = root.querySelector(`[data-count="${id}"]`);
-        if (output instanceof HTMLElement) output.textContent = String(next);
+        if (output instanceof HTMLElement) {
+          output.textContent = String(next);
+          // A count that just jumps is easy to miss on a row among twelve.
+          // Restarting the pulse animation gives the change a beat of weight.
+          output.classList.remove('is-pulsing');
+          void output.offsetWidth;
+          output.classList.add('is-pulsing');
+        }
         // Mark the row so a chosen opening is visible while scanning the list,
         // rather than the count being the only difference between twelve rows.
         button.closest('.counter')?.classList.toggle('is-chosen', next > 0);
+        syncStepper(id);
         render();
       });
     });
@@ -543,7 +564,8 @@ const model = {
     transition:
       background var(--dur-fast) var(--ease),
       border-color var(--dur-fast) var(--ease),
-      color var(--dur-fast) var(--ease);
+      color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
   }
 
   .counter-controls button:hover {
@@ -552,12 +574,47 @@ const model = {
     color: var(--accent-ink);
   }
 
+  /* A press should feel like it landed, not just like a colour swap. */
+  .counter-controls button:active {
+    transform: scale(0.92);
+  }
+
+  .counter-controls button:disabled {
+    border-color: var(--line);
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .counter-controls output {
+    display: inline-block;
     min-width: 2.6rem;
     text-align: center;
     font-variant-numeric: tabular-nums;
     font-size: var(--step-0);
     font-weight: 600;
+  }
+
+  .counter-controls output.is-pulsing {
+    animation: count-pulse var(--dur) var(--ease-out);
+  }
+
+  @keyframes count-pulse {
+    from {
+      color: var(--accent);
+      transform: scale(1.22);
+    }
+    to {
+      color: var(--ink);
+      transform: scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .counter-controls output.is-pulsing {
+      animation: none;
+    }
   }
 
   /* Choices ───────────────────────────────────────────────────────────── */

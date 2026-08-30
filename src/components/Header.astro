@@ -130,7 +130,22 @@ const links = [
     trackScroll();
   }
 
+  // The reading rail already exists to show scroll position, so it is the
+  // natural place for a navigation-in-flight indicator too — one property
+  // doing two jobs, rather than a second bar bolted on for this alone.
+  function trackNavigation() {
+    const header = document.querySelector('.site-header');
+    if (!(header instanceof HTMLElement)) return;
+    document.addEventListener('astro:before-preparation', () => {
+      header.dataset.loading = 'true';
+    });
+    document.addEventListener('astro:page-load', () => {
+      header.dataset.loading = 'false';
+    });
+  }
+
   setUpHeader();
+  trackNavigation();
   document.addEventListener('astro:page-load', setUpHeader);
 </script>
 
@@ -177,13 +192,33 @@ const links = [
     min-height: 60px;
   }
 
-  /* Reading rail. Width comes from --scroll-progress, set on scroll. */
+  /* Reading rail. Width comes from --scroll-progress, set on scroll. While a
+     page transition is in flight it switches to an indeterminate sweep, so
+     a click gets an immediate answer instead of a header that just sits
+     there until the new page appears. */
   .header-progress {
     height: 2px;
     transform: scaleX(var(--scroll-progress, 0));
     transform-origin: left;
     background: linear-gradient(90deg, var(--accent), var(--accent-bright));
     transition: transform 90ms linear;
+  }
+
+  .site-header[data-loading='true'] .header-progress {
+    transform: none;
+    animation: nav-loading 900ms ease-in-out infinite;
+  }
+
+  @keyframes nav-loading {
+    0%, 100% { transform: scaleX(0.08); }
+    50% { transform: scaleX(0.6); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header[data-loading='true'] .header-progress {
+      animation: none;
+      opacity: 0.6;
+    }
   }
 
   .nav {
