@@ -110,8 +110,9 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
             quality={72}
             loading="eager"
             fetchpriority="high"
+            style={`object-position: ${guide.data.heroImageFocus ?? '50% 50%'}`}
           />
-          <figcaption>Stock photo for illustration — not a Clearveiw job.</figcaption>
+          <figcaption>{guide.data.heroImageCredit ?? 'Stock photo for illustration — not a Clearveiw job.'}</figcaption>
         </figure>
       </div>
     </section>
@@ -272,7 +273,9 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   }
 
   .guide-photo img {
+    display: block;
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: var(--radius);

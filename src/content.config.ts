@@ -56,6 +56,8 @@ const guides = defineCollection({
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
       heroImageCredit: z.string().optional(),
+      /** CSS object-position for the hero crop, e.g. "50% 68%". Defaults to center. */
+      heroImageFocus: z.string().optional(),
       faq: z
         .array(
           z.object({
