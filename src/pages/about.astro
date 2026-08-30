@@ -14,7 +14,10 @@ const pricesAreAverages = pricingIsRegionalAverage();
 >
   <section class="page-hero">
     <div class="wrap">
-      <p class="kicker">About</p>
+      <p class="kicker about-kicker">
+        <img class="about-kicker-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+        About
+      </p>
       <h1>A Vancouver crew, not a national sales office.</h1>
       <p class="lede">
         The site, the truck, and the estimate all point back to the same person responsible for the
@@ -102,6 +105,19 @@ const pricesAreAverages = pricingIsRegionalAverage();
 </BaseLayout>
 
 <style>
+  .about-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .about-kicker-mark {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    object-fit: contain;
+  }
+
   /* Naming the gaps outright is the strongest thing a new company can do on
      an About page, and it keeps the site's claims inside what RCW 18.27.100
      allows a registered contractor to advertise. */

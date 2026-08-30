@@ -37,7 +37,10 @@ const poster = await getImage({
     </div>
 
     <div class="wrap video-copy">
-      <p class="kicker">Vancouver, WA &middot; Clark County</p>
+      <p class="kicker">
+        <img class="kicker-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+        Vancouver, WA &middot; Clark County
+      </p>
       <h1>Great prices. Clean work. Clear windows.</h1>
       <p class="lede">
         Replacement and new-construction windows, installed by the person who quoted them.
@@ -53,7 +56,10 @@ const poster = await getImage({
     <div class="photo-hero-grain" aria-hidden="true"></div>
     <div class="wrap photo-hero-inner">
       <div class="photo-hero-copy">
-        <p class="hero-eyebrow"><span aria-hidden="true"></span>Vancouver, WA &middot; Clark County</p>
+        <p class="hero-eyebrow">
+          <img class="hero-eyebrow-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+          Vancouver, WA &middot; Clark County
+        </p>
         <h1>Great prices.<br />Clean work.<br /><em>Clear windows.</em></h1>
         <p class="lede">
           {site.shortName} replaces tired windows and sets new ones for builders — Vancouver,
@@ -178,6 +184,12 @@ const poster = await getImage({
     min-width: 0;
   }
 
+  .video-copy .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .hero-eyebrow {
     display: flex;
     align-items: center;
@@ -190,12 +202,12 @@ const poster = await getImage({
     color: var(--on-dark-faint);
   }
 
-  .hero-eyebrow span {
-    width: 0.44rem;
-    height: 0.44rem;
-    border-radius: 50%;
-    background: var(--accent-bright);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-bright) 22%, transparent);
+  .hero-eyebrow-mark,
+  .kicker-mark {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    object-fit: contain;
   }
 
   .photo-hero-copy h1 {
