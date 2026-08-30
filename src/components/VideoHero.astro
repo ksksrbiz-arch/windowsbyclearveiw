@@ -15,7 +15,17 @@ const insetPhoto = findWork('blue-pair-installday');
 // (silently returning false and falling back to the photo hero). The
 // project root — where "public/" always lives — is process.cwd() in both
 // `astro dev` and `astro build`.
-const hasVideo = existsSync(join(process.cwd(), 'public/video/logo-reveal.mp4'));
+//
+// Multiple takes of the same brand-reveal animation live side by side
+// (logo-reveal-1, logo-reveal-2, ...) so repeat visitors don't see the
+// identical loop every time. The list is discovered rather than hardcoded
+// to a count, so dropping in a logo-reveal-3.mp4 later is enough on its
+// own. Variant 1 is what renders in the static HTML (and so is what shows
+// with JS disabled); the client script below picks randomly among all of
+// them once the page loads.
+const heroVariants = ['logo-reveal-1', 'logo-reveal-2', 'logo-reveal-3', 'logo-reveal-4']
+  .filter((name) => existsSync(join(process.cwd(), `public/video/${name}.mp4`)));
+const hasVideo = heroVariants.length > 0;
 
 // The poster has to be a plain URL, so render one through the image pipeline.
 const poster = await getImage({
@@ -36,9 +46,10 @@ const poster = await getImage({
         playsinline
         loop
         preload="metadata"
+        data-variants={JSON.stringify(heroVariants)}
       >
-        <source src="/video/logo-reveal.webm" type="video/webm" />
-        <source src="/video/logo-reveal.mp4" type="video/mp4" />
+        <source src={`/video/${heroVariants[0]}.webm`} type="video/webm" />
+        <source src={`/video/${heroVariants[0]}.mp4`} type="video/mp4" />
       </video>
       <div class="video-wash"></div>
     </div>
@@ -132,6 +143,29 @@ const poster = await getImage({
       video.pause();
       return;
     }
+
+    // Swap in a random take of the reveal, once per page view. The server
+    // render always ships variant 1 (so JS-off visitors and crawlers see a
+    // real video either way); this only re-rolls which one plays for
+    // everyone else. Guarded by a dataset flag rather than re-running on
+    // every astro:page-load, since a mid-visit swap would just yank the
+    // clip out from under someone already watching it.
+    if (!video.dataset.variantPicked) {
+      video.dataset.variantPicked = '1';
+      try {
+        const variants = JSON.parse(video.dataset.variants || '[]');
+        if (Array.isArray(variants) && variants.length > 1) {
+          const pick = variants[Math.floor(Math.random() * variants.length)];
+          const sources = video.querySelectorAll('source');
+          if (sources[0]) sources[0].src = `/video/${pick}.webm`;
+          if (sources[1]) sources[1].src = `/video/${pick}.mp4`;
+          video.load();
+        }
+      } catch {
+        // Malformed data-variants just means everyone gets variant 1 — fine.
+      }
+    }
+
     video.play().catch(() => {});
   }
 
