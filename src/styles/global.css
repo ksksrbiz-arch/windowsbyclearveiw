@@ -140,6 +140,15 @@
 
 * { box-sizing: border-box; }
 
+/* An unconditional `display:` rule on a selector beats the browser's own
+   `[hidden]` attribute rule regardless of specificity, since author-origin
+   CSS always wins over user-agent CSS. Every element this site toggles via
+   `.hidden = true/false` (not a class) relies on the native behavior, so
+   this reasserts it globally rather than re-discovering the bug per
+   component — confirmed live on `.ask-starters` (never actually hid after
+   the first question) before this rule existed. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {

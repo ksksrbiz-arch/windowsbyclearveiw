@@ -1,6 +1,7 @@
 import { topMatches } from '../_lib/rag.mjs';
 import { BUSINESS_FACTS } from '../_lib/facts.mjs';
 import { toolsForGroq, toolsForGemini, runTool } from '../_lib/tools.mjs';
+import { analyzePhoto, MAX_IMAGE_BYTES } from '../_lib/vision.mjs';
 import guidesIndex from '../_data/guides-index.json';
 
 // Verified against each provider's own /models list — model names in this
@@ -14,6 +15,12 @@ const MAX_MESSAGE_LENGTH = 500;
 const MAX_HISTORY_MESSAGES = 6;
 const MAX_TOOL_ROUNDS = 2; // up to 3 LLM calls total: initial + one per round of tool results
 
+// Derived from vision.mjs's real decoded-byte cap (base64 inflates by 4/3,
+// plus slack for the "data:image/jpeg;base64," prefix) rather than a second
+// hand-picked number — this only has to reject a string too large to be worth
+// parsing at all; vision.mjs's own byte check is what actually enforces the limit.
+const MAX_IMAGE_DATA_URL_LENGTH = Math.ceil(MAX_IMAGE_BYTES * 1.4) + 32;
+
 const UNAVAILABLE_ANSWER =
   "The assistant isn't available right now — call or text us at (564) 208-0801, or request an estimate at /estimate.";
 
@@ -25,6 +32,8 @@ Your knowledge has three tiers, and mixing them up is the one thing you must nev
 1. REFERENCE MATERIAL (below) — guide excerpts and business facts about Clearveiw specifically. This is the ONLY source for anything about this business: its methods, service area, contact info, hours, what it offers. Never say anything about Clearveiw that isn't in here.
 2. THE estimate_price TOOL — the only source for a number. It runs Clearveiw's own published pricing model, the same one behind /tools/window-replacement-cost-calculator. Call it whenever someone describes a job and wants a sense of cost — ask a couple of clarifying questions first if you need to (opening types, rough count, insert vs full-frame) rather than guessing at the inputs. Never state a price, even a rough one, without calling this tool. Present its output as a range and a starting point, never a final number — a real measure is what makes it firm.
 3. GENERAL KNOWLEDGE — your own understanding of windows, construction, energy performance, glass, installation methods, and the search_web tool for anything current (rebates, codes, material trends). Use this freely and confidently for education — this is where you should sound like an expert, not hedge. Two rules on this tier: general knowledge and search results describe the industry, never Clearveiw — don't imply something you read on the web is Clearveiw's policy or practice. And it is scoped to windows, doors, home construction, and home improvement — not general trivia, unrelated topics, coding help, or anything else. If a visitor asks something outside that scope, say plainly that it's outside what you help with here and redirect to windows/construction questions or the phone number — do not just answer it because you happen to know it.
+
+If the reference material includes a "Photo observations" section, a visitor attached a photo this turn. Those observations are a machine description of what's visible in the image — frame material, style, visible fog or damage — nothing more. Treat them as general-knowledge-tier context, same rules as above: describe what they suggest in general terms, never state it as a certainty ("that's consistent with a failed seal" not "that window is broken"), never treat it as a measurement or a diagnosis, and never call estimate_price using a count of openings guessed from one photo — ask the visitor to use the calculator or tell you the count instead. Always point toward Mark confirming in person.
 
 Hard rules, no exceptions, regardless of source:
 - Never state or imply the business is "bonded and insured" — Washington law (RCW 18.27.100) prohibits contractors from advertising that.
@@ -225,20 +234,49 @@ export async function onRequestPost(context) {
     return json({ answer: UNAVAILABLE_ANSWER, sources: [] });
   }
 
+  // Guide retrieval and photo analysis (below) hit different providers and
+  // neither depends on the other's output, so they run concurrently — a
+  // photo turn shouldn't take twice as long as a text-only one just because
+  // this was written as two separate steps.
+  const rawImage = typeof body.image === 'string' ? body.image : '';
+  const imageTooLarge = rawImage.length > MAX_IMAGE_DATA_URL_LENGTH;
+
+  const [embeddingResult, visionResult] = await Promise.allSettled([
+    embedQuery(message, env.GEMINI_API_KEY),
+    rawImage && !imageTooLarge ? analyzePhoto(rawImage, env) : Promise.resolve(null),
+  ]);
+
   let matches = [];
-  try {
-    const queryEmbedding = await embedQuery(message, env.GEMINI_API_KEY);
-    matches = topMatches(queryEmbedding, guidesIndex.chunks, 4, 0.5);
-  } catch {
-    // Retrieval failing doesn't have to end the conversation — fall through
-    // and answer from business facts and general knowledge alone.
+  if (embeddingResult.status === 'fulfilled') {
+    matches = topMatches(embeddingResult.value, guidesIndex.chunks, 4, 0.5);
+  }
+  // Retrieval failing doesn't have to end the conversation — fall through
+  // and answer from business facts and general knowledge alone.
+
+  // Photo analysis, same shape as guide retrieval above: it runs eagerly,
+  // before the main chat call, rather than as something the model decides to
+  // invoke as a tool. A visitor attaching a photo has already signaled "look
+  // at this" — there's no case where asking the model to additionally decide
+  // to call a tool buys anything, and skipping that round trip saves a call.
+  let usedVision = false;
+  let visionSection = '';
+  if (rawImage) {
+    usedVision = true;
+    const vision = imageTooLarge
+      ? { error: 'the photo was too large to send' }
+      : visionResult.status === 'fulfilled'
+        ? visionResult.value
+        : { error: visionResult.reason?.message || String(visionResult.reason) };
+    visionSection = vision.description
+      ? `\n\nPhoto observations (machine-generated, describes only what's visible — see the guardrail on this in your instructions):\n${vision.description}`
+      : `\n\n(A photo was attached but could not be analyzed: ${vision.error})`;
   }
 
   const referenceText = matches.length
     ? matches.map((m) => `### ${m.heading} (from "${m.title}")\n${m.text}`).join('\n\n')
     : '(No guide section matched this question closely.)';
 
-  const systemContent = `${SYSTEM_PROMPT}\n\nReference material:\n\nBusiness facts:\n${BUSINESS_FACTS}\n\nGuide excerpts:\n${referenceText}`;
+  const systemContent = `${SYSTEM_PROMPT}\n\nReference material:\n\nBusiness facts:\n${BUSINESS_FACTS}\n\nGuide excerpts:\n${referenceText}${visionSection}`;
 
   const messages = [{ role: 'system', content: systemContent }, ...history, { role: 'user', content: message }];
 
@@ -266,6 +304,7 @@ export async function onRequestPost(context) {
     .flatMap((t) => (t.result.results || []).map((r) => ({ title: r.title, url: r.url })));
   const sources = [...new Map([...guideSources, ...webSources].map((s) => [s.url, s])).values()];
   const toolsUsed = [...new Set(trace.map((t) => t.name))];
+  if (usedVision) toolsUsed.push('analyze_photo');
 
   await logInteraction(env, {
     question: message,

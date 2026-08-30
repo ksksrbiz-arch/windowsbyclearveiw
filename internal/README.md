@@ -39,8 +39,13 @@ npx wrangler d1 execute QUOTES_DB --local --file=internal/db/schema.sql
 npx wrangler pages dev dist \
   --d1 QUOTES_DB=4700b6f7-c3d8-46c9-9b19-17cf34accb84 \
   -b INTERNAL_PASSWORD=devpassword \
-  -b INTERNAL_SESSION_SECRET=devsecret
+  -b INTERNAL_SESSION_SECRET=devsecret \
+  --ai AI
 ```
+
+`--ai AI` binds Workers AI for the `/ask` photo-analysis feature — it proxies to
+the real Cloudflare API, so it needs `wrangler login` to actually return a result
+locally; without login it fails gracefully (see the main README's `/ask` section).
 
 `npx astro dev`/`astro preview` do **not** run Pages Functions, so `/internal/*`
 will 404 or fail to authenticate under those — use `wrangler pages dev` for
