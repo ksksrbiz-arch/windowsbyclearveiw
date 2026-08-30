@@ -53,17 +53,46 @@ const starters = guides
 
         <p class="ask-error" data-ask-error hidden role="alert"></p>
 
+        <p class="ask-handoff" data-ask-handoff hidden>
+          <a href="/estimate" data-ask-handoff-link>Turn this into a written estimate &rarr;</a>
+        </p>
+
         <form class="ask-form" data-ask-form>
-          <label class="visually-hidden" for="ask-input">Your question</label>
-          <textarea
-            id="ask-input"
-            data-ask-input
-            rows="2"
-            maxlength="500"
-            placeholder="e.g. Is insert replacement cheaper than full-frame?"
-            required
-          ></textarea>
-          <button class="btn btn-primary" type="submit" data-ask-submit>Ask</button>
+          <div class="ask-photo-row">
+            <label class="ask-photo-btn" for="ask-photo-input">
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M4 6.5h2.4l1-1.5h5.2l1 1.5H16a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7.5a1 1 0 0 1 1-1Z" />
+                <circle cx="10" cy="11" r="2.6" />
+              </svg>
+              Add a photo of the window
+            </label>
+            <input
+              id="ask-photo-input"
+              data-ask-photo-input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              class="visually-hidden"
+            />
+            <div class="ask-photo-preview" data-ask-photo-preview hidden>
+              <img data-ask-photo-thumb alt="Photo you attached" />
+              <button type="button" class="ask-photo-remove" data-ask-photo-remove aria-label="Remove photo">
+                &times;
+              </button>
+            </div>
+          </div>
+
+          <div class="ask-input-row">
+            <label class="visually-hidden" for="ask-input">Your question</label>
+            <textarea
+              id="ask-input"
+              data-ask-input
+              rows="2"
+              maxlength="500"
+              placeholder="e.g. Is insert replacement cheaper than full-frame?"
+              required
+            ></textarea>
+            <button class="btn btn-primary" type="submit" data-ask-submit>Ask</button>
+          </div>
         </form>
       </div>
 
@@ -89,15 +118,111 @@ const starters = guides
     const transcript = document.querySelector('[data-transcript]');
     const errorEl = document.querySelector('[data-ask-error]');
     const starters = document.querySelector('[data-starters]');
+    const photoInput = document.querySelector('[data-ask-photo-input]');
+    const photoPreview = document.querySelector('[data-ask-photo-preview]');
+    const photoThumb = document.querySelector('[data-ask-photo-thumb]');
+    const photoRemove = document.querySelector('[data-ask-photo-remove]');
+    const handoff = document.querySelector('[data-ask-handoff]');
+    const handoffLink = document.querySelector('[data-ask-handoff-link]');
 
     if (!(input instanceof HTMLTextAreaElement) || !(transcript instanceof HTMLElement)) return;
 
     const conversation: Message[] = [];
+    // The resized photo attached to the NEXT question, if any. Cleared after
+    // every send (successful or not) — a photo describes one turn, not the
+    // whole conversation, so it should never silently re-attach to a later
+    // unrelated question.
+    let attachedImage: string | null = null;
+    // Bumped on every selection/removal. resizeToDataUrl runs async — without
+    // this, clicking remove (or picking a second photo) while an earlier
+    // resize is still in flight lets that stale resize land afterward and
+    // silently reattach a photo the visitor already dismissed or replaced.
+    let photoGeneration = 0;
 
-    function appendMessage(role: 'user' | 'assistant', content: string, sources?: { title: string; url: string }[]) {
+    // Phone photos are commonly several MB. Resizing client-side keeps the
+    // upload small (Workers AI still has to decode it, and the free daily
+    // Neuron allocation is not unlimited) without asking the visitor to do
+    // anything but pick a file.
+    async function resizeToDataUrl(file: File): Promise<string> {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1024;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not read that image.');
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.75);
+    }
+
+    function showError(message: string) {
+      if (errorEl instanceof HTMLElement) {
+        errorEl.hidden = false;
+        errorEl.textContent = message;
+      }
+    }
+
+    function clearAttachedPhoto() {
+      photoGeneration += 1;
+      attachedImage = null;
+      if (photoInput instanceof HTMLInputElement) photoInput.value = '';
+      if (photoPreview instanceof HTMLElement) photoPreview.hidden = true;
+    }
+
+    if (photoInput instanceof HTMLInputElement) {
+      photoInput.addEventListener('change', async () => {
+        const file = photoInput.files?.[0];
+        if (!file) return;
+        photoGeneration += 1;
+        const thisPhoto = photoGeneration;
+        if (!file.type.startsWith('image/')) {
+          showError('That file is not a photo — try a JPG, PNG, or WebP.');
+          clearAttachedPhoto();
+          return;
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          showError('That photo is too large — try one under 8MB.');
+          clearAttachedPhoto();
+          return;
+        }
+        try {
+          const resized = await resizeToDataUrl(file);
+          if (thisPhoto !== photoGeneration) return; // superseded while resizing
+          attachedImage = resized;
+          if (photoThumb instanceof HTMLImageElement) photoThumb.src = attachedImage;
+          if (photoPreview instanceof HTMLElement) photoPreview.hidden = false;
+          if (errorEl instanceof HTMLElement) errorEl.hidden = true;
+        } catch {
+          if (thisPhoto !== photoGeneration) return;
+          showError('Could not read that photo — try a different file.');
+          clearAttachedPhoto();
+        }
+      });
+    }
+
+    if (photoRemove instanceof HTMLElement) {
+      photoRemove.addEventListener('click', clearAttachedPhoto);
+    }
+
+    function appendMessage(
+      role: 'user' | 'assistant',
+      content: string,
+      sources?: { title: string; url: string }[],
+      photo?: string | null,
+    ) {
       if (!(transcript instanceof HTMLElement)) return;
       const bubble = document.createElement('div');
       bubble.className = `ask-msg ask-msg-${role}`;
+
+      if (photo) {
+        const img = document.createElement('img');
+        img.className = 'ask-msg-photo';
+        img.src = photo;
+        img.alt = 'Photo you attached';
+        bubble.append(img);
+      }
+
       const p = document.createElement('p');
       p.textContent = content;
       bubble.append(p);
@@ -125,9 +250,11 @@ const starters = guides
       errorEl.hidden = true;
       if (starters instanceof HTMLElement) starters.hidden = true;
 
-      appendMessage('user', question);
+      const photo = attachedImage;
+      appendMessage('user', question, undefined, photo);
       const history = conversation.slice(-6);
       conversation.push({ role: 'user', content: question });
+      clearAttachedPhoto();
 
       if (submitBtn instanceof HTMLButtonElement) {
         submitBtn.disabled = true;
@@ -139,7 +266,7 @@ const starters = guides
         const response = await fetch('/ask/api/chat', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ message: question, history }),
+          body: JSON.stringify(photo ? { message: question, history, image: photo } : { message: question, history }),
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || 'Something went wrong.');
@@ -147,6 +274,21 @@ const starters = guides
         const answer = result.answer || "Sorry — I didn't get an answer for that.";
         appendMessage('assistant', answer, result.sources);
         conversation.push({ role: 'assistant', content: answer });
+
+        // A photo turn is the strongest signal yet that this visitor has a
+        // real project in front of them — hand the assistant's answer over
+        // as the estimate form's starting notes, same mechanism the cost
+        // calculator already uses, so nobody has to describe it twice.
+        if (photo && handoff instanceof HTMLElement && handoffLink instanceof HTMLAnchorElement) {
+          const scope = answer.slice(0, 400);
+          try {
+            sessionStorage.setItem('clearveiw:scope', scope);
+          } catch {
+            // Private browsing can refuse storage. The query param still works.
+          }
+          handoffLink.href = `/estimate?scope=${encodeURIComponent(scope)}`;
+          handoff.hidden = false;
+        }
       } catch (error) {
         errorEl.hidden = false;
         errorEl.textContent = error instanceof Error ? error.message : 'Something went wrong. Try again in a moment.';
@@ -245,6 +387,16 @@ const starters = guides
     color: var(--ink-faint);
   }
 
+  :global(.ask-msg-photo) {
+    display: block;
+    width: 100%;
+    max-width: 12rem;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: var(--space-2xs);
+  }
+
   .ask-starters {
     display: flex;
     flex-wrap: wrap;
@@ -273,9 +425,90 @@ const starters = guides
   }
 
   .ask-form {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .ask-input-row {
     display: flex;
     gap: var(--space-xs);
     align-items: end;
+  }
+
+  .ask-photo-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .ask-photo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.8rem;
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+
+  .ask-photo-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .ask-photo-btn svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ask-photo-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .ask-photo-preview img {
+    width: 2.6rem;
+    height: 2.6rem;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+
+  .ask-photo-remove {
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    border-radius: 999px;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+
+  .ask-photo-remove:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .ask-handoff {
+    margin: 0;
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .ask-handoff a {
+    color: var(--accent-ink);
   }
 
   @media (max-width: 640px) {

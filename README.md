@@ -34,6 +34,13 @@ window installation in Vancouver, WA and the rest of Clark County.
       answers "The assistant isn't available right now" instead of crashing.
       See [Ask, the design-consultant chatbot](#ask-the-design-consultant-chatbot)
       below.
+- [ ] **`AI` Workers AI binding** set in Cloudflare Pages → Settings →
+      **Bindings** (not Environment variables — this is a binding, same
+      category as `QUOTES_DB`, not a secret). Free up to 10,000 Neurons/day,
+      no billing setup. Without it the photo-upload button on `/ask` still
+      works, it just answers that photo analysis isn't configured yet rather
+      than failing the turn. See
+      [Ask, the design-consultant chatbot](#ask-the-design-consultant-chatbot).
 
 ## Local development
 
@@ -246,6 +253,24 @@ never mixing them:**
 Hard rules that hold regardless of tier: never "bonded and insured" (RCW
 18.27.100), never a specific L&I number, never a competitor, never legal
 advice, never a firm final price outside the tool.
+
+**Photo analysis.** A visitor can attach a photo of a window on `/ask`.
+It's resized client-side (max 1024px, JPEG) and sent as a base64 field
+alongside the message — no multipart upload, no new content-type on the
+endpoint. `functions/ask/_lib/vision.mjs` runs it through Workers AI
+(`@cf/meta/llama-3.2-11b-vision-instruct`, the `AI` binding) for a factual
+description only — frame material, style, visible fog or damage — *before*
+the main chat call, the same eager-not-tool-gated shape retrieval already
+uses below. The description is folded into that turn's reference material,
+labelled as machine-generated observations, and the system prompt has an
+explicit guardrail: describe in general terms, never state it as certain,
+never treat it as a measurement, never call `estimate_price` from a guessed
+opening count. **The photo itself is never stored anywhere** — analyzed and
+discarded, matching the lead form's "no lists, no resale" stance; if Mark
+ever wants to review photos afterward, that's an R2 bucket added later, not
+today. Binding missing or the daily Neuron quota exhausted both degrade the
+same way as a Gemini outage: the chat turn still completes, just without
+visual context, rather than failing.
 
 **Retrieval is build-time, not live.** `scripts/build-guides-index.mjs` reads
 every published guide, splits it into one chunk per `##` section, embeds each
