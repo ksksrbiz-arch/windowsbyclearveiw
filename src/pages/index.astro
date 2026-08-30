@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
-import LogoReveal from '../components/LogoReveal.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { Image } from 'astro:assets';
@@ -62,7 +61,6 @@ const signs = [
 ---
 <BaseLayout title={site.shortName} description={site.metaDescription} path="/">
   <VideoHero />
-  <LogoReveal />
 
   <section class="section is-airy">
     <div class="wrap" data-reveal>

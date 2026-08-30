@@ -15,7 +15,7 @@ const insetPhoto = findWork('blue-pair-installday');
 // (silently returning false and falling back to the photo hero). The
 // project root — where "public/" always lives — is process.cwd() in both
 // `astro dev` and `astro build`.
-const hasVideo = existsSync(join(process.cwd(), 'public/video/hero.mp4'));
+const hasVideo = existsSync(join(process.cwd(), 'public/video/logo-reveal.mp4'));
 
 // The poster has to be a plain URL, so render one through the image pipeline.
 const poster = await getImage({
@@ -37,8 +37,8 @@ const poster = await getImage({
         loop
         preload="metadata"
       >
-        <source src="/video/hero.webm" type="video/webm" />
-        <source src="/video/hero.mp4" type="video/mp4" />
+        <source src="/video/logo-reveal.webm" type="video/webm" />
+        <source src="/video/logo-reveal.mp4" type="video/mp4" />
       </video>
       <div class="video-wash"></div>
     </div>
