@@ -117,6 +117,27 @@ const breadcrumbSchema =
       type="font/woff2"
       crossorigin
     />
+
+    <!-- Google tag (gtag.js) — GA4 property "Windows by Clearveiw". Disclosed
+         in the privacy policy: it sets a first-party cookie and assigns you a
+         random client ID so we can tell returning visitors apart in
+         aggregate, which is a different privacy posture than the cookieless
+         Cloudflare Web Analytics also running on this site. Only on public
+         pages — never loaded on the internal quoting tool (InternalLayout). -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE96XMJSWJ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(...args: unknown[]) {
+        dataLayer.push(args);
+      }
+      // @ts-expect-error — attached for the page-view tracker below.
+      window.gtag = gtag;
+      gtag('js', new Date());
+      // send_page_view is turned off here because the ClientRouter swaps pages
+      // without a full reload; astro:page-load fires the page_view for every
+      // navigation, initial load included, instead.
+      gtag('config', 'G-YE96XMJSWJ', { send_page_view: false });
+    </script>
     <ClientRouter />
     <JsonLd extra={schema} image={ogImageUrl} />
     {breadcrumbSchema && (
@@ -172,6 +193,21 @@ const breadcrumbSchema =
 
       initReveal();
       document.addEventListener('astro:page-load', initReveal);
+
+      // GA4 page_view for every client-side navigation, initial load
+      // included — see the send_page_view: false note in <head>.
+      function trackPageView() {
+        // @ts-expect-error — attached in <head>.
+        if (typeof window.gtag !== 'function') return;
+        // @ts-expect-error — attached in <head>.
+        window.gtag('event', 'page_view', {
+          page_title: document.title,
+          page_location: window.location.href,
+          page_path: window.location.pathname,
+        });
+      }
+
+      document.addEventListener('astro:page-load', trackPageView);
     </script>
   </body>
 </html>

@@ -1,9 +1,9 @@
 ---
 title: Privacy policy
 description: What Clearveiw Windows, LLC collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-08-21
+updated: 2026-08-30
 order: 1
-summary: No cookies, no advertising trackers, and no cross-site profiling. Traffic is counted with a privacy-preserving analytics tool that cannot identify you. The only personal information collected is what you type into the estimate form.
+summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. The only personal information collected is what you type into the estimate form.
 ---
 
 Clearveiw Windows, LLC ("Clearveiw", "we", "us") operates windowsbyclearveiw.com.
@@ -30,26 +30,40 @@ Cloudflare Pages. Like any web host, Cloudflare's edge network processes your
 IP address and browser user-agent in order to deliver the page and to block
 abusive traffic. We do not receive, store, or analyze those logs ourselves.
 
-**Traffic counting.** The site uses Cloudflare Web Analytics to count page
-views. It records the page visited, the referring site, your browser and
-operating system, your country, and how quickly the page loaded. It uses no
-cookies, sets no identifier on your device, and does not fingerprint you —
-which means it cannot follow you between visits or across other websites, and
-we cannot tell that any two page views came from the same person.
+**Traffic counting.** The site uses two analytics tools side by side, and they
+work differently:
 
-We use it to see which pages are worth writing and which are not. That is the
-whole purpose.
+- **Cloudflare Web Analytics** counts page views. It records the page
+  visited, the referring site, your browser and operating system, your
+  country, and how quickly the page loaded. It uses no cookies, sets no
+  identifier on your device, and does not fingerprint you — it cannot follow
+  you between visits, and we cannot tell that two page views came from the
+  same person.
+- **Google Analytics (GA4)** also records page views, plus which pages you
+  came from and left through in one visit. Unlike Cloudflare's tool, it sets
+  a cookie in your browser and assigns you a randomly generated ID, so it can
+  tell that the same browser viewed several pages in one visit or came back
+  later. We have not turned on Google Signals or any advertising-personalization
+  feature for this property, so Google Analytics is not, to our knowledge,
+  linking your visits here to a Google account or using them for ad
+  targeting on this site. Your data is still processed on Google's servers
+  under Google's own privacy policy, which we do not control.
+
+We use both to see which pages are worth writing and which are not. That is
+the whole purpose.
 
 **We do not collect** heatmaps, session recordings, advertising identifiers,
 mouse or scroll tracking, or location beyond the city you type in. There is no
-Google Analytics, no Meta pixel, no tag manager, and no advertising network on
-this site.
+Meta pixel, no ad network tag, and no tag manager beyond the Google Analytics
+snippet described above.
 
 ## Cookies and local storage
 
-**This site sets no cookies.**
+**Google Analytics sets a small number of first-party cookies** (named `_ga`
+and `_ga_*`) so it can recognize a returning visit. That is the only cookie
+this site sets. Cloudflare Web Analytics sets none.
 
-The cost calculator stores one item in your browser's `sessionStorage` — the
+The cost calculator also stores one item in your browser's `sessionStorage` — the
 project scope you built, under the key `clearveiw:scope` — so that the estimate
 form can pre-fill your notes if you choose to continue. It stays in your
 browser, is never transmitted to us, and your browser discards it when you
@@ -57,14 +71,15 @@ close the tab.
 
 ## Requests your browser makes to other companies
 
-Almost none. Every asset this site needs — the stylesheet, the typeface, the
-photographs, the icons — is served from this domain. There is no font CDN, no
-script CDN, and no tag manager.
+Very few. Every asset this site needs — the stylesheet, the typeface, the
+photographs, the icons — is served from this domain. There is no font CDN.
 
-The one exception is the **Cloudflare Web Analytics** script described above,
-which loads from `static.cloudflareinsights.com`. Cloudflare already handles
-every request to this site as its host, so this does not introduce a company
-that was not already in the path.
+Two exceptions, both analytics scripts described above: **Cloudflare Web
+Analytics**, which loads from `static.cloudflareinsights.com` (Cloudflare
+already handles every request to this site as its host, so this does not
+introduce a company that was not already in the path), and **Google
+Analytics**, which loads its tag from `googletagmanager.com` and sends visit
+data to Google's servers.
 
 ## Who else sees your estimate request
 
