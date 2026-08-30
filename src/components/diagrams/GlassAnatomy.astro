@@ -5,7 +5,8 @@
  * between the panes (a failed seal, no fix but replacement) or on the room
  * side of the glass (condensation, a humidity problem)? A photo of foggy
  * glass cannot show *where* the moisture sits. A section through the glass
- * can.
+ * can — now with the outer pane, air gap, and inner pane labeled directly on
+ * the drawing, so a reader isn't left guessing which bar is which.
  *
  * Same token-driven palette as the other diagrams — currentColor and the
  * design system's CSS custom properties, no hardcoded hexes.
@@ -46,6 +47,15 @@ const { heading = 'Where the moisture actually is' } = Astro.props;
           <circle cx="135" cy="115" r="7" />
           <circle cx="150" cy="95" r="6" />
         </g>
+
+        <!-- Part labels, in the drawing rather than only below it. -->
+        <text x="77" y="20" class="g-part-label">Outer pane</text>
+        <text x="123" y="20" class="g-part-label">Sealed gap</text>
+        <text x="163" y="20" class="g-part-label">Inner pane</text>
+        <text x="123" y="34" class="g-part-sub">— fog trapped here —</text>
+
+        <line x1="90" y1="32" x2="82" y2="32" class="g-callout" />
+        <text x="79" y="35" class="g-callout-label" text-anchor="end">Spacer failed</text>
 
         <line x1="120" y1="12" x2="120" y2="24" class="g-lead" />
         <line x1="120" y1="170" x2="120" y2="184" class="g-lead" />
@@ -89,8 +99,18 @@ const { heading = 'Where the moisture actually is' } = Astro.props;
           <circle cx="194" cy="138" r="2.6" />
         </g>
 
+        <!-- Same three-part labeling as the failed-seal panel, for a direct
+             side-by-side read: everything inside is fine, the room side isn't. -->
+        <text x="77" y="20" class="g-part-label">Outer pane</text>
+        <text x="123" y="20" class="g-part-label">Sealed gap</text>
+        <text x="163" y="20" class="g-part-label">Inner pane</text>
+        <text x="123" y="34" class="g-part-sub">— intact, gas still fills it —</text>
+
         <path d="M176 20 L176 158" class="g-room-line" />
-        <text x="176" y="12" class="g-label" text-anchor="middle">Room side</text>
+        <text x="192" y="46" class="g-callout-label">Room side</text>
+        <line x1="188" y1="52" x2="180" y2="52" class="g-callout" />
+        <text x="192" y="63" class="g-callout-label">Condensation beads</text>
+        <text x="192" y="74" class="g-callout-label">on this face</text>
 
         <line x1="120" y1="12" x2="120" y2="24" class="g-lead" />
         <line x1="120" y1="170" x2="120" y2="184" class="g-lead" />
@@ -167,30 +187,30 @@ const { heading = 'Where the moisture actually is' } = Astro.props;
   }
 
   .g-pane {
-    fill: color-mix(in srgb, var(--accent) 10%, transparent);
+    fill: color-mix(in srgb, var(--accent) 18%, transparent);
     stroke: var(--ink-soft);
     stroke-width: 1.5;
   }
 
   .g-coat {
-    fill: color-mix(in srgb, var(--accent) 40%, transparent);
+    fill: color-mix(in srgb, var(--accent) 55%, transparent);
   }
 
   .g-spacer-ok {
-    fill: color-mix(in srgb, var(--ink) 20%, transparent);
+    fill: color-mix(in srgb, var(--ink) 24%, transparent);
     stroke: var(--ink);
     stroke-width: 1.5;
   }
 
   .g-spacer-broken {
-    fill: color-mix(in srgb, var(--danger) 18%, transparent);
+    fill: color-mix(in srgb, var(--danger) 26%, transparent);
     stroke: var(--danger);
     stroke-width: 1.5;
     stroke-dasharray: 3 3;
   }
 
   .g-fog circle {
-    fill: color-mix(in srgb, var(--ink) 30%, transparent);
+    fill: color-mix(in srgb, var(--ink) 38%, transparent);
   }
 
   .g-drip circle {
@@ -212,6 +232,35 @@ const { heading = 'Where the moisture actually is' } = Astro.props;
     text-anchor: middle;
     text-transform: uppercase;
     writing-mode: vertical-rl;
+  }
+
+  .g-part-label {
+    fill: var(--ink-soft);
+    font-family: Outfit, 'Outfit Fallback', system-ui, sans-serif;
+    font-size: 7px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-anchor: middle;
+  }
+
+  .g-part-sub {
+    fill: var(--ink-faint);
+    font-family: Outfit, 'Outfit Fallback', system-ui, sans-serif;
+    font-size: 6px;
+    font-style: italic;
+    text-anchor: middle;
+  }
+
+  .g-callout {
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+  }
+
+  .g-callout-label {
+    fill: var(--ink-soft);
+    font-family: Outfit, 'Outfit Fallback', system-ui, sans-serif;
+    font-size: 7px;
+    font-weight: 600;
   }
 
   .g-label {
@@ -254,15 +303,15 @@ const { heading = 'Where the moisture actually is' } = Astro.props;
 
   .s-broken {
     border: 1.5px dashed var(--danger);
-    background: color-mix(in srgb, var(--danger) 18%, transparent);
+    background: color-mix(in srgb, var(--danger) 26%, transparent);
   }
 
   .s-fog {
-    background: color-mix(in srgb, var(--ink) 30%, transparent);
+    background: color-mix(in srgb, var(--ink) 38%, transparent);
   }
 
   .s-ok {
-    background: color-mix(in srgb, var(--ink) 20%, transparent);
+    background: color-mix(in srgb, var(--ink) 24%, transparent);
     border: 1.5px solid var(--ink);
   }
 
