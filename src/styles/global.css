@@ -444,18 +444,53 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* The clip itself is a logo sting: the mark assembles, then the full
+     lockup (wordmark + tagline) holds for most of the loop. Biased upward,
+     the crop keeps the mark and lets the copy's own dark wash swallow the
+     wordmark before it ever reaches the text below, instead of the two
+     fighting for the same few lines. */
+  object-position: 50% 8%;
 }
 
 .video-wash {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(11 12 14 / 0.15), rgb(11 12 14 / 0.72) 70%);
+  background: linear-gradient(
+    180deg,
+    rgb(11 12 14 / 0.2) 0%,
+    rgb(11 12 14 / 0.38) 38%,
+    rgb(11 12 14 / 0.82) 62%,
+    rgb(11 12 14 / 0.94) 100%
+  );
 }
 
 .video-copy {
   position: relative;
   z-index: 1;
   padding: 6rem 0 4rem;
+  /* A beat of black-and-mark-only before the page's own words land, rather
+     than both appearing in the same instant the video starts assembling
+     itself. Reduced-motion drops straight to the end state below. */
+  opacity: 0;
+  animation: video-copy-in var(--dur-slow) var(--ease-out) 0.5s forwards;
+}
+
+@keyframes video-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-copy {
+    opacity: 1;
+    animation: none;
+  }
 }
 
 .video-copy h1,
@@ -465,6 +500,34 @@ input:focus, textarea:focus, select:focus {
 }
 
 .video-copy .kicker { color: var(--on-dark-faint); }
+
+@media (max-width: 640px) {
+  .video-hero {
+    min-height: min(74vh, 620px);
+  }
+
+  /* Portrait screens crop far less off the top and bottom of a 16:9 clip, so
+     the wordmark reads larger and closer to the copy than on desktop. Push
+     the crop further up and lean harder on the wash to compensate. */
+  .video-stage,
+  .hero-media {
+    object-position: 50% 2%;
+  }
+
+  .video-wash {
+    background: linear-gradient(
+      180deg,
+      rgb(11 12 14 / 0.25) 0%,
+      rgb(11 12 14 / 0.5) 30%,
+      rgb(11 12 14 / 0.9) 55%,
+      rgb(11 12 14 / 0.97) 100%
+    );
+  }
+
+  .video-copy {
+    padding: 4.5rem 0 3rem;
+  }
+}
 
 .btn-light {
   background: var(--on-dark);
