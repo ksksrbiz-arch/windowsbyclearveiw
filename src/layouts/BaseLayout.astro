@@ -118,25 +118,28 @@ const breadcrumbSchema =
       crossorigin
     />
 
-    <!-- Google tag (gtag.js) — GA4 property "Windows by Clearveiw". Disclosed
-         in the privacy policy: it sets a first-party cookie and assigns you a
-         random client ID so we can tell returning visitors apart in
-         aggregate, which is a different privacy posture than the cookieless
-         Cloudflare Web Analytics also running on this site. Only on public
-         pages — never loaded on the internal quoting tool (InternalLayout). -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE96XMJSWJ"></script>
+    <!-- Google Tag Manager — container GTM-WGCFVHQM, GA4 property "Windows by
+         Clearveiw" (G-YE96XMJSWJ). Disclosed in the privacy policy: it sets a
+         first-party cookie and assigns you a random client ID so we can tell
+         returning visitors apart in aggregate, which is a different privacy
+         posture than the cookieless Cloudflare Web Analytics also running on
+         this site. Only on public pages — never loaded on the internal
+         quoting tool (InternalLayout). The GA4 Event tag inside this
+         container fires only on the "spa_page_view" custom event pushed
+         below, not on GTM's built-in Page View trigger, because the
+         ClientRouter swaps pages without a full reload — see the
+         astro:page-load listener at the bottom of this file. -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(...args: unknown[]) {
-        dataLayer.push(args);
-      }
-      // @ts-expect-error — attached for the page-view tracker below.
-      window.gtag = gtag;
-      gtag('js', new Date());
-      // send_page_view is turned off here because the ClientRouter swaps pages
-      // without a full reload; astro:page-load fires the page_view for every
-      // navigation, initial load included, instead.
-      gtag('config', 'G-YE96XMJSWJ', { send_page_view: false });
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-WGCFVHQM');
     </script>
     <ClientRouter />
     <JsonLd extra={schema} image={ogImageUrl} />
@@ -145,6 +148,15 @@ const breadcrumbSchema =
     )}
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-WGCFVHQM"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"></iframe></noscript
+    >
+    <!-- End Google Tag Manager (noscript) -->
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
     <main id="main" tabindex="-1" data-route={route}>
@@ -195,12 +207,17 @@ const breadcrumbSchema =
       document.addEventListener('astro:page-load', initReveal);
 
       // GA4 page_view for every client-side navigation, initial load
-      // included — see the send_page_view: false note in <head>.
+      // included, via GTM's dataLayer — see the container-snippet note in
+      // <head>. The GA4 Event tag inside GTM-WGCFVHQM listens for this
+      // "spa_page_view" custom event (not GTM's built-in Page View trigger,
+      // which only fires on real/hard loads and would miss every in-site
+      // navigation the ClientRouter performs).
       function trackPageView() {
-        // @ts-expect-error — attached in <head>.
-        if (typeof window.gtag !== 'function') return;
-        // @ts-expect-error — attached in <head>.
-        window.gtag('event', 'page_view', {
+        // @ts-expect-error — initialized by the GTM snippet in <head>.
+        window.dataLayer = window.dataLayer || [];
+        // @ts-expect-error — see above.
+        window.dataLayer.push({
+          event: 'spa_page_view',
           page_title: document.title,
           page_location: window.location.href,
           page_path: window.location.pathname,
