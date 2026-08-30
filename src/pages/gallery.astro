@@ -1,10 +1,15 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { allWork, findWork } from '../data/work';
 
 const ogPhoto = findWork('green-craftsman-upper')!;
+
+// A real job photo for the hero, not stock or AI -- the page's own copy
+// promises exactly that ("None of it is stock"), so the hero has to keep it.
+const heroBg = await getImage({ src: ogPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip
@@ -55,7 +60,7 @@ const total = allWork.length;
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Gallery</p>
       <h1>Mark’s work</h1>
@@ -116,6 +121,12 @@ const total = allWork.length;
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
   /* A jump index in the hero: 26 tiles down one page is a long scroll for a
      builder who only wants the framing shots. */
   /* The link list re-wraps when Outfit replaces the fallback — metric matching

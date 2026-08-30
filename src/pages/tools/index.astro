@@ -1,9 +1,15 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { pricingIsUsable } from '../../data/pricing';
+import toolsHeroSrc from '../../assets/hero/tools.jpg';
 
 const showMoney = pricingIsUsable();
+
+// Real stock photography rather than AI imagery -- a tape measure needs no
+// disclaimer for being generic, only for being staged as a Clearveiw job.
+const heroBg = await getImage({ src: toolsHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="Free window tools"
@@ -11,7 +17,7 @@ const showMoney = pricingIsUsable();
   path="/tools"
   crumbs={[{ name: 'Tools', href: '/tools' }]}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Tools</p>
       <h1>Work it out yourself first.</h1>
@@ -20,6 +26,7 @@ const showMoney = pricingIsUsable();
         want — we would rather you understood the job than felt rushed into it.
       </p>
     </div>
+    <p class="hero-photo-credit">Stock photography — not an actual Clearveiw job or job site</p>
   </section>
   <section class="section">
     <div class="wrap" data-reveal>
@@ -57,6 +64,22 @@ const showMoney = pricingIsUsable();
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* One tool in a three-across card grid looked like two had failed to load.
      Given the whole band, it reads as the offer it actually is. */
   .tool-feature {

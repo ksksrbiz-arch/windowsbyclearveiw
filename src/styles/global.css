@@ -470,9 +470,12 @@ input:focus, textarea:focus, select:focus {
   padding: 6rem 0 4rem;
   /* A beat of black-and-mark-only before the page's own words land, rather
      than both appearing in the same instant the video starts assembling
-     itself. Reduced-motion drops straight to the end state below. */
+     itself. The delay is timed to the clip: the mark finishes assembling
+     and the full lockup holds by roughly the 2.5s mark, so the copy waits
+     for that rather than cutting the reveal off partway through.
+     Reduced-motion drops straight to the end state below. */
   opacity: 0;
-  animation: video-copy-in var(--dur-slow) var(--ease-out) 0.5s forwards;
+  animation: video-copy-in 900ms var(--ease-out) 2.6s forwards;
 }
 
 @keyframes video-copy-in {

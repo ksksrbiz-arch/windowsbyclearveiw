@@ -1,10 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { site } from '../../data/site';
+import areasHeroSrc from '../../assets/hero/areas.jpg';
 
 const cities = (await getCollection('cities')).filter((city) => city.data.published);
+
+// Real stock photography of the Cascades, not a specific Clark County job
+// site -- same disclosure the other stock and AI hero photos carry.
+const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="Service areas"
@@ -12,12 +18,13 @@ const cities = (await getCollection('cities')).filter((city) => city.data.publis
   path="/areas"
   crumbs={[{ name: 'Service areas', href: '/areas' }]}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Service areas</p>
       <h1>Vancouver, WA and nearby</h1>
       <p class="lede">{site.serviceAreaNote}</p>
     </div>
+    <p class="hero-photo-credit">Stock photography — not an actual Clearveiw job or job site</p>
   </section>
 
   <section class="section">
@@ -43,6 +50,22 @@ const cities = (await getCollection('cities')).filter((city) => city.data.publis
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* A card grid made nine towns look like nine products. An index reads as
      coverage, which is what the page is actually claiming. */
   .area-list {
