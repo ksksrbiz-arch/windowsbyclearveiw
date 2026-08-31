@@ -449,24 +449,21 @@ const model = {
     align-items: start;
   }
 
+  /* Each step is its own tile rather than one long form — a worksheet you
+     fill in top to bottom feels like paperwork; a row of distinct panels
+     feels like a tool. */
   .estimator-inputs {
-    padding: var(--space-l);
-    background: var(--paper-raised);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: var(--space-m);
   }
 
   .est-block {
-    border: 0;
+    border: 1px solid var(--line);
     margin: 0;
-    padding: 0;
-  }
-
-  .est-block + .est-block {
-    margin-top: var(--space-l);
-    padding-top: var(--space-m);
-    border-top: 1px solid var(--line);
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
   }
 
   .est-block legend {
@@ -513,6 +510,15 @@ const model = {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  @media (min-width: 640px) {
+    .counter-list {
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--space-m);
+    }
   }
 
   .counter {
@@ -520,16 +526,16 @@ const model = {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
-    padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) 0;
-    border-bottom: 1px solid var(--line);
-    border-left: 2px solid transparent;
+    padding: var(--space-2xs);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-sunk);
     transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
   }
 
   .counter.is-chosen {
-    border-left-color: var(--accent);
+    border-color: var(--accent);
     background: var(--accent-wash);
-    padding-left: var(--space-2xs);
   }
 
   .counter-copy strong {
@@ -624,16 +630,23 @@ const model = {
   /* Choices ───────────────────────────────────────────────────────────── */
   .est-choices {
     display: grid;
-    gap: var(--space-3xs);
+    gap: var(--space-2xs);
+  }
+
+  @media (min-width: 640px) {
+    .est-choices {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   .est-choices .choice {
     display: flex;
     align-items: flex-start;
     gap: var(--space-2xs);
-    padding: var(--space-2xs);
+    padding: var(--space-2xs) var(--space-s);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    background: var(--paper-sunk);
     cursor: pointer;
     transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
   }
