@@ -62,8 +62,8 @@ unlawful, abusive, or automated.
 ## Our content
 
 The text, photographs, diagrams, and design on this site belong to Clearveiw
-Windows, LLC. **The job photographs are of real work performed by Mark**; they
-are not stock imagery and they are not licensed for reuse.
+Windows, LLC. **The job photographs are of real work performed by Clearveiw
+Windows**; they are not stock imagery and they are not licensed for reuse.
 
 You may read, print, and share links to these pages. You may not republish the
 photographs or copy the site's content for a competing commercial purpose
