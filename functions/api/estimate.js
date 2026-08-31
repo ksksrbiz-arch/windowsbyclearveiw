@@ -68,6 +68,97 @@ function telUri(phone) {
   return digits;
 }
 
+/**
+ * Parses the hidden visit_journey field EstimateForm.astro attaches at
+ * submit time (see BaseLayout.astro's trackVisitJourney). Always returns a
+ * safe shape even if the field is missing, malformed, or was stripped by a
+ * browser with storage disabled — a lead with no journey is just a lead.
+ */
+function parseJourney(raw) {
+  const empty = { visits: [], firstTouch: null };
+  if (!raw) return empty;
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      visits: Array.isArray(parsed?.visits) ? parsed.visits.slice(0, 25) : [],
+      firstTouch: parsed?.firstTouch && typeof parsed.firstTouch === 'object' ? parsed.firstTouch : null,
+    };
+  } catch {
+    return empty;
+  }
+}
+
+/** Short, human-readable block folded into the lead email's NOTES variable —
+ *  see the comment on TEMPLATES.lead below for why this rides in NOTES
+ *  rather than a new template variable. */
+function summarizeJourney(journey) {
+  const visits = journey.visits;
+  if (!visits.length) return '';
+
+  const pageLines = visits
+    .slice(-10)
+    .map((v) => `  - ${clean(v?.title, 160) || clean(v?.path, 200) || 'Untitled page'}`)
+    .join('\n');
+
+  const first = journey.firstTouch || {};
+  const arrival = first.utm_source
+    ? `arrived via ${clean(first.utm_source, 80)}${first.utm_medium ? `/${clean(first.utm_medium, 80)}` : ''}`
+    : first.referrer
+      ? `arrived from ${clean(first.referrer, 200)}`
+      : 'arrived directly (no referrer)';
+
+  const shown = Math.min(visits.length, 10);
+  const omitted = visits.length - shown;
+  return [
+    `Visitor journey (${visits.length} page${visits.length === 1 ? '' : 's'} viewed this visit, ${arrival}):`,
+    pageLines,
+    omitted > 0 ? `  …and ${omitted} more (full list in the internal leads view).` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+/**
+ * Best-effort record of the inbound lead plus its visit history, so it
+ * survives even if Resend has a bad day and so Mark can browse it later at
+ * /internal/leads. Never allowed to fail the actual estimate request — see
+ * functions/api/_data/schema.sql for the table this writes to.
+ */
+async function logLead(env, lead, journey, visitorId) {
+  if (!env?.QUOTES_DB) return;
+  try {
+    const first = journey.firstTouch || {};
+    await env.QUOTES_DB.prepare(
+      `INSERT INTO leads (
+        created_at, name, phone, email, city, role, notes, visitor_id,
+        first_seen_at, first_referrer, first_utm_source, first_utm_medium, first_utm_campaign, landing_path,
+        visit_count, page_views_json
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    )
+      .bind(
+        new Date().toISOString(),
+        lead.name,
+        lead.phone,
+        lead.email || null,
+        lead.city,
+        lead.role || null,
+        lead.notes || null,
+        visitorId || null,
+        first.ts ? new Date(first.ts).toISOString() : null,
+        first.referrer || null,
+        first.utm_source || null,
+        first.utm_medium || null,
+        first.utm_campaign || null,
+        first.path || null,
+        journey.visits.length,
+        JSON.stringify(journey.visits),
+      )
+      .run();
+  } catch (error) {
+    console.error('lead-log-failed', error);
+  }
+}
+
 function receivedAt() {
   return new Date().toLocaleString('en-US', {
     timeZone: 'America/Los_Angeles',
@@ -144,6 +235,15 @@ export async function onRequestPost(context) {
       : redirect(request, '/estimate/problem');
   }
 
+  const visitorId = clean(form.get('visitor_id'), 100);
+  const journey = parseJourney(clean(form.get('visit_journey'), 8000));
+  const journeySummary = summarizeJourney(journey);
+
+  // Kicked off as soon as we know the lead is real, independent of whether
+  // the email below succeeds — a database row is a fallback record, not a
+  // reward for the email working.
+  context.waitUntil(logLead(context.env, lead, journey, visitorId));
+
   const key = context.env?.RESEND_API_KEY;
   if (!key) {
     console.error('estimate-request missing RESEND_API_KEY');
@@ -166,9 +266,9 @@ export async function onRequestPost(context) {
           CUSTOMER_PHONE_HREF: telUri(lead.phone),
           CUSTOMER_EMAIL: lead.email || 'Not given',
           CITY: lead.city,
-          NOTES: [lead.role && `[${lead.role}]`, lead.notes || 'No notes.']
+          NOTES: [lead.role && `[${lead.role}]`, lead.notes || 'No notes.', journeySummary]
             .filter(Boolean)
-            .join(' '),
+            .join('\n\n'),
           RECEIVED_AT: receivedAt(),
         },
       },

@@ -1,0 +1,277 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Leads">
+  <div class="ld-head">
+    <div>
+      <p class="kicker">Clearveiw internal</p>
+      <h1>Leads</h1>
+      <p class="lede">Every estimate request, with what the visitor looked at on the site before they asked.</p>
+    </div>
+    <div class="ld-head-actions">
+      <a class="btn btn-ghost" href="/internal/ask-logs">Ask activity</a>
+      <a class="btn btn-ghost" href="/internal/quotes">Quotes</a>
+    </div>
+  </div>
+
+  <p data-loading>Loading…</p>
+  <p class="ld-error" data-error hidden role="alert"></p>
+  <p data-empty hidden>No estimate requests yet.</p>
+
+  <label class="ld-search" data-search-wrap hidden>
+    Search
+    <input type="search" data-search placeholder="Name, phone, or city" />
+  </label>
+  <p class="ld-empty-filtered" data-empty-filtered hidden>No leads match that search.</p>
+
+  <div class="ld-list" data-list hidden></div>
+</InternalLayout>
+
+<script>
+  function initLeads() {
+    const list = document.querySelector('[data-list]');
+    if (!(list instanceof HTMLElement) || list.dataset.bound === 'true') return;
+    list.dataset.bound = 'true';
+
+    const loading = document.querySelector('[data-loading]');
+    const errorEl = document.querySelector('[data-error]');
+    const emptyEl = document.querySelector('[data-empty]');
+    const emptyFilteredEl = document.querySelector('[data-empty-filtered]');
+    const searchWrap = document.querySelector('[data-search-wrap]');
+    const searchInput = document.querySelector('[data-search]');
+
+    function escapeHtml(s: string) {
+      const div = document.createElement('div');
+      div.textContent = s ?? '';
+      return div.innerHTML;
+    }
+
+    function telHref(phone: string) {
+      const digits = String(phone || '').replace(/\D/g, '');
+      if (digits.length === 10) return `tel:+1${digits}`;
+      if (digits.length === 11 && digits.startsWith('1')) return `tel:+${digits}`;
+      return digits ? `tel:${digits}` : '';
+    }
+
+    function formatWhen(iso: string) {
+      if (!iso) return '';
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function arrivalLine(lead: any) {
+      if (lead.first_utm_source) {
+        const medium = lead.first_utm_medium ? `/${lead.first_utm_medium}` : '';
+        return `Arrived via ${escapeHtml(lead.first_utm_source)}${escapeHtml(medium)}${lead.landing_path ? ` &rarr; ${escapeHtml(lead.landing_path)}` : ''}`;
+      }
+      if (lead.first_referrer) {
+        let host = lead.first_referrer;
+        try { host = new URL(lead.first_referrer).hostname; } catch {}
+        return `Arrived from ${escapeHtml(host)}${lead.landing_path ? ` &rarr; ${escapeHtml(lead.landing_path)}` : ''}`;
+      }
+      return lead.landing_path ? `Arrived directly at ${escapeHtml(lead.landing_path)}` : 'Arrival unknown';
+    }
+
+    function renderJourney(lead: any) {
+      let visits = [];
+      try { visits = JSON.parse(lead.page_views_json || '[]'); } catch { visits = []; }
+      if (!visits.length) return '<p class="ld-no-journey">No page-view history for this visit.</p>';
+      const items = visits
+        .map((v: any) => `<li><span class="ld-journey-title">${escapeHtml(v.title || v.path || 'Untitled page')}</span><span class="ld-journey-path">${escapeHtml(v.path || '')}</span></li>`)
+        .join('');
+      return `<ol class="ld-journey">${items}</ol>`;
+    }
+
+    async function load() {
+      try {
+        const response = await fetch('/internal/api/leads');
+        if (!response.ok) throw new Error();
+        const { leads } = await response.json();
+
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        if (!leads.length) {
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          return;
+        }
+
+        if (searchWrap instanceof HTMLElement) searchWrap.hidden = leads.length < 6;
+
+        if (list instanceof HTMLElement) {
+          list.hidden = false;
+          list.innerHTML = '';
+          for (const lead of leads) {
+            const card = document.createElement('article');
+            card.className = 'ld-card';
+            card.dataset.search = `${lead.name || ''} ${lead.phone || ''} ${lead.city || ''}`.toLowerCase();
+
+            const phoneHref = telHref(lead.phone);
+            card.innerHTML = `
+              <div class="ld-card-top">
+                <div>
+                  <h2>${escapeHtml(lead.name)}</h2>
+                  <p class="ld-meta">
+                    ${phoneHref ? `<a href="${phoneHref}">${escapeHtml(lead.phone)}</a>` : escapeHtml(lead.phone || '')}
+                    ${lead.email ? ` &middot; <a href="mailto:${escapeHtml(lead.email)}">${escapeHtml(lead.email)}</a>` : ''}
+                    ${lead.city ? ` &middot; ${escapeHtml(lead.city)}` : ''}
+                    ${lead.role ? ` &middot; ${escapeHtml(lead.role)}` : ''}
+                  </p>
+                </div>
+                <time class="ld-when">${formatWhen(lead.created_at)}</time>
+              </div>
+              ${lead.notes ? `<p class="ld-notes">${escapeHtml(lead.notes)}</p>` : ''}
+              <details class="ld-journey-wrap">
+                <summary>${lead.visit_count || 0} page${lead.visit_count === 1 ? '' : 's'} viewed this visit &middot; ${arrivalLine(lead)}</summary>
+                ${renderJourney(lead)}
+              </details>
+            `;
+            list.append(card);
+          }
+        }
+        applyFilter();
+      } catch {
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        if (errorEl instanceof HTMLElement) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Could not load leads.';
+        }
+      }
+    }
+
+    function applyFilter() {
+      if (!(searchInput instanceof HTMLInputElement) || !(list instanceof HTMLElement)) return;
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+      for (const card of list.querySelectorAll('[data-search]')) {
+        const el = card as HTMLElement;
+        const match = !query || (el.dataset.search || '').includes(query);
+        el.hidden = !match;
+        if (match) visibleCount += 1;
+      }
+      if (emptyFilteredEl instanceof HTMLElement) {
+        emptyFilteredEl.hidden = !(query && visibleCount === 0);
+      }
+    }
+
+    if (searchInput instanceof HTMLInputElement && searchInput.dataset.bound !== 'true') {
+      searchInput.dataset.bound = 'true';
+      searchInput.addEventListener('input', applyFilter);
+    }
+
+    load();
+  }
+
+  initLeads();
+  document.addEventListener('astro:page-load', initLeads);
+</script>
+
+<style>
+  .ld-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: var(--space-l);
+    gap: var(--space-m);
+  }
+
+  .ld-head-actions {
+    display: flex;
+    gap: var(--space-xs);
+  }
+
+  .ld-error {
+    color: var(--danger);
+  }
+
+  .ld-search {
+    display: grid;
+    gap: 0.2rem;
+    max-width: 20rem;
+    margin-bottom: var(--space-m);
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .ld-search input {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.55rem;
+    font: inherit;
+    font-size: var(--step-0);
+  }
+
+  .ld-empty-filtered {
+    color: var(--ink-soft);
+  }
+
+  .ld-list {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  :global(.ld-card) {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-s) var(--space-m);
+  }
+
+  :global(.ld-card-top) {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--space-m);
+  }
+
+  :global(.ld-card-top h2) {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  :global(.ld-meta) {
+    margin: 0.2rem 0 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  :global(.ld-when) {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  :global(.ld-notes) {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--step--1);
+  }
+
+  :global(.ld-journey-wrap) {
+    margin-top: var(--space-xs);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  :global(.ld-journey-wrap summary) {
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+
+  :global(.ld-journey) {
+    margin: var(--space-2xs) 0 0;
+    padding-left: 1.2em;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  :global(.ld-journey-title) {
+    color: var(--ink);
+  }
+
+  :global(.ld-journey-path) {
+    color: var(--ink-faint);
+    margin-left: 0.4em;
+  }
+
+  :global(.ld-no-journey) {
+    margin: var(--space-2xs) 0 0;
+  }
+</style>

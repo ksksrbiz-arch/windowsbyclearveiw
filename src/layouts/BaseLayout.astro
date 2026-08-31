@@ -225,6 +225,116 @@ const breadcrumbSchema =
       }
 
       document.addEventListener('astro:page-load', trackPageView);
+
+      // Per-visitor journey, kept entirely client-side until someone submits
+      // the estimate form. Two small storage items, same spirit as the cost
+      // calculator's existing `clearveiw:scope` sessionStorage key:
+      //
+      // - `clearveiw:vid` (localStorage): a random id so a returning visitor
+      //   can be recognized as "probably the same person" across separate
+      //   visits. Not a cookie, not sent anywhere on its own, never leaves
+      //   the browser unless an estimate is actually submitted.
+      // - `clearveiw:visits` (sessionStorage): a capped list of
+      //   {path, title, ts} for this browsing session, plus first-touch
+      //   referrer/UTM info captured once. EstimateForm.astro reads both at
+      //   submit time and attaches a summary to the lead so Mark can see
+      //   what someone looked at before asking for an estimate.
+      //
+      // None of this is read by anything except EstimateForm.astro's submit
+      // handler — see /legal/privacy for what this is and is not used for.
+      function trackVisitJourney() {
+        try {
+          const path = window.location.pathname;
+          const title = document.title;
+          const now = Date.now();
+
+          let vid = localStorage.getItem('clearveiw:vid');
+          if (!vid) {
+            vid = (crypto.randomUUID ? crypto.randomUUID() : `${now}-${Math.random().toString(16).slice(2)}`);
+            localStorage.setItem('clearveiw:vid', vid);
+          }
+
+          if (!localStorage.getItem('clearveiw:first_touch')) {
+            const params = new URLSearchParams(window.location.search);
+            localStorage.setItem(
+              'clearveiw:first_touch',
+              JSON.stringify({
+                path,
+                referrer: document.referrer || null,
+                utm_source: params.get('utm_source'),
+                utm_medium: params.get('utm_medium'),
+                utm_campaign: params.get('utm_campaign'),
+                ts: now,
+              }),
+            );
+          }
+
+          const MAX_VISITS = 25;
+          let visits = [];
+          try {
+            visits = JSON.parse(sessionStorage.getItem('clearveiw:visits') || '[]');
+          } catch {
+            visits = [];
+          }
+          const last = visits[visits.length - 1];
+          if (!last || last.path !== path) {
+            visits.push({ path, title, ts: now });
+            if (visits.length > MAX_VISITS) visits = visits.slice(visits.length - MAX_VISITS);
+            sessionStorage.setItem('clearveiw:visits', JSON.stringify(visits));
+          }
+        } catch {
+          // Storage can be unavailable (private browsing, disabled storage,
+          // etc.) — the journey is a nice-to-have on top of the estimate
+          // form, never a reason to break navigation.
+        }
+      }
+
+      trackVisitJourney();
+      document.addEventListener('astro:page-load', trackVisitJourney);
+
+      // Aggregate signal: "did someone actually read a guide", not just
+      // land on it. GTM's built-in Scroll Depth trigger only arms once per
+      // real page load (window.load), so on an SPA route change it silently
+      // stops re-arming for the next guide page — same class of bug the
+      // stock GA4 Page View trigger had before spa_page_view replaced it.
+      // Pushing our own event, re-armed on every astro:page-load, sidesteps
+      // that the same way trackPageView() already does for page views.
+      let removeScrollListener: (() => void) | null = null;
+      function trackGuideEngagement() {
+        removeScrollListener?.();
+        removeScrollListener = null;
+
+        if (!window.location.pathname.startsWith('/guides/')) return;
+
+        let fired = false;
+        const onScroll = () => {
+          if (fired) return;
+          const doc = document.documentElement;
+          const scrollable = doc.scrollHeight - window.innerHeight;
+          const depth = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 100;
+          if (depth < 75) return;
+          fired = true;
+          try {
+            // @ts-expect-error — initialized by the GTM snippet in <head>.
+            window.dataLayer = window.dataLayer || [];
+            // @ts-expect-error — see above.
+            window.dataLayer.push({
+              event: 'guide_engaged',
+              page_path: window.location.pathname,
+              page_title: document.title,
+            });
+          } catch {
+            // Never worth breaking the page over.
+          }
+          window.removeEventListener('scroll', onScroll);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        removeScrollListener = () => window.removeEventListener('scroll', onScroll);
+      }
+
+      trackGuideEngagement();
+      document.addEventListener('astro:page-load', trackGuideEngagement);
     </script>
   </body>
 </html>

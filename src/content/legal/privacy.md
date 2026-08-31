@@ -1,9 +1,9 @@
 ---
 title: Privacy policy
 description: What Clearveiw Windows, LLC collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-08-30
+updated: 2026-08-31
 order: 1
-summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. The only personal information collected is what you type into the estimate form.
+summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---
 
 Clearveiw Windows, LLC ("Clearveiw", "we", "us") operates windowsbyclearveiw.com.
@@ -49,6 +49,12 @@ work differently:
   targeting on this site. Your data is still processed on Google's servers
   under Google's own privacy policy, which we do not control.
 
+  We also send Google Analytics a small number of aggregate event counts: when
+  someone clicks a phone number, clicks a link to the estimate form, reads at
+  least three-quarters of the way down a guide article, or submits the
+  estimate form. These only count how often each thing happens across all
+  visitors — the same cookie-based ID as above, no new personal information.
+
 We use both to see which pages are worth writing and which are not. That is
 the whole purpose.
 
@@ -56,6 +62,28 @@ the whole purpose.
 mouse or scroll tracking, or location beyond the city you type in. There is no
 Meta pixel, no ad network tag, and no tag manager beyond the Google Analytics
 snippet described above.
+
+## If you request an estimate: your visit history
+
+When you submit the estimate form, your browser also sends us a short record
+of how you found the site and which pages you looked at first. Specifically:
+
+- **A random ID for your browser**, generated the first time you visit and
+  stored only in your browser (see "Cookies and local storage" below) — not a
+  cookie, and not shared with Google Analytics or any other service.
+- **Your first-touch details**: the first page you landed on, the site that
+  referred you (if any), and any campaign parameters present in that first
+  URL.
+- **The pages you visited in this browsing session** (up to 25), each with
+  its path, title, and the time you viewed it.
+
+This never leaves your browser unless you submit the estimate form — there is
+no background tracking beacon, and nothing is sent to us if you just browse
+the site and leave. If you do submit the form, this visit history is stored
+alongside your name, phone number, and the other fields you typed, in the
+database described below, so the person who calls you back has context on
+what you were looking at. It is never used for advertising, never sold or
+shared, and never turned into a mailing list.
 
 ## Cookies and local storage
 
@@ -68,6 +96,14 @@ project scope you built, under the key `clearveiw:scope` — so that the estimat
 form can pre-fill your notes if you choose to continue. It stays in your
 browser, is never transmitted to us, and your browser discards it when you
 close the tab.
+
+The site also uses a few more items in your browser's `localStorage` and
+`sessionStorage` to build the visit history described above: `clearveiw:vid`
+(the random browser ID, kept until you clear your browser data),
+`clearveiw:first_touch` (how you first arrived), and `clearveiw:visits` (the
+pages viewed in your current browsing session, cleared when you close the
+tab). None of these are cookies, and none are sent anywhere in the
+background — they only reach us if you submit the estimate form.
 
 ## Requests your browser makes to other companies
 
@@ -87,16 +123,19 @@ Your form submission is handled by exactly three companies, each doing one job:
 
 | Company | What they do | What they see |
 | --- | --- | --- |
-| Cloudflare | Runs the function that receives the form | The submitted fields, in transit |
+| Cloudflare | Runs the function that receives the form and stores the record described below | The submitted fields and visit history, in transit and at rest |
 | Resend | Delivers the two emails | The submitted fields, in the message body |
 | Google Workspace | Hosts the business mailbox the lead arrives in | The submitted fields, in the message |
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
 
-We do not use a customer relationship manager, a marketing platform, or a
-database. There is no stored record of your submission other than the email in
-Mark's inbox.
+We do not use a customer relationship manager or a marketing platform, and
+nothing here is used to build a mailing list. We do keep your submission — the
+fields you typed and the visit history above — in a small database on
+Cloudflare that only Mark can browse, so he has that context in front of him
+when he calls or emails you back. That database record, and the email in
+Mark's inbox, are the only stored records of your submission.
 
 ## What we do with it
 
@@ -116,10 +155,11 @@ otherwise. Either way, tell us to stop and we will stop.
 
 ## How long we keep it
 
-Your request lives as an email in the business mailbox Mark reads. We keep correspondence for
-active and recent jobs so we can honour what we agreed to. If you ask us to
-delete your information and you are not a current customer with an open job, we
-will delete the correspondence.
+Your request lives as an email in the business mailbox Mark reads, and as a
+record in the database described above. We keep both for active and recent
+jobs so we can honour what we agreed to. If you ask us to delete your
+information and you are not a current customer with an open job, we will
+delete the correspondence and the database record.
 
 Washington law requires a contractor to retain certain records relating to work
 actually performed. Where that applies, we keep only what the law requires and

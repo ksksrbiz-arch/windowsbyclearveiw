@@ -69,6 +69,23 @@ import { site, telHref } from '../../data/site';
   </section>
 </BaseLayout>
 
+<script>
+  // GA4 conversion signal for the no-JS fallback path: estimate.js 303s here
+  // on a real form post, which is a hard navigation, so this runs once per
+  // arrival — no astro:page-load listener needed the way trackPageView()
+  // needs one, since this page is never reached by client-side routing.
+  // The JS-intercepted submit path pushes the same event itself, from
+  // EstimateForm.astro, because it never navigates here at all.
+  try {
+    // @ts-expect-error — initialized by the GTM snippet in BaseLayout's <head>.
+    window.dataLayer = window.dataLayer || [];
+    // @ts-expect-error — see above.
+    window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form_no_js' });
+  } catch {
+    // Analytics plumbing should never be able to break this confirmation page.
+  }
+</script>
+
 <style>
   .sent-layout {
     display: grid;
