@@ -122,5 +122,5 @@ and the version published here is the one that applies.
 ## Contact
 
 - Clearveiw Windows, LLC, Vancouver, Washington
-- [admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com)
+- [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

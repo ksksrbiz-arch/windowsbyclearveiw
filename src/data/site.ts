@@ -25,7 +25,7 @@ export const site = {
    * in: this one is public and will attract scrapers, and leads should not
    * share an inbox with whatever that brings.
    */
-  email: 'admin@windowsbyclearveiw.com',
+  email: 'owner@windowsbyclearveiw.com',
   phone: '(564) 208-0801',
   phoneDisplay: '(564) 208-0801',
   address: {

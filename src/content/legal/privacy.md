@@ -174,7 +174,7 @@ Whatever state you live in, you can ask us to:
 - delete it, or
 - stop contacting you.
 
-Email [admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com) or call
+Email [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com) or call
 (564) 208-0801. We will not charge you, and we will not treat you differently
 for asking. There is nothing to opt out of regarding sale or targeted
 advertising, because we do neither.
@@ -199,5 +199,5 @@ Material changes will be reflected here before they take effect.
 ## Contact
 
 - Clearveiw Windows, LLC, Vancouver, Washington
-- [admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com)
+- [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801
