@@ -53,7 +53,7 @@ If something here stopped you, we want to know — it is a bug, and we will fix
 it.
 
 Call **(564) 208-0801** or email
-[admin@windowsbyclearveiw.com](mailto:admin@windowsbyclearveiw.com). Describe the page
+[owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com). Describe the page
 and what happened. If you need the information in another format, ask and we
 will read it to you or send it however works.
 

@@ -8,7 +8,7 @@
 export const BUSINESS_FACTS = `
 Business: Clearveiw Windows, LLC — replacement and new-construction window installation.
 Phone: (564) 208-0801
-Email: admin@windowsbyclearveiw.com
+Email: owner@windowsbyclearveiw.com
 Service area: Based in Vancouver, WA. Installs throughout Clark County — Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland — and across the river in Portland, OR.
 Hours: By appointment.
 Estimates: Free measure and written estimate — request one at /estimate.
