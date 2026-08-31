@@ -42,6 +42,21 @@ import tanUpperSlider from '../assets/work/tan-upper-slider.jpg';
 import twoStoryWhite from '../assets/work/two-story-white.jpg';
 import vaultedGrids from '../assets/work/vaulted-grids.jpg';
 
+// New batch added 2026-08-31
+import greenSidingHedgeWindow from '../assets/work/green-siding-hedge-window.jpg';
+import beigeCornerRedGutter from '../assets/work/beige-corner-red-gutter.jpg';
+import charcoalCornerPictureWindow from '../assets/work/charcoal-corner-picture-window.jpg';
+import beigeSliderAcUnit from '../assets/work/beige-slider-ac-unit.jpg';
+import blueTwoStoryFourWindows from '../assets/work/blue-two-story-four-windows.jpg';
+import greenPorchRedShingleSlider from '../assets/work/green-porch-red-shingle-slider.jpg';
+import blackShuttersWindow from '../assets/work/black-shutters-window.jpg';
+import redwoodShakeUpperWindows from '../assets/work/redwood-shake-upper-windows.jpg';
+import cabinGableInstallCrew from '../assets/work/cabin-gable-install-crew.jpg';
+import darkGreenFlagsShutters from '../assets/work/dark-green-flags-shutters.jpg';
+import lightBlueTwoStoryFront from '../assets/work/light-blue-two-story-front.jpg';
+import modernGrayTwoStoryFront from '../assets/work/modern-gray-two-story-front.jpg';
+import modernTanDuskFront from '../assets/work/modern-tan-dusk-front.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -276,6 +291,123 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'after',
     featured: false,
     order: 26,
+  },
+  {
+    id: 'green-siding-hedge-window',
+    image: greenSidingHedgeWindow,
+    alt: 'Single white-framed window on dark green board-and-batten siding beside a tall hedge',
+    caption: 'Single window against dark board-and-batten',
+    kind: 'after',
+    featured: false,
+    order: 27,
+  },
+  {
+    id: 'beige-corner-red-gutter',
+    image: beigeCornerRedGutter,
+    alt: 'Corner of a beige house with two new windows and a red gutter line beside a covered porch',
+    caption: 'Corner pair, red gutter trim',
+    kind: 'after',
+    featured: false,
+    order: 28,
+  },
+  {
+    id: 'charcoal-corner-picture-window',
+    image: charcoalCornerPictureWindow,
+    alt: 'Large grid picture window on a charcoal house corner under a worn cedar shake roof, door open mid-job',
+    caption: 'Corner picture window, mid-job',
+    kind: 'process',
+    featured: false,
+    order: 29,
+  },
+  {
+    id: 'beige-slider-ac-unit',
+    image: beigeSliderAcUnit,
+    alt: 'Finished window on a beige house beside an AC unit and routed electrical wiring',
+    caption: 'Finished opening beside the AC unit',
+    kind: 'after',
+    featured: false,
+    order: 30,
+  },
+  {
+    id: 'blue-two-story-four-windows',
+    image: blueTwoStoryFourWindows,
+    alt: 'Four new windows stacked on a dark blue two-story house with a ladder still in the yard',
+    caption: 'Four openings, ladder still out',
+    kind: 'process',
+    featured: false,
+    order: 31,
+  },
+  {
+    id: 'green-porch-red-shingle-slider',
+    image: greenPorchRedShingleSlider,
+    alt: 'White-trimmed slider window on red cedar shingle siding under a green porch ceiling',
+    caption: 'Slider under the porch overhang',
+    kind: 'after',
+    featured: false,
+    order: 32,
+  },
+  {
+    id: 'black-shutters-window',
+    image: blackShuttersWindow,
+    alt: 'New window flanked by black shutters on a dark house',
+    caption: 'Window between black shutters',
+    kind: 'after',
+    featured: false,
+    order: 33,
+  },
+  {
+    id: 'redwood-shake-upper-windows',
+    image: redwoodShakeUpperWindows,
+    alt: 'Two upper-story windows on a redwood shake house above a green porch beam',
+    caption: 'Paired upper windows on shake siding',
+    kind: 'after',
+    featured: false,
+    order: 34,
+  },
+  {
+    id: 'cabin-gable-install-crew',
+    image: cabinGableInstallCrew,
+    alt: 'Three installers on ladders setting large multi-pane windows in the gable of a wood cabin-style house',
+    caption: 'Crew setting the gable windows',
+    kind: 'process',
+    featured: false,
+    order: 35,
+  },
+  {
+    id: 'dark-green-flags-shutters',
+    image: darkGreenFlagsShutters,
+    alt: 'Window with black shutters on a dark green house beside American flags and a boxwood shrub',
+    caption: 'Shuttered window, dark green elevation',
+    kind: 'after',
+    featured: false,
+    order: 36,
+  },
+  {
+    id: 'light-blue-two-story-front',
+    image: lightBlueTwoStoryFront,
+    alt: 'Front elevation of a light blue-gray two-story house with new windows, garage, and landscaped retaining walls',
+    caption: 'Front elevation, finished job',
+    kind: 'after',
+    featured: false,
+    order: 37,
+  },
+  {
+    id: 'modern-gray-two-story-front',
+    image: modernGrayTwoStoryFront,
+    alt: 'Front elevation of a modern gray two-story house with new windows above the garage',
+    caption: 'Modern two-story, front elevation',
+    kind: 'after',
+    featured: false,
+    order: 38,
+  },
+  {
+    id: 'modern-tan-dusk-front',
+    image: modernTanDuskFront,
+    alt: 'Front elevation of a modern tan house with new windows and a dark garage door at dusk',
+    caption: 'Front elevation at dusk',
+    kind: 'after',
+    featured: false,
+    order: 39,
   },
 ];
 
