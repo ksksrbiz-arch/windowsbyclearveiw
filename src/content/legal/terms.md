@@ -6,10 +6,11 @@ order: 2
 summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
 ---
 
-These terms apply to your use of windowsbyclearveiw.com, operated by Clearveiw
-Windows, LLC ("Clearveiw", "we", "us"), a Washington limited liability company
-based in Vancouver, Washington. By using the site you agree to them. If you do
-not, please do not use the site.
+These terms apply to your use of windowsbyclearveiw.com, operated by Clear View
+Windows & Trim LLC, doing business as Clearveiw Windows ("Clearveiw", "we",
+"us"), a Washington limited liability company based in Vancouver, Washington.
+By using the site you agree to them. If you do not, please do not use the
+site.
 
 These terms cover the **website**. Work we actually perform for you is governed
 by the written estimate and contract you sign, not by this page. Where the two
@@ -61,9 +62,10 @@ unlawful, abusive, or automated.
 
 ## Our content
 
-The text, photographs, diagrams, and design on this site belong to Clearveiw
-Windows, LLC. **The job photographs are of real work performed by Clearveiw
-Windows**; they are not stock imagery and they are not licensed for reuse.
+The text, photographs, diagrams, and design on this site belong to Clear View
+Windows & Trim LLC. **The job photographs are of real work performed by
+Clearveiw Windows**; they are not stock imagery and they are not licensed for
+reuse.
 
 You may read, print, and share links to these pages. You may not republish the
 photographs or copy the site's content for a competing commercial purpose
@@ -90,7 +92,7 @@ by our negligence, or for fraud.
 
 ## Contractor registration
 
-Clearveiw Windows, LLC is a Washington contractor. Ask for the registration
+Clear View Windows & Trim LLC is a Washington contractor. Ask for the registration
 number on your first call and verify it yourself using the Washington State
 Department of Labor & Industries contractor lookup. You should do that with
 every contractor you let near your walls, including us.
@@ -121,6 +123,6 @@ and the version published here is the one that applies.
 
 ## Contact
 
-- Clearveiw Windows, LLC, Vancouver, Washington
+- Clear View Windows & Trim LLC (d/b/a Clearveiw Windows), Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

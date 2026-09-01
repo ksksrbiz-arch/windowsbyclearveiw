@@ -36,7 +36,8 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
     <div class="wrap split" data-reveal>
       <div class="prose">
         <p>
-          {site.legalName} is Mark’s window company. We install in Vancouver and the towns
+          {site.legalName}, doing business as {site.shortName}, is Mark’s window
+          company. We install in Vancouver and the towns
           around it — Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center,
           and Woodland — and we cross the river into Portland.
         </p>
@@ -75,11 +76,12 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
           </dd>
         </div>
         <div>
-          <dt>Registration number pending</dt>
+          <dt>Contractor registration number pending</dt>
           <dd>
-            The Washington contractor registration number is not published here yet. Ask for
-            it on the first call and verify it yourself at the L&amp;I contractor lookup —
-            you should do that with anyone you let near your walls.
+            {site.legalName} is a registered Washington LLC (UBI {site.ubiNumber}), but the
+            separate L&amp;I contractor registration number is not published here yet. Ask
+            for it on the first call and verify it yourself at the L&amp;I contractor
+            lookup — you should do that with anyone you let near your walls.
           </dd>
         </div>
         <div>

@@ -7,7 +7,7 @@ Technical detail lives in [README.md](./README.md); this file is the *why*.
 
 ## What this is
 
-A marketing site for **Clearveiw Windows, LLC** — my friend Mark's window
+A marketing site for **Clearveiw Windows** — my friend Mark's window
 installation company in Vancouver, WA. He does replacement work for homeowners
 and new-construction installs for builders, across Clark County and across the
 river into Portland.
@@ -17,8 +17,15 @@ river into Portland.
 - **Stack:** Astro, static, no adapter. Cloudflare Pages. Estimate form is a
   Pages Function. Resend for mail.
 - **Pricing worker:** https://clearveiw-pricing.skdev-371.workers.dev
-- **Note the spelling:** the legal entity and domain are "Clear**veiw**", not
-  "Clearview". That is deliberate — the domain is canonical. Do not "fix" it.
+- **Legal entity:** Clear View Windows & Trim LLC (WA UBI 605 779 798),
+  doing business as "Clearveiw Windows". `site.legalName` in
+  `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold
+  the trade name.
+- **Note the spelling:** the trade name and current domain are
+  "Clear**veiw**", not "Clearview" — a holdover from before the legal name
+  was settled. Mark is purchasing windowsbyclearview.com and the site will
+  migrate there, at which point the "veiw" spelling gets fixed sitewide too.
+  Until that migration happens, do not "fix" the spelling piecemeal.
 
 ## Where it stands
 

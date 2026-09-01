@@ -27,13 +27,15 @@
  * customer actually saw and signed, not whatever the wording says today.
  */
 
+import { site } from './site';
+
 export const TERMS_VERSION = '2026-08-28';
 
 export const WARRANTY_YEARS = 1;
 
 export const contractTerms = {
   paymentTerms:
-    'Payment is due as agreed in writing between Clearveiw Windows, LLC and the customer. ' +
+    `Payment is due as agreed in writing between ${site.legalName} and the customer. ` +
     'No deposit is collected as part of this document; any deposit or payment schedule will ' +
     'be stated separately before work begins.',
 
@@ -44,11 +46,11 @@ export const contractTerms = {
   warranty:
     `Workmanship is warranted for ${WARRANTY_YEARS} year${WARRANTY_YEARS === 1 ? '' : 's'} from ` +
     'the date work is completed. Windows and materials carry the manufacturer’s own warranty; ' +
-    'Clearveiw Windows, LLC will assist in facilitating a manufacturer warranty claim but does ' +
+    `${site.legalName} will assist in facilitating a manufacturer warranty claim but does ` +
     'not itself extend or replace it.',
 
   delays:
-    'Clearveiw Windows, LLC is not responsible for delays caused by material availability, ' +
+    `${site.legalName} is not responsible for delays caused by material availability, ` +
     'weather, or conditions discovered once work begins (including but not limited to rot or ' +
     'structural damage not visible at the time of this estimate). The customer will be notified ' +
     'promptly if a delay or a change in scope becomes necessary.',
@@ -65,7 +67,7 @@ export const contractTerms = {
     body: [
       'You may cancel this transaction, without any penalty or obligation, within THREE ' +
         'BUSINESS DAYS from the date on which you sign this contract.',
-      'To cancel, you must notify Clearveiw Windows, LLC in writing, by mail or email, before ' +
+      `To cancel, you must notify ${site.legalName} in writing, by mail or email, before ` +
         'midnight of the third business day after the date of this contract. Notice sent by ' +
         'mail is effective when postmarked.',
       'If you cancel, any payment made and any goods traded in will be returned within 10 days ' +

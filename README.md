@@ -1,7 +1,8 @@
 # Clearveiw Windows
 
-Marketing site for **Clearveiw Windows, LLC** — replacement and new-construction
-window installation in Vancouver, WA and the rest of Clark County.
+Marketing site for **Clearveiw Windows** (operated by Clear View Windows & Trim
+LLC) — replacement and new-construction window installation in Vancouver, WA
+and the rest of Clark County.
 
 - Domain: [windowsbyclearveiw.com](https://windowsbyclearveiw.com)
 - Stack: [Astro](https://astro.build) (static, no adapter)

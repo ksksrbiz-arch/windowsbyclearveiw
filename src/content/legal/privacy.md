@@ -1,12 +1,13 @@
 ---
 title: Privacy policy
-description: What Clearveiw Windows, LLC collects when you use this website, who processes it, and how to have it deleted.
+description: What Clearveiw Windows collects when you use this website, who processes it, and how to have it deleted.
 updated: 2026-08-31
 order: 1
 summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---
 
-Clearveiw Windows, LLC ("Clearveiw", "we", "us") operates windowsbyclearveiw.com.
+Clearveiw Windows, operated by Clear View Windows & Trim LLC ("Clearveiw", "we",
+"us"), runs windowsbyclearveiw.com.
 This policy describes what the website actually does with your information. It
 is written against the code that runs the site rather than from a template, so
 where it says we do not collect something, we do not collect it.
@@ -198,6 +199,6 @@ Material changes will be reflected here before they take effect.
 
 ## Contact
 
-- Clearveiw Windows, LLC, Vancouver, Washington
+- Clear View Windows & Trim LLC (d/b/a Clearveiw Windows), Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

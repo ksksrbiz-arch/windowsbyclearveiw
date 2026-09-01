@@ -1,7 +1,12 @@
 export const site = {
-  name: 'Clearveiw Windows, LLC',
+  name: 'Clearveiw Windows',
   shortName: 'Clearveiw Windows',
-  legalName: 'Clearveiw Windows, LLC',
+  legalName: 'Clear View Windows & Trim LLC',
+  /**
+   * Washington Unified Business Identifier. Distinct from lniNumber (the WA
+   * L&I contractor registration, which is separate and still pending).
+   */
+  ubiNumber: '605 779 798',
   domain: 'windowsbyclearveiw.com',
   url: 'https://windowsbyclearveiw.com',
   tagline: 'Great prices. Clean work. Clear windows.',
@@ -9,7 +14,7 @@ export const site = {
    * Long form, for the JSON-LD business entity where length does not matter.
    */
   description:
-    'Clearveiw Windows, LLC installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
+    'Clearveiw Windows, operated by Clear View Windows & Trim LLC, installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
   /**
    * Short form, for the homepage <meta name="description">. Google truncates
    * around 160 characters and the long version was 253, so the service-area
