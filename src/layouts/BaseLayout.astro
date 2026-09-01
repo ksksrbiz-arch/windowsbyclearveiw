@@ -23,7 +23,13 @@ interface Props {
    */
   ogImageSrc?: ImageMetadata;
   ogImageAlt?: string;
-}
+  /**
+   * Transient / no-search-value pages (form outcome pages, etc.) — keeps them
+   * out of Google's index without pulling them out of internal navigation or
+   * the sitemap filter's job of hiding them from crawlers in the first place.
+   * They still resolve and still link out; they just should never rank.
+   */
+  noindex?: boolean;
 
 const {
   title,
@@ -33,6 +39,7 @@ const {
   crumbs = [],
   ogImageSrc = heroPhoto.image,
   ogImageAlt = heroPhoto.alt,
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(path === '/' ? '/' : path, site.url).toString();
@@ -78,6 +85,7 @@ const breadcrumbSchema =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonical} />
 
     <meta property="og:site_name" content={site.shortName} />
