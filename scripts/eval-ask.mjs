@@ -2,7 +2,7 @@
 // Regression suite for /ask/api/chat. Run against local dev or production:
 //
 //   node scripts/eval-ask.mjs http://localhost:8788
-//   node scripts/eval-ask.mjs https://windowsbyclearveiw.com
+//   node scripts/eval-ask.mjs https://windowsbyclearview.com
 //
 // Would have caught both real bugs found while building this: a truncated
 // answer (the thinking-tokens issue) and a hard failure disguised as a

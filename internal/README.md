@@ -21,7 +21,7 @@ variables — D1 needs a real binding, and this stays separate from
 
 | Binding | Type | Value |
 | --- | --- | --- |
-| `QUOTES_DB` | D1 database | `clearveiw-quotes` (`4700b6f7-c3d8-46c9-9b19-17cf34accb84`) |
+| `QUOTES_DB` | D1 database | `clearview-quotes` (`4700b6f7-c3d8-46c9-9b19-17cf34accb84`) |
 | `INTERNAL_PASSWORD` | Secret | The one password Mark keeps on his phone |
 | `INTERNAL_SESSION_SECRET` | Secret | A long random string — signs the login session cookie. Generate once with `openssl rand -hex 32` and never rotate it casually; rotating it logs everyone out |
 

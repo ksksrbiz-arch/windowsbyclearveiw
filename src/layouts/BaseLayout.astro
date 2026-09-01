@@ -119,7 +119,7 @@ const breadcrumbSchema =
     />
 
     <!-- Google Tag Manager — container GTM-WGCFVHQM, GA4 property "Windows by
-         Clearveiw" (G-YE96XMJSWJ). Disclosed in the privacy policy: it sets a
+         Clearview" (G-YE96XMJSWJ). Disclosed in the privacy policy: it sets a
          first-party cookie and assigns you a random client ID so we can tell
          returning visitors apart in aggregate, which is a different privacy
          posture than the cookieless Cloudflare Web Analytics also running on
@@ -228,13 +228,13 @@ const breadcrumbSchema =
 
       // Per-visitor journey, kept entirely client-side until someone submits
       // the estimate form. Two small storage items, same spirit as the cost
-      // calculator's existing `clearveiw:scope` sessionStorage key:
+      // calculator's existing `clearview:scope` sessionStorage key:
       //
-      // - `clearveiw:vid` (localStorage): a random id so a returning visitor
+      // - `clearview:vid` (localStorage): a random id so a returning visitor
       //   can be recognized as "probably the same person" across separate
       //   visits. Not a cookie, not sent anywhere on its own, never leaves
       //   the browser unless an estimate is actually submitted.
-      // - `clearveiw:visits` (sessionStorage): a capped list of
+      // - `clearview:visits` (sessionStorage): a capped list of
       //   {path, title, ts} for this browsing session, plus first-touch
       //   referrer/UTM info captured once. EstimateForm.astro reads both at
       //   submit time and attaches a summary to the lead so Mark can see
@@ -248,16 +248,16 @@ const breadcrumbSchema =
           const title = document.title;
           const now = Date.now();
 
-          let vid = localStorage.getItem('clearveiw:vid');
+          let vid = localStorage.getItem('clearview:vid');
           if (!vid) {
             vid = (crypto.randomUUID ? crypto.randomUUID() : `${now}-${Math.random().toString(16).slice(2)}`);
-            localStorage.setItem('clearveiw:vid', vid);
+            localStorage.setItem('clearview:vid', vid);
           }
 
-          if (!localStorage.getItem('clearveiw:first_touch')) {
+          if (!localStorage.getItem('clearview:first_touch')) {
             const params = new URLSearchParams(window.location.search);
             localStorage.setItem(
-              'clearveiw:first_touch',
+              'clearview:first_touch',
               JSON.stringify({
                 path,
                 referrer: document.referrer || null,
@@ -272,7 +272,7 @@ const breadcrumbSchema =
           const MAX_VISITS = 25;
           let visits = [];
           try {
-            visits = JSON.parse(sessionStorage.getItem('clearveiw:visits') || '[]');
+            visits = JSON.parse(sessionStorage.getItem('clearview:visits') || '[]');
           } catch {
             visits = [];
           }
@@ -280,7 +280,7 @@ const breadcrumbSchema =
           if (!last || last.path !== path) {
             visits.push({ path, title, ts: now });
             if (visits.length > MAX_VISITS) visits = visits.slice(visits.length - MAX_VISITS);
-            sessionStorage.setItem('clearveiw:visits', JSON.stringify(visits));
+            sessionStorage.setItem('clearview:visits', JSON.stringify(visits));
           }
         } catch {
           // Storage can be unavailable (private browsing, disabled storage,

@@ -9,7 +9,7 @@ const guides = (await getCollection('guides', ({ data }) => data.published)).sor
   (a, b) => a.data.order - b.data.order,
 );
 
-// Real stock photography, not staged as a Clearveiw job -- same disclosure
+// Real stock photography, not staged as a Clearview job -- same disclosure
 // rule as the AI hero images elsewhere on the site.
 const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
@@ -28,7 +28,7 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
         weather, not a national sales script.
       </p>
     </div>
-    <p class="hero-photo-credit">Stock photography — not an actual Clearveiw job or job site</p>
+    <p class="hero-photo-credit">Stock photography — not an actual Clearview job or job site</p>
   </section>
 
   <section class="section">

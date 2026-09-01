@@ -26,7 +26,7 @@ const { title, showLogout = true } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} · Clearveiw internal</title>
+    <title>{title} · Clearview internal</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -34,7 +34,7 @@ const { title, showLogout = true } = Astro.props;
   <body class="internal">
     <header class="internal-header">
       <div class="internal-header-inner">
-        <span class="internal-brand">Clearveiw <span>Internal</span></span>
+        <span class="internal-brand">Clearview <span>Internal</span></span>
         {showLogout && (
           <form method="post" action="/internal/api/logout">
             <button class="internal-logout" type="submit">Log out</button>

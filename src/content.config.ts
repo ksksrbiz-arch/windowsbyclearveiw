@@ -55,7 +55,7 @@ const guides = defineCollection({
       secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
       /**
        * Optional topical stock photo for the same slot the diagram uses —
-       * never both on one guide. Never a real Clearveiw job photo (those live
+       * never both on one guide. Never a real Clearview job photo (those live
        * in src/assets/work and only appear in the Gallery and homepage, where
        * the "after" claim is true). Sourced under a license that permits
        * commercial use with no attribution required; heroImageCredit records

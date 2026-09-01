@@ -12,13 +12,13 @@ if (!site.lniNumber) {
     "site.lniNumber is empty. Add Mark's L&I contractor registration number in " +
     'src/data/site.ts before advertising this site.';
   if (process.env.REQUIRE_LNI === '1') {
-    throw new Error(`[clearveiw] ${message}`);
+    throw new Error(`[clearview] ${message}`);
   }
-  console.warn(`\n[clearveiw] WARNING: ${message}\n`);
+  console.warn(`\n[clearview] WARNING: ${message}\n`);
 }
 
 export default defineConfig({
-  site: 'https://windowsbyclearveiw.com',
+  site: 'https://windowsbyclearview.com',
   integrations: [
     sitemap({
       // Outcome pages for the estimate form — no search value, and /problem

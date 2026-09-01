@@ -13,7 +13,7 @@ const isAverage = pricingIsRegionalAverage();
 // under-quote the whole job.
 const openings = showMoney ? pricedOpenings() : pricing.openings;
 
-// A radio group with one option is not a choice. Clearveiw installs vinyl
+// A radio group with one option is not a choice. Clearview installs vinyl
 // only, so the material step is dropped rather than shown with nothing to
 // pick — and the remaining steps renumber themselves instead of skipping a
 // number, which would look like a rendering bug.
@@ -165,8 +165,8 @@ const model = {
             <p class="est-number" data-range aria-live="polite"></p>
             <p class="est-hint">
               {isAverage
-                ? 'Based on published 2026 Washington and Portland-metro averages — not Clearveiw\u2019s own pricing, and not a quote. Mark gives you a real figure after measuring.'
-                : 'A Clearveiw range for this scope — not a quote. Every opening gets measured before anything is ordered.'}
+                ? 'Based on published 2026 Washington and Portland-metro averages — not Clearview\u2019s own pricing, and not a quote. Mark gives you a real figure after measuring.'
+                : 'A Clearview range for this scope — not a quote. Every opening gets measured before anything is ordered.'}
             </p>
           </div>
         ) : (
@@ -371,7 +371,7 @@ const model = {
         .join('. ');
 
       try {
-        sessionStorage.setItem('clearveiw:scope', noteText);
+        sessionStorage.setItem('clearview:scope', noteText);
       } catch {
         // Private browsing can refuse storage. The link below still works.
       }

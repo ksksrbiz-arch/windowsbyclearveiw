@@ -42,7 +42,7 @@ const shgcTypicalPct = pct(shgc.typical, shgc.min, shgc.max);
       <div class="gauge-zone-tag" style={`width: ${uGoodPct}%`}>
         <span class="gauge-zone-dot gauge-zone-dot-good"></span>WA rebate range
       </div>
-      <div class="gauge-track" role="img" aria-label={`U-factor scale from ${uFactor.min} to ${uFactor.max}. Washington's better-performing range runs up to about ${uFactor.goodMax}. A typical Clearveiw double-pane install lands around ${uFactor.typical}.`}>
+      <div class="gauge-track" role="img" aria-label={`U-factor scale from ${uFactor.min} to ${uFactor.max}. Washington's better-performing range runs up to about ${uFactor.goodMax}. A typical Clearview double-pane install lands around ${uFactor.typical}.`}>
         <div class="gauge-zone gauge-zone-good" style={`width: ${uGoodPct}%`}></div>
         <div class="gauge-tick" style={`left: ${uGoodPct}%`}></div>
         <div class="gauge-mark" style={`left: ${uTypicalPct}%`}>
@@ -58,7 +58,7 @@ const shgcTypicalPct = pct(shgc.typical, shgc.min, shgc.max);
 
       <p class="gauge-note">
         Below about <strong>{uFactor.goodMax}</strong> is the range Washington utility rebates
-        usually look for. A typical Clearveiw double-pane, Low-E install lands near
+        usually look for. A typical Clearview double-pane, Low-E install lands near
         <strong> {uFactor.typical}</strong>; triple-pane goes lower still.
       </p>
     </div>

@@ -1,13 +1,13 @@
 ---
 title: Privacy policy
-description: What Clearveiw Windows collects when you use this website, who processes it, and how to have it deleted.
+description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
 updated: 2026-08-31
 order: 1
 summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---
 
-Clearveiw Windows, operated by Clear View Windows & Trim LLC ("Clearveiw", "we",
-"us"), runs windowsbyclearveiw.com.
+Clearview Windows, operated by Clear View Windows & Trim LLC ("Clearview", "we",
+"us"), runs windowsbyclearview.com.
 This policy describes what the website actually does with your information. It
 is written against the code that runs the site rather than from a template, so
 where it says we do not collect something, we do not collect it.
@@ -93,15 +93,15 @@ and `_ga_*`) so it can recognize a returning visit. That is the only cookie
 this site sets. Cloudflare Web Analytics sets none.
 
 The cost calculator also stores one item in your browser's `sessionStorage` — the
-project scope you built, under the key `clearveiw:scope` — so that the estimate
+project scope you built, under the key `clearview:scope` — so that the estimate
 form can pre-fill your notes if you choose to continue. It stays in your
 browser, is never transmitted to us, and your browser discards it when you
 close the tab.
 
 The site also uses a few more items in your browser's `localStorage` and
-`sessionStorage` to build the visit history described above: `clearveiw:vid`
+`sessionStorage` to build the visit history described above: `clearview:vid`
 (the random browser ID, kept until you clear your browser data),
-`clearveiw:first_touch` (how you first arrived), and `clearveiw:visits` (the
+`clearview:first_touch` (how you first arrived), and `clearview:visits` (the
 pages viewed in your current browsing session, cleared when you close the
 tab). None of these are cookies, and none are sent anywhere in the
 background — they only reach us if you submit the estimate form.
@@ -199,6 +199,6 @@ Material changes will be reflected here before they take effect.
 
 ## Contact
 
-- Clear View Windows & Trim LLC (d/b/a Clearveiw Windows), Vancouver, Washington
+- Clear View Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

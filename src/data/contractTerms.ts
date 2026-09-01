@@ -4,7 +4,7 @@
  * ── This has not been reviewed by an attorney ───────────────────────────────
  * The wording below is standard, commonly-used boilerplate for a residential
  * home-improvement contract in Washington — not something invented from
- * nothing, but also not something a lawyer has checked against Clearveiw's
+ * nothing, but also not something a lawyer has checked against Clearview's
  * actual practices. Three things specifically need a second look before this
  * is used for a real, binding signature:
  *

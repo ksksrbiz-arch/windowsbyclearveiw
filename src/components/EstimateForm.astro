@@ -101,7 +101,7 @@ import { site, telHref } from '../data/site';
       let scope = new URLSearchParams(window.location.search).get('scope');
       if (!scope) {
         try {
-          scope = sessionStorage.getItem('clearveiw:scope');
+          scope = sessionStorage.getItem('clearview:scope');
         } catch {
           scope = null;
         }
@@ -119,20 +119,20 @@ import { site, telHref } from '../data/site';
       try {
         const visitorField = form.querySelector('[data-visitor-id]');
         if (visitorField instanceof HTMLInputElement) {
-          visitorField.value = localStorage.getItem('clearveiw:vid') || '';
+          visitorField.value = localStorage.getItem('clearview:vid') || '';
         }
 
         const journeyField = form.querySelector('[data-visit-journey]');
         if (journeyField instanceof HTMLInputElement) {
           let visits = [];
           try {
-            visits = JSON.parse(sessionStorage.getItem('clearveiw:visits') || '[]');
+            visits = JSON.parse(sessionStorage.getItem('clearview:visits') || '[]');
           } catch {
             visits = [];
           }
           let firstTouch = null;
           try {
-            firstTouch = JSON.parse(localStorage.getItem('clearveiw:first_touch') || 'null');
+            firstTouch = JSON.parse(localStorage.getItem('clearview:first_touch') || 'null');
           } catch {
             firstTouch = null;
           }

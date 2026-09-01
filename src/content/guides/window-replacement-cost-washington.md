@@ -15,7 +15,7 @@ faq:
     answer: Ten small inserts in a ranch is a different job from fifteen full-frame units on a two-story with custom sizes. Count, method, material, and access swing the total more than the brand name on the glass.
 heroImage: ./img-window-replacement-cost-washington.png
 heroImageAlt: Illustration of a tape measure and a clipboard with an estimate sheet resting on a window sill, representing the measure a real quote starts from.
-heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearveiw job or job site
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
 heroImageFocus: 62% 62%
 secondaryDiagram: cost-build-up
 ---
