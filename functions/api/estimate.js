@@ -7,7 +7,7 @@ const MAX = {
   notes: 2000,
 };
 
-const FROM = 'Clearveiw Windows <estimates@windowsbyclearveiw.com>';
+const FROM = 'Clearview Windows <estimates@windowsbyclearview.com>';
 // Where estimate requests land. Overridable by NOTIFY_EMAIL in the Pages
 // environment, which takes precedence over this default.
 const TO = 'owner@windowsbyclearveiw.com';

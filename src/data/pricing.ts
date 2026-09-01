@@ -21,8 +21,8 @@
  */
 
 export type PricingBasis = {
-  /** 'averages' = regional published data. 'clearveiw' = Mark's own numbers. */
-  source: 'averages' | 'clearveiw';
+  /** 'averages' = regional published data. 'clearview' = Mark's own numbers. */
+  source: 'averages' | 'clearview';
   region: string;
   /** ISO date the figures were last checked against reality. */
   reviewedAt: string;
@@ -53,7 +53,7 @@ export type WindowBrand = {
 
 export const pricing = {
   basis: {
-    source: 'clearveiw',
+    source: 'clearview',
     region: 'Washington / Portland metro',
     reviewedAt: '2026-08-21',
     maxAgeDays: 180,
@@ -155,7 +155,7 @@ export const pricing = {
     {
       id: 'cascade',
       label: 'Cascade',
-      blurb: 'The standard window Clearveiw installs on most jobs.',
+      blurb: 'The standard window Clearview installs on most jobs.',
       low: 0,
       high: 0,
     },

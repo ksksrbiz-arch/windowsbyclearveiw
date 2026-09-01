@@ -1,13 +1,13 @@
 ---
 title: Terms of use
-description: The terms that apply to using windowsbyclearveiw.com, including what the cost calculator is and is not.
+description: The terms that apply to using windowsbyclearview.com, including what the cost calculator is and is not.
 updated: 2026-08-21
 order: 2
 summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
 ---
 
-These terms apply to your use of windowsbyclearveiw.com, operated by Clear View
-Windows & Trim LLC, doing business as Clearveiw Windows ("Clearveiw", "we",
+These terms apply to your use of windowsbyclearview.com, operated by Clear View
+Windows & Trim LLC, doing business as Clearview Windows ("Clearview", "we",
 "us"), a Washington limited liability company based in Vancouver, Washington.
 By using the site you agree to them. If you do not, please do not use the
 site.
@@ -64,7 +64,7 @@ unlawful, abusive, or automated.
 
 The text, photographs, diagrams, and design on this site belong to Clear View
 Windows & Trim LLC. **The job photographs are of real work performed by
-Clearveiw Windows**; they are not stock imagery and they are not licensed for
+Clearview Windows**; they are not stock imagery and they are not licensed for
 reuse.
 
 You may read, print, and share links to these pages. You may not republish the
@@ -78,7 +78,7 @@ free of errors, that it will always be reachable, or that a published figure
 still reflects current market conditions on the day you read it.
 
 To the fullest extent Washington law allows, the site is provided "as is" and
-we disclaim implied warranties in relation to **the website**. Clearveiw's
+we disclaim implied warranties in relation to **the website**. Clearview's
 liability arising out of your use of this website is limited to one hundred
 dollars (\$100).
 
@@ -123,6 +123,6 @@ and the version published here is the one that applies.
 
 ## Contact
 
-- Clear View Windows & Trim LLC (d/b/a Clearveiw Windows), Vancouver, Washington
+- Clear View Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

@@ -1,4 +1,4 @@
-# Project context — Clearveiw Windows
+# Project context — Clearview Windows
 
 Paste this into a new Claude session to pick up where the last one left off.
 Technical detail lives in [README.md](./README.md); this file is the *why*.
@@ -7,18 +7,18 @@ Technical detail lives in [README.md](./README.md); this file is the *why*.
 
 ## What this is
 
-A marketing site for **Clearveiw Windows** — my friend Mark's window
+A marketing site for **Clearview Windows** — my friend Mark's window
 installation company in Vancouver, WA. He does replacement work for homeowners
 and new-construction installs for builders, across Clark County and across the
 river into Portland.
 
-- **Live:** https://windowsbyclearveiw.com
+- **Live:** https://windowsbyclearview.com
 - **Repo:** `ksksrbiz-arch/windowsbyclearveiw` (public), deploys from `main`
 - **Stack:** Astro, static, no adapter. Cloudflare Pages. Estimate form is a
   Pages Function. Resend for mail.
-- **Pricing worker:** https://clearveiw-pricing.skdev-371.workers.dev
+- **Pricing worker:** https://clearview-pricing.skdev-371.workers.dev
 - **Legal entity:** Clear View Windows & Trim LLC (WA UBI 605 779 798),
-  doing business as "Clearveiw Windows". `site.legalName` in
+  doing business as "Clearview Windows". `site.legalName` in
   `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold
   the trade name.
 - **Note the spelling:** the trade name and current domain are
@@ -57,7 +57,7 @@ These came out of real problems and are easy to undo by accident.
 3. **Pricing must say whose numbers it is.** The estimator currently shows
    published 2026 Washington / Portland-metro averages, labelled as exactly
    that on the page, with a review date. When Mark supplies his own ranges, set
-   `basis.source` to `'clearveiw'` and the copy switches itself. Never present
+   `basis.source` to `'clearview'` and the copy switches itself. Never present
    somebody else's averages as ours.
 
 4. **The pricing worker does not discover prices.** There is no authoritative

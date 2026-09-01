@@ -941,7 +941,7 @@ html.reveal-ready [data-reveal].is-revealed {
 
   /* One line of provenance so a printed page can be traced back. */
   .site-footer::after {
-    content: 'windowsbyclearveiw.com · Clearveiw Windows · Vancouver, WA · (564) 208-0801';
+    content: 'windowsbyclearview.com · Clearview Windows · Vancouver, WA · (564) 208-0801';
     display: block;
     margin-top: 0.5rem;
     font-size: 9pt;

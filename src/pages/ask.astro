@@ -16,7 +16,7 @@ const starters = guides
 
 <BaseLayout
   title="Ask a window question"
-  description="Ask Clearveiw's guide assistant about window replacement, methods, glass, and cost in Vancouver, WA."
+  description="Ask Clearview's guide assistant about window replacement, methods, glass, and cost in Vancouver, WA."
   path="/ask"
   crumbs={[{ name: 'Ask', href: '/ask' }]}
 >
@@ -282,7 +282,7 @@ const starters = guides
         if (photo && handoff instanceof HTMLElement && handoffLink instanceof HTMLAnchorElement) {
           const scope = answer.slice(0, 400);
           try {
-            sessionStorage.setItem('clearveiw:scope', scope);
+            sessionStorage.setItem('clearview:scope', scope);
           } catch {
             // Private browsing can refuse storage. The query param still works.
           }

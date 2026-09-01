@@ -1,10 +1,10 @@
-# Clearveiw Windows
+# Clearview Windows
 
-Marketing site for **Clearveiw Windows** (operated by Clear View Windows & Trim
+Marketing site for **Clearview Windows** (operated by Clear View Windows & Trim
 LLC) — replacement and new-construction window installation in Vancouver, WA
 and the rest of Clark County.
 
-- Domain: [windowsbyclearveiw.com](https://windowsbyclearveiw.com)
+- Domain: [windowsbyclearview.com](https://windowsbyclearview.com)
 - Stack: [Astro](https://astro.build) (static, no adapter)
 - Deploy: Cloudflare Pages from this GitHub repo
 
@@ -65,7 +65,7 @@ npm run preview
 2. Production branch: `main`
 3. Build command: `npm run build`
 4. Build output directory: `dist`
-5. Attach `windowsbyclearveiw.com` after the first deploy.
+5. Attach `windowsbyclearview.com` after the first deploy.
 
 No Cloudflare adapter is required while the site stays static. The estimate form
 runs as a Pages Function from `functions/api/estimate.js`.
@@ -108,7 +108,7 @@ never fold them into the baseline or they get counted twice.
 To switch from regional averages to Mark's real pricing:
 
 1. Replace the figures in `src/data/pricing.ts`.
-2. Set `basis.source` to `'clearveiw'`.
+2. Set `basis.source` to `'clearview'`.
 3. Set `basis.reviewedAt` to today.
 
 The estimator copy changes automatically — it stops saying "published Washington
@@ -133,11 +133,11 @@ authoritative. What it does:
 The site ships its own copy of the numbers and only *upgrades* from the worker,
 so an outage there can never blank out the estimator.
 
-**Deployed.** Live at `https://clearveiw-pricing.skdev-371.workers.dev`, bound to
-the `clearveiw-pricing` KV namespace, with the monthly cron registered.
+**Deployed.** Live at `https://clearview-pricing.skdev-371.workers.dev`, bound to
+the `clearview-pricing` KV namespace, with the monthly cron registered.
 
 Two things are still unset, both on purpose — they are secrets and belong in the
-dashboard rather than a transcript (*Workers → clearveiw-pricing → Settings →
+dashboard rather than a transcript (*Workers → clearview-pricing → Settings →
 Variables → Add secret*):
 
 | Secret | Effect while unset |
@@ -175,7 +175,7 @@ cd workers/pricing && npx wrangler deploy
 Push new pricing without a redeploy:
 
 ```bash
-curl -X PUT https://clearveiw-pricing.<subdomain>.workers.dev \
+curl -X PUT https://clearview-pricing.<subdomain>.workers.dev \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "content-type: application/json" \
   --data @pricing.json
@@ -211,7 +211,7 @@ Environment variables it reads:
 | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — |
 | `NOTIFY_EMAIL` | no | `owner@windowsbyclearveiw.com` |
-| `RESEND_FROM` | no | `Clearveiw Windows <estimates@windowsbyclearveiw.com>` |
+| `RESEND_FROM` | no | `Clearview Windows <estimates@windowsbyclearview.com>` |
 
 With JavaScript the page swaps in a confirmation panel. Without it, the function
 redirects to `/estimate/sent` or `/estimate/problem`, so the form still works.
@@ -235,9 +235,9 @@ never mixing them:**
 1. **Reference material** — `/guides` content (embedded and retrieved by
    cosine similarity, see below) plus a short list of basic business facts
    (phone, service area, hours). The only source for anything about
-   Clearveiw itself.
+   Clearview itself.
 2. **The `estimate_price` tool** (`functions/ask/_lib/pricing.mjs`) — the
-   only source for a number. Runs Clearveiw's own published pricing model,
+   only source for a number. Runs Clearview's own published pricing model,
    the exact same figures and formula as
    `/tools/window-replacement-cost-calculator` (duplicated by hand, kept in
    sync manually — see the file's own comment). The model is instructed to
@@ -249,7 +249,7 @@ never mixing them:**
    is no official free search API, this is how every free DDG integration
    works) for anything current like rebate programs or code changes. Scoped
    hard to windows/doors/home construction/home improvement, and to
-   describing the *industry*, never Clearveiw's own claims or policies.
+   describing the *industry*, never Clearview's own claims or policies.
 
 Hard rules that hold regardless of tier: never "bonded and insured" (RCW
 18.27.100), never a specific L&I number, never a competitor, never legal
@@ -315,7 +315,7 @@ limits, at which point the fallback chain (and, ultimately, the graceful
 
 ## Notes
 
-The legal / domain spelling **Clearveiw** is used throughout. Public copy can still
+The legal / domain spelling **Clearview** is used throughout. Public copy can still
 say "Clearview" if you decide that is the brand.
 
 ## Images: why WebP, and why not Cloudflare Transformations

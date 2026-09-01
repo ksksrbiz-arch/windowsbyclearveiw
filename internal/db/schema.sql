@@ -1,4 +1,4 @@
--- Clearveiw internal quoting tool — D1 schema.
+-- Clearview internal quoting tool — D1 schema.
 --
 -- Money is stored in integer cents throughout, never as a float, so rounding
 -- can never silently drift a real contract total.

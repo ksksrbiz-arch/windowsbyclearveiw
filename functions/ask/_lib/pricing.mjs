@@ -102,6 +102,6 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
     highCents: round(high, PRICING.rounding) * 100,
     scope: `${scopeParts.join(', ')} — ${material.label.toLowerCase()}${brand.id !== PRICING.brands[0].id ? `, ${brand.label}` : ''}, ${method}`,
     appliedModifiers,
-    basedOn: 'Clearveiw\'s own published pricing model (same as /tools/window-replacement-cost-calculator), reviewed ' + PRICING.reviewedAt,
+    basedOn: 'Clearview\'s own published pricing model (same as /tools/window-replacement-cost-calculator), reviewed ' + PRICING.reviewedAt,
   };
 }

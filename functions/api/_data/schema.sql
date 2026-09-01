@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS leads (
   role                TEXT,                  -- 'Homeowner' | 'Builder / GC'
   notes               TEXT,
 
-  -- Random id set in the visitor's own localStorage (clearveiw:vid), not
+  -- Random id set in the visitor's own localStorage (clearview:vid), not
   -- derived from anything identifying — lets Mark notice "this is the same
   -- person who submitted before" if it ever comes up. Null whenever
   -- localStorage was unavailable at submit time.

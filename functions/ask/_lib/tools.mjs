@@ -14,7 +14,7 @@ export const TOOL_DEFS = [
   {
     name: 'estimate_price',
     description:
-      "Calculates a real price range from Clearveiw's own published pricing model — the exact same numbers and formula as /tools/window-replacement-cost-calculator. Use this whenever a visitor describes a job and wants a sense of cost. Never state a price without calling this — never estimate from memory or general knowledge.",
+      "Calculates a real price range from Clearview's own published pricing model — the exact same numbers and formula as /tools/window-replacement-cost-calculator. Use this whenever a visitor describes a job and wants a sense of cost. Never state a price without calling this — never estimate from memory or general knowledge.",
     parameters: {
       type: 'object',
       properties: {
@@ -49,7 +49,7 @@ export const TOOL_DEFS = [
   {
     name: 'search_web',
     description:
-      'Searches the web for general window/construction industry knowledge — terminology, how methods or materials work, current rebate programs, building codes, energy standards. Do NOT use this for anything about Clearveiw Windows itself (its policies, pricing, claims, reviews) — that must only ever come from the reference material already provided.',
+      'Searches the web for general window/construction industry knowledge — terminology, how methods or materials work, current rebate programs, building codes, energy standards. Do NOT use this for anything about Clearview Windows itself (its policies, pricing, claims, reviews) — that must only ever come from the reference material already provided.',
     parameters: {
       type: 'object',
       properties: {

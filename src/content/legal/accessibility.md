@@ -1,6 +1,6 @@
 ---
 title: Accessibility
-description: How windowsbyclearveiw.com is built for accessibility, what is known to fall short, and how to tell us about a barrier.
+description: How windowsbyclearview.com is built for accessibility, what is known to fall short, and how to tell us about a barrier.
 updated: 2026-08-21
 order: 3
 summary: This site aims at WCAG 2.2 Level AA. Below is what it does to get there and what is honestly still short.
