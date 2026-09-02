@@ -18,11 +18,10 @@ function withPrivacyHeaders(response) {
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
-  // Cloudflare's static asset server 308s every directory-style page (e.g.
-  // /internal/login) to add a trailing slash before it can serve the
-  // index.html inside it -- true for every page on this site, not something
-  // specific to /internal. Comparing the un-slashed form means the public
-  // paths stay public after that redirect instead of looping.
+  // Astro builds every route as `page.html` (not `page/index.html`), so
+  // Cloudflare's static asset server no longer redirects a bare path like
+  // /internal/login to add a trailing slash. Stripping one here anyway is
+  // cheap insurance against a client requesting the slashed form directly.
   const path = url.pathname.replace(/\/$/, '') || '/';
 
   if (PUBLIC_PATHS.has(path)) {
