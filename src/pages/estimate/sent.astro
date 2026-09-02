@@ -64,6 +64,9 @@ import { site, telHref } from '../../data/site';
           <li><a href="/guides/full-frame-vs-insert">Full-frame vs insert</a></li>
           <li><a href="/guides/window-replacement-cost-washington">What a project costs in Washington</a></li>
           <li><a href="/gallery">See recent work</a></li>
+          {site.social.facebook && (
+            <li><a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Follow along on Facebook</a></li>
+          )}
         </ul>
       </div>
     </div>
