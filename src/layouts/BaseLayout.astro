@@ -215,6 +215,21 @@ const breadcrumbSchema =
       initReveal();
       document.addEventListener('astro:page-load', initReveal);
 
+      // Defers a callback until the browser is idle (or after a timeout, so
+      // it never waits forever). Used below to keep GTM/analytics work off
+      // the main thread during the moment a ClientRouter navigation is
+      // painting — GTM synchronously evaluates every tag/trigger on each
+      // dataLayer.push, which is expensive enough on this container to
+      // visibly block clicks if it runs in the same tick as the page swap.
+      function whenIdle(fn: () => void) {
+        if ('requestIdleCallback' in window) {
+          (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void })
+            .requestIdleCallback(fn, { timeout: 500 });
+        } else {
+          setTimeout(fn, 0);
+        }
+      }
+
       // GA4 page_view for every client-side navigation, initial load
       // included, via GTM's dataLayer — see the container-snippet note in
       // <head>. The GA4 Event tag inside GTM-WGCFVHQM listens for this
@@ -233,7 +248,7 @@ const breadcrumbSchema =
         });
       }
 
-      document.addEventListener('astro:page-load', trackPageView);
+      document.addEventListener('astro:page-load', () => whenIdle(trackPageView));
 
       // Per-visitor journey, kept entirely client-side until someone submits
       // the estimate form. Two small storage items, same spirit as the cost
@@ -299,7 +314,7 @@ const breadcrumbSchema =
       }
 
       trackVisitJourney();
-      document.addEventListener('astro:page-load', trackVisitJourney);
+      document.addEventListener('astro:page-load', () => whenIdle(trackVisitJourney));
 
       // Aggregate signal: "did someone actually read a guide", not just
       // land on it. GTM's built-in Scroll Depth trigger only arms once per
