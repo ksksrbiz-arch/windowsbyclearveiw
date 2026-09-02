@@ -205,6 +205,13 @@ turns out to be enough.
 - Lead to Mark — [estimate-request](https://resend.com/templates/f8b73ea1-867e-48b8-8ccf-926b1a825913)
 - Receipt to the customer — [estimate-received](https://resend.com/templates/68555c62-cbc3-4061-8dfe-ea1b02a59c75)
 
+Both are full HTML emails, not plain text: a "Call now" `tel:` button and a
+"Reply by email" `mailto:` button on each, sized for one-tap use on a phone.
+The lead email to Mark also carries a `.vcf` vCard attachment built from the
+submitted name, phone, and email, so he can save the customer to his contacts
+in one tap instead of retyping it. Edit the templates in the Resend dashboard
+(the IDs above) — the Pages Function only fills in the variables.
+
 Environment variables it reads:
 
 | Variable | Required | Default |
@@ -312,6 +319,40 @@ There is no rate limiting on `/ask/api/chat` beyond message-length and
 history caps; the worst case of abuse is hitting a provider's free-tier
 limits, at which point the fallback chain (and, ultimately, the graceful
 "unavailable" message) takes over. Revisit if that turns out to matter.
+
+## Performance: keep `astro:page-load` handlers cheap
+
+The site uses Astro View Transitions (`<ClientRouter />`), so an in-site link
+click does a client-side DOM swap rather than a full navigation. Everything
+wired to the `astro:page-load` event in `BaseLayout.astro` — the GTM
+`dataLayer` pushes, the scroll-reveal `IntersectionObserver` setup — reruns on
+*every* navigation, including the very first page load, so it sits directly in
+front of the LCP element.
+
+Two real regressions came from this, both measured with the browser's
+Performance API rather than assumed:
+
+- **Synchronous analytics pushes.** `trackPageView()` and `trackVisitJourney()`
+  used to push to `window.dataLayer` synchronously inside the `astro:page-load`
+  handler. GTM evaluates every tag/trigger synchronously on each push, which
+  measured as ~465ms of blocked main thread on a single in-site click. Fixed by
+  deferring both through `requestIdleCallback` (with a `setTimeout` fallback),
+  so tracking still fires every navigation, just after the page has painted.
+- **Interleaved layout reads/writes.** `initReveal()`'s "reveal anything
+  already in view" pass used to loop over each `[data-reveal]` element doing
+  `el.getBoundingClientRect()` (read) immediately followed by
+  `el.classList.add('is-revealed')` (write) in the same iteration. Since that
+  class change affects the reveal animation's transform/opacity, each write
+  invalidated layout, forcing the next read to synchronously recompute it — a
+  forced-reflow thrash that a live DevTools trace measured at ~540ms of Layout
+  work, over half of the homepage's LCP. Fixed by splitting it into two
+  passes: read every element's position first, then apply all the class
+  changes after.
+
+The lesson generalizes: anything hung on `astro:page-load` runs on the
+critical path of every navigation, not just once. Batch DOM reads and writes
+separately, and push non-essential work (analytics, logging) off the main
+thread with `requestIdleCallback` rather than firing it inline.
 
 ## Notes
 

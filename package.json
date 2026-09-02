@@ -14,8 +14,8 @@
     "eval:ask": "node scripts/eval-ask.mjs"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.2.4"
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.2.10"
   },
   "devDependencies": {
     "gray-matter": "^4.0.3"
