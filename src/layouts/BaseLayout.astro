@@ -204,11 +204,19 @@ const breadcrumbSchema =
         targets.forEach((el) => observer.observe(el));
 
         // Anything already in view on load should not wait for a scroll.
+        // Read every element's position first (all layout reads batched
+        // together), THEN write the class changes in a second pass. Doing
+        // read-then-write per element in one loop forces a synchronous
+        // layout recalculation on every iteration (each classList.add
+        // invalidates layout, so the next getBoundingClientRect has to
+        // recompute it) — measured as ~540ms of forced-reflow Layout work
+        // blocking the hero image's LCP on first load.
         requestAnimationFrame(() => {
-          targets.forEach((el) => {
-            const box = el.getBoundingClientRect();
-            if (box.top < window.innerHeight) el.classList.add('is-revealed');
-          });
+          const viewportHeight = window.innerHeight;
+          const inView = Array.from(targets).filter(
+            (el) => el.getBoundingClientRect().top < viewportHeight,
+          );
+          inView.forEach((el) => el.classList.add('is-revealed'));
         });
       }
 
