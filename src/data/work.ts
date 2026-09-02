@@ -53,9 +53,6 @@ import blackShuttersWindow from '../assets/work/black-shutters-window.jpg';
 import redwoodShakeUpperWindows from '../assets/work/redwood-shake-upper-windows.jpg';
 import cabinGableInstallCrew from '../assets/work/cabin-gable-install-crew.jpg';
 import darkGreenFlagsShutters from '../assets/work/dark-green-flags-shutters.jpg';
-import lightBlueTwoStoryFront from '../assets/work/light-blue-two-story-front.jpg';
-import modernGrayTwoStoryFront from '../assets/work/modern-gray-two-story-front.jpg';
-import modernTanDuskFront from '../assets/work/modern-tan-dusk-front.jpg';
 
 export const workPhotos: WorkPhoto[] = [
   {
@@ -381,33 +378,6 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'after',
     featured: false,
     order: 36,
-  },
-  {
-    id: 'light-blue-two-story-front',
-    image: lightBlueTwoStoryFront,
-    alt: 'Front elevation of a light blue-gray two-story house with new windows, garage, and landscaped retaining walls',
-    caption: 'Front elevation, finished job',
-    kind: 'after',
-    featured: false,
-    order: 37,
-  },
-  {
-    id: 'modern-gray-two-story-front',
-    image: modernGrayTwoStoryFront,
-    alt: 'Front elevation of a modern gray two-story house with new windows above the garage',
-    caption: 'Modern two-story, front elevation',
-    kind: 'after',
-    featured: false,
-    order: 38,
-  },
-  {
-    id: 'modern-tan-dusk-front',
-    image: modernTanDuskFront,
-    alt: 'Front elevation of a modern tan house with new windows and a dark garage door at dusk',
-    caption: 'Front elevation at dusk',
-    kind: 'after',
-    featured: false,
-    order: 39,
   },
 ];
 
