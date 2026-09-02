@@ -30,4 +30,14 @@ export default defineConfig({
     }),
   ],
   trailingSlash: 'never',
+  // Astro's default 'directory' format writes every route as
+  // `page/index.html`, which doesn't match `trailingSlash: 'never'` above —
+  // Cloudflare Pages' static server then 308-redirects a bare `/estimate`
+  // request to `/estimate/` on first (non-SPA) load, because that's the only
+  // path with a matching file. 'file' format writes `page.html` instead, so
+  // the URL Astro generates and the file Pages finds are the same request,
+  // no redirect needed.
+  build: {
+    format: 'file',
+  },
 });
