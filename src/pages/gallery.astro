@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { allWork, findWork } from '../data/work';
+import { site } from '../data/site';
 
 const ogPhoto = findWork('green-craftsman-upper')!;
 
@@ -79,6 +80,11 @@ const total = allWork.length;
           ))}
         </span>
       </p>
+      {site.social.facebook && (
+        <p class="gallery-social">
+          More jobs go up on <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a> as they finish.
+        </p>
+      )}
     </div>
   </section>
 
@@ -161,6 +167,23 @@ const total = allWork.length;
   }
 
   .gallery-index a:hover {
+    color: var(--on-dark);
+    text-decoration-color: currentColor;
+  }
+
+  .gallery-social {
+    margin: var(--space-2xs) 0 0;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .gallery-social a {
+    color: var(--on-dark-soft);
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--dark-line-strong);
+  }
+
+  .gallery-social a:hover {
     color: var(--on-dark);
     text-decoration-color: currentColor;
   }

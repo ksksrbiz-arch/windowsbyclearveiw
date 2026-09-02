@@ -57,7 +57,9 @@ export const site = {
   lniNumber: '',
   hours: 'By appointment',
   social: {
-    facebook: '',
+    facebook: 'https://www.facebook.com/share/18pyB4MHkS/',
+    // Set once Mark's Instagram profile is live — every link below reads
+    // from this field and disappears on its own while it is empty.
     instagram: '',
     google: '',
   },

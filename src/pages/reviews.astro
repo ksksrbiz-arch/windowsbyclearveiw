@@ -77,6 +77,9 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
           <h2>We would rather have one real one.</h2>
           <ul class="plain-list">
             <li>Tell Mark you are happy to be quoted here</li>
+            {site.social.facebook && (
+              <li>Or leave it on our <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Facebook page</a></li>
+            )}
             <li>Or leave it on the Google Business Profile once it is live</li>
           </ul>
         </div>
