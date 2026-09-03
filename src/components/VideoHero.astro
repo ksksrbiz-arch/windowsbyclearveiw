@@ -144,25 +144,42 @@ const poster = await getImage({
       return;
     }
 
-    // Swap in a random take of the reveal, once per page view. The server
-    // render always ships variant 1 (so JS-off visitors and crawlers see a
-    // real video either way); this only re-rolls which one plays for
-    // everyone else. Guarded by a dataset flag rather than re-running on
-    // every astro:page-load, since a mid-visit swap would just yank the
-    // clip out from under someone already watching it.
-    if (!video.dataset.variantPicked) {
-      video.dataset.variantPicked = '1';
+    // Cycle through every take of the reveal in turn, rather than looping
+    // whichever one loads first forever. The server render always ships
+    // variant 1 (so JS-off visitors and crawlers see a real video either
+    // way, via the `loop` attribute in the markup); once JS takes over we
+    // shuffle the run order once and advance on each `ended` event, so
+    // someone watching the hero for a while actually sees the other takes
+    // instead of the same clip on repeat. Guarded by a dataset flag rather
+    // than re-running on every astro:page-load, since a mid-visit restart
+    // would just yank the clip out from under someone already watching it.
+    if (!video.dataset.cycleBound) {
+      video.dataset.cycleBound = '1';
       try {
-        const variants = JSON.parse(video.dataset.variants || '[]');
-        if (Array.isArray(variants) && variants.length > 1) {
-          const pick = variants[Math.floor(Math.random() * variants.length)];
+        const order = JSON.parse(video.dataset.variants || '[]');
+        if (Array.isArray(order) && order.length > 1) {
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+          }
           const sources = video.querySelectorAll('source');
-          if (sources[0]) sources[0].src = `/video/${pick}.webm`;
-          if (sources[1]) sources[1].src = `/video/${pick}.mp4`;
-          video.load();
+          const loadVariant = (name) => {
+            if (sources[0]) sources[0].src = `/video/${name}.webm`;
+            if (sources[1]) sources[1].src = `/video/${name}.mp4`;
+            video.load();
+          };
+          let index = 0;
+          video.loop = false;
+          video.addEventListener('ended', () => {
+            index = (index + 1) % order.length;
+            loadVariant(order[index]);
+            video.play().catch(() => {});
+          });
+          loadVariant(order[0]);
         }
       } catch {
-        // Malformed data-variants just means everyone gets variant 1 — fine.
+        // Malformed data-variants just means everyone gets variant 1,
+        // looping via the markup's `loop` attribute — fine.
       }
     }
 
