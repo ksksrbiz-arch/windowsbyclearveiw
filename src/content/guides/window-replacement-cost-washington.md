@@ -20,7 +20,7 @@ heroImageFocus: 62% 62%
 secondaryDiagram: cost-build-up
 ---
 
-A window price on the internet is a guess about someone else’s house. The number that matters is the one that follows a measure. This page is here so that number is not a surprise.
+Short answer: published 2026 industry data puts a standard vinyl replacement window in Washington at roughly **$600 to $1,300 installed per opening**, with Seattle-area labor toward the top of that band. That is a regional average, not a quote — the number that actually matters is the one that follows a measure of your openings. This page is here so that number is not a surprise.
 
 ## What you are actually paying for
 
@@ -35,9 +35,9 @@ Permits, if the city requires them for the scope, sit on top of that.
 
 ## Ranges, not quotes
 
-Industry write-ups for Washington in 2026 often land around **$600 to $1,300 per typical opening** for standard energy-efficient vinyl, with Seattle-area labor on the higher end of that band. A small handful of windows can land in the low thousands. A mid-size house is often a five-figure project.
+That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once method and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and anything full-frame push well past a "typical opening" number built around a standard vinyl insert.
 
-Treat those as orientation. Your openings, your trim, and your method will move the number.
+Treat all of it as a starting point. Your openings, your trim, and your method will move the number — that is what a measure is for.
 
 ## How to think about value
 
