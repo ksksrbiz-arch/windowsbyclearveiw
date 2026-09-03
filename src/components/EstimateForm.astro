@@ -159,9 +159,16 @@ import { site, telHref } from '../data/site';
           headers: { Accept: 'application/json' },
           body: new FormData(form),
         });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(typeof result.error === 'string' ? result.error : 'Could not send.');
+        const result = await response.json().catch(() => null);
+        // Checking response.ok alone isn't enough: something between the
+        // browser and the real function -- an ad blocker, a privacy
+        // extension, a router-level content filter -- can intercept the
+        // request and answer with its own HTTP 200 page. Only our function
+        // ever returns a JSON body with ok: true, so require that exact
+        // shape before telling anyone the request actually sent.
+        if (!response.ok || !result || result.ok !== true) {
+          const reason = result && typeof result.error === 'string' ? result.error : 'Could not send.';
+          throw new Error(reason);
         }
         form.hidden = true;
         success.hidden = false;
