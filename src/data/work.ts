@@ -54,6 +54,9 @@ import redwoodShakeUpperWindows from '../assets/work/redwood-shake-upper-windows
 import cabinGableInstallCrew from '../assets/work/cabin-gable-install-crew.jpg';
 import darkGreenFlagsShutters from '../assets/work/dark-green-flags-shutters.jpg';
 
+// New batch added 2026-09-03
+import newBuildSheathedGarage from '../assets/work/new-build-sheathed-garage.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -378,6 +381,15 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'after',
     featured: false,
     order: 36,
+  },
+  {
+    id: 'new-build-sheathed-garage',
+    image: newBuildSheathedGarage,
+    alt: 'Two-story new construction wrapped in weather-resistant barrier with windows set and an open garage bay, ready for siding',
+    caption: 'Set and flashed, two-story new build',
+    kind: 'new construction',
+    featured: true,
+    order: 37,
   },
 ];
 
