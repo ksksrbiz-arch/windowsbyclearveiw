@@ -26,7 +26,12 @@ const article = {
   headline: guide.data.title,
   description: guide.data.description,
   dateModified: guide.data.updated.toISOString(),
-  author: { '@type': 'Organization', name: site.legalName },
+  author: {
+    '@type': 'Person',
+    name: site.owner,
+    jobTitle: 'Owner and installer',
+    worksFor: { '@type': 'Organization', name: site.legalName },
+  },
   publisher: { '@type': 'Organization', name: site.legalName },
   mainEntityOfPage: `${site.url}/guides/${guide.id}`,
 };
@@ -75,6 +80,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
       <h1>{guide.data.title}</h1>
       <p class="lede">{guide.data.description}</p>
       <p class="article-meta">
+        <span>Written by <a href="/about">{site.owner}</a>, owner and installer</span>
         <span>{guide.data.topic}</span>
         <span>Updated {updated}</span>
         <span>{minutes} min read</span>
@@ -180,6 +186,19 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   .article-meta span + span::before {
     content: '·';
     margin-right: var(--space-s);
+  }
+
+  .article-meta a {
+    color: var(--on-dark-soft);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--dark-line-strong);
+  }
+
+  .article-meta a:hover,
+  .article-meta a:focus-visible {
+    color: var(--on-dark);
+    text-decoration-color: currentColor;
   }
 
   /* Guide photo ───────────────────────────────────────────────────────── */
