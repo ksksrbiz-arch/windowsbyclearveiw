@@ -52,6 +52,11 @@ const {
         color-mix(in srgb, var(--accent) 30%, transparent),
         transparent 60%
       ),
+      radial-gradient(
+        70% 100% at 8% 100%,
+        color-mix(in srgb, var(--accent-2) 14%, transparent),
+        transparent 62%
+      ),
       var(--black);
     color: var(--on-dark);
     padding: var(--space-3xl) 0;
@@ -61,7 +66,12 @@ const {
     position: absolute;
     inset: 0 0 auto;
     height: 2px;
-    background: linear-gradient(90deg, var(--accent-bright), transparent 55%);
+    background: linear-gradient(
+      90deg,
+      var(--accent-bright),
+      color-mix(in srgb, var(--accent-2-bright) 60%, transparent) 55%,
+      transparent 85%
+    );
   }
 
   .cta-bar {

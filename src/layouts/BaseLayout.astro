@@ -56,6 +56,20 @@ const ogImage = await getImage({
 });
 const ogImageUrl = new URL(ogImage.src, site.url).toString();
 
+// privacy.md discloses Cloudflare Web Analytics (cookieless, no fingerprinting)
+// loading from static.cloudflareinsights.com. There is no wrangler.toml or
+// functions/** beacon in this repo, so either Cloudflare Pages' dashboard
+// "automatic injection" toggle is doing this with no code involved, or the
+// beacon was never wired up and the policy is describing something the site
+// doesn't do. This can't be told apart from the repo alone, so the beacon is
+// wired here behind a PUBLIC_ env var rather than guessed at with a fake
+// token: set PUBLIC_CF_BEACON_TOKEN in the Cloudflare Pages project (the
+// token from Analytics > Web Analytics > Add a site) if automatic injection
+// is off, and this starts emitting the exact script the policy describes.
+// Leave it unset if the dashboard toggle is already on — a page must never
+// load the beacon twice.
+const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN as string | undefined;
+
 const breadcrumbSchema =
   crumbs.length > 0
     ? {
@@ -115,6 +129,13 @@ const breadcrumbSchema =
       crossorigin
     />
     <ClientRouter />
+    {cfBeaconToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: cfBeaconToken })}
+      />
+    )}
     <JsonLd extra={schema} />
     {breadcrumbSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
