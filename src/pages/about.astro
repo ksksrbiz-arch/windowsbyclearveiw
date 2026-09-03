@@ -5,12 +5,27 @@ import { site } from '../data/site';
 import { pricingIsRegionalAverage } from '../data/pricing';
 
 const pricesAreAverages = pricingIsRegionalAverage();
+
+const description = `${site.owner} measures, installs, and answers the phone himself — no call center, no subcontractors. Serving Vancouver, WA and Clark County.`;
+
+// Accurate, not fabricated: this just points the existing business entity at
+// the About page rather than asserting anything new about it.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${site.url}/about#page`,
+  url: `${site.url}/about`,
+  name: `About ${site.shortName}`,
+  description,
+  mainEntity: { '@id': `${site.url}/#business` },
+};
 ---
 <BaseLayout
   title="About"
-  description={`Meet ${site.owner} and ${site.legalName}, a Vancouver, WA window installation company.`}
+  description={description}
   path="/about"
   crumbs={[{ name: 'About', href: '/about' }]}
+  schema={schema}
 >
   <section class="page-hero">
     <div class="wrap">
@@ -68,8 +83,10 @@ const pricesAreAverages = pricingIsRegionalAverage();
           <dt>Registration number pending</dt>
           <dd>
             The Washington contractor registration number is not published here yet. Ask for
-            it on the first call and verify it yourself at the L&amp;I contractor lookup —
-            you should do that with anyone you let near your walls.
+            it on the first call and verify it yourself at the
+            <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
+              L&amp;I contractor lookup
+            </a> — you should do that with anyone you let near your walls.
           </dd>
         </div>
         <div>
