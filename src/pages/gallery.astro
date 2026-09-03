@@ -261,57 +261,10 @@ const total = allWork.length;
     font-variant-numeric: tabular-nums;
   }
 
+  /* Below 700px the label/count pair in .group-head wraps to two lines
+     rather than fighting for a single row next to the group heading. */
   @media (max-width: 700px) {
-    /* Per-group scale. The column counts keep every tile at or below the 450px
-     source width at the widths this page is read at. */
-  .work-grid.is-large {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .work-grid.is-square {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .work-grid.is-dense {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-2xs);
-  }
-
-  .work-grid.is-single {
-    grid-template-columns: minmax(0, 22rem);
-  }
-
-  /* Interiors are room shots, which survive a square crop better than an
-     elevation does — an elevation cropped short loses the roofline that makes
-     it legible. */
-  .work-grid.is-square :global(.work-card img) {
-    aspect-ratio: 1 / 1;
-  }
-
-  @media (max-width: 900px) {
-    .work-grid.is-large,
-    .work-grid.is-square {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .work-grid.is-dense {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 560px) {
-    .work-grid.is-large,
-    .work-grid.is-square,
-    .work-grid.is-dense {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .work-grid.is-single {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  .group-head {
+    .group-head {
       display: grid;
       gap: var(--space-2xs);
     }
