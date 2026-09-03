@@ -20,10 +20,10 @@ import { mailHref, site, telHref } from '../../data/site';
     </div>
   </section>
   <section class="section">
-    <div class="wrap split">
+    <div class="wrap split" data-reveal>
       <div>
         <p class="kicker">Fastest route</p>
-        <h2><a href={telHref()}>{site.phoneDisplay}</a></h2>
+        <p class="problem-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>
           Leave a name, your city, and a rough window count. You can also email
           <a href={mailHref()}>{site.email}</a>.
@@ -33,3 +33,24 @@ import { mailHref, site, telHref } from '../../data/site';
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Same treatment as the phone number on /estimate and /estimate/sent — a
+     tel: link this prominent should not carry a stray underline through the
+     parentheses. */
+  .problem-phone {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .problem-phone a {
+    text-decoration: none;
+  }
+
+  .problem-phone a:hover {
+    color: var(--accent-ink);
+  }
+</style>

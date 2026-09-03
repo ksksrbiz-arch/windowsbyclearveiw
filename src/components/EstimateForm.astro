@@ -24,24 +24,34 @@ import { site, telHref } from '../data/site';
     </label>
   </fieldset>
 
+  <p class="rule-label form-section-label">Reach you</p>
   <label>
     Name
     <input name="name" type="text" required autocomplete="name" maxlength="120" />
   </label>
   <label>
     Phone
-    <input name="phone" type="tel" required autocomplete="tel" maxlength="40" />
+    <input
+      name="phone"
+      type="tel"
+      inputmode="tel"
+      required
+      autocomplete="tel"
+      maxlength="40"
+    />
   </label>
   <label>
     Email <span class="field-hint">optional, for a written copy</span>
-    <input name="email" type="email" autocomplete="email" maxlength="160" />
+    <input name="email" type="email" inputmode="email" autocomplete="email" maxlength="160" />
   </label>
+
+  <p class="rule-label form-section-label">The project</p>
   <label>
     City
     <input name="city" type="text" required autocomplete="address-level2" maxlength="80" />
   </label>
   <label>
-    Project notes
+    Project notes <span class="field-hint">optional, but it saves a question on the call</span>
     <textarea
       name="notes"
       rows="4"
@@ -69,7 +79,7 @@ import { site, telHref } from '../data/site';
   </p>
 </div>
 
-<script>
+<script define:vars={{ phoneDisplay: site.phoneDisplay }}>
   function bindEstimate() {
     const form = document.getElementById('estimate-form');
     const status = document.querySelector('[data-status]');
@@ -129,7 +139,7 @@ import { site, telHref } from '../data/site';
       } catch (error) {
         status.hidden = false;
         const reason = error instanceof Error ? error.message : 'Could not send.';
-        status.textContent = `${reason} You can always call (564) 208-0801.`;
+        status.textContent = `${reason} You can always call ${phoneDisplay}.`;
       } finally {
         if (button instanceof HTMLButtonElement) {
           button.disabled = false;
@@ -209,13 +219,21 @@ import { site, telHref } from '../data/site';
     margin-bottom: var(--space-3xs);
   }
 
+  /* Two logical groups inside one form — who to call, and what the job is —
+     using the site's existing rule-and-label motif instead of a second set of
+     boxed fieldsets, which would fight the field-group above it. */
+  .form-section-label {
+    margin: var(--space-2xs) 0 0;
+  }
+
   .choice {
     display: flex;
     align-items: center;
     gap: var(--space-2xs);
     font-weight: 400;
     cursor: pointer;
-    padding: 0.3rem 0;
+    min-height: 2.75rem;
+    padding: 0.4rem 0;
   }
 
   .choice input {
