@@ -19,7 +19,7 @@ heroImageAlt: A weathered window frame with peeling paint and exposed wood, an e
 heroImageCredit: Stock photo — T / Unsplash (free license)
 ---
 
-Windows rarely fail all at once. They leak a little more air, collect a little more water, and get a little harder to live with. These are the signs that replacement is the honest next step.
+Six signs cover nearly every case for replacement, and seeing two or more in the same room is usually the tipping point. Windows rarely fail all at once. They leak a little more air, collect a little more water, and get a little harder to live with. Here is what to check for, room by room.
 
 ## 1. You can feel weather next to a closed window
 
