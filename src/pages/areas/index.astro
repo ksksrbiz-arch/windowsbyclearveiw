@@ -4,11 +4,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { site } from '../../data/site';
 
-const cities = (await getCollection('cities')).filter((city) => city.data.published);
+// Vancouver is home base, so it leads the list rather than landing wherever
+// the filesystem glob happens to sort it. Everything else follows
+// alphabetically — there is no other principled order for nine towns.
+const cities = (await getCollection('cities'))
+  .filter((city) => city.data.published)
+  .sort((a, b) =>
+    a.id === 'vancouver' ? -1 : b.id === 'vancouver' ? 1 : a.data.name.localeCompare(b.data.name),
+  );
 ---
 <BaseLayout
   title="Service areas"
-  description="Window installation in Vancouver, WA and nearby Clark County: Camas, Washougal, Battle Ground, Ridgefield, La Center, and Woodland."
+  description="Window installation in Vancouver, WA and Clark County — Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland — plus Portland, OR."
   path="/areas"
   crumbs={[{ name: 'Service areas', href: '/areas' }]}
 >
