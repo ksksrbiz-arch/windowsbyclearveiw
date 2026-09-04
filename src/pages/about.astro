@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
 import { pricingIsRegionalAverage } from '../data/pricing';
+import { getImage } from 'astro:assets';
+import aboutHeroSrc from '../assets/hero/about.png';
 
 const pricesAreAverages = pricingIsRegionalAverage();
 
@@ -19,6 +21,10 @@ const schema = {
   description,
   mainEntity: { '@id': `${site.url}/#business` },
 };
+
+// Full-bleed hero background. AI-generated, not a real job site, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="About"
@@ -27,29 +33,34 @@ const schema = {
   crumbs={[{ name: 'About', href: '/about' }]}
   schema={schema}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
-      <p class="kicker">About</p>
+      <p class="kicker about-kicker">
+        <img class="about-kicker-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+        About
+      </p>
       <h1>A Vancouver crew, not a national sales office.</h1>
       <p class="lede">
-        The site, the truck, and the estimate all point back to the same person responsible for the
-        opening in your wall.
+        The site, the truck, and the estimate all point back to the same person who walked
+        your openings and wrote the number down.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview property</p>
   </section>
   <section class="section">
     <div class="wrap split" data-reveal>
       <div class="prose">
         <p>
-          {site.legalName} is Mark’s window company. We install in Vancouver and the towns
+          {site.legalName}, doing business as {site.shortName}, is Mark’s window
+          company. We install in Vancouver and the towns
           around it — Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center,
           and Woodland — and we cross the river into Portland.
         </p>
         <p>
-          The person who measures your openings is the person who installs them. That is not
-          a marketing line about service; it is just how a shop this size works, and it is the
-          reason you will not be handed between a salesperson, a scheduler, and a subcontractor
-          who has never seen the house.
+          Mark measures your openings and writes the quote himself — no salesperson, no
+          appointment setter, no call center reading from a script. His crew, the same
+          people on every job, does the install, and Mark stays the one you call if
+          anything comes up.
         </p>
         <p>
           Show up, install it right, leave the house better than we found it.
@@ -69,21 +80,22 @@ const schema = {
   <section class="section section-sunk">
     <div class="wrap is-narrow" data-reveal>
       <p class="rule-label">Straight answers</p>
-      <h2>What this site does not claim.</h2>
+      <h2>What we have not earned yet.</h2>
       <dl class="honest">
         <div>
           <dt>No reviews yet</dt>
           <dd>
-            The company is new. Rather than fill a page with invented quotes, the
+            The company is new. Rather than fill a page with invented quotes, the{' '}
             <a href="/reviews">reviews page</a> stays empty until real customers put their
             names to something. Ask Mark for references when he comes out.
           </dd>
         </div>
         <div>
-          <dt>Registration number pending</dt>
+          <dt>Contractor registration number pending</dt>
           <dd>
-            The Washington contractor registration number is not published here yet. Ask for
-            it on the first call and verify it yourself at the
+            {site.legalName} is a registered Washington LLC (UBI {site.ubiNumber}), but the
+            separate L&amp;I contractor registration number is not published here yet. Ask
+            for it on the first call and verify it yourself at the{' '}
             <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
               L&amp;I contractor lookup
             </a> — you should do that with anyone you let near your walls.
@@ -95,7 +107,7 @@ const schema = {
             {pricesAreAverages ? (
               <>
                 The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
-                on published Washington averages, clearly labeled as such, not on Clearveiw’s
+                on published Washington averages, clearly labeled as such, not on Clearview’s
                 own pricing. It is there to sanity-check any quote you get — including ours.
               </>
             ) : (
@@ -113,12 +125,41 @@ const schema = {
   </section>
 
   <CtaBar
-    heading="Talk to the person doing the work."
+    heading="Talk to the person who quotes the job."
     body="No call center, no appointment setter. Mark answers from the truck."
   />
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
+  .about-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .about-kicker-mark {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    object-fit: contain;
+  }
+
   /* Naming the gaps outright is the strongest thing a new company can do on
      an About page, and it keeps the site's claims inside what RCW 18.27.100
      allows a registered contractor to advertise. */

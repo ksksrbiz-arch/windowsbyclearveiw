@@ -12,6 +12,13 @@ import { site, telHref } from '../data/site';
     </label>
   </div>
 
+  <!-- Populated just before submit from client-side storage — see
+       BaseLayout.astro's trackVisitJourney() and bindEstimate() below.
+       Never shown, never required; if storage is unavailable these just
+       submit empty and functions/api/estimate.js treats that as normal. -->
+  <input type="hidden" name="visitor_id" data-visitor-id />
+  <input type="hidden" name="visit_journey" data-visit-journey />
+
   <fieldset class="field-group">
     <legend>Who is asking?</legend>
     <label class="choice">
@@ -54,7 +61,7 @@ import { site, telHref } from '../data/site';
   <p class="form-status" data-status role="alert" hidden></p>
   <p class="fine-print">
     We use this to call you back about the work — no lists, no resale, no
-    follow-up sequence. We will not text you unless you ask us to. See the
+    follow-up sequence. We will not text you unless you ask us to. See the{' '}
     <a href="/legal/privacy">privacy policy</a>; submitting this form is a
     request for contact, not a contract (<a href="/legal/terms">terms</a>).
   </p>
@@ -64,7 +71,7 @@ import { site, telHref } from '../data/site';
   <p class="kicker">Received</p>
   <h2>We have the request.</h2>
   <p>
-    Mark will follow up, usually the same day. If you would rather talk now, call
+    Mark will follow up, usually the same day. If you would rather talk now, call{' '}
     <a href={telHref()}>{site.phoneDisplay}</a>.
   </p>
 </div>
@@ -94,7 +101,7 @@ import { site, telHref } from '../data/site';
       let scope = new URLSearchParams(window.location.search).get('scope');
       if (!scope) {
         try {
-          scope = sessionStorage.getItem('clearveiw:scope');
+          scope = sessionStorage.getItem('clearview:scope');
         } catch {
           scope = null;
         }
@@ -105,9 +112,42 @@ import { site, telHref } from '../data/site';
     const button = form.querySelector('[data-submit]');
     const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
 
+    // Filled in right before we read the form, not on load, so the visit
+    // list is as complete as possible — someone can browse for a while with
+    // this page open in a background tab before coming back to submit.
+    function populateVisitJourney() {
+      try {
+        const visitorField = form.querySelector('[data-visitor-id]');
+        if (visitorField instanceof HTMLInputElement) {
+          visitorField.value = localStorage.getItem('clearview:vid') || '';
+        }
+
+        const journeyField = form.querySelector('[data-visit-journey]');
+        if (journeyField instanceof HTMLInputElement) {
+          let visits = [];
+          try {
+            visits = JSON.parse(sessionStorage.getItem('clearview:visits') || '[]');
+          } catch {
+            visits = [];
+          }
+          let firstTouch = null;
+          try {
+            firstTouch = JSON.parse(localStorage.getItem('clearview:first_touch') || 'null');
+          } catch {
+            firstTouch = null;
+          }
+          journeyField.value = JSON.stringify({ visits, firstTouch });
+        }
+      } catch {
+        // Storage can be unavailable (private browsing, etc.) — never block
+        // the actual estimate request over a missing nice-to-have.
+      }
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       status.hidden = true;
+      populateVisitJourney();
       if (button instanceof HTMLButtonElement) {
         button.disabled = true;
         button.textContent = 'Sending…';
@@ -119,13 +159,42 @@ import { site, telHref } from '../data/site';
           headers: { Accept: 'application/json' },
           body: new FormData(form),
         });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(typeof result.error === 'string' ? result.error : 'Could not send.');
+        const result = await response.json().catch(() => null);
+        // Checking response.ok alone isn't enough: something between the
+        // browser and the real function -- an ad blocker, a privacy
+        // extension, a router-level content filter -- can intercept the
+        // request and answer with its own HTTP 200 page. Only our function
+        // ever returns a JSON body with ok: true, so require that exact
+        // shape before telling anyone the request actually sent.
+        const isExactSuccess =
+          result !== null &&
+          typeof result === 'object' &&
+          !Array.isArray(result) &&
+          Object.keys(result).length === 1 &&
+          result.ok === true;
+        if (!response.ok || !isExactSuccess) {
+          const reason = result && typeof result.error === 'string' ? result.error : 'Could not send.';
+          throw new Error(reason);
         }
         form.hidden = true;
         success.hidden = false;
         success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // GA4 conversion signal. Pushed here rather than relying on a
+        // page-view trigger on /estimate/sent because a successful
+        // fetch()-based submission never navigates there — it just swaps
+        // this panel in. The no-JS fallback (estimate.js's 303 redirect)
+        // still lands on /estimate/sent for real, which pushes the same
+        // event itself — see that page.
+        try {
+          // @ts-expect-error — initialized by the GTM snippet in BaseLayout's <head>.
+          window.dataLayer = window.dataLayer || [];
+          // @ts-expect-error — see above.
+          window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form' });
+        } catch {
+          // Never let analytics plumbing get in the way of a lead that
+          // already succeeded.
+        }
       } catch (error) {
         status.hidden = false;
         const reason = error instanceof Error ? error.message : 'Could not send.';

@@ -45,7 +45,7 @@ const steps = [
     <text x="16" y="32" class="f-note">Housewrap laps over the head</text>
 
     <!-- Head flashing (4) -->
-    <path d="M74 62 H246" class="f-flash f-head" />
+    <path d="M74 62 H246" class="f-flash" />
     <circle cx="60" cy="62" r="11" class="f-pip" />
     <text x="60" y="66" class="f-pip-text">4</text>
 
@@ -121,10 +121,6 @@ const steps = [
     fill: none;
   }
 
-  .f-head {
-    stroke: var(--accent-bright);
-  }
-
   .f-window {
     fill: var(--paper-raised);
     stroke: var(--ink);
@@ -165,7 +161,7 @@ const steps = [
   }
 
   .f-note {
-    fill: var(--ink-faint);
+    fill: var(--ink-soft);
     font-family: Outfit, 'Outfit Fallback', system-ui, sans-serif;
     font-size: 9px;
     font-weight: 500;

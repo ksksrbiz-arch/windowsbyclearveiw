@@ -60,6 +60,13 @@ const { heading = 'What actually comes out' } = Astro.props;
         <li><span class="swatch s-new"></span>New unit sets inside it</li>
         <li>Siding and interior trim are not disturbed</li>
       </ul>
+
+      <p class="detail-best detail-best-keep">
+        <span class="detail-best-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="10" class="bi-stroke" /><path d="M16 17l5-6" class="bi-needle" /><circle cx="16" cy="17" r="1.6" class="bi-fill" /><path d="M10 8l-2-2M22 8l2-2" class="bi-needle" /></svg>
+        </span>
+        <span><strong>Best for</strong> — sound, square frames where a quick, cost-effective upgrade is the goal.</span>
+      </p>
     </div>
 
     <div class="detail-panel">
@@ -104,6 +111,13 @@ const { heading = 'What actually comes out' } = Astro.props;
         <li><span class="swatch s-flash"></span>Opening is re-flashed</li>
         <li>Trim is replaced; siding may be cut back</li>
       </ul>
+
+      <p class="detail-best detail-best-remove">
+        <span class="detail-best-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M6 16 16 7l10 9" class="bi-stroke" /><path d="M9 14v11h14V14" class="bi-stroke" /><rect x="14" y="18" width="4" height="7" class="bi-fill" /></svg>
+        </span>
+        <span><strong>Best for</strong> — rotten, racked, or out-of-square frames, or a full renovation.</span>
+      </p>
     </div>
   </div>
 
@@ -159,7 +173,7 @@ const { heading = 'What actually comes out' } = Astro.props;
     width: 100%;
     height: auto;
     background: var(--paper-sunk);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
   }
 
   /* Wall build-up ─────────────────────────────────────────────────────── */
@@ -196,7 +210,7 @@ const { heading = 'What actually comes out' } = Astro.props;
   .p-flash {
     fill: none;
     stroke: var(--danger);
-    stroke-width: 2.5;
+    stroke-width: 3.5;
     stroke-linecap: square;
   }
 
@@ -274,6 +288,76 @@ const { heading = 'What actually comes out' } = Astro.props;
     max-width: var(--measure);
     font-size: var(--step--1);
     color: var(--ink-soft);
+  }
+
+  /* "Best for" badge — the one addition borrowed straight from the kind of
+     one-page comparison graphic a competitor would run: a colored chip that
+     answers "which one is mine" without making the reader parse the whole
+     cross-section first. */
+  .detail-best {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin: var(--space-m) 0 0;
+    padding: var(--space-s);
+    border-radius: var(--radius);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .detail-best strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .detail-best-keep {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .detail-best-remove {
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+  }
+
+  .detail-best-icon {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--paper-raised);
+  }
+
+  .detail-best-icon svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .detail-best-keep .detail-best-icon {
+    color: var(--accent-ink);
+  }
+
+  .detail-best-remove .detail-best-icon {
+    color: var(--danger);
+  }
+
+  .bi-stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bi-needle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .bi-fill {
+    fill: currentColor;
   }
 
   @media (max-width: 800px) {
