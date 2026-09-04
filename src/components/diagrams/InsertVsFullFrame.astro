@@ -159,7 +159,8 @@ const { heading = 'What actually comes out' } = Astro.props;
     width: 100%;
     height: auto;
     background: var(--paper-sunk);
-    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
   }
 
   /* Wall build-up ─────────────────────────────────────────────────────── */
@@ -213,11 +214,11 @@ const { heading = 'What actually comes out' } = Astro.props;
   }
 
   .p-label {
-    fill: var(--ink-soft);
+    fill: var(--ink-faint);
     font-family: Outfit, 'Outfit Fallback', system-ui, sans-serif;
     font-size: 9px;
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-anchor: middle;
     text-transform: uppercase;
   }
