@@ -8,15 +8,30 @@ import aboutHeroSrc from '../assets/hero/about.png';
 
 const pricesAreAverages = pricingIsRegionalAverage();
 
+const description = `${site.owner} measures, installs, and answers the phone himself — no call center, no subcontractors. Serving Vancouver, WA and Clark County.`;
+
+// Accurate, not fabricated: this just points the existing business entity at
+// the About page rather than asserting anything new about it.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${site.url}/about#page`,
+  url: `${site.url}/about`,
+  name: `About ${site.shortName}`,
+  description,
+  mainEntity: { '@id': `${site.url}/#business` },
+};
+
 // Full-bleed hero background. AI-generated, not a real job site, so it is
 // captioned as such — the same rule the guide photos already follow.
 const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="About"
-  description={`Meet ${site.owner} and ${site.legalName}, a Vancouver, WA window installation company.`}
+  description={description}
   path="/about"
   crumbs={[{ name: 'About', href: '/about' }]}
+  schema={schema}
 >
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
@@ -80,8 +95,10 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
           <dd>
             {site.legalName} is a registered Washington LLC (UBI {site.ubiNumber}), but the
             separate L&amp;I contractor registration number is not published here yet. Ask
-            for it on the first call and verify it yourself at the L&amp;I contractor
-            lookup — you should do that with anyone you let near your walls.
+            for it on the first call and verify it yourself at the{' '}
+            <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
+              L&amp;I contractor lookup
+            </a> — you should do that with anyone you let near your walls.
           </dd>
         </div>
         <div>
