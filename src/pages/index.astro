@@ -15,8 +15,8 @@ const newBuildTile = findWork('new-build-sheathed-garage')!;
 
 // The sliding-doors tile has no real installed-job photo yet (see
 // sliding-glass-doors.astro), so unlike the two tiles above it borrows the
-// same AI-generated hero image that page uses — and carries the same small
-// credit line, rather than presenting it as a real Clearview job.
+// same AI-generated hero image that page uses. TODO: swap for a real
+// installed-job photo once one exists, same as the other two tiles.
 const slidingDoorsTile = await getImage({ src: slidingDoorsTileSrc, width: 900, format: 'webp', quality: 72 });
 
 const serviceLinks = [
@@ -117,7 +117,6 @@ const signs = [
             <h2>Sliding glass doors</h2>
             <p>Standard, multi-panel, and French rail patio doors.</p>
           </div>
-          <p class="service-tile-credit">AI-generated imagery</p>
         </a>
       </div>
     </div>
@@ -263,21 +262,6 @@ const signs = [
     color: var(--on-dark);
     text-decoration: none;
     background: var(--black);
-  }
-
-  /* Only the sliding-doors tile carries this — see the comment by
-     slidingDoorsTile above for why that one photo needs a credit and the
-     other two don't. */
-  .service-tile-credit {
-    position: absolute;
-    top: var(--space-2xs);
-    right: var(--space-2xs);
-    margin: 0;
-    padding: 0.2rem 0.5rem;
-    border-radius: var(--radius);
-    background: rgb(11 12 14 / 0.55);
-    color: var(--on-dark-faint);
-    font-size: var(--step--2);
   }
 
   .service-tile img {
