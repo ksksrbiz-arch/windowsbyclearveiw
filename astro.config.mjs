@@ -22,11 +22,14 @@ export default defineConfig({
   integrations: [
     sitemap({
       // Outcome pages for the estimate form — no search value, and /problem
-      // reads like a broken page if someone lands on it cold.
+      // reads like a broken page if someone lands on it cold — plus the 404
+      // page, which Astro builds as a real route (dist/404.html) but which
+      // has no canonical URL worth indexing.
       filter: (page) =>
         !page.includes('/estimate/sent') &&
         !page.includes('/estimate/problem') &&
-        !page.includes('/internal/'),
+        !page.includes('/internal/') &&
+        !/\/404\/?$/.test(page),
     }),
   ],
   trailingSlash: 'never',
