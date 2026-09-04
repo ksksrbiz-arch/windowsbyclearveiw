@@ -1,13 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import LogoReveal from '../../components/LogoReveal.astro';
 import { site, telHref } from '../../data/site';
 ---
 <BaseLayout
   title="Request received"
-  description="Your window estimate request reached Clearveiw Windows, LLC in Vancouver, WA."
+  description="Your window estimate request reached Clearview Windows in Vancouver, WA."
   path="/estimate/sent"
   crumbs={[{ name: 'Request an estimate', href: '/estimate' }]}
+  noindex
 >
   <section class="page-hero">
     <div class="wrap">
@@ -20,7 +20,25 @@ import { site, telHref } from '../../data/site';
   </section>
   <section class="section">
     <div class="wrap sent-layout" data-reveal>
-      <LogoReveal caption="Clearveiw Windows, LLC — Vancouver, WA" />
+      <figure class="confirm-mark">
+        <span class="confirm-mark-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="M8 41 L8 20 A16 16 0 0 1 40 20 L40 41 Z" fill="url(#sentGlass)" stroke="#122033" stroke-width="2.6" stroke-linejoin="round" />
+            <path d="M8 20h32M24 20v21" stroke="#122033" stroke-width="2.3" stroke-linecap="round" />
+            <path d="M13.5 12 L22 18.5" stroke="#f6f1e8" stroke-width="2.6" stroke-linecap="round" opacity="0.55" />
+            <defs>
+              <linearGradient id="sentGlass" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#d9efec" />
+                <stop offset="1" stop-color="#1f6f73" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="confirm-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="#f4f4f2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </span>
+        </span>
+        <figcaption>Clearview Windows — Vancouver, WA</figcaption>
+      </figure>
       <div class="sent-note">
         <p class="rule-label">What happens now</p>
         <ol class="steps">
@@ -36,7 +54,7 @@ import { site, telHref } from '../../data/site';
     <div class="wrap split" data-reveal>
       <div>
         <p class="rule-label">Sooner is fine</p>
-        <p class="sent-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
+        <p class="phone-display is-large"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>If something changed or you want to talk it through now, call. Mark answers from the truck.</p>
       </div>
       <div>
@@ -46,43 +64,88 @@ import { site, telHref } from '../../data/site';
           <li><a href="/guides/full-frame-vs-insert">Full-frame vs insert</a></li>
           <li><a href="/guides/window-replacement-cost-washington">What a project costs in Washington</a></li>
           <li><a href="/gallery">See recent work</a></li>
+          {site.social.facebook && (
+            <li><a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Follow along on Facebook</a></li>
+          )}
         </ul>
       </div>
     </div>
   </section>
 </BaseLayout>
 
+<script>
+  // GA4 conversion signal for the no-JS fallback path: estimate.js 303s here
+  // on a real form post, which is a hard navigation, so this runs once per
+  // arrival — no astro:page-load listener needed the way trackPageView()
+  // needs one, since this page is never reached by client-side routing.
+  // The JS-intercepted submit path pushes the same event itself, from
+  // EstimateForm.astro, because it never navigates here at all.
+  try {
+    // @ts-expect-error — initialized by the GTM snippet in BaseLayout's <head>.
+    window.dataLayer = window.dataLayer || [];
+    // @ts-expect-error — see above.
+    window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form_no_js' });
+  } catch {
+    // Analytics plumbing should never be able to break this confirmation page.
+  }
+</script>
+
 <style>
-  /* The confirmation is a moment of completion: nothing is being delayed and
-     there is nothing else to look at, which is the one place a six-second
-     brand animation costs a visitor nothing. */
   .sent-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-xl);
     align-items: center;
   }
 
+  .confirm-mark {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2xs);
+    margin: 0;
+  }
+
+  .confirm-mark-icon {
+    position: relative;
+    display: block;
+    width: clamp(6rem, 12vw, 8.25rem);
+  }
+
+  .confirm-mark-icon svg:first-child {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 18px 34px rgb(11 12 14 / 0.22));
+  }
+
+  .confirm-badge {
+    position: absolute;
+    right: -0.4rem;
+    bottom: -0.4rem;
+    display: grid;
+    place-items: center;
+    width: 34%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--paper-raised);
+    box-shadow: var(--shadow-md);
+  }
+
+  .confirm-badge svg {
+    width: 58%;
+    height: 58%;
+  }
+
+  .confirm-mark figcaption {
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
   .sent-note .rule-label {
     margin-bottom: var(--space-s);
-  }
-
-  /* The default link underline ran through the parentheses and read as a
-     typo. Same treatment as the estimate page's number. */
-  .sent-phone {
-    margin: 0 0 var(--space-2xs);
-    font-size: var(--step-3);
-    font-weight: 600;
-    letter-spacing: var(--tracking-display);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .sent-phone a {
-    text-decoration: none;
-  }
-
-  .sent-phone a:hover {
-    color: var(--accent-ink);
   }
 
   @media (max-width: 900px) {

@@ -1,0 +1,267 @@
+---
+/**
+ * U-factor and SHGC as two horizontal scales rather than two acronyms. Both
+ * numbers appear on every NFRC label Mark hands over, and both are
+ * meaningless without a sense of where "good" sits and why the Washington
+ * answer is not the same as the Arizona answer. The colored zone now carries
+ * its own label directly above it, so the scale explains itself without
+ * making the reader cross-reference the paragraph below.
+ */
+const uFactor = {
+  min: 0.15,
+  max: 0.5,
+  goodMax: 0.3,
+  typical: 0.27,
+};
+
+const shgc = {
+  min: 0.15,
+  max: 0.7,
+  // In a heating-dominated climate a higher SHGC is welcome on south glass —
+  // the opposite of the advice a hot, sunny climate gives.
+  usefulMin: 0.3,
+  typical: 0.32,
+};
+
+const pct = (value: number, min: number, max: number) =>
+  Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+
+const uGoodPct = pct(uFactor.goodMax, uFactor.min, uFactor.max);
+const uTypicalPct = pct(uFactor.typical, uFactor.min, uFactor.max);
+const shgcUsefulPct = pct(shgc.usefulMin, shgc.min, shgc.max);
+const shgcTypicalPct = pct(shgc.typical, shgc.min, shgc.max);
+---
+<figure class="gauge-detail">
+  <figcaption class="gauge-heading">Two numbers on every window label</figcaption>
+
+  <div class="gauge-pair">
+    <div class="gauge-panel">
+      <p class="gauge-title">U-factor</p>
+      <p class="gauge-sub">Heat lost through the window — lower is tighter</p>
+
+      <div class="gauge-zone-tag" style={`width: ${uGoodPct}%`}>
+        <span class="gauge-zone-dot gauge-zone-dot-good"></span>WA rebate range
+      </div>
+      <div class="gauge-track" role="img" aria-label={`U-factor scale from ${uFactor.min} to ${uFactor.max}. Washington's better-performing range runs up to about ${uFactor.goodMax}. A typical Clearview double-pane install lands around ${uFactor.typical}.`}>
+        <div class="gauge-zone gauge-zone-good" style={`width: ${uGoodPct}%`}></div>
+        <div class="gauge-tick" style={`left: ${uGoodPct}%`}></div>
+        <div class="gauge-mark" style={`left: ${uTypicalPct}%`}>
+          <span class="gauge-mark-dot"></span>
+          <span class="gauge-mark-label">{uFactor.typical}</span>
+        </div>
+      </div>
+      <div class="gauge-scale">
+        <span>{uFactor.min}</span>
+        <span class="gauge-scale-mid" style={`left: ${uGoodPct}%`}>{uFactor.goodMax}</span>
+        <span>{uFactor.max}</span>
+      </div>
+
+      <p class="gauge-note">
+        Below about <strong>{uFactor.goodMax}</strong> is the range Washington utility rebates
+        usually look for. A typical Clearview double-pane, Low-E install lands near
+        <strong> {uFactor.typical}</strong>; triple-pane goes lower still.
+      </p>
+    </div>
+
+    <div class="gauge-panel">
+      <p class="gauge-title">SHGC</p>
+      <p class="gauge-sub">Solar heat let through — higher means more free heat</p>
+
+      <div class="gauge-zone-tag gauge-zone-tag-right" style={`width: ${100 - shgcUsefulPct}%`}>
+        <span class="gauge-zone-dot gauge-zone-dot-warm"></span>Useful in our climate
+      </div>
+      <div class="gauge-track" role="img" aria-label={`SHGC scale from ${shgc.min} to ${shgc.max}. Washington's useful range for passive solar heat starts around ${shgc.usefulMin}. A typical install lands around ${shgc.typical}.`}>
+        <div class="gauge-zone gauge-zone-warm" style={`left: ${shgcUsefulPct}%; width: ${100 - shgcUsefulPct}%`}></div>
+        <div class="gauge-tick" style={`left: ${shgcUsefulPct}%`}></div>
+        <div class="gauge-mark" style={`left: ${shgcTypicalPct}%`}>
+          <span class="gauge-mark-dot"></span>
+          <span class="gauge-mark-label">{shgc.typical}</span>
+        </div>
+      </div>
+      <div class="gauge-scale">
+        <span>{shgc.min}</span>
+        <span class="gauge-scale-mid" style={`left: ${shgcUsefulPct}%`}>{shgc.usefulMin}</span>
+        <span>{shgc.max}</span>
+      </div>
+
+      <p class="gauge-note">
+        This is where climate flips the advice: a hot, sunny region wants SHGC low to keep heat
+        out. Vancouver wants a little more of it on south-facing glass, since that sun is free
+        heat for eight months of the year.
+      </p>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .gauge-detail {
+    margin: 0;
+  }
+
+  .gauge-heading {
+    display: block;
+    margin: 0 0 var(--space-m);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+
+  .gauge-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+  }
+
+  .gauge-panel {
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+
+  .gauge-title {
+    margin: 0 0 var(--space-3xs);
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .gauge-sub {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  /* The zone's own name, sized to the zone it sits above, so "what does the
+     colored part mean" is answered before the eye even reaches the scale. */
+  .gauge-zone-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: var(--space-m) 0 0.35rem;
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .gauge-zone-tag-right {
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
+  .gauge-zone-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .gauge-zone-dot-good {
+    background: color-mix(in srgb, var(--accent) 75%, var(--ink));
+  }
+
+  .gauge-zone-dot-warm {
+    background: color-mix(in srgb, var(--accent-bright, var(--accent)) 75%, var(--ink));
+  }
+
+  .gauge-track {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--paper-sunk);
+    border: 1px solid var(--line);
+    margin: 0 0 var(--space-2xs);
+  }
+
+  .gauge-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .gauge-zone-good {
+    background: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+
+  .gauge-zone-warm {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-bright, var(--accent)) 65%, transparent));
+  }
+
+  /* A small boundary tick where the named zone ends, so the cutoff reads as
+     a deliberate line rather than just a soft color fade. */
+  .gauge-tick {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 18px;
+    background: var(--ink-soft);
+    translate: -50% 0;
+  }
+
+  .gauge-mark {
+    position: absolute;
+    top: 50%;
+    translate: -50% -50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    z-index: 1;
+  }
+
+  .gauge-mark-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--paper-raised);
+    box-shadow: 0 0 0 1px var(--ink);
+  }
+
+  .gauge-mark-label {
+    position: absolute;
+    top: 18px;
+    font-size: var(--step--2);
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .gauge-scale {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-m);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .gauge-scale-mid {
+    position: absolute;
+    translate: -50% 0;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .gauge-note {
+    margin: var(--space-s) 0 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .gauge-note strong {
+    color: var(--ink);
+  }
+
+  @media (max-width: 800px) {
+    .gauge-pair {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

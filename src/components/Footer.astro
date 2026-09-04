@@ -4,12 +4,18 @@ import Brand from './Brand.astro';
 
 const year = new Date().getFullYear();
 
+const socialLinks = [
+  ['Facebook', site.social.facebook],
+  ['Instagram', site.social.instagram],
+].filter((entry): entry is [string, string] => Boolean(entry[1]));
+
 const columns = [
   {
     heading: 'Work',
     links: [
       ['/replacement', 'Replacement'],
       ['/new-construction', 'New construction'],
+      ['/window-features', 'Window features'],
       ['/process', 'Process'],
       ['/gallery', 'Gallery'],
     ],
@@ -32,6 +38,7 @@ const columns = [
       ['/about', 'About Mark'],
       ['/tools', 'Free tools'],
       ['/guides', 'Guides'],
+      ['/ask', 'Ask a question'],
       ['/reviews', 'Reviews'],
       ['/estimate', 'Request an estimate'],
     ],
@@ -55,6 +62,12 @@ const columns = [
           <span class="footer-contact-label">Email</span>
           <a href={mailHref()}>{site.email}</a>
         </li>
+        {socialLinks.map(([label, href]) => (
+          <li>
+            <span class="footer-contact-label">{label}</span>
+            <a href={href} target="_blank" rel="noopener noreferrer">Follow along</a>
+          </li>
+        ))}
       </ul>
     </div>
 

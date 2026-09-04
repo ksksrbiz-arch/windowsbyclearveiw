@@ -1,0 +1,303 @@
+---
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { pricing } from '../data/pricing';
+import { findWork } from '../data/work';
+import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
+import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
+import featuresHeroSrc from '../assets/hero/window-features.png';
+
+const ogPhoto = findWork('stone-craftsman')!;
+
+// Full-bleed hero background. AI-generated macro detail shot, not a real
+// Clearview unit, so it is captioned as such.
+const heroBg = await getImage({ src: featuresHeroSrc, width: 2400, format: 'webp', quality: 76 });
+
+const materials = pricing.materials;
+const brands = pricing.brands;
+const styles = pricing.openings.filter((opening) => !opening.isDoor);
+const doors = pricing.openings.filter((opening) => opening.isDoor);
+
+const stylePhotos = [
+  { id: 'blue-slider', label: 'Slider' },
+  { id: 'new-unit-interior', label: 'Double-hung' },
+  { id: 'blue-hung', label: 'Single-hung' },
+  { id: 'green-craftsman-upper', label: 'Picture' },
+]
+  .map(({ id, label }) => ({ label, photo: findWork(id) }))
+  .filter((entry): entry is { label: string; photo: NonNullable<ReturnType<typeof findWork>> } => Boolean(entry.photo));
+---
+<BaseLayout
+  title="Window features"
+  description="What's actually in a Clearview window: vinyl or fiberglass, Cascade or Milgard, the glass package, and every style we install in Vancouver, WA and Clark County."
+  path="/window-features"
+  crumbs={[{ name: 'Window features', href: '/window-features' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
+>
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
+    <div class="wrap">
+      <p class="kicker">Window features</p>
+      <h1>The window, not just the price.</h1>
+      <p class="lede">
+        A quote is a number. This page is what that number is actually for — the material, the
+        glass, the brand Mark orders it from, and the shape it comes in.
+      </p>
+    </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview unit</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Why it matters</p>
+      <h2>A small part of the wall. A large part of the bill.</h2>
+      <p>
+        Windows are a small share of a house's square footage and a large share of what it loses
+        in a Washington winter. A failed seal, a tired weatherstrip, and a single pane of glass
+        all show up the same way — a draft at the lock, a cold chair by the window, a heating
+        bill that climbs a little more each year the unit gets older.
+      </p>
+      <p>
+        None of that means every window needs replacing. It means the choices below are worth
+        understanding before you pay for one — whether that's with us or anyone else.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">What it's made of</p>
+      <h2>Vinyl or fiberglass.</h2>
+      <div class="compare">
+        {materials.map((material) => (
+          <article class="compare-card">
+            <h3>{material.label}</h3>
+            <p class="compare-blurb">{material.blurb}</p>
+          </article>
+        ))}
+      </div>
+      <div class="diagram-slot">
+        <FrameMaterials />
+      </div>
+      <p class="fine-print">
+        We install both. Which one makes sense depends on the opening size and what you want
+        out of it — vinyl for most standard openings, fiberglass where a wide slider or picture
+        window would otherwise flex. Mark will say which on site, not from a photo.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Which window</p>
+      <h2>Cascade or Milgard.</h2>
+      <div class="compare">
+        {brands.map((brand) => (
+          <article class="compare-card">
+            <h3>{brand.label}</h3>
+            <p class="compare-blurb">{brand.blurb}</p>
+          </article>
+        ))}
+      </div>
+      <p class="fine-print">
+        Same crew, same install, a different window in the opening. Ask which one a quote is
+        written around, and why — Mark will tell you what he is ordering and what it costs before
+        anything goes on paper.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Glass</p>
+      <h2>Double- or triple-pane, Low-E either way.</h2>
+      <p>
+        Every unit we install is an insulated glass package — double- or triple-pane, with a
+        Low-E coating tuned for a Pacific Northwest heating season rather than the hot, dry
+        climate that coating was originally built for. That is the difference between glass that
+        looks clear and glass that is actually doing the job here.
+      </p>
+      <p>
+        A cloudy or fogged pane is a different problem entirely — a failed seal, not a coating
+        choice. <a href="/guides/fogged-windows">How to tell the difference</a>.
+      </p>
+      <div class="diagram-slot">
+        <UFactorGauge />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="styles">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">Shapes and operation</p>
+      <h2>Every opening, however it moves.</h2>
+      <p class="lede">
+        The style does not change what is in the glass — it changes how the sash opens, and how
+        much of the frame you see once it is shut.
+      </p>
+
+      <div class="style-list">
+        {styles.map((style) => (
+          <article class="style-row">
+            <h3>{style.label}</h3>
+            <p>{style.blurb}</p>
+          </article>
+        ))}
+      </div>
+
+      {stylePhotos.length > 0 && (
+        <div class="work-grid style-photos">
+          {stylePhotos.map(({ label, photo }) => (
+            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={label} />
+          ))}
+        </div>
+      )}
+
+      <p class="fine-print">
+        Arches, transoms, and other non-rectangular openings are measured and priced
+        individually — not on this list, but not unusual either.
+        {doors.length > 0 && (
+          <>
+            {' '}Doors — {doors.map((door) => door.label.toLowerCase()).join(' and ')} — are not
+            technically windows, but Mark sets both on the same trip if you are doing a whole
+            elevation.
+          </>
+        )}
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Hardware and color</p>
+      <h2>Whatever the line actually offers.</h2>
+      <p>
+        Locking hardware, interior and exterior color, and grid patterns all come from whichever
+        line Mark orders — Cascade's options are not identical to Milgard's. Rather than publish a
+        swatch board that might not match what ships, he brings the real samples to the measure,
+        so you are choosing from what is actually available.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Warranty</p>
+      <h2>Ask what's covered, and by whom.</h2>
+      <p>
+        The glass and hardware carry the manufacturer's own warranty — Cascade and Milgard each
+        write theirs differently. The install is a separate promise, from Mark. Ask him to spell
+        out both before you sign: what's covered, for how long, and who you call if something
+        needs it.
+      </p>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="See it in your own opening."
+    body="The right material, brand, and style depend on the house. Mark measures, then tells you exactly what he's ordering and why."
+  />
+</BaseLayout>
+
+<style>
+  /* Full-bleed photo hero. The image is AI-generated macro detail, not a
+     photo of a real Clearview unit — hence the small credit line. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
+  /* Two comparisons on this page — material and brand — share this device: a
+     pair of cards rather than prose, because the choice is genuinely binary
+     and a reader scanning for "which one" should not have to parse a
+     paragraph to find it. */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+    margin: var(--space-l) 0 var(--space-m);
+  }
+
+  .diagram-slot {
+    margin: var(--space-l) 0;
+  }
+
+  .compare-card {
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+  }
+
+  .compare-card h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  .compare-blurb {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* The style list is meant to be scanned in order, like the six-signs band
+     on the homepage — a spine down the middle of the page, not a card grid
+     implying the eight are interchangeable. */
+  .style-list {
+    margin: var(--space-l) 0 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .style-row {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: baseline;
+    padding: var(--space-s) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .style-row h3 {
+    margin: 0;
+    font-size: var(--step-0);
+  }
+
+  .style-row p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .style-photos {
+    margin-top: var(--space-l);
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 900px) {
+    .compare {
+      grid-template-columns: 1fr;
+    }
+
+    .style-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+
+    .style-photos {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

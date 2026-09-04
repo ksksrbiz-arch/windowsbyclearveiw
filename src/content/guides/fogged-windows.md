@@ -4,7 +4,7 @@ description: Why Washington windows fog, how to tell room-side condensation from
 kicker: Glass and moisture
 topic: Diagnosis
 published: true
-updated: 2026-08-19
+updated: 2026-08-30
 order: 2
 faq:
   - question: Can fog between the panes be repaired?
@@ -13,9 +13,7 @@ faq:
     answer: That is usually room-side condensation. Indoor air is wetter than the cold glass. Bath fans, a tighter house, and warmer glass all help. It is not automatically a failed window.
   - question: Does fogged glass mean I need every window replaced?
     answer: Only the failed units are required. We often replace a few now and plan the rest of the house as a second trip.
-heroImage: ./img-fogged-windows.jpg
-heroImageAlt: Condensation beaded on the inside of a window pane, the kind of moisture that signals a failed seal between panes.
-heroImageCredit: Stock photo — Genet Schneider / Unsplash (free license)
+diagram: glass-anatomy
 ---
 
 Not all “foggy windows” are the same job. One kind is a failed window. The other is your house telling you it is damp.
@@ -46,6 +44,15 @@ A new insulated unit with a sound spacer and a tight frame does two different th
 - It raises the inside glass temperature so everyday winter condensation is less likely
 
 It will not fix a crawl space that pumps moisture or a bath fan that does not reach outside. We will say so if that is what we see.
+
+## Why Washington accelerates this
+
+A sealed unit's spacer and desiccant are rated for a service life, not forever. Two things in this climate use that life up faster than average:
+
+- **Wet-dry cycling.** Nine wet months and three dry ones put more stress on the seal than a steady climate does — it expands and contracts with every swing.
+- **West and south sun exposure.** UV and heat break down the sealant faster on unshaded elevations, which is why one side of a house often fogs first.
+
+None of that means every unit fails on a schedule. A shaded, north-facing window can outlast a sun-battered one by a decade or more.
 
 ## A simple check before you call
 

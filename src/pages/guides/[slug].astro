@@ -5,6 +5,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
+import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
+import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
+import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -26,7 +29,12 @@ const article = {
   headline: guide.data.title,
   description: guide.data.description,
   dateModified: guide.data.updated.toISOString(),
-  author: { '@type': 'Organization', name: site.legalName },
+  author: {
+    '@type': 'Person',
+    name: site.owner,
+    jobTitle: 'Owner and installer',
+    worksFor: { '@type': 'Organization', name: site.legalName },
+  },
   publisher: { '@type': 'Organization', name: site.legalName },
   mainEntityOfPage: `${site.url}/guides/${guide.id}`,
 };
@@ -75,6 +83,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
       <h1>{guide.data.title}</h1>
       <p class="lede">{guide.data.description}</p>
       <p class="article-meta">
+        <span>Written by <a href="/about">{site.owner}</a>, owner and installer</span>
         <span>{guide.data.topic}</span>
         <span>Updated {updated}</span>
         <span>{minutes} min read</span>
@@ -89,6 +98,8 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
           <InsertVsFullFrame heading={null} />
         )}
         {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
+        {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
+        {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
       </div>
     </section>
   )}
@@ -106,8 +117,9 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
             quality={72}
             loading="eager"
             fetchpriority="high"
+            style={`object-position: ${guide.data.heroImageFocus ?? '50% 50%'}`}
           />
-          <figcaption>Stock photo for illustration — not a Clearveiw job.</figcaption>
+          <figcaption>{guide.data.heroImageCredit ?? 'Stock photo for illustration — not a Clearview job.'}</figcaption>
         </figure>
       </div>
     </section>
@@ -118,6 +130,15 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
       <Content />
     </div>
 
+    {guide.data.secondaryDiagram && (
+      <div class="wrap is-narrow" data-reveal>
+        <section class="section-tight secondary-diagram">
+          {guide.data.secondaryDiagram === 'flashing-order' && <FlashingOrder />}
+          {guide.data.secondaryDiagram === 'cost-build-up' && <EstimateBuildUp />}
+        </section>
+      </div>
+    )}
+
     {guide.data.faq.length > 0 && (
       <div class="wrap is-narrow" data-reveal>
         <section class="faq">
@@ -125,10 +146,11 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
           {guide.data.faq.map((item) => (
             <details>
               <summary>{item.question}</summary>
-              <p>{item.answer}</p>
+              <div class="faq-body"><p>{item.answer}</p></div>
             </details>
           ))}
         </section>
+        <p class="faq-ask"><a href="/ask">Still have a question? Ask our guide assistant &rarr;</a></p>
       </div>
     )}
 
@@ -151,6 +173,85 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   </article>
   <CtaBar />
 </BaseLayout>
+
+<script>
+  // Native <details> snaps open and closed instantly — the content model
+  // hides everything with `display: none` the moment it collapses, which
+  // CSS transitions cannot touch. This intercepts the toggle and animates
+  // the element's own height with the Web Animations API instead, so the
+  // FAQ matches the considered-reveal feel used everywhere else on the
+  // site. JS off, or reduced motion, falls back to the native instant toggle.
+  function initFaqAccordion() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll<HTMLDetailsElement>('.faq details').forEach((details) => {
+      if (details.dataset.animBound === 'true' || reduceMotion) return;
+      details.dataset.animBound = 'true';
+
+      const summary = details.querySelector('summary');
+      const body = details.querySelector('.faq-body');
+      if (!(summary instanceof HTMLElement) || !(body instanceof HTMLElement)) return;
+
+      let animation: Animation | null = null;
+      let closing = false;
+      let opening = false;
+      // A click's expand() runs a frame late (see below). If a second click
+      // lands in that single-frame gap, this tells the stale callback to
+      // stand down rather than overriding the click that superseded it.
+      let generation = 0;
+
+      const finish = (open: boolean) => {
+        details.open = open;
+        animation = null;
+        closing = false;
+        opening = false;
+        details.style.height = details.style.overflow = '';
+      };
+
+      const shrink = () => {
+        closing = true;
+        animation?.cancel();
+        animation = details.animate(
+          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight}px`] },
+          { duration: 220, easing: 'ease-out' },
+        );
+        animation.onfinish = () => finish(false);
+        animation.oncancel = () => { closing = false; };
+      };
+
+      const expand = () => {
+        opening = true;
+        animation?.cancel();
+        animation = details.animate(
+          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight + body.offsetHeight}px`] },
+          { duration: 220, easing: 'ease-out' },
+        );
+        animation.onfinish = () => finish(true);
+        animation.oncancel = () => { opening = false; };
+      };
+
+      summary.addEventListener('click', (event) => {
+        event.preventDefault();
+        generation += 1;
+        const thisClick = generation;
+        details.style.overflow = 'hidden';
+        if (closing || !details.open) {
+          opening = true;
+          details.style.height = `${details.offsetHeight}px`;
+          details.open = true;
+          requestAnimationFrame(() => {
+            if (thisClick !== generation) return;
+            expand();
+          });
+        } else if (opening || details.open) {
+          shrink();
+        }
+      });
+    });
+  }
+
+  initFaqAccordion();
+  document.addEventListener('astro:page-load', initFaqAccordion);
+</script>
 
 <style>
   /* ───────────────────────────────────────────────────────────────────────
@@ -182,13 +283,28 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     margin-right: var(--space-s);
   }
 
+  .article-meta a {
+    color: var(--on-dark-soft);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--dark-line-strong);
+  }
+
+  .article-meta a:hover,
+  .article-meta a:focus-visible {
+    color: var(--on-dark);
+    text-decoration-color: currentColor;
+  }
+
   /* Guide photo ───────────────────────────────────────────────────────── */
   .guide-photo {
     margin: 0;
   }
 
   .guide-photo img {
+    display: block;
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: var(--radius);
@@ -202,6 +318,16 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     color: var(--ink-faint);
   }
 
+  /* Secondary diagram ───────────────────────────────────────────────────
+     A second, more detailed visual after the body copy has set up the
+     context to use it — the cost guide's build-up chart, or the flashing
+     sequence after the full-frame explanation. */
+  .secondary-diagram {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--line);
+  }
+
   /* FAQ ───────────────────────────────────────────────────────────────── */
   .faq {
     margin-top: var(--space-2xl);
@@ -210,6 +336,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   .faq details {
     border-top: 1px solid var(--line);
     padding: 0;
+    overflow: hidden;
   }
 
   .faq details:last-of-type {
@@ -249,11 +376,20 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     color: var(--accent-ink);
   }
 
-  .faq details p {
+  .faq-body p {
     margin: 0 0 var(--space-s);
     padding-left: calc(0.7rem + var(--space-2xs));
     color: var(--ink-soft);
     font-size: var(--step--1);
+  }
+
+  .faq-ask {
+    margin-top: var(--space-m);
+    font-size: var(--step--1);
+  }
+
+  .faq-ask a {
+    font-weight: 500;
   }
 
   /* Related ───────────────────────────────────────────────────────────── */
