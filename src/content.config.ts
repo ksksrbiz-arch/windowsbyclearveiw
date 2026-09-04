@@ -44,10 +44,18 @@ const guides = defineCollection({
        * Optional diagram rendered above the body. Keyed rather than hardcoded in
        * the template so a new guide can claim one from its own frontmatter.
        */
-      diagram: z.enum(['insert-vs-full-frame', 'flashing-order']).optional(),
+      diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist']).optional(),
+      /**
+       * A second, deeper diagram rendered after the article body, before the
+       * FAQ -- for a guide that already uses the top slot for a heroImage
+       * (like the cost guide) or wants a second, more detailed diagram after
+       * the reader has the context to use it (like flashing order after the
+       * full-frame-vs-insert explanation).
+       */
+      secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
       /**
        * Optional topical stock photo for the same slot the diagram uses —
-       * never both on one guide. Never a real Clearveiw job photo (those live
+       * never both on one guide. Never a real Clearview job photo (those live
        * in src/assets/work and only appear in the Gallery and homepage, where
        * the "after" claim is true). Sourced under a license that permits
        * commercial use with no attribution required; heroImageCredit records
@@ -56,6 +64,8 @@ const guides = defineCollection({
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
       heroImageCredit: z.string().optional(),
+      /** CSS object-position for the hero crop, e.g. "50% 68%". Defaults to center. */
+      heroImageFocus: z.string().optional(),
       faq: z
         .array(
           z.object({
