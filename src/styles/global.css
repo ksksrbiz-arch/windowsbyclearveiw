@@ -74,6 +74,20 @@
   --accent-wash: color-mix(in srgb, var(--accent) 8%, transparent);
   --danger: #8a3d2a;
 
+  /* Second accent. A warm clay pulled from the same PNW palette as the pines —
+     cedar bark against the teal firs — used sparingly (a page-hero variant, a
+     CTA warmth pass) so the site keeps one accent as its dominant voice and
+     gains a second only where a little contrast helps. Same three-step shape
+     as --accent so it drops into the same patterns: -ink for text/hover on
+     paper, -bright for use on --black. Checked against the same surfaces:
+     --accent-2-ink clears 8.5:1 on paper / 7.78:1 on paper-sunk (text-safe);
+     --accent-2-bright clears 6.94:1 on --black (matches --accent-bright's
+     4.73:1 there, both well past the 3:1 large-text/UI bar they're used at). */
+  --accent-2: #b5652f;
+  --accent-2-bright: #d6883f;
+  --accent-2-ink: #6b3a19;
+  --accent-2-wash: color-mix(in srgb, var(--accent-2) 8%, transparent);
+
   --line: color-mix(in srgb, var(--ink) 12%, transparent);
   --line-strong: color-mix(in srgb, var(--ink) 24%, transparent);
 
@@ -95,7 +109,11 @@
   --step-5: clamp(2.49rem, 2.11rem + 1.87vw, 3.38rem);
   --step-6: clamp(2.99rem, 2.42rem + 2.83vw, 4.65rem);
 
-  --tracking-display: -0.035em;
+  /* Eased from -0.035em: at the h1 clamp's top end (4.65rem) the old value
+     was tight enough to nudge tall letterforms together. Letter-spacing has
+     no bearing on the WCAG contrast figures above or below — this only
+     affects legibility, not color. */
+  --tracking-display: -0.026em;
   --tracking-label: 0.18em;
   --leading-display: 1.05;
   --leading-body: 1.6;
@@ -322,7 +340,13 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 
 /* Fourteen pages open with this band, so it does most of the work of making
    the site feel like one thing. It gets the same accent field as the home
-   hero and a rule at its foot, rather than ending on a hard edge. */
+   hero and a rule at its foot, rather than ending on a hard edge.
+
+   The field is two radial washes rather than one: the accent still owns the
+   top-right, but a low, quiet pass of the second accent from the opposite
+   corner keeps a single teal glow from reading flat on fourteen otherwise
+   unrelated pages. Nothing here is page-specific — every page gets both
+   washes at the same strength — so the "one thing" cohesion holds. */
 .page-hero {
   position: relative;
   background:
@@ -331,17 +355,65 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
       color-mix(in srgb, var(--accent) 24%, transparent),
       transparent 58%
     ),
+    radial-gradient(
+      65% 90% at 6% 100%,
+      color-mix(in srgb, var(--accent-2) 12%, transparent),
+      transparent 62%
+    ),
     var(--black);
   color: var(--on-dark);
   padding: var(--space-2xl) 0 var(--space-xl);
 }
 
+/* The foot rule now carries both accents, so it reads as a seam rather than
+   a single flat line — still a hairline, still uniform across every page
+   that includes this band. */
 .page-hero::after {
   content: '';
   position: absolute;
   inset: auto 0 0;
   height: 1px;
-  background: linear-gradient(90deg, var(--accent-bright), transparent 45%);
+  background: linear-gradient(
+    90deg,
+    var(--accent-bright),
+    color-mix(in srgb, var(--accent-2-bright) 65%, transparent) 45%,
+    transparent 80%
+  );
+}
+
+/* Opt-in variant for a page-hero that wants the warm accent to lead instead
+   of trail — a page author swaps this class in without touching this file.
+   Same shape, swapped hue, so the band still reads as the site's motif.
+
+   Not applied anywhere yet: this design-token unit only edits shared chrome,
+   not src/pages/**, so wiring it to a specific page is a page-level unit's
+   call to make (or not) — this just makes the option exist. */
+.page-hero.is-warm {
+  background:
+    radial-gradient(
+      80% 120% at 92% 0%,
+      color-mix(in srgb, var(--accent-2) 24%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      65% 90% at 6% 100%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 62%
+    ),
+    var(--black);
+}
+
+.page-hero.is-warm::after {
+  background: linear-gradient(
+    90deg,
+    var(--accent-2-bright),
+    color-mix(in srgb, var(--accent-bright) 65%, transparent) 45%,
+    transparent 80%
+  );
+}
+
+.page-hero.is-warm .kicker::before {
+  background: var(--accent-2-bright);
 }
 
 .page-hero h1 {
