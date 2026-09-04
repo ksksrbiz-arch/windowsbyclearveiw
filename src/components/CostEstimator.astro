@@ -530,8 +530,11 @@ const model = {
   }
 
   .counter-controls button {
-    width: 2.6rem;
-    height: 2.6rem;
+    /* 44px, the standard minimum comfortable touch target — this row of
+       plus/minus buttons is the one control on the whole site a visitor is
+       likely to tap a dozen times in a row while walking the house. */
+    width: 2.75rem;
+    height: 2.75rem;
     border: 1px solid var(--line-strong);
     background: var(--paper-raised);
     color: var(--ink);
