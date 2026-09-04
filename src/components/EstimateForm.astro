@@ -33,22 +33,30 @@ import { site, telHref } from '../data/site';
 
   <label>
     Name
-    <input name="name" type="text" required autocomplete="name" maxlength="120" />
+    <input name="name" type="text" required autocomplete="name" autocapitalize="words" maxlength="120" />
   </label>
   <label>
     Phone
-    <input name="phone" type="tel" required autocomplete="tel" maxlength="40" />
+    <input
+      name="phone"
+      type="tel"
+      required
+      autocomplete="tel"
+      inputmode="tel"
+      placeholder="(360) 555-0123"
+      maxlength="40"
+    />
   </label>
   <label>
     Email <span class="field-hint">optional, for a written copy</span>
-    <input name="email" type="email" autocomplete="email" maxlength="160" />
+    <input name="email" type="email" autocomplete="email" inputmode="email" maxlength="160" />
   </label>
   <label>
     City
-    <input name="city" type="text" required autocomplete="address-level2" maxlength="80" />
+    <input name="city" type="text" required autocomplete="address-level2" autocapitalize="words" maxlength="80" />
   </label>
   <label>
-    Project notes
+    Project notes <span class="field-hint">optional, but it saves a round of back-and-forth</span>
     <textarea
       name="notes"
       rows="4"
@@ -76,7 +84,7 @@ import { site, telHref } from '../data/site';
   </p>
 </div>
 
-<script>
+<script define:vars={{ phoneDisplay: site.phoneDisplay }}>
   function bindEstimate() {
     const form = document.getElementById('estimate-form');
     const status = document.querySelector('[data-status]');
@@ -198,7 +206,7 @@ import { site, telHref } from '../data/site';
       } catch (error) {
         status.hidden = false;
         const reason = error instanceof Error ? error.message : 'Could not send.';
-        status.textContent = `${reason} You can always call (564) 208-0801.`;
+        status.textContent = `${reason} You can always call ${phoneDisplay}.`;
       } finally {
         if (button instanceof HTMLButtonElement) {
           button.disabled = false;
@@ -284,7 +292,11 @@ import { site, telHref } from '../data/site';
     gap: var(--space-2xs);
     font-weight: 400;
     cursor: pointer;
-    padding: 0.3rem 0;
+    /* Padded past the browser radio's own hit area so the tap target is the
+       full row, not the 16px dot — the whole label already carries the
+       click handler, this just gives a thumb room to land on it. */
+    padding: 0.6rem 0;
+    min-height: 2.75rem;
   }
 
   .choice input {
@@ -303,6 +315,7 @@ import { site, telHref } from '../data/site';
     justify-self: start;
     padding: 0.9rem var(--space-l);
     font-size: var(--step-0);
+    min-height: 2.9rem;
   }
 
   .form-status {
