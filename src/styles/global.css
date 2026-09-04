@@ -650,6 +650,31 @@ html.reveal-ready [data-reveal].is-revealed {
 /* Stagger children of a revealed group. */
 [data-reveal-group] > * { transition-delay: calc(var(--i, 0) * 70ms); }
 
+/* The estimate flow's call-to-action phone number: large, non-underlined,
+   tabular-nums so the digits do not jitter, with an accent hover. Shared
+   because estimate.astro, estimate/sent.astro, and estimate/problem.astro
+   all showed the same number the same way. `.is-large` bumps it to the
+   size the confirmation page uses. */
+.phone-display {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.phone-display.is-large {
+  font-size: var(--step-3);
+}
+
+.phone-display a {
+  text-decoration: none;
+}
+
+.phone-display a:hover {
+  color: var(--accent-ink);
+}
+
 /* A rule-and-label device, the closest thing this site has to a motif. */
 .rule-label {
   display: flex;
