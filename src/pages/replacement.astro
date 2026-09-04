@@ -6,12 +6,32 @@ import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { replacementWork, findWork } from '../data/work';
 import replacementHeroSrc from '../assets/hero/replacement.png';
+import { site } from '../data/site';
 
 const ogPhoto = findWork('vaulted-grids')!;
 
 // Full-bleed hero background. AI-generated, not a real elevation, so it is
 // captioned as such — the same rule the guide photos already follow.
 const heroBg = await getImage({ src: replacementHeroSrc, width: 2400, format: 'webp', quality: 76 });
+
+// Same shape as the per-city Service schema in areas/[slug].astro, scoped to
+// this service rather than one town. The sitewide hasOfferCatalog entry
+// (JsonLd.astro) is just a name + url; this gives the service its own
+// describable entity, so it is additive rather than a duplicate.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'Window replacement',
+  name: 'Window replacement',
+  description:
+    'Full-frame and insert window replacement for existing Vancouver, WA and Clark County homes.',
+  provider: { '@id': `${site.url}/#business` },
+  areaServed: site.nearby.map((place) => ({
+    '@type': 'City',
+    name: place.name,
+    containedInPlace: { '@type': 'State', name: place.state },
+  })),
+};
 
 const decision = [
   {
@@ -55,6 +75,7 @@ const spec = [
   crumbs={[{ name: 'Window replacement', href: '/replacement' }]}
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
+  schema={schema}
 >
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
@@ -63,6 +84,9 @@ const spec = [
       <p class="lede">
         Tired, leaky, or single-pane units out. The right replacement in the same opening —
         without wrecking the siding or the interior finish.
+      </p>
+      <p class="hero-note">
+        Framing a new build or an addition instead? See <a href="/new-construction">new construction window installs</a>.
       </p>
     </div>
     <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
@@ -125,6 +149,9 @@ const spec = [
         <p class="section-link">
           <a href="/window-features">Vinyl vs fiberglass, Cascade vs Milgard, and every style — in detail</a>
         </p>
+        <p class="section-link">
+          <a href="/process">How the install itself runs, step by step</a>
+        </p>
       </div>
       <dl class="spec-table">
         {spec.map(([term, description]) => (
@@ -179,6 +206,28 @@ const spec = [
     font-size: var(--step--2);
     color: var(--on-dark-faint);
     opacity: 0.75;
+  }
+
+  /* Cross-link to the other service page, set into the dark hero. The global
+     `a { color: var(--ink) }` reads as invisible on this background, so the
+     link gets its own on-dark treatment rather than inheriting it. */
+  .hero-note {
+    margin: var(--space-s) 0 0;
+    max-width: 44rem;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .hero-note a {
+    color: var(--on-dark);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-bright);
+    text-underline-offset: 0.2em;
+  }
+
+  .hero-note a:hover,
+  .hero-note a:focus-visible {
+    color: var(--accent-bright);
   }
 
   /* The decision table is the spine of this page: it is what a homeowner
