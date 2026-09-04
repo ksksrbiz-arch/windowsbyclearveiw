@@ -1,0 +1,229 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { findWork } from '../data/work';
+import { pricing } from '../data/pricing';
+
+// Real product facts, sourced from the pricing model rather than re-typed —
+// if the lineup or lines change, this page changes with them instead of
+// drifting into its own, possibly wrong, description.
+const brands = pricing.brands;
+const styles = pricing.openings.filter((opening) => !opening.isDoor);
+
+const glassPhoto = findWork('vaulted-grids')!;
+
+const glassPackages = [
+  {
+    label: 'Double-pane, standard',
+    detail:
+      'Two panes of glass with a sealed air space between them. What most Clark County ' +
+      'replacements ship with — enough insulating value for the climate, at the lower cost.',
+  },
+  {
+    label: 'Triple-pane, available',
+    detail:
+      'A third pane adds another sealed air space. Warmer glass and quieter rooms, for more ' +
+      'money and more weight per sash. Worth asking about on a north- or street-facing room.',
+  },
+];
+
+const spec = [
+  ['Coating', 'Low-E, tuned for a Pacific Northwest heating season rather than a hot climate'],
+  ['Fill', 'Dry air or argon between the panes, depending on the unit ordered'],
+  ['Spacer & seal', 'What actually fails over time — see how to spot it in the fogged-windows guide below'],
+  ['Grids', 'Optional, applied to the glass or set between the panes, in the pattern you pick'],
+];
+---
+<BaseLayout
+  title="Vinyl windows, brands, and glass"
+  description="What Clearveiw Windows installs: vinyl frames, the Cascade and Milgard lines, and the glass packages available for Vancouver, WA and Clark County homes."
+  path="/window-features"
+  crumbs={[{ name: 'Window features', href: '/window-features' }]}
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="kicker">Materials</p>
+      <h1>What's actually in the window.</h1>
+      <p class="lede">
+        One frame material, two window lines, and a short list of glass options. This is the
+        whole menu — no fine print hiding somewhere else.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split" data-reveal>
+      <div>
+        <p class="rule-label">Frame</p>
+        <h2>Vinyl. That's the material.</h2>
+        <p>
+          Clearveiw installs vinyl frames — the standard choice for Clark County houses, low
+          upkeep, and the sizes local openings actually come in. We do not install fiberglass,
+          wood, or aluminum replacement units.
+        </p>
+        <p class="fine-print">
+          If a quote from somewhere else is priced in a different material, that is a fair
+          reason to compare — just know it is not something Mark installs.
+        </p>
+      </div>
+      <dl class="spec-table">
+        {spec.map(([term, description]) => (
+          <div class="spec-pair">
+            <dt>{term}</dt>
+            <dd>{description}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Which line</p>
+      <h2>Two brands. One install.</h2>
+      <p class="lede">
+        The install method does not change with the brand. What changes is the window itself —
+        and what it costs per opening.
+      </p>
+      <div class="brand-grid">
+        {brands.map((brand) => (
+          <article class="brand-card">
+            <h3>{brand.label}</h3>
+            <p>{brand.blurb}</p>
+          </article>
+        ))}
+      </div>
+      <p class="section-link">
+        <a href="/tools/window-replacement-cost-calculator">See what each line runs, opening by opening</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Glass</p>
+      <h2>Double-pane or triple-pane.</h2>
+      <ul class="plain-list glass-list">
+        {glassPackages.map((item) => (
+          <li>
+            <strong>{item.label}.</strong> {item.detail}
+          </li>
+        ))}
+      </ul>
+      <p class="section-link">
+        <a href="/guides/fogged-windows">How to tell a failed seal from ordinary condensation</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">Styles</p>
+      <h2>Every opening shape we build to.</h2>
+      <p class="lede">
+        The style is set by the opening, not the other way around — a picture window does not
+        become a casement because you'd prefer the crank.
+      </p>
+      <div class="style-grid">
+        {styles.map((style) => (
+          <article class="style-card">
+            <h3>{style.label}</h3>
+            <p>{style.blurb}</p>
+          </article>
+        ))}
+      </div>
+      <div class="work-grid style-photo">
+        <WorkCard
+          image={glassPhoto.image}
+          alt={glassPhoto.alt}
+          caption={glassPhoto.caption}
+          kind={glassPhoto.kind}
+        />
+      </div>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Bring the openings, we'll bring the options."
+    body="A walkthrough is where the brand, the glass, and the style actually get decided — not before."
+  />
+</BaseLayout>
+
+<style>
+  /* Reuses the spec-table device from the replacement page's material band —
+     same shape, scoped here since each page owns its own styles. */
+  .spec-table {
+    margin: 0;
+  }
+
+  .spec-pair {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: var(--space-s);
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .spec-pair:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .spec-pair dt {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .spec-pair dd {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .brand-grid,
+  .style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+  }
+
+  .brand-card,
+  .style-card {
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .brand-card h3,
+  .style-card h3 {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-3xs);
+  }
+
+  .brand-card p,
+  .style-card p {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .glass-list li strong {
+    color: var(--ink);
+  }
+
+  .style-photo {
+    margin-top: var(--space-l);
+    grid-template-columns: minmax(0, 20rem);
+  }
+
+  @media (max-width: 900px) {
+    .spec-pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+  }
+</style>

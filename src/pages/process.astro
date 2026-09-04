@@ -3,12 +3,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { processWork } from '../data/work';
+
+// Mirrors the four <li> items below exactly — if the steps change, this must
+// change with them, or the markup and the schema will say different things.
+const steps = [
+  {
+    name: 'Walkthrough',
+    text: 'We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.',
+  },
+  {
+    name: 'Measure and order',
+    text: 'Each opening is measured for the chosen method. Windows are ordered to those sizes. Lead times vary by manufacturer.',
+  },
+  {
+    name: 'Install',
+    text: 'Old units come out. New units go in plumb and flashed. Finishes close up to match the house.',
+  },
+  {
+    name: 'Walk the job',
+    text: 'We operate every sash with you, haul debris, and leave the rooms usable.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How Clearveiw Windows installs replacement windows',
+  description: 'The four steps Clearveiw Windows follows on every installation, from the first walkthrough to the final walk-through.',
+  step: steps.map((step) => ({
+    '@type': 'HowToStep',
+    name: step.name,
+    text: step.text,
+  })),
+};
 ---
 <BaseLayout
   title="How installation works"
   description="From first measure to final sweep: the Clearveiw Windows installation process for Clark County homeowners."
   path="/process"
   crumbs={[{ name: 'Process', href: '/process' }]}
+  schema={schema}
 >
   <section class="page-hero">
     <div class="wrap">
@@ -23,15 +57,18 @@ import { processWork } from '../data/work';
 
   <section class="section">
     <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">In this order, every job</p>
       <ol class="steps process-steps">
-        <li><strong>Walkthrough.</strong> We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.</li>
-        <li><strong>Measure and order.</strong> Each opening is measured for the chosen method. Windows are ordered to those sizes. Lead times vary by manufacturer.</li>
-        <li><strong>Install.</strong> Old units come out. New units go in plumb and flashed. Finishes close up to match the house.</li>
-        <li><strong>Walk the job.</strong> We operate every sash with you, haul debris, and leave the rooms usable.</li>
+        {steps.map((step) => (
+          <li><strong>{step.name}.</strong> {step.text}</li>
+        ))}
       </ol>
       <p class="notice">
         Permits depend on the city and whether the opening changes. We handle that
         conversation before work starts.
+      </p>
+      <p class="section-link">
+        <a href="/window-features">What we order at step two — materials, brands, and glass</a>
       </p>
     </div>
   </section>
