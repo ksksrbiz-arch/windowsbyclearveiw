@@ -13,7 +13,7 @@ const isAverage = pricingIsRegionalAverage();
 // under-quote the whole job.
 const openings = showMoney ? pricedOpenings() : pricing.openings;
 
-// A radio group with one option is not a choice. Clearveiw installs vinyl
+// A radio group with one option is not a choice. Clearview installs vinyl
 // only, so the material step is dropped rather than shown with nothing to
 // pick — and the remaining steps renumber themselves instead of skipping a
 // number, which would look like a rendering bug.
@@ -165,8 +165,8 @@ const model = {
             <p class="est-number" data-range aria-live="polite"></p>
             <p class="est-hint">
               {isAverage
-                ? 'Based on published 2026 Washington and Portland-metro averages — not Clearveiw\u2019s own pricing, and not a quote. Mark gives you a real figure after measuring.'
-                : 'A Clearveiw range for this scope — not a quote. Every opening gets measured before anything is ordered.'}
+                ? 'Based on published 2026 Washington and Portland-metro averages — not Clearview\u2019s own pricing, and not a quote. Mark gives you a real figure after measuring.'
+                : 'A Clearview range for this scope — not a quote. Every opening gets measured before anything is ordered.'}
             </p>
           </div>
         ) : (
@@ -371,7 +371,7 @@ const model = {
         .join('. ');
 
       try {
-        sessionStorage.setItem('clearveiw:scope', noteText);
+        sessionStorage.setItem('clearview:scope', noteText);
       } catch {
         // Private browsing can refuse storage. The link below still works.
       }
@@ -380,17 +380,38 @@ const model = {
       }
     }
 
+    // Keep the minus/plus pair honest about the bounds: a button that stays
+    // full-strength at 0 or 40 invites a click that visibly does nothing,
+    // which reads as broken rather than clamped.
+    const syncStepper = (id: string) => {
+      const count = counts.get(id) || 0;
+      const row = root.querySelector(`[data-count="${id}"]`)?.closest('.counter');
+      const minus = row?.querySelector<HTMLButtonElement>('[data-dir="-1"]');
+      const plus = row?.querySelector<HTMLButtonElement>('[data-dir="1"]');
+      if (minus) minus.disabled = count <= 0;
+      if (plus) plus.disabled = count >= 40;
+    };
+
     root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((button) => {
+      syncStepper(button.dataset.step || '');
       button.addEventListener('click', () => {
         const id = button.dataset.step || '';
         const dir = Number(button.dataset.dir || 0);
         const next = Math.max(0, Math.min(40, (counts.get(id) || 0) + dir));
         counts.set(id, next);
         const output = root.querySelector(`[data-count="${id}"]`);
-        if (output instanceof HTMLElement) output.textContent = String(next);
+        if (output instanceof HTMLElement) {
+          output.textContent = String(next);
+          // A count that just jumps is easy to miss on a row among twelve.
+          // Restarting the pulse animation gives the change a beat of weight.
+          output.classList.remove('is-pulsing');
+          void output.offsetWidth;
+          output.classList.add('is-pulsing');
+        }
         // Mark the row so a chosen opening is visible while scanning the list,
         // rather than the count being the only difference between twelve rows.
         button.closest('.counter')?.classList.toggle('is-chosen', next > 0);
+        syncStepper(id);
         render();
       });
     });
@@ -428,24 +449,21 @@ const model = {
     align-items: start;
   }
 
+  /* Each step is its own tile rather than one long form — a worksheet you
+     fill in top to bottom feels like paperwork; a row of distinct panels
+     feels like a tool. */
   .estimator-inputs {
-    padding: var(--space-l);
-    background: var(--paper-raised);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: var(--space-m);
   }
 
   .est-block {
-    border: 0;
+    border: 1px solid var(--line);
     margin: 0;
-    padding: 0;
-  }
-
-  .est-block + .est-block {
-    margin-top: var(--space-l);
-    padding-top: var(--space-m);
-    border-top: 1px solid var(--line);
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
   }
 
   .est-block legend {
@@ -492,6 +510,15 @@ const model = {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  @media (min-width: 640px) {
+    .counter-list {
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--space-m);
+    }
   }
 
   .counter {
@@ -499,16 +526,16 @@ const model = {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
-    padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) 0;
-    border-bottom: 1px solid var(--line);
-    border-left: 2px solid transparent;
+    padding: var(--space-2xs);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-sunk);
     transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
   }
 
   .counter.is-chosen {
-    border-left-color: var(--accent);
+    border-color: var(--accent);
     background: var(--accent-wash);
-    padding-left: var(--space-2xs);
   }
 
   .counter-copy strong {
@@ -546,7 +573,8 @@ const model = {
     transition:
       background var(--dur-fast) var(--ease),
       border-color var(--dur-fast) var(--ease),
-      color var(--dur-fast) var(--ease);
+      color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
   }
 
   .counter-controls button:hover {
@@ -555,7 +583,21 @@ const model = {
     color: var(--accent-ink);
   }
 
+  /* A press should feel like it landed, not just like a colour swap. */
+  .counter-controls button:active {
+    transform: scale(0.92);
+  }
+
+  .counter-controls button:disabled {
+    border-color: var(--line);
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .counter-controls output {
+    display: inline-block;
     min-width: 2.6rem;
     text-align: center;
     font-variant-numeric: tabular-nums;
@@ -563,19 +605,51 @@ const model = {
     font-weight: 600;
   }
 
+  .counter-controls output.is-pulsing {
+    animation: count-pulse var(--dur) var(--ease-out);
+  }
+
+  @keyframes count-pulse {
+    from {
+      color: var(--accent);
+      transform: scale(1.22);
+    }
+    to {
+      color: var(--ink);
+      transform: scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .counter-controls output.is-pulsing {
+      animation: none;
+    }
+
+    .counter-controls button:active {
+      transform: none;
+    }
+  }
+
   /* Choices ───────────────────────────────────────────────────────────── */
   .est-choices {
     display: grid;
-    gap: var(--space-3xs);
+    gap: var(--space-2xs);
+  }
+
+  @media (min-width: 640px) {
+    .est-choices {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   .est-choices .choice {
     display: flex;
     align-items: flex-start;
     gap: var(--space-2xs);
-    padding: var(--space-2xs);
+    padding: var(--space-2xs) var(--space-s);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    background: var(--paper-sunk);
     cursor: pointer;
     transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
   }

@@ -62,8 +62,8 @@ export function validatePricing(doc, now = new Date()) {
   if (!basis || typeof basis !== 'object') {
     problems.push('basis is missing');
   } else {
-    if (basis.source !== 'averages' && basis.source !== 'clearveiw') {
-      problems.push(`basis.source must be "averages" or "clearveiw", got ${JSON.stringify(basis.source)}`);
+    if (basis.source !== 'averages' && basis.source !== 'clearview') {
+      problems.push(`basis.source must be "averages" or "clearview", got ${JSON.stringify(basis.source)}`);
     }
     const reviewed = new Date(`${basis.reviewedAt}T00:00:00Z`);
     if (Number.isNaN(reviewed.getTime())) {

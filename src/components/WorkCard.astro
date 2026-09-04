@@ -82,6 +82,13 @@ const widths = [240, 340, 450];
 
   .work-card img {
     width: 100%;
+    /* Astro's <Image> writes the source file's real intrinsic width/height
+       as HTML attributes. Those act as a low-priority CSS width/height (not
+       "auto"), so aspect-ratio below only takes effect once height is
+       explicitly auto -- without this, a source whose pixel dimensions
+       aren't already ~3:4 (or are just much larger) renders at its literal
+       attribute height instead of the intended box. */
+    height: auto;
     aspect-ratio: 3 / 4;
     object-fit: cover;
     transition: transform var(--dur-slow) var(--ease-out);

@@ -22,3 +22,6 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+
+# Local Miniflare D1 / Pages simulation state (wrangler dev / wrangler d1 execute --local)
+.wrangler/

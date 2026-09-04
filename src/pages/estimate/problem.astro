@@ -5,9 +5,10 @@ import { mailHref, site, telHref } from '../../data/site';
 ---
 <BaseLayout
   title="That request did not go through"
-  description="The estimate form could not be sent. Call Clearveiw Windows, LLC in Vancouver, WA instead."
+  description="The estimate form could not be sent. Call Clearview Windows in Vancouver, WA instead."
   path="/estimate/problem"
   crumbs={[{ name: 'Request an estimate', href: '/estimate' }]}
+  noindex
 >
   <section class="page-hero">
     <div class="wrap">
@@ -23,9 +24,9 @@ import { mailHref, site, telHref } from '../../data/site';
     <div class="wrap split" data-reveal>
       <div>
         <p class="kicker">Fastest route</p>
-        <p class="problem-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
+        <p class="phone-display"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>
-          Leave a name, your city, and a rough window count. You can also email
+          Leave a name, your city, and a rough window count. You can also email{' '}
           <a href={mailHref()}>{site.email}</a>.
         </p>
       </div>
@@ -36,29 +37,3 @@ import { mailHref, site, telHref } from '../../data/site';
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  /* Same treatment as the phone number on /estimate and /estimate/sent: the
-     default underline runs through the parentheses and reads as a typo, and
-     a bare h2 doesn't get tabular-nums, so a raw <a> here would look like a
-     different page's phone number rather than the same one that follows you
-     through the flow. Duplicated rather than shared because this unit's
-     scope is limited to the estimate flow's own files — global.css is
-     someone else's to change; a `.phone-display` utility there would let
-     all three copies collapse into one. */
-  .problem-phone {
-    margin: 0 0 var(--space-2xs);
-    font-size: var(--step-2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-display);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .problem-phone a {
-    text-decoration: none;
-  }
-
-  .problem-phone a:hover {
-    color: var(--accent-ink);
-  }
-</style>
