@@ -1,0 +1,364 @@
+---
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import { pricing } from '../data/pricing';
+import { findWork } from '../data/work';
+import slidingDoorsHeroSrc from '../assets/hero/sliding-glass-doors.png';
+import { site } from '../data/site';
+
+const ogPhoto = findWork('stone-craftsman')!;
+
+// Full-bleed hero background. AI-generated, not a real elevation, so it is
+// captioned as such — the same rule the other service-page heroes follow
+// (replacement.astro, new-construction.astro, window-features.astro).
+const heroBg = await getImage({ src: slidingDoorsHeroSrc, width: 2400, format: 'webp', quality: 76 });
+
+// The estimator already prices sliding patio doors as their own opening type
+// (doors are not brand-specific — see pricing.ts) — reuse that single source
+// of truth rather than hand-writing a second number here.
+const doorPricing = pricing.openings.find((opening) => opening.id === 'sliding-door')!;
+const frenchDoor = pricing.openings.find((opening) => opening.id === 'french-door');
+
+const types = [
+  {
+    name: 'Standard two-panel slider',
+    text: 'One fixed panel, one that slides past it. The most common patio door in Clark County — straightforward opening, straightforward install.',
+  },
+  {
+    name: 'Three- and four-panel sliders',
+    text: 'Wider openings, either stacking to one side or splitting from the center. More glass, more weight per panel, and a track built to carry it.',
+  },
+  {
+    name: 'French rail (swinging) sliders',
+    text: 'Panels that glide on a French-style rail rather than a standard track — a different look at the sill, same sliding operation.',
+  },
+  {
+    name: 'Impact-rated glass',
+    text: 'Not a common ask in Clark County the way it is on the coast, but a heavier, impact-rated glass package can be special-ordered through the same manufacturers if you want it.',
+  },
+];
+
+const benefits = [
+  {
+    name: 'Natural light',
+    text: 'More glass than any window in the house, in one opening. It changes a room more than a fresh coat of paint does.',
+  },
+  {
+    name: 'Space-saving operation',
+    text: 'A slider needs no swing radius. Furniture can sit closer to the opening than it ever could next to a hinged door.',
+  },
+  {
+    name: 'Energy efficiency',
+    text: 'The same insulated, Low-E glass packages as our windows — tuned for a Pacific Northwest heating season, not a showroom in a warmer state.',
+  },
+  {
+    name: 'Indoor–outdoor flow',
+    text: 'The usual reason to add or replace one: a deck, patio, or backyard that starts to feel like part of the house instead of separate from it.',
+  },
+];
+
+const steps = [
+  {
+    name: 'Walkthrough',
+    text: 'Mark looks at the opening, the deck or patio it leads to, and what you want out of the door — light, access, or both.',
+  },
+  {
+    name: 'Measure and order',
+    text: 'The rough opening is measured to the panel configuration you pick. Doors are ordered to that size; lead times vary by manufacturer.',
+  },
+  {
+    name: 'Install',
+    text: 'Old unit comes out (or the rough opening is framed, on a new build). New door goes in plumb, level, and flashed at the sill.',
+  },
+  {
+    name: 'Walk the job',
+    text: 'We run the panels with you, check the lock and the screen, haul debris, and leave the room usable.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'Sliding glass door installation',
+  name: 'Sliding glass door installation',
+  description:
+    'Sliding glass patio door installation and replacement for Vancouver, WA and Clark County homes — standard, French rail, and multi-panel configurations.',
+  provider: { '@id': `${site.url}/#business` },
+  areaServed: site.nearby.map((place) => ({
+    '@type': 'City',
+    name: place.name,
+    containedInPlace: { '@type': 'State', name: place.state },
+  })),
+  offers: {
+    '@type': 'Offer',
+    priceCurrency: 'USD',
+    priceSpecification: {
+      '@type': 'PriceSpecification',
+      minPrice: doorPricing.low,
+      maxPrice: doorPricing.high,
+      priceCurrency: 'USD',
+    },
+  },
+};
+---
+<BaseLayout
+  title="Sliding glass door installation"
+  description="Sliding glass patio door installation and replacement in Vancouver, WA and Clark County: standard, French rail, and multi-panel doors, measured and installed by Mark."
+  path="/sliding-glass-doors"
+  crumbs={[{ name: 'Sliding glass doors', href: '/sliding-glass-doors' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
+  schema={schema}
+>
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
+    <div class="wrap">
+      <p class="kicker">Services</p>
+      <h1>Sliding glass doors</h1>
+      <p class="lede">
+        Patio doors, measured and installed the same way we do every opening — plumb, flashed,
+        and priced before anything is ordered.
+      </p>
+      <p class="hero-note">
+        Looking for a hinged pair instead of a slider? Mark installs French doors too — ask on
+        the same call. Replacing a window instead? See <a href="/replacement">window replacement</a>.
+      </p>
+    </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">What we install</p>
+      <h2>Every configuration, one crew.</h2>
+      <p class="lede">
+        A patio door is its own opening, not a window — bigger glass, heavier panels, and a track
+        that has to carry both. Here is what we set.
+      </p>
+      <div class="style-list">
+        {types.map((type) => (
+          <article class="style-row">
+            <h3>{type.name}</h3>
+            <p>{type.text}</p>
+          </article>
+        ))}
+      </div>
+      <p class="fine-print">
+        Vinyl and fiberglass frames, the same Cascade and Milgard lines we install in windows —
+        though the door itself is not brand-priced the way a window opening is; see the range
+        below.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Why homeowners add one</p>
+      <h2>More glass than any window in the house.</h2>
+      <div class="compare">
+        {benefits.map((benefit) => (
+          <article class="compare-card">
+            <h3>{benefit.name}</h3>
+            <p class="compare-blurb">{benefit.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split" data-reveal>
+      <div>
+        <p class="rule-label">How it runs</p>
+        <h2>Four steps, same as every install.</h2>
+        <ol class="plain-list">
+          {steps.map((step) => (
+            <li><strong>{step.name}.</strong> {step.text}</li>
+          ))}
+        </ol>
+        <p class="section-link">
+          <a href="/process">The same process, in full, for window installs</a>
+        </p>
+      </div>
+      <dl class="spec-table">
+        <div class="spec-pair">
+          <dt>Sliding door</dt>
+          <dd>{`$${doorPricing.low.toLocaleString('en-US')} – $${doorPricing.high.toLocaleString('en-US')} installed`}</dd>
+        </div>
+        {frenchDoor && (
+          <div class="spec-pair">
+            <dt>French door</dt>
+            <dd>{`$${frenchDoor.low.toLocaleString('en-US')} – $${frenchDoor.high.toLocaleString('en-US')} installed`}</dd>
+          </div>
+        )}
+        <div class="spec-pair">
+          <dt>Materials</dt>
+          <dd>Vinyl and fiberglass frames</dd>
+        </div>
+        <div class="spec-pair">
+          <dt>Glass</dt>
+          <dd>Double- and triple-pane insulated units, Low-E</dd>
+        </div>
+        <div class="spec-pair">
+          <dt>Configurations</dt>
+          <dd>Two-, three-, and four-panel; French rail on request</dd>
+        </div>
+      </dl>
+    </div>
+    <div class="wrap" data-reveal>
+      <p class="fine-print">
+        A range, not a quote — every opening is measured before anything is ordered. See the{' '}
+        <a href="/tools">free cost estimator</a> to run this against the rest of the house.
+      </p>
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Measure the opening, then the price."
+    body="Mark measures the door and the sill, tells you which configuration fits, and writes it down before anything is ordered."
+  />
+</BaseLayout>
+
+<style>
+  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
+     not a photo of a real job — hence the small credit line — matching the
+     treatment used on replacement.astro and new-construction.astro. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
+  .hero-note {
+    margin: var(--space-s) 0 0;
+    max-width: 44rem;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .hero-note a {
+    color: var(--on-dark);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-bright);
+    text-underline-offset: 0.2em;
+  }
+
+  .hero-note a:hover,
+  .hero-note a:focus-visible {
+    color: var(--accent-bright);
+  }
+
+  /* Same scanning-spine treatment as window-features.astro's style list —
+     four configurations read in order, not as interchangeable cards. */
+  .style-list {
+    margin: var(--space-l) 0 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .style-row {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: baseline;
+    padding: var(--space-s) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .style-row h3 {
+    margin: 0;
+    font-size: var(--step-0);
+  }
+
+  .style-row p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* Same benefit-card grid as window-features.astro's material comparison. */
+  .compare {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-m);
+    margin: var(--space-l) 0 0;
+  }
+
+  .compare-card {
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+  }
+
+  .compare-card h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  .compare-blurb {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* Same pricing-line table as replacement.astro. */
+  .spec-table {
+    margin: 0;
+  }
+
+  .spec-pair {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: var(--space-s);
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .spec-pair:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .spec-pair dt {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .spec-pair dd {
+    margin: 0;
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plain-list li {
+    margin-bottom: var(--space-2xs);
+  }
+
+  @media (max-width: 900px) {
+    .style-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+
+    .compare {
+      grid-template-columns: 1fr;
+    }
+
+    .spec-pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+  }
+</style>

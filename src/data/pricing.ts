@@ -118,7 +118,7 @@ export const pricing = {
     {
       id: 'sliding-door',
       label: 'Sliding patio door',
-      blurb: 'Glass door, one panel slides past the other. Its own opening, not a window.',
+      blurb: 'Glass door, one or more panels slide past a fixed one. Its own opening, not a window.',
       low: 3000,
       high: 7000,
       isDoor: true,

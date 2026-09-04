@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
@@ -7,9 +8,16 @@ import WorkCard from '../components/WorkCard.astro';
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { featuredWork, findWork } from '../data/work';
+import slidingDoorsTileSrc from '../assets/hero/sliding-glass-doors.png';
 
 const replacementTile = findWork('stone-craftsman')!;
 const newBuildTile = findWork('new-build-sheathed-garage')!;
+
+// The sliding-doors tile has no real installed-job photo yet (see
+// sliding-glass-doors.astro), so unlike the two tiles above it borrows the
+// same AI-generated hero image that page uses — and carries the same small
+// credit line, rather than presenting it as a real Clearview job.
+const slidingDoorsTile = await getImage({ src: slidingDoorsTileSrc, width: 900, format: 'webp', quality: 72 });
 
 const serviceLinks = [
   { slug: 'vancouver', label: 'Vancouver' },
@@ -68,16 +76,16 @@ const signs = [
 
   <section class="section is-airy">
     <div class="wrap" data-reveal>
-      <p class="rule-label">Two kinds of work</p>
-      <h2>Replace what’s there. Set the new ones.</h2>
-      <p class="lede">Same crew, same standards, either way. Pick the job that’s yours.</p>
+      <p class="rule-label">Three kinds of work</p>
+      <h2>Replace what’s there. Set the new ones. Open up the wall.</h2>
+      <p class="lede">Same crew, same standards, every time. Pick the job that’s yours.</p>
       <div class="service-tiles">
         <a class="service-tile" href="/replacement">
           <Image
             src={replacementTile.image}
             alt=""
             widths={[400, 640, 900]}
-            sizes="(max-width: 800px) 100vw, 50vw"
+            sizes="(max-width: 800px) 100vw, 33vw"
             format="webp"
             quality={72}
           />
@@ -92,7 +100,7 @@ const signs = [
             src={newBuildTile.image}
             alt=""
             widths={[400, 640, 900]}
-            sizes="(max-width: 800px) 100vw, 50vw"
+            sizes="(max-width: 800px) 100vw, 33vw"
             format="webp"
             quality={72}
           />
@@ -101,6 +109,15 @@ const signs = [
             <h2>New construction</h2>
             <p>Flashed openings. Nailing fins. Ready for siding.</p>
           </div>
+        </a>
+        <a class="service-tile" href="/sliding-glass-doors">
+          <img src={slidingDoorsTile.src} alt="" loading="lazy" decoding="async" />
+          <div class="service-tile-copy">
+            <p class="kicker">Homeowners</p>
+            <h2>Sliding glass doors</h2>
+            <p>Standard, multi-panel, and French rail patio doors.</p>
+          </div>
+          <p class="service-tile-credit">AI-generated imagery</p>
         </a>
       </div>
     </div>
@@ -232,7 +249,7 @@ const signs = [
   /* Service tiles ─────────────────────────────────────────────────────── */
   .service-tiles {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-xs);
     margin-top: var(--space-l);
   }
@@ -240,12 +257,27 @@ const signs = [
   .service-tile {
     position: relative;
     display: block;
-    min-height: clamp(360px, 42vw, 520px);
+    min-height: clamp(320px, 32vw, 460px);
     border-radius: var(--radius);
     overflow: hidden;
     color: var(--on-dark);
     text-decoration: none;
     background: var(--black);
+  }
+
+  /* Only the sliding-doors tile carries this — see the comment by
+     slidingDoorsTile above for why that one photo needs a credit and the
+     other two don't. */
+  .service-tile-credit {
+    position: absolute;
+    top: var(--space-2xs);
+    right: var(--space-2xs);
+    margin: 0;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius);
+    background: rgb(11 12 14 / 0.55);
+    color: var(--on-dark-faint);
+    font-size: var(--step--2);
   }
 
   .service-tile img {
