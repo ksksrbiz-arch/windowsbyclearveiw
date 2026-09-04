@@ -6,12 +6,32 @@ import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { newBuildWork, findWork } from '../data/work';
 import newConstructionHeroSrc from '../assets/hero/new-construction.png';
+import { site } from '../data/site';
 
 const ogPhoto = findWork('new-construction-sheathed')!;
 
 // Full-bleed hero background. AI-generated, not a real job site, so it is
 // captioned as such — the same rule the guide photos already follow.
 const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format: 'webp', quality: 76 });
+
+// Same shape as the per-city Service schema in areas/[slug].astro, scoped to
+// this service rather than one town. The sitewide hasOfferCatalog entry
+// (JsonLd.astro) is just a name + url; this gives the service its own
+// describable entity, so it is additive rather than a duplicate.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'New construction window installation',
+  name: 'New construction window installation',
+  description:
+    'Nailing-fin window setting for new Clark County builds, flashed to the rough opening and coordinated with the GC schedule.',
+  provider: { '@id': `${site.url}/#business` },
+  areaServed: site.nearby.map((place) => ({
+    '@type': 'City',
+    name: place.name,
+    containedInPlace: { '@type': 'State', name: place.state },
+  })),
+};
 ---
 <BaseLayout
   title="New construction windows"
@@ -20,6 +40,7 @@ const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format
   crumbs={[{ name: 'New construction', href: '/new-construction' }]}
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
+  schema={schema}
 >
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
@@ -28,6 +49,9 @@ const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format
       <p class="lede">
         Framed opening, housewrap, nailing fin, shims, and a unit that is plumb before the siding
         crew shows up.
+      </p>
+      <p class="hero-note">
+        Replacing windows in a house that is already standing? See <a href="/replacement">window replacement</a> instead.
       </p>
     </div>
     <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
@@ -57,6 +81,9 @@ const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format
         <p>
           Confirm openings, confirm lead time, then a scheduled set — not a surprise on a framing
           day. Tell us if you are the GC or the owner so the quote is written for the right person.
+        </p>
+        <p class="section-link">
+          <a href="/window-features">Vinyl vs fiberglass, glass packages, and every style — in detail</a>
         </p>
       </article>
       <article>
@@ -119,6 +146,28 @@ const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format
     font-size: var(--step--2);
     color: var(--on-dark-faint);
     opacity: 0.75;
+  }
+
+  /* Cross-link to the other service page, set into the dark hero. The global
+     `a { color: var(--ink) }` reads as invisible on this background, so the
+     link gets its own on-dark treatment rather than inheriting it. */
+  .hero-note {
+    margin: var(--space-s) 0 0;
+    max-width: 44rem;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .hero-note a {
+    color: var(--on-dark);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-bright);
+    text-underline-offset: 0.2em;
+  }
+
+  .hero-note a:hover,
+  .hero-note a:focus-visible {
+    color: var(--accent-bright);
   }
 
   /* A single tall framing shot needs a partner, not a full-width grid row of
