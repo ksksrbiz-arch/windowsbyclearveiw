@@ -6,7 +6,7 @@ description: Window replacement and new-construction installation across the riv
 published: true
 ---
 
-We cross the river. Portland is a short run from Vancouver, and the housing stock is the part we know best — old Portland four-squares, bungalows, and mid-century ranches with single-pane sash or tired aluminum.
+We cross the river. Portland sits where the Willamette meets the Columbia, with the West Hills rising on one side of the river and flatter ground on the other — Vancouver is a short run north across the Columbia from either side. At well over 600,000 people it is Oregon's largest city, and the housing stock is the part we know best — old Portland four-squares, bungalows, and mid-century ranches with single-pane sash or tired aluminum.
 
 Portland's rain is the same rain. What is different is the age of the openings. On a 1910s house the frame is often out of square and the sill has taken decades of water, which pushes a job toward full-frame rather than an insert. We tell you which one an opening needs when we measure, not after the units are ordered.
 

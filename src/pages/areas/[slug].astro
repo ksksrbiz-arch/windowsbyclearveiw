@@ -1,8 +1,10 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { site } from '../../data/site';
+import areasHeroSrc from '../../assets/hero/areas.jpg';
 
 export async function getStaticPaths() {
   const cities = await getCollection('cities', ({ data }) => data.published);
@@ -37,6 +39,11 @@ const schema = {
     },
   },
 };
+
+// Same Cascades stock photo the areas index uses, with the same disclosure --
+// not a photo of this specific city or of a real Clearview job site, so it is
+// never captioned as one.
+const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title={city.data.title}
@@ -48,12 +55,13 @@ const schema = {
   ]}
   schema={schema}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">{city.data.region}</p>
       <h1>{city.data.title}</h1>
       <p class="lede">{city.data.description}</p>
     </div>
+    <p class="hero-photo-credit">Stock photography — not a photo of {city.data.name} or an actual Clearview job site</p>
   </section>
 
   <section class="section">
@@ -76,3 +84,21 @@ const schema = {
 
   <CtaBar />
 </BaseLayout>
+
+<style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+</style>
