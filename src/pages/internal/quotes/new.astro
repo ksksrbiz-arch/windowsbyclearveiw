@@ -1,0 +1,650 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+import { pricing } from '../../../data/pricing';
+
+// Everything the client script needs to compute a suggested price, in one
+// serialised payload — same pattern CostEstimator.astro uses. This page
+// suggests a starting price; every line stays editable, because a real quote
+// reflects what Mark actually saw at the house, not a catalog lookup.
+const catalog = {
+  openings: pricing.openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high, isDoor: !!o.isDoor })),
+  materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
+  brands: pricing.brands.map((b) => ({ id: b.id, label: b.label, low: b.low, high: b.high })),
+  fullFrame: { low: pricing.fullFrame.low, high: pricing.fullFrame.high },
+};
+---
+<InternalLayout title="New quote">
+  <p class="kicker">Clearview internal</p>
+  <h1 data-heading>New quote</h1>
+  <p class="lede" data-lede>Build the scope, get a firm number, then sign or print.</p>
+  <p class="qb-status" data-load-error hidden role="alert"></p>
+
+  <form id="quote-form" data-catalog={JSON.stringify(catalog)}>
+    <fieldset class="qb-block">
+      <legend>Customer</legend>
+      <div class="qb-grid-2">
+        <label>Name<input type="text" name="name" required maxlength="200" autocomplete="name" /></label>
+        <label>Phone<input type="tel" inputmode="tel" name="phone" required maxlength="40" autocomplete="tel" /></label>
+        <label>Email<input type="email" inputmode="email" name="email" maxlength="200" autocomplete="email" /></label>
+        <label>City<input type="text" name="city" maxlength="120" /></label>
+      </div>
+      <label>Address<input type="text" name="address" maxlength="300" /></label>
+      <fieldset class="qb-role">
+        <legend class="visually-hidden">Who is this quote for</legend>
+        <label class="choice"><input type="radio" name="role" value="Homeowner" checked /> Homeowner</label>
+        <label class="choice"><input type="radio" name="role" value="Builder / GC" /> Builder / GC</label>
+      </fieldset>
+      <label>Notes (not printed on the contract)<textarea name="notes" rows="2" maxlength="4000"></textarea></label>
+    </fieldset>
+
+    <fieldset class="qb-block">
+      <legend>Add from the price book</legend>
+      <div class="qb-catalog-row">
+        <label>Opening
+          <select data-catalog-opening></select>
+        </label>
+        <label>Material
+          <select data-catalog-material></select>
+        </label>
+        <label>Brand
+          <select data-catalog-brand></select>
+        </label>
+        <label>Method
+          <select data-catalog-method>
+            <option value="insert">Insert</option>
+            <option value="full-frame">Full-frame</option>
+          </select>
+        </label>
+        <label>Qty
+          <input type="number" inputmode="numeric" data-catalog-qty value="1" min="1" step="1" />
+        </label>
+        <button type="button" class="btn btn-ghost" data-catalog-add>Add line</button>
+      </div>
+      <p class="est-hint">Adds one editable line with a suggested price — nothing here is final until you change it or leave it as-is.</p>
+    </fieldset>
+
+    <fieldset class="qb-block">
+      <legend>Add a custom line</legend>
+      <div class="qb-custom-row">
+        <label>Label
+          <input type="text" data-custom-label placeholder="e.g. Trim, rot repair, discount" maxlength="300" />
+        </label>
+        <label>Qty
+          <input type="number" inputmode="numeric" data-custom-qty value="1" min="1" step="1" />
+        </label>
+        <label>Unit price ($)
+          <input type="number" inputmode="decimal" data-custom-price value="0" step="0.01" min="0" />
+        </label>
+        <button type="button" class="btn btn-ghost" data-custom-add>Add line</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="qb-block">
+      <legend>Line items</legend>
+      <table class="qb-items">
+        <thead>
+          <tr><th>Line</th><th>Qty</th><th>Unit ($)</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody data-items-body></tbody>
+      </table>
+      <p class="est-empty" data-items-empty>Nothing added yet.</p>
+
+      <div class="qb-totals">
+        <label class="qb-discount">
+          Discount ($)
+          <input type="number" inputmode="decimal" data-discount value="0" min="0" step="0.01" />
+        </label>
+        <label class="qb-discount">
+          Reason
+          <input type="text" data-discount-reason maxlength="200" placeholder="optional" />
+        </label>
+        <div class="qb-total-line">
+          <span>Subtotal</span><output data-subtotal>$0</output>
+        </div>
+        <div class="qb-total-line qb-total-line-final">
+          <span>Total</span><output data-total>$0</output>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="qb-block">
+      <legend>Signature</legend>
+      <div class="qb-sig-choice">
+        <label class="choice">
+          <input type="radio" name="signatureMethod" value="digital" checked />
+          Sign on screen now
+        </label>
+        <label class="choice">
+          <input type="radio" name="signatureMethod" value="pen" />
+          Print, sign by hand
+        </label>
+      </div>
+    </fieldset>
+
+    <p class="qb-status" data-status role="alert" hidden></p>
+    <button class="btn btn-primary" type="submit" data-submit>Save &amp; continue</button>
+  </form>
+</InternalLayout>
+
+<script>
+  type CatalogOpening = { id: string; label: string; low: number; high: number; isDoor: boolean };
+  type CatalogMaterial = { id: string; label: string; multiplier: number };
+  type CatalogBrand = { id: string; label: string; low: number; high: number };
+  type Catalog = {
+    openings: CatalogOpening[];
+    materials: CatalogMaterial[];
+    brands: CatalogBrand[];
+    fullFrame: { low: number; high: number };
+  };
+  type LineItem = { label: string; description: string; quantity: number; unitPrice: number };
+
+  function initQuoteBuilder() {
+    const form = document.getElementById('quote-form');
+    if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+
+    const searchParams = new URLSearchParams(location.search);
+    const editId = searchParams.get('edit');
+    const duplicateId = editId ? null : searchParams.get('duplicate');
+
+    const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
+    const items: LineItem[] = [];
+
+    const openingSelect = form.querySelector('[data-catalog-opening]');
+    const materialSelect = form.querySelector('[data-catalog-material]');
+    const brandSelect = form.querySelector('[data-catalog-brand]');
+    const methodSelect = form.querySelector('[data-catalog-method]');
+    const qtyInput = form.querySelector('[data-catalog-qty]');
+    const itemsBody = form.querySelector('[data-items-body]');
+    const itemsEmpty = form.querySelector('[data-items-empty]');
+    const subtotalOut = form.querySelector('[data-subtotal]');
+    const totalOut = form.querySelector('[data-total]');
+    const discountInput = form.querySelector('[data-discount]');
+
+    if (
+      !(openingSelect instanceof HTMLSelectElement) ||
+      !(materialSelect instanceof HTMLSelectElement) ||
+      !(brandSelect instanceof HTMLSelectElement) ||
+      !(methodSelect instanceof HTMLSelectElement) ||
+      !(qtyInput instanceof HTMLInputElement) ||
+      !(itemsBody instanceof HTMLElement) ||
+      !(itemsEmpty instanceof HTMLElement) ||
+      !(subtotalOut instanceof HTMLElement) ||
+      !(totalOut instanceof HTMLElement) ||
+      !(discountInput instanceof HTMLInputElement)
+    ) {
+      return;
+    }
+
+    const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+    const mid = (low: number, high: number) => (low + high) / 2;
+
+    for (const o of catalog.openings) {
+      const opt = document.createElement('option');
+      opt.value = o.id;
+      opt.textContent = o.label;
+      openingSelect.append(opt);
+    }
+    for (const m of catalog.materials) {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.label;
+      materialSelect.append(opt);
+    }
+    for (const b of catalog.brands) {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.label;
+      brandSelect.append(opt);
+    }
+
+    function currentOpening() {
+      return catalog.openings.find((o) => o.id === openingSelect.value);
+    }
+
+    function syncBrandVisibility() {
+      const opening = currentOpening();
+      const isDoor = !!opening?.isDoor;
+      brandSelect.disabled = isDoor;
+      brandSelect.closest('label')?.classList.toggle('is-disabled', isDoor);
+    }
+    openingSelect.addEventListener('change', syncBrandVisibility);
+    syncBrandVisibility();
+
+    function render() {
+      itemsBody.innerHTML = '';
+      itemsEmpty.hidden = items.length > 0;
+
+      let subtotal = 0;
+      items.forEach((item, index) => {
+        const lineTotal = item.quantity * item.unitPrice;
+        subtotal += lineTotal;
+
+        const row = document.createElement('tr');
+
+        const labelCell = document.createElement('td');
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.value = item.label;
+        labelInput.addEventListener('input', () => {
+          items[index].label = labelInput.value;
+        });
+        labelCell.append(labelInput);
+
+        const qtyCell = document.createElement('td');
+        const qtyInputEl = document.createElement('input');
+        qtyInputEl.type = 'number';
+        qtyInputEl.inputMode = 'numeric';
+        qtyInputEl.min = '1';
+        qtyInputEl.step = '1';
+        qtyInputEl.value = String(item.quantity);
+        qtyInputEl.addEventListener('input', () => {
+          items[index].quantity = Math.max(1, Number(qtyInputEl.value) || 1);
+          render();
+        });
+        qtyCell.append(qtyInputEl);
+
+        const priceCell = document.createElement('td');
+        const priceInputEl = document.createElement('input');
+        priceInputEl.type = 'number';
+        priceInputEl.inputMode = 'decimal';
+        priceInputEl.step = '0.01';
+        priceInputEl.min = '0';
+        priceInputEl.value = String(item.unitPrice);
+        priceInputEl.addEventListener('input', () => {
+          items[index].unitPrice = Number(priceInputEl.value) || 0;
+          render();
+        });
+        priceCell.append(priceInputEl);
+
+        const totalCell = document.createElement('td');
+        totalCell.className = 'qb-line-total';
+        totalCell.textContent = money(lineTotal);
+
+        const removeCell = document.createElement('td');
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'qb-remove';
+        removeBtn.setAttribute('aria-label', `Remove ${item.label || 'line'}`);
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => {
+          items.splice(index, 1);
+          render();
+        });
+        removeCell.append(removeBtn);
+
+        row.append(labelCell, qtyCell, priceCell, totalCell, removeCell);
+        itemsBody.append(row);
+      });
+
+      const discount = Math.max(0, Math.min(subtotal, Number(discountInput.value) || 0));
+      subtotalOut.textContent = money(subtotal);
+      totalOut.textContent = money(subtotal - discount);
+    }
+
+    discountInput.addEventListener('input', render);
+
+    const catalogAdd = form.querySelector('[data-catalog-add]');
+    catalogAdd?.addEventListener('click', () => {
+      const opening = currentOpening();
+      if (!opening) return;
+      const material = catalog.materials.find((m) => m.id === materialSelect.value) || catalog.materials[0];
+      const brand = catalog.brands.find((b) => b.id === brandSelect.value);
+      const method = methodSelect.value;
+      const qty = Math.max(1, Number(qtyInput.value) || 1);
+
+      let unitPrice = mid(opening.low, opening.high) * (material?.multiplier ?? 1);
+      if (!opening.isDoor && brand) unitPrice += mid(brand.low, brand.high);
+      if (method === 'full-frame') unitPrice += mid(catalog.fullFrame.low, catalog.fullFrame.high);
+      unitPrice = Math.round(unitPrice / 10) * 10;
+
+      const labelParts = [opening.label, material?.label, !opening.isDoor ? brand?.label : null, method === 'full-frame' ? 'full-frame' : 'insert'].filter(Boolean);
+
+      items.push({ label: labelParts.join(' — '), description: '', quantity: qty, unitPrice });
+      render();
+    });
+
+    const customLabel = form.querySelector('[data-custom-label]');
+    const customQty = form.querySelector('[data-custom-qty]');
+    const customPrice = form.querySelector('[data-custom-price]');
+    const customAdd = form.querySelector('[data-custom-add]');
+    customAdd?.addEventListener('click', () => {
+      if (!(customLabel instanceof HTMLInputElement) || !(customQty instanceof HTMLInputElement) || !(customPrice instanceof HTMLInputElement)) return;
+      const label = customLabel.value.trim();
+      if (!label) {
+        customLabel.focus();
+        return;
+      }
+      items.push({
+        label,
+        description: '',
+        quantity: Math.max(1, Number(customQty.value) || 1),
+        unitPrice: Number(customPrice.value) || 0,
+      });
+      customLabel.value = '';
+      customQty.value = '1';
+      customPrice.value = '0';
+      render();
+    });
+
+    render();
+
+    const status = form.querySelector('[data-status]');
+    const submitBtn = form.querySelector('[data-submit]');
+    const headingEl = document.querySelector('[data-heading]');
+    const ledeEl = document.querySelector('[data-lede]');
+    const loadErrorEl = document.querySelector('[data-load-error]');
+
+    function setField(name: string, value: string) {
+      const el = form.elements.namedItem(name);
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.value = value ?? '';
+    }
+    function setRadio(name: string, value: string) {
+      const el = form.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (el instanceof HTMLInputElement) el.checked = true;
+    }
+
+    async function loadForEdit(id: string, mode: 'edit' | 'duplicate') {
+      form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) {
+          el.disabled = true;
+        }
+      });
+
+      try {
+        const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id)}`);
+        if (!response.ok) throw new Error('Could not load that quote.');
+        const { quote, items: loadedItems } = await response.json();
+        if (mode === 'edit' && quote.status !== 'draft') {
+          throw new Error('This quote is already finalized and can no longer be edited.');
+        }
+
+        if (mode === 'edit') {
+          if (headingEl) headingEl.textContent = `Edit quote ${quote.id}`;
+          if (ledeEl) ledeEl.textContent = 'Fix anything below, then save — nothing is signed yet.';
+          if (submitBtn instanceof HTMLButtonElement) submitBtn.textContent = 'Save changes';
+        } else {
+          if (headingEl) headingEl.textContent = 'New quote (copied)';
+          if (ledeEl) ledeEl.textContent = `Copied from ${quote.id} — check the customer details before you save.`;
+        }
+
+        setField('name', quote.customer_name);
+        setField('phone', quote.customer_phone);
+        setField('email', quote.customer_email);
+        setField('address', quote.customer_address);
+        setField('city', quote.customer_city);
+        setField('notes', quote.notes);
+        if (quote.customer_role) setRadio('role', quote.customer_role);
+        setRadio('signatureMethod', quote.signature_method);
+
+        items.length = 0;
+        for (const item of loadedItems) {
+          items.push({
+            label: item.label,
+            description: item.description || '',
+            quantity: item.quantity,
+            unitPrice: item.unit_price_cents / 100,
+          });
+        }
+        discountInput.value = String((quote.discount_cents || 0) / 100);
+        const discountReasonEl = form.querySelector('[data-discount-reason]');
+        if (discountReasonEl instanceof HTMLInputElement) discountReasonEl.value = quote.discount_reason || '';
+        render();
+
+        form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+          if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) {
+            el.disabled = false;
+          }
+        });
+        syncBrandVisibility();
+      } catch (error) {
+        if (loadErrorEl instanceof HTMLElement) {
+          loadErrorEl.hidden = false;
+          loadErrorEl.textContent = error instanceof Error ? error.message : 'Could not load that quote.';
+        }
+        form.hidden = true;
+      }
+    }
+
+    if (editId) loadForEdit(editId, 'edit');
+    else if (duplicateId) loadForEdit(duplicateId, 'duplicate');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!(status instanceof HTMLElement)) return;
+      status.hidden = true;
+
+      if (items.length === 0) {
+        status.hidden = false;
+        status.textContent = 'Add at least one line item first.';
+        return;
+      }
+
+      const data = new FormData(form);
+      const discountReasonEl = form.querySelector('[data-discount-reason]');
+      const payload = {
+        customer: {
+          name: data.get('name'),
+          phone: data.get('phone'),
+          email: data.get('email'),
+          address: data.get('address'),
+          city: data.get('city'),
+          role: data.get('role'),
+        },
+        notes: data.get('notes'),
+        items: items.map((item) => ({
+          label: item.label,
+          description: item.description,
+          quantity: item.quantity,
+          unitPriceCents: Math.round(item.unitPrice * 100),
+        })),
+        discountCents: Math.round((Number(discountInput.value) || 0) * 100),
+        discountReason: discountReasonEl instanceof HTMLInputElement ? discountReasonEl.value : '',
+        signatureMethod: data.get('signatureMethod'),
+      };
+
+      if (submitBtn instanceof HTMLButtonElement) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
+      }
+
+      try {
+        const response = await fetch(
+          editId ? `/internal/api/quotes/${encodeURIComponent(editId)}` : '/internal/api/quotes',
+          {
+            method: editId ? 'PUT' : 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        );
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Could not save the quote.');
+        const id = editId || result.id;
+        window.location.href = `/internal/quotes/view?id=${encodeURIComponent(id)}`;
+      } catch (error) {
+        status.hidden = false;
+        status.textContent = error instanceof Error ? error.message : 'Could not save the quote.';
+        if (submitBtn instanceof HTMLButtonElement) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = editId ? 'Save changes' : 'Save & continue';
+        }
+      }
+    });
+  }
+
+  initQuoteBuilder();
+  document.addEventListener('astro:page-load', initQuoteBuilder);
+</script>
+
+<style>
+  #quote-form {
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-l);
+  }
+
+  .qb-block {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: var(--space-m);
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .qb-block legend {
+    font-weight: 600;
+    padding: 0 var(--space-2xs);
+  }
+
+  .qb-block label {
+    display: grid;
+    gap: 0.2rem;
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+
+  .qb-block input,
+  .qb-block select,
+  .qb-block textarea {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 0.55rem;
+    font: inherit;
+    font-size: var(--step-0);
+  }
+
+  .qb-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-s);
+  }
+
+  .qb-role {
+    border: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--space-m);
+  }
+
+  .qb-role .choice {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 400;
+  }
+
+  .qb-catalog-row,
+  .qb-custom-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    gap: var(--space-s);
+    align-items: end;
+  }
+
+  .qb-catalog-row label.is-disabled {
+    opacity: 0.5;
+  }
+
+  .qb-items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .qb-items th {
+    text-align: left;
+    padding: 0.3rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+    font-weight: 500;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: var(--step--2);
+  }
+
+  /* The tbody rows below are built at runtime from the items array (one
+     render() per add/edit/remove), so they never get Astro's scoping
+     attribute — these rules have to be :global() or they silently only
+     ever match zero elements. */
+  :global(.qb-items td) {
+    padding: 0.3rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  :global(.qb-items td:first-child input) {
+    width: 100%;
+  }
+
+  :global(.qb-items td input[type='number']) {
+    width: 5rem;
+  }
+
+  :global(.qb-line-total) {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  :global(.qb-remove) {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    width: 1.8rem;
+    height: 1.8rem;
+    cursor: pointer;
+    color: var(--danger);
+  }
+
+  .qb-totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-s);
+    align-items: end;
+    margin-top: var(--space-xs);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--line);
+  }
+
+  .qb-discount input {
+    max-width: 10rem;
+  }
+
+  .qb-total-line {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--step--1);
+  }
+
+  .qb-total-line-final {
+    font-size: var(--step-1);
+    font-weight: 600;
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--line);
+  }
+
+  .qb-sig-choice {
+    display: flex;
+    gap: var(--space-l);
+  }
+
+  .qb-sig-choice .choice {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .qb-status {
+    color: var(--danger);
+    border-left: 2px solid var(--danger);
+    padding-left: var(--space-2xs);
+    margin: 0;
+  }
+
+  @media (max-width: 700px) {
+    .qb-grid-2,
+    .qb-catalog-row,
+    .qb-custom-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

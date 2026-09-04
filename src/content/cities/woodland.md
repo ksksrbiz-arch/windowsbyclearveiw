@@ -2,7 +2,7 @@
 name: Woodland
 region: Cowlitz County
 title: Window replacement in Woodland, WA
-description: Window replacement for Woodland, Washington — just north of Clark County.
+description: Window replacement for Woodland, WA on the Lewis River, just north of Clark County — mostly older housing stock in this diked river town.
 published: true
 ---
 

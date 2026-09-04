@@ -4,7 +4,7 @@ description: The difference between insert (pocket) windows and full-frame repla
 kicker: How we install
 topic: Installation
 published: true
-updated: 2026-08-19
+updated: 2026-08-30
 order: 3
 faq:
   - question: Is insert replacement cheaper?
@@ -14,6 +14,7 @@ faq:
   - question: Can you mix methods on one house?
     answer: Yes. A rotten kitchen sink window may need full-frame while the bedrooms take inserts. The elevations should still read as one house.
 diagram: insert-vs-full-frame
+secondaryDiagram: flashing-order
 ---
 
 There are two honest ways to put a new window in an old opening. The right one depends on the frame that is already there, not on a sales package.
@@ -41,6 +42,17 @@ Choose this when:
 - Water has already been in the wall
 
 It is more work. It is also the only way to start over at the opening — which is what a wet Washington wall often needs.
+
+## Signs a frame won't take an insert
+
+An insert only works if the existing frame is doing its job structurally. Walk the opening and check for:
+
+- **Soft wood at the sill or jamb** — press with a screwdriver handle, not just a look. If it gives, water has been inside the wall.
+- **A sash that racks instead of sliding square** — the opening itself has shifted, not just the hardware.
+- **Visible gap or daylight at a corner** — the frame is no longer square enough to seal a new insert against.
+- **Aluminum frames with heavy pitting or corrosion** — common on 1970s-80s Vancouver-area homes, and rarely worth insetting into.
+
+Any one of these usually means full-frame, whatever the rest of the house gets.
 
 ## How we decide on site
 

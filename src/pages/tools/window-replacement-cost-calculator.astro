@@ -8,7 +8,7 @@ import { site } from '../../data/site';
 const showMoney = pricingIsUsable();
 const isAverage = pricingIsRegionalAverage();
 
-// The layout appends " | Clearveiw Windows" (20 chars), so the base has to
+// The layout appends " | Clearview Windows" (20 chars), so the base has to
 // stay under ~40 to survive Google's ~60-character title truncation.
 const title = showMoney
   ? 'Window replacement cost calculator'
@@ -151,12 +151,12 @@ const schema = {
           {isAverage ? (
             <>
               Published 2026 Washington and Portland-metro averages, compiled from industry
-              cost guides &mdash; not Clearveiw&rsquo;s own pricing. They are here so you can
+              cost guides &mdash; not Clearview&rsquo;s own pricing. They are here so you can
               sanity-check any quote you get, from us or anyone else.
             </>
           ) : (
             <>
-              Clearveiw&rsquo;s own installed pricing &mdash; what Mark actually charges for
+              Clearview&rsquo;s own installed pricing &mdash; what Mark actually charges for
               this work in Clark County, not a national average. It is still a range, because
               the opening decides the number and nobody has seen yours yet.
             </>
@@ -178,6 +178,7 @@ const schema = {
 
       <h2>Keep reading</h2>
       <ul class="plain-list">
+        <li><a href="/window-features">What each material, brand, and style actually is</a></li>
         <li><a href="/guides/window-replacement-cost-washington">What drives window replacement cost in Washington</a></li>
         <li><a href="/guides/full-frame-vs-insert">Full-frame vs insert replacement</a></li>
         <li><a href="/guides/signs-you-need-new-windows">Six signs it is time to replace</a></li>

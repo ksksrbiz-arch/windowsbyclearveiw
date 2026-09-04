@@ -5,7 +5,7 @@ import { mailHref, site, telHref } from '../data/site';
 ---
 <BaseLayout
   title="Request an estimate"
-  description="Request a free in-home window replacement estimate from Clearveiw Windows, LLC in Vancouver, WA."
+  description="Request a free in-home window replacement estimate from Clearview Windows in Vancouver, WA."
   path="/estimate"
   crumbs={[{ name: 'Request an estimate', href: '/estimate' }]}
 >
@@ -25,7 +25,7 @@ import { mailHref, site, telHref } from '../data/site';
 
       <aside class="estimate-aside">
         <p class="rule-label">Prefer to talk</p>
-        <p class="estimate-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
+        <p class="phone-display"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>
           Mark answers from the truck. If it rings out, leave a name, city, and a window
           count, or email <a href={mailHref()}>{site.email}</a>.
@@ -35,7 +35,7 @@ import { mailHref, site, telHref } from '../data/site';
         <ol class="steps">
           <li><strong>A call back.</strong> Usually the same day.</li>
           <li><strong>A measure.</strong> Every opening, at the house.</li>
-          <li><strong>A written number.</strong> Method listed per opening.</li>
+          <li><strong>A written estimate.</strong> Method listed per opening.</li>
         </ol>
 
         <p class="fine-print">
@@ -54,22 +54,6 @@ import { mailHref, site, telHref } from '../data/site';
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
     gap: var(--space-xl);
     align-items: start;
-  }
-
-  .estimate-phone {
-    margin: 0 0 var(--space-2xs);
-    font-size: var(--step-2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-display);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .estimate-phone a {
-    text-decoration: none;
-  }
-
-  .estimate-phone a:hover {
-    color: var(--accent-ink);
   }
 
   .estimate-aside .rule-label {
