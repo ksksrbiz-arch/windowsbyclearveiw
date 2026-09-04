@@ -16,7 +16,7 @@ faq:
 diagram: glass-anatomy
 ---
 
-Not all “foggy windows” are the same job. One kind is a failed window. The other is your house telling you it is damp.
+Western Washington's roughly nine wet months and three dry ones a year is why sealed windows here tend to fog sooner than they would in a steadier climate. Not all "foggy windows" are the same job, though. One kind is a failed window. The other is your house telling you it is damp.
 
 ## Fog between the panes
 
