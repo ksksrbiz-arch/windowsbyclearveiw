@@ -77,7 +77,7 @@ import { site, telHref } from '../data/site';
   </p>
 </div>
 
-<script>
+<script define:vars={{ phoneDisplay: site.phoneDisplay }}>
   function bindEstimate() {
     const form = document.getElementById('estimate-form');
     const status = document.querySelector('[data-status]');
@@ -137,7 +137,7 @@ import { site, telHref } from '../data/site';
       } catch (error) {
         status.hidden = false;
         const reason = error instanceof Error ? error.message : 'Could not send.';
-        status.textContent = `${reason} You can always call (564) 208-0801.`;
+        status.textContent = `${reason} You can always call ${phoneDisplay}.`;
       } finally {
         if (button instanceof HTMLButtonElement) {
           button.disabled = false;
