@@ -3,9 +3,13 @@ import { site, phoneDigits } from '../data/site';
 
 interface Props {
   extra?: Record<string, unknown>;
+  /** Absolute URL of a representative photo. BaseLayout already computes one
+   *  per page (the OG image); reusing it here means the business entity
+   *  always points at a real job photo instead of nothing. */
+  image?: string;
 }
 
-const { extra } = Astro.props;
+const { extra, image } = Astro.props;
 const digits = phoneDigits();
 
 const business = {
@@ -15,6 +19,8 @@ const business = {
   alternateName: site.shortName,
   url: site.url,
   description: site.description,
+  slogan: site.tagline,
+  ...(image ? { image } : {}),
   areaServed: site.nearby.map((place) => ({
     '@type': 'City',
     name: place.name,
@@ -36,6 +42,7 @@ const business = {
     'Full-frame window replacement',
     'Insert window replacement',
     'Vinyl windows',
+    'Fiberglass windows',
   ],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
@@ -61,6 +68,7 @@ const business = {
   },
   ...(digits ? { telephone: `+1${digits}` } : {}),
   ...(site.email ? { email: site.email } : {}),
+  ...(site.ubiNumber ? { taxID: site.ubiNumber } : {}),
   // Washington requires the contractor registration number in advertising.
   // Publish it in the markup as soon as site.lniNumber is filled in.
   ...(site.lniNumber

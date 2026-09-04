@@ -174,4 +174,34 @@ const schema = {
     font-size: var(--step--1);
     color: var(--ink-soft);
   }
+
+  /* The global print stylesheet sets a fixed pt size on bare h2/h3, but the
+     class selectors here (with the Astro scope attribute) are more specific
+     and would otherwise win the cascade even on paper, leaving headings at
+     their fluid on-screen size. Restate the print sizes at matching
+     specificity so a printed policy keeps the same compact scale as every
+     other printed page. The scroll region is also print-only noise: paper
+     has no viewport to scroll, so let the table simply run to its full
+     width instead of clipping at the container edge. "Also here" is
+     cross-page navigation, not part of the document being printed, so it is
+     dropped along with the rest of the site chrome. */
+  @media print {
+    .legal-body :global(h2) {
+      margin-top: 0.6cm;
+      font-size: 15pt;
+      border-bottom-color: #ccc;
+    }
+
+    .legal-body :global(h3) {
+      font-size: 12pt;
+    }
+
+    .legal-body :global(.table-scroll) {
+      overflow: visible;
+    }
+
+    .legal-nav {
+      display: none;
+    }
+  }
 </style>

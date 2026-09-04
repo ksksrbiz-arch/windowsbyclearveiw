@@ -1,0 +1,26 @@
+# Local development only.
+#
+# This file exists so `wrangler d1 execute --local` and `wrangler pages dev`
+# know which database to simulate on disk. It is deliberately NOT used for
+# production: Cloudflare Pages Git-integration deploys read bindings from the
+# dashboard (Settings -> Bindings), which is where the real D1 binding,
+# INTERNAL_PASSWORD, and INTERNAL_SESSION_SECRET all live. See
+# internal/README.md for exactly what to set there.
+#
+# The database_id below is not a secret — it is an opaque identifier scoped
+# to the Cloudflare account's own auth, not a capability token — but nothing
+# here should ever hold INTERNAL_PASSWORD or INTERNAL_SESSION_SECRET.
+name = "windowsbyclearveiw-local-dev"
+compatibility_date = "2026-08-21"
+
+[[d1_databases]]
+binding = "QUOTES_DB"
+database_name = "clearveiw-quotes"
+database_id = "4700b6f7-c3d8-46c9-9b19-17cf34accb84"
+preview_database_id = "4700b6f7-c3d8-46c9-9b19-17cf34accb84"
+
+# Workers AI, for the /ask photo-analysis feature (functions/ask/_lib/vision.mjs).
+# Free up to 10,000 Neurons/day, no billing setup required. Also needs adding in
+# the Cloudflare Pages dashboard for production — see internal/README.md.
+[ai]
+binding = "AI"

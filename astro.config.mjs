@@ -12,13 +12,13 @@ if (!site.lniNumber) {
     "site.lniNumber is empty. Add Mark's L&I contractor registration number in " +
     'src/data/site.ts before advertising this site.';
   if (process.env.REQUIRE_LNI === '1') {
-    throw new Error(`[clearveiw] ${message}`);
+    throw new Error(`[clearview] ${message}`);
   }
-  console.warn(`\n[clearveiw] WARNING: ${message}\n`);
+  console.warn(`\n[clearview] WARNING: ${message}\n`);
 }
 
 export default defineConfig({
-  site: 'https://windowsbyclearveiw.com',
+  site: 'https://windowsbyclearview.com',
   integrations: [
     sitemap({
       // Outcome pages for the estimate form — no search value, and /problem
@@ -28,8 +28,19 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/estimate/sent') &&
         !page.includes('/estimate/problem') &&
+        !page.includes('/internal/') &&
         !/\/404\/?$/.test(page),
     }),
   ],
   trailingSlash: 'never',
+  // Astro's default 'directory' format writes every route as
+  // `page/index.html`, which doesn't match `trailingSlash: 'never'` above —
+  // Cloudflare Pages' static server then 308-redirects a bare `/estimate`
+  // request to `/estimate/` on first (non-SPA) load, because that's the only
+  // path with a matching file. 'file' format writes `page.html` instead, so
+  // the URL Astro generates and the file Pages finds are the same request,
+  // no redirect needed.
+  build: {
+    format: 'file',
+  },
 });

@@ -1,15 +1,20 @@
 export const site = {
-  name: 'Clearveiw Windows, LLC',
-  shortName: 'Clearveiw Windows',
-  legalName: 'Clearveiw Windows, LLC',
-  domain: 'windowsbyclearveiw.com',
-  url: 'https://windowsbyclearveiw.com',
-  tagline: 'Replacement windows for Vancouver, WA and nearby.',
+  name: 'Clearview Windows',
+  shortName: 'Clearview Windows',
+  legalName: 'Clear View Windows & Trim LLC',
+  /**
+   * Washington Unified Business Identifier. Distinct from lniNumber (the WA
+   * L&I contractor registration, which is separate and still pending).
+   */
+  ubiNumber: '605 779 798',
+  domain: 'windowsbyclearview.com',
+  url: 'https://windowsbyclearview.com',
+  tagline: 'Great prices. Clean work. Clear windows.',
   /**
    * Long form, for the JSON-LD business entity where length does not matter.
    */
   description:
-    'Clearveiw Windows, LLC installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
+    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
   /**
    * Short form, for the homepage <meta name="description">. Google truncates
    * around 160 characters and the long version was 253, so the service-area
@@ -25,7 +30,7 @@ export const site = {
    * in: this one is public and will attract scrapers, and leads should not
    * share an inbox with whatever that brings.
    */
-  email: 'admin@windowsbyclearveiw.com',
+  email: 'owner@windowsbyclearveiw.com',
   phone: '(564) 208-0801',
   phoneDisplay: '(564) 208-0801',
   address: {
@@ -52,7 +57,9 @@ export const site = {
   lniNumber: '',
   hours: 'By appointment',
   social: {
-    facebook: '',
+    facebook: 'https://www.facebook.com/share/18pyB4MHkS/',
+    // Set once Mark's Instagram profile is live — every link below reads
+    // from this field and disappears on its own while it is empty.
     instagram: '',
     google: '',
   },

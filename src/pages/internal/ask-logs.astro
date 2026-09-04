@@ -1,0 +1,194 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Ask activity">
+  <div class="al-head">
+    <div>
+      <p class="kicker">Clearview internal</p>
+      <h1>Ask activity</h1>
+      <p class="lede">What visitors are actually asking the /ask chatbot, and how it answered.</p>
+    </div>
+    <a class="btn btn-ghost" href="/internal/leads">Leads</a>
+    <a class="btn btn-ghost" href="/internal/quotes">&larr; Quotes</a>
+  </div>
+
+  <p data-loading>Loading…</p>
+  <p class="al-error" data-error hidden role="alert"></p>
+  <p data-empty hidden>No activity yet.</p>
+
+  <div class="al-summary" data-summary hidden>
+    <div><strong data-stat-total></strong><span>questions</span></div>
+    <div><strong data-stat-refused></strong><span>couldn't answer</span></div>
+    <div><strong data-stat-tools></strong><span>used a tool</span></div>
+  </div>
+
+  <div class="al-list" data-list hidden></div>
+</InternalLayout>
+
+<script>
+  function initAskLogs() {
+    const list = document.querySelector('[data-list]');
+    if (!(list instanceof HTMLElement) || list.dataset.bound === 'true') return;
+    list.dataset.bound = 'true';
+
+    const loading = document.querySelector('[data-loading]');
+    const errorEl = document.querySelector('[data-error]');
+    const emptyEl = document.querySelector('[data-empty]');
+    const summary = document.querySelector('[data-summary]');
+
+    function escapeHtml(s: string) {
+      const div = document.createElement('div');
+      div.textContent = s ?? '';
+      return div.innerHTML;
+    }
+
+    async function load() {
+      try {
+        const response = await fetch('/internal/api/ask-logs');
+        if (!response.ok) throw new Error();
+        const { logs } = await response.json();
+
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        if (!logs.length) {
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          return;
+        }
+
+        if (summary instanceof HTMLElement) {
+          summary.hidden = false;
+          const refused = logs.filter((l: any) => l.refused).length;
+          const withTools = logs.filter((l: any) => JSON.parse(l.tools_used || '[]').length > 0).length;
+          const set = (sel: string, v: string) => { const el = summary.querySelector(sel); if (el) el.textContent = v; };
+          set('[data-stat-total]', String(logs.length));
+          set('[data-stat-refused]', String(refused));
+          set('[data-stat-tools]', String(withTools));
+        }
+
+        if (list instanceof HTMLElement) {
+          list.hidden = false;
+          list.innerHTML = '';
+          for (const l of logs) {
+            const tools = JSON.parse(l.tools_used || '[]');
+            const sources = JSON.parse(l.sources || '[]');
+            const date = new Date(l.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+            const card = document.createElement('article');
+            card.className = 'al-card' + (l.refused ? ' al-refused' : '');
+            card.innerHTML = `
+              <div class="al-card-meta">
+                <span>${date}</span>
+                <span>${escapeHtml(l.model_used)}</span>
+                ${tools.map((t: string) => `<span class="al-tag">${escapeHtml(t)}</span>`).join('')}
+                ${l.refused ? '<span class="al-tag al-tag-refused">no answer</span>' : ''}
+              </div>
+              <p class="al-question">${escapeHtml(l.question)}</p>
+              <p class="al-answer">${escapeHtml(l.answer)}</p>
+              ${sources.length ? `<p class="al-sources">Sources: ${sources.map((s: any) => escapeHtml(s.title)).join(', ')}</p>` : ''}
+            `;
+            list.append(card);
+          }
+        }
+      } catch {
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        if (errorEl instanceof HTMLElement) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'Could not load ask activity.';
+        }
+      }
+    }
+
+    load();
+  }
+
+  initAskLogs();
+  document.addEventListener('astro:page-load', initAskLogs);
+</script>
+
+<style>
+  .al-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: var(--space-l);
+    gap: var(--space-m);
+  }
+
+  .al-error {
+    color: var(--danger);
+  }
+
+  .al-summary {
+    display: flex;
+    gap: var(--space-l);
+    margin-bottom: var(--space-l);
+    padding-bottom: var(--space-m);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .al-summary > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .al-summary strong {
+    font-size: var(--step-2);
+  }
+
+  .al-summary span {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .al-list {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  :global(.al-card) {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-s) var(--space-m);
+  }
+
+  :global(.al-card.al-refused) {
+    border-left: 2px solid var(--danger);
+  }
+
+  :global(.al-card-meta) {
+    display: flex;
+    gap: var(--space-xs);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+    margin-bottom: var(--space-2xs);
+  }
+
+  :global(.al-tag) {
+    background: var(--paper-sunk);
+    border-radius: 999px;
+    padding: 0.05rem 0.5rem;
+  }
+
+  :global(.al-tag-refused) {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+  }
+
+  :global(.al-question) {
+    font-weight: 600;
+    margin: 0 0 0.3rem;
+  }
+
+  :global(.al-answer) {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  :global(.al-sources) {
+    margin: 0.3rem 0 0;
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+</style>
