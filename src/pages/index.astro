@@ -8,8 +8,8 @@ import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { featuredWork, findWork } from '../data/work';
 
-const replacementTile = findWork('vaulted-grids')!;
-const newBuildTile = findWork('new-construction-sheathed')!;
+const replacementTile = findWork('stone-craftsman')!;
+const newBuildTile = findWork('new-build-sheathed-garage')!;
 
 const serviceLinks = [
   { slug: 'vancouver', label: 'Vancouver' },
@@ -48,25 +48,29 @@ const signs = [
     href: '/guides/signs-you-need-new-windows',
   },
   {
-    title: 'A room that never evens out',
+    title: 'A room that is never comfortable',
     text: 'Cold glass makes a cold chair even when the thermostat is fine.',
     href: '/guides/signs-you-need-new-windows',
   },
   {
-    title: 'A bill that does not add up',
-    text: 'Windows are a small wall and a large leak. Start with the openings you can feel.',
+    title: 'A heating bill that keeps climbing',
+    text: 'Windows are a small share of the wall and a large share of the leak.',
     href: '/guides/window-replacement-cost-washington',
   },
 ];
 ---
-<BaseLayout title={site.shortName} description={site.metaDescription} path="/">
+<BaseLayout
+  title="Window Replacement in Vancouver, WA"
+  description={site.metaDescription}
+  path="/"
+>
   <VideoHero />
 
   <section class="section is-airy">
     <div class="wrap" data-reveal>
       <p class="rule-label">Two kinds of work</p>
       <h2>Replace what’s there. Set the new ones.</h2>
-      <p class="lede">Homeowners and builders need different pages. Pick the one that matches the job.</p>
+      <p class="lede">Same crew, same standards, either way. Pick the job that’s yours.</p>
       <div class="service-tiles">
         <a class="service-tile" href="/replacement">
           <Image
@@ -126,7 +130,7 @@ const signs = [
   <section class="section section-dark is-airy" id="what-changes">
     <div class="wrap" data-reveal>
       <p class="rule-label">What actually changes</p>
-      <h2>Comfort first. Then the bill. Then the wall.</h2>
+      <h2>What you’ll notice: comfort, moisture, and the bill.</h2>
       <div class="metric-row">
         <article class="metric">
           <p class="kicker">Comfort</p>
@@ -136,7 +140,7 @@ const signs = [
         <article class="metric">
           <p class="kicker">Moisture</p>
           <h3>Fog you cannot wipe is a failed unit</h3>
-          <p>Haze between panes means the seal is gone. Room-side sweat is often humidity. We tell those apart on site. <a href="/guides/fogged-windows">How to look</a>.</p>
+          <p>Haze between panes means the seal is gone. Room-side sweat is often humidity. We tell those apart on site — <a href="/guides/fogged-windows">how to spot the difference</a>.</p>
         </article>
         <article class="metric">
           <p class="kicker">Energy</p>

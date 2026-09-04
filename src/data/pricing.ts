@@ -15,14 +15,14 @@
  *
  * Every opening figure is INSTALLED cost per opening: unit, labour, and a
  * block install (no trim, just re-caulk), for a standard-size ground-floor
- * opening, in vinyl, as an insert. Full-frame, upper-floor access,
+ * opening, in vinyl, as an insert. Fiberglass, full-frame, upper-floor access,
  * custom shapes, and trim are modifiers further down — never bake them into
  * the baseline or they double-count.
  */
 
 export type PricingBasis = {
-  /** 'averages' = regional published data. 'clearveiw' = Mark's own numbers. */
-  source: 'averages' | 'clearveiw';
+  /** 'averages' = regional published data. 'clearview' = Mark's own numbers. */
+  source: 'averages' | 'clearview';
   region: string;
   /** ISO date the figures were last checked against reality. */
   reviewedAt: string;
@@ -53,7 +53,7 @@ export type WindowBrand = {
 
 export const pricing = {
   basis: {
-    source: 'clearveiw',
+    source: 'clearview',
     region: 'Washington / Portland metro',
     reviewedAt: '2026-08-21',
     maxAgeDays: 180,
@@ -133,21 +133,19 @@ export const pricing = {
     },
   ] satisfies OpeningType[],
 
-  /**
-   * Multiplied against the baseline. Vinyl is the baseline, so it is 1.
-   *
-   * Clearveiw installs vinyl only — Mark does not do fiberglass. The array
-   * stays because the estimator, the schema, and the pricing worker are all
-   * built around it, and because a second line may be added later. With one
-   * entry the estimator drops the material step rather than showing a radio
-   * group with nothing to choose between.
-   */
+  /** Multiplied against the baseline. Vinyl is the baseline, so it is 1. */
   materials: [
     {
       id: 'vinyl',
       label: 'Vinyl',
       blurb: 'The usual choice in Clark County. Good value, low upkeep.',
       multiplier: 1,
+    },
+    {
+      id: 'fiberglass',
+      label: 'Fiberglass',
+      blurb: 'Stiffer, holds paint, costs more. Worth it on big openings.',
+      multiplier: 1.4,
     },
   ],
 
@@ -157,7 +155,7 @@ export const pricing = {
     {
       id: 'cascade',
       label: 'Cascade',
-      blurb: 'The standard window Clearveiw installs on most jobs.',
+      blurb: 'The standard window Clearview installs on most jobs.',
       low: 0,
       high: 0,
     },

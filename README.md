@@ -1,9 +1,10 @@
-# Clearveiw Windows
+# Clearview Windows
 
-Marketing site for **Clearveiw Windows, LLC** — replacement and new-construction
-window installation in Vancouver, WA and the rest of Clark County.
+Marketing site for **Clearview Windows** (operated by Clear View Windows & Trim
+LLC) — replacement and new-construction window installation in Vancouver, WA
+and the rest of Clark County.
 
-- Domain: [windowsbyclearveiw.com](https://windowsbyclearveiw.com)
+- Domain: [windowsbyclearview.com](https://windowsbyclearview.com)
 - Stack: [Astro](https://astro.build) (static, no adapter)
 - Deploy: Cloudflare Pages from this GitHub repo
 
@@ -25,6 +26,22 @@ window installation in Vancouver, WA and the rest of Clark County.
 - [ ] **Pricing.** The cost estimator currently runs on published Washington /
       Portland-metro averages, labelled as such on the page. Mark's own ranges
       convert better — see [Pricing](#pricing) below.
+- [ ] **Internal quoting tool bindings.** `/internal/*` (Mark's quote +
+      contract + signature tool) needs `QUOTES_DB`, `INTERNAL_PASSWORD`, and
+      `INTERNAL_SESSION_SECRET` set in Cloudflare Pages → Settings → Bindings
+      before it works in production. See [internal/README.md](internal/README.md).
+- [x] **`GROQ_API_KEY` and `GEMINI_API_KEY`** set in Cloudflare Pages →
+      Settings → Environment variables. Without them `/ask` still loads but
+      answers "The assistant isn't available right now" instead of crashing.
+      See [Ask, the design-consultant chatbot](#ask-the-design-consultant-chatbot)
+      below.
+- [ ] **`AI` Workers AI binding** set in Cloudflare Pages → Settings →
+      **Bindings** (not Environment variables — this is a binding, same
+      category as `QUOTES_DB`, not a secret). Free up to 10,000 Neurons/day,
+      no billing setup. Without it the photo-upload button on `/ask` still
+      works, it just answers that photo analysis isn't configured yet rather
+      than failing the turn. See
+      [Ask, the design-consultant chatbot](#ask-the-design-consultant-chatbot).
 
 ## Local development
 
@@ -48,7 +65,7 @@ npm run preview
 2. Production branch: `main`
 3. Build command: `npm run build`
 4. Build output directory: `dist`
-5. Attach `windowsbyclearveiw.com` after the first deploy.
+5. Attach `windowsbyclearview.com` after the first deploy.
 
 No Cloudflare adapter is required while the site stays static. The estimate form
 runs as a Pages Function from `functions/api/estimate.js`.
@@ -85,13 +102,13 @@ number from `src/data/pricing.ts`. Nothing else in the codebase knows about mone
 
 Each opening figure is **installed cost per opening**: unit, labour, and normal
 finish work, for a standard-size ground-floor opening, **in vinyl, as an insert**.
-Full-frame, second-story access, and custom shapes are modifiers —
+Fiberglass, full-frame, second-story access, and custom shapes are modifiers —
 never fold them into the baseline or they get counted twice.
 
 To switch from regional averages to Mark's real pricing:
 
 1. Replace the figures in `src/data/pricing.ts`.
-2. Set `basis.source` to `'clearveiw'`.
+2. Set `basis.source` to `'clearview'`.
 3. Set `basis.reviewedAt` to today.
 
 The estimator copy changes automatically — it stops saying "published Washington
@@ -116,11 +133,11 @@ authoritative. What it does:
 The site ships its own copy of the numbers and only *upgrades* from the worker,
 so an outage there can never blank out the estimator.
 
-**Deployed.** Live at `https://clearveiw-pricing.skdev-371.workers.dev`, bound to
-the `clearveiw-pricing` KV namespace, with the monthly cron registered.
+**Deployed.** Live at `https://clearview-pricing.skdev-371.workers.dev`, bound to
+the `clearview-pricing` KV namespace, with the monthly cron registered.
 
 Two things are still unset, both on purpose — they are secrets and belong in the
-dashboard rather than a transcript (*Workers → clearveiw-pricing → Settings →
+dashboard rather than a transcript (*Workers → clearview-pricing → Settings →
 Variables → Add secret*):
 
 | Secret | Effect while unset |
@@ -158,7 +175,7 @@ cd workers/pricing && npx wrangler deploy
 Push new pricing without a redeploy:
 
 ```bash
-curl -X PUT https://clearveiw-pricing.<subdomain>.workers.dev \
+curl -X PUT https://clearview-pricing.<subdomain>.workers.dev \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "content-type: application/json" \
   --data @pricing.json
@@ -188,20 +205,158 @@ turns out to be enough.
 - Lead to Mark — [estimate-request](https://resend.com/templates/f8b73ea1-867e-48b8-8ccf-926b1a825913)
 - Receipt to the customer — [estimate-received](https://resend.com/templates/68555c62-cbc3-4061-8dfe-ea1b02a59c75)
 
+Both are full HTML emails, not plain text: a "Call now" `tel:` button and a
+"Reply by email" `mailto:` button on each, sized for one-tap use on a phone.
+The lead email to Mark also carries a `.vcf` vCard attachment built from the
+submitted name, phone, and email, so he can save the customer to his contacts
+in one tap instead of retyping it. Edit the templates in the Resend dashboard
+(the IDs above) — the Pages Function only fills in the variables.
+
 Environment variables it reads:
 
 | Variable | Required | Default |
 | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — |
 | `NOTIFY_EMAIL` | no | `owner@windowsbyclearveiw.com` |
-| `RESEND_FROM` | no | `Clearveiw Windows <estimates@windowsbyclearveiw.com>` |
+| `RESEND_FROM` | no | `Clearview Windows <estimates@windowsbyclearview.com>` |
 
 With JavaScript the page swaps in a confirmation panel. Without it, the function
 redirects to `/estimate/sent` or `/estimate/problem`, so the form still works.
 
+## Ask, the design-consultant chatbot
+
+`/ask` is a public agentic assistant — a visitor can plan a real project with
+it: ask general window/construction questions, get a real price range for a
+described job, and get pointed to `/estimate` when it's time to make it firm.
+It runs an actual tool-calling loop (up to 3 LLM calls per turn) against
+**Groq** (`openai/gpt-oss-120b`, OpenAI-compatible tool calling) as the fast
+path, falling back to **Gemini** (`gemini-3.6-flash`, native function
+calling) if Groq is unavailable — same two tools, same guardrails, either
+way. Model names in this space drift fast; if either starts 404ing, check
+`GET /ask/api/models` (lists what's actually live from each provider, using
+the real keys server-side) before guessing a new one.
+
+**Its knowledge has three tiers, and the system prompt is explicit about
+never mixing them:**
+
+1. **Reference material** — `/guides` content (embedded and retrieved by
+   cosine similarity, see below) plus a short list of basic business facts
+   (phone, service area, hours). The only source for anything about
+   Clearview itself.
+2. **The `estimate_price` tool** (`functions/ask/_lib/pricing.mjs`) — the
+   only source for a number. Runs Clearview's own published pricing model,
+   the exact same figures and formula as
+   `/tools/window-replacement-cost-calculator` (duplicated by hand, kept in
+   sync manually — see the file's own comment). The model is instructed to
+   call this for any price question rather than ever stating a number from
+   memory, and to present the result as a range and a starting point, never
+   a final total.
+3. **General knowledge**, plus the `search_web` tool
+   (`functions/ask/_lib/search.mjs`, DuckDuckGo's HTML results page — there
+   is no official free search API, this is how every free DDG integration
+   works) for anything current like rebate programs or code changes. Scoped
+   hard to windows/doors/home construction/home improvement, and to
+   describing the *industry*, never Clearview's own claims or policies.
+
+Hard rules that hold regardless of tier: never "bonded and insured" (RCW
+18.27.100), never a specific L&I number, never a competitor, never legal
+advice, never a firm final price outside the tool.
+
+**Photo analysis.** A visitor can attach a photo of a window on `/ask`.
+It's resized client-side (max 1024px, JPEG) and sent as a base64 field
+alongside the message — no multipart upload, no new content-type on the
+endpoint. `functions/ask/_lib/vision.mjs` runs it through Workers AI
+(`@cf/meta/llama-3.2-11b-vision-instruct`, the `AI` binding) for a factual
+description only — frame material, style, visible fog or damage — *before*
+the main chat call, the same eager-not-tool-gated shape retrieval already
+uses below. The description is folded into that turn's reference material,
+labelled as machine-generated observations, and the system prompt has an
+explicit guardrail: describe in general terms, never state it as certain,
+never treat it as a measurement, never call `estimate_price` from a guessed
+opening count. **The photo itself is never stored anywhere** — analyzed and
+discarded, matching the lead form's "no lists, no resale" stance; if Mark
+ever wants to review photos afterward, that's an R2 bucket added later, not
+today. Binding missing or the daily Neuron quota exhausted both degrade the
+same way as a Gemini outage: the chat turn still completes, just without
+visual context, rather than failing.
+
+**Retrieval is build-time, not live.** `scripts/build-guides-index.mjs` reads
+every published guide, splits it into one chunk per `##` section, embeds each
+chunk with Gemini's `gemini-embedding-001`, and writes
+`functions/ask/_data/guides-index.json` — committed to the repo, not
+generated on deploy. That is deliberate: retrieval quality shouldn't depend
+on Gemini being reachable at build time, and guide content changes rarely
+enough that regenerating by hand is no burden. Run it after editing a guide:
+
+```bash
+GEMINI_API_KEY=... node scripts/build-guides-index.mjs
+```
+
+Get a free key at <https://aistudio.google.com/apikey>. `GROQ_API_KEY` is
+free at <https://console.groq.com>. Set both in Cloudflare Pages → Settings
+→ Environment variables — `GEMINI_API_KEY` alone is enough for the feature to
+work (it's its own fallback and what retrieval depends on); `GROQ_API_KEY` is
+what makes the common case fast. No key set at all → the page still loads,
+answering with a message pointing to the phone number instead of crashing.
+
+**Visibility.** Every question/answer/model-used/tools-used/sources is
+logged (best-effort, never blocking the chat turn) to an `ask_logs` table —
+see `functions/ask/_data/schema.sql`, applied to the same D1 database as the
+internal quoting tool (`QUOTES_DB`) rather than provisioning a second
+database for one small table. View it at `/internal/ask-logs`, gated behind
+the same login as the quoting tool.
+
+**Regression testing.** `node scripts/eval-ask.mjs [baseUrl]` runs six checks
+against a live `/ask/api/chat` (sources present, safety-rail probes, pricing
+gives a range not a firm number, general knowledge answered directly rather
+than refused, off-topic redirects). Two real bugs found while building this
+— a truncated-answer issue and a stale-model-name issue — would have been
+caught by this automatically instead of by manual testing. Run it after any
+change to the system prompt, tools, or model names, against both local dev
+and production.
+
+There is no rate limiting on `/ask/api/chat` beyond message-length and
+history caps; the worst case of abuse is hitting a provider's free-tier
+limits, at which point the fallback chain (and, ultimately, the graceful
+"unavailable" message) takes over. Revisit if that turns out to matter.
+
+## Performance: keep `astro:page-load` handlers cheap
+
+The site uses Astro View Transitions (`<ClientRouter />`), so an in-site link
+click does a client-side DOM swap rather than a full navigation. Everything
+wired to the `astro:page-load` event in `BaseLayout.astro` — the GTM
+`dataLayer` pushes, the scroll-reveal `IntersectionObserver` setup — reruns on
+*every* navigation, including the very first page load, so it sits directly in
+front of the LCP element.
+
+Two real regressions came from this, both measured with the browser's
+Performance API rather than assumed:
+
+- **Synchronous analytics pushes.** `trackPageView()` and `trackVisitJourney()`
+  used to push to `window.dataLayer` synchronously inside the `astro:page-load`
+  handler. GTM evaluates every tag/trigger synchronously on each push, which
+  measured as ~465ms of blocked main thread on a single in-site click. Fixed by
+  deferring both through `requestIdleCallback` (with a `setTimeout` fallback),
+  so tracking still fires every navigation, just after the page has painted.
+- **Interleaved layout reads/writes.** `initReveal()`'s "reveal anything
+  already in view" pass used to loop over each `[data-reveal]` element doing
+  `el.getBoundingClientRect()` (read) immediately followed by
+  `el.classList.add('is-revealed')` (write) in the same iteration. Since that
+  class change affects the reveal animation's transform/opacity, each write
+  invalidated layout, forcing the next read to synchronously recompute it — a
+  forced-reflow thrash that a live DevTools trace measured at ~540ms of Layout
+  work, over half of the homepage's LCP. Fixed by splitting it into two
+  passes: read every element's position first, then apply all the class
+  changes after.
+
+The lesson generalizes: anything hung on `astro:page-load` runs on the
+critical path of every navigation, not just once. Batch DOM reads and writes
+separately, and push non-essential work (analytics, logging) off the main
+thread with `requestIdleCallback` rather than firing it inline.
+
 ## Notes
 
-The legal / domain spelling **Clearveiw** is used throughout. Public copy can still
+The legal / domain spelling **Clearview** is used throughout. Public copy can still
 say "Clearview" if you decide that is the brand.
 
 ## Images: why WebP, and why not Cloudflare Transformations

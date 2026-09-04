@@ -5,6 +5,7 @@ import type { ImageMetadata } from 'astro';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import MobileCtaBar from '../components/MobileCtaBar.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { site } from '../data/site';
 import { heroPhoto } from '../data/work';
@@ -22,6 +23,13 @@ interface Props {
    */
   ogImageSrc?: ImageMetadata;
   ogImageAlt?: string;
+  /**
+   * Transient / no-search-value pages (form outcome pages, etc.) — keeps them
+   * out of Google's index without pulling them out of internal navigation or
+   * the sitemap filter's job of hiding them from crawlers in the first place.
+   * They still resolve and still link out; they just should never rank.
+   */
+  noindex?: boolean;
 }
 
 const {
@@ -32,6 +40,7 @@ const {
   crumbs = [],
   ogImageSrc = heroPhoto.image,
   ogImageAlt = heroPhoto.alt,
+  noindex = false,
 } = Astro.props;
 
 const canonical = new URL(path === '/' ? '/' : path, site.url).toString();
@@ -91,6 +100,7 @@ const breadcrumbSchema =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonical} />
 
     <meta property="og:site_name" content={site.shortName} />
@@ -112,9 +122,11 @@ const breadcrumbSchema =
     <meta name="theme-color" content="#0b0c0e" />
     <meta name="geo.region" content="US-WA" />
     <meta name="geo.placename" content="Vancouver, Washington" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -128,6 +140,30 @@ const breadcrumbSchema =
       type="font/woff2"
       crossorigin
     />
+
+    <!-- Google Tag Manager — container GTM-WGCFVHQM, GA4 property "Windows by
+         Clearview" (G-YE96XMJSWJ). Disclosed in the privacy policy: it sets a
+         first-party cookie and assigns you a random client ID so we can tell
+         returning visitors apart in aggregate, which is a different privacy
+         posture than the cookieless Cloudflare Web Analytics also running on
+         this site. Only on public pages — never loaded on the internal
+         quoting tool (InternalLayout). The GA4 Event tag inside this
+         container fires only on the "spa_page_view" custom event pushed
+         below, not on GTM's built-in Page View trigger, because the
+         ClientRouter swaps pages without a full reload — see the
+         astro:page-load listener at the bottom of this file. -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-WGCFVHQM');
+    </script>
     <ClientRouter />
     {cfBeaconToken && (
       <script
@@ -136,18 +172,28 @@ const breadcrumbSchema =
         data-cf-beacon={JSON.stringify({ token: cfBeaconToken })}
       />
     )}
-    <JsonLd extra={schema} />
+    <JsonLd extra={schema} image={ogImageUrl} />
     {breadcrumbSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     )}
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-WGCFVHQM"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"></iframe></noscript
+    >
+    <!-- End Google Tag Manager (noscript) -->
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
     <main id="main" tabindex="-1" data-route={route}>
       <slot />
     </main>
     <Footer />
+    <MobileCtaBar />
     <script>
       // Gate the hidden state on JS actually running: if this script never
       // executes, `.reveal-ready` is never set and everything stays visible.
@@ -179,16 +225,169 @@ const breadcrumbSchema =
         targets.forEach((el) => observer.observe(el));
 
         // Anything already in view on load should not wait for a scroll.
+        // Read every element's position first (all layout reads batched
+        // together), THEN write the class changes in a second pass. Doing
+        // read-then-write per element in one loop forces a synchronous
+        // layout recalculation on every iteration (each classList.add
+        // invalidates layout, so the next getBoundingClientRect has to
+        // recompute it) — measured as ~540ms of forced-reflow Layout work
+        // blocking the hero image's LCP on first load.
         requestAnimationFrame(() => {
-          targets.forEach((el) => {
-            const box = el.getBoundingClientRect();
-            if (box.top < window.innerHeight) el.classList.add('is-revealed');
-          });
+          const viewportHeight = window.innerHeight;
+          const inView = Array.from(targets).filter(
+            (el) => el.getBoundingClientRect().top < viewportHeight,
+          );
+          inView.forEach((el) => el.classList.add('is-revealed'));
         });
       }
 
       initReveal();
       document.addEventListener('astro:page-load', initReveal);
+
+      // Defers a callback until the browser is idle (or after a timeout, so
+      // it never waits forever). Used below to keep GTM/analytics work off
+      // the main thread during the moment a ClientRouter navigation is
+      // painting — GTM synchronously evaluates every tag/trigger on each
+      // dataLayer.push, which is expensive enough on this container to
+      // visibly block clicks if it runs in the same tick as the page swap.
+      function whenIdle(fn: () => void) {
+        if ('requestIdleCallback' in window) {
+          (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void })
+            .requestIdleCallback(fn, { timeout: 500 });
+        } else {
+          setTimeout(fn, 0);
+        }
+      }
+
+      // GA4 page_view for every client-side navigation, initial load
+      // included, via GTM's dataLayer — see the container-snippet note in
+      // <head>. The GA4 Event tag inside GTM-WGCFVHQM listens for this
+      // "spa_page_view" custom event (not GTM's built-in Page View trigger,
+      // which only fires on real/hard loads and would miss every in-site
+      // navigation the ClientRouter performs).
+      function trackPageView() {
+        // @ts-expect-error — initialized by the GTM snippet in <head>.
+        window.dataLayer = window.dataLayer || [];
+        // @ts-expect-error — see above.
+        window.dataLayer.push({
+          event: 'spa_page_view',
+          page_title: document.title,
+          page_location: window.location.href,
+          page_path: window.location.pathname,
+        });
+      }
+
+      document.addEventListener('astro:page-load', () => whenIdle(trackPageView));
+
+      // Per-visitor journey, kept entirely client-side until someone submits
+      // the estimate form. Two small storage items, same spirit as the cost
+      // calculator's existing `clearview:scope` sessionStorage key:
+      //
+      // - `clearview:vid` (localStorage): a random id so a returning visitor
+      //   can be recognized as "probably the same person" across separate
+      //   visits. Not a cookie, not sent anywhere on its own, never leaves
+      //   the browser unless an estimate is actually submitted.
+      // - `clearview:visits` (sessionStorage): a capped list of
+      //   {path, title, ts} for this browsing session, plus first-touch
+      //   referrer/UTM info captured once. EstimateForm.astro reads both at
+      //   submit time and attaches a summary to the lead so Mark can see
+      //   what someone looked at before asking for an estimate.
+      //
+      // None of this is read by anything except EstimateForm.astro's submit
+      // handler — see /legal/privacy for what this is and is not used for.
+      function trackVisitJourney() {
+        try {
+          const path = window.location.pathname;
+          const title = document.title;
+          const now = Date.now();
+
+          let vid = localStorage.getItem('clearview:vid');
+          if (!vid) {
+            vid = (crypto.randomUUID ? crypto.randomUUID() : `${now}-${Math.random().toString(16).slice(2)}`);
+            localStorage.setItem('clearview:vid', vid);
+          }
+
+          if (!localStorage.getItem('clearview:first_touch')) {
+            const params = new URLSearchParams(window.location.search);
+            localStorage.setItem(
+              'clearview:first_touch',
+              JSON.stringify({
+                path,
+                referrer: document.referrer || null,
+                utm_source: params.get('utm_source'),
+                utm_medium: params.get('utm_medium'),
+                utm_campaign: params.get('utm_campaign'),
+                ts: now,
+              }),
+            );
+          }
+
+          const MAX_VISITS = 25;
+          let visits = [];
+          try {
+            visits = JSON.parse(sessionStorage.getItem('clearview:visits') || '[]');
+          } catch {
+            visits = [];
+          }
+          const last = visits[visits.length - 1];
+          if (!last || last.path !== path) {
+            visits.push({ path, title, ts: now });
+            if (visits.length > MAX_VISITS) visits = visits.slice(visits.length - MAX_VISITS);
+            sessionStorage.setItem('clearview:visits', JSON.stringify(visits));
+          }
+        } catch {
+          // Storage can be unavailable (private browsing, disabled storage,
+          // etc.) — the journey is a nice-to-have on top of the estimate
+          // form, never a reason to break navigation.
+        }
+      }
+
+      trackVisitJourney();
+      document.addEventListener('astro:page-load', () => whenIdle(trackVisitJourney));
+
+      // Aggregate signal: "did someone actually read a guide", not just
+      // land on it. GTM's built-in Scroll Depth trigger only arms once per
+      // real page load (window.load), so on an SPA route change it silently
+      // stops re-arming for the next guide page — same class of bug the
+      // stock GA4 Page View trigger had before spa_page_view replaced it.
+      // Pushing our own event, re-armed on every astro:page-load, sidesteps
+      // that the same way trackPageView() already does for page views.
+      let removeScrollListener: (() => void) | null = null;
+      function trackGuideEngagement() {
+        removeScrollListener?.();
+        removeScrollListener = null;
+
+        if (!window.location.pathname.startsWith('/guides/')) return;
+
+        let fired = false;
+        const onScroll = () => {
+          if (fired) return;
+          const doc = document.documentElement;
+          const scrollable = doc.scrollHeight - window.innerHeight;
+          const depth = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 100;
+          if (depth < 75) return;
+          fired = true;
+          try {
+            // @ts-expect-error — initialized by the GTM snippet in <head>.
+            window.dataLayer = window.dataLayer || [];
+            // @ts-expect-error — see above.
+            window.dataLayer.push({
+              event: 'guide_engaged',
+              page_path: window.location.pathname,
+              page_title: document.title,
+            });
+          } catch {
+            // Never worth breaking the page over.
+          }
+          window.removeEventListener('scroll', onScroll);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        removeScrollListener = () => window.removeEventListener('scroll', onScroll);
+      }
+
+      trackGuideEngagement();
+      document.addEventListener('astro:page-load', trackGuideEngagement);
     </script>
   </body>
 </html>

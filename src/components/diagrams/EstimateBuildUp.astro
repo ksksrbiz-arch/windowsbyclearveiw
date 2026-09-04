@@ -1,0 +1,182 @@
+---
+/**
+ * How a real estimate actually builds up, using Mark's own numbers from
+ * data/pricing.ts directly -- nothing here is a separate hardcoded figure
+ * that could drift from the estimator. Four stages, stacked on one scale,
+ * for a representative opening (double-hung): base install, a material
+ * step-up, full-frame method, and trim. Rounded the same way the estimator
+ * rounds, so this always agrees with what the calculator actually shows.
+ */
+import { pricing } from '../../data/pricing';
+
+const round = (n: number) => Math.round(n / pricing.displayRounding) * pricing.displayRounding;
+
+const base = pricing.openings.find((o) => o.id === 'double-hung')!;
+const fiberglass = pricing.materials.find((m) => m.id === 'fiberglass')!;
+const fullFrame = pricing.fullFrame;
+const trim = pricing.modifiers.find((m) => m.id === 'trim')!;
+
+const rawStages = [
+  {
+    label: 'Base install',
+    note: 'Double-hung, vinyl, insert, ground floor',
+    low: base.low,
+    high: base.high,
+  },
+  {
+    label: '+ Fiberglass',
+    note: `Frame upgrade, ${fiberglass.multiplier}x the base`,
+    low: base.low * fiberglass.multiplier,
+    high: base.high * fiberglass.multiplier,
+  },
+  {
+    label: '+ Full-frame',
+    note: fullFrame.label,
+    low: base.low * fiberglass.multiplier + fullFrame.low,
+    high: base.high * fiberglass.multiplier + fullFrame.high,
+  },
+  {
+    label: '+ Trim',
+    note: trim.label,
+    low: base.low * fiberglass.multiplier + fullFrame.low + trim.low,
+    high: base.high * fiberglass.multiplier + fullFrame.high + trim.high,
+  },
+];
+
+const stages = rawStages.map((s) => ({ ...s, low: round(s.low), high: round(s.high) }));
+const scaleMax = Math.max(...stages.map((s) => s.high)) * 1.08;
+const pct = (v: number) => (v / scaleMax) * 100;
+const money = (n: number) => `$${n.toLocaleString('en-US')}`;
+---
+<figure class="build-detail">
+  <figcaption class="build-heading">One opening, stacked</figcaption>
+  <p class="build-sub">
+    A double-hung window, priced up one real decision at a time. Every number below is Mark's own
+    installed pricing -- the same figures the <a href="/tools/window-replacement-cost-calculator">cost calculator</a> uses.
+  </p>
+
+  <div class="build-rows" role="img" aria-label={`Cost build-up for a double-hung window: base install ${money(stages[0].low)} to ${money(stages[0].high)}, rising to ${money(stages[3].low)} to ${money(stages[3].high)} with a fiberglass upgrade, full-frame method, and trim all added.`}>
+    {stages.map((stage) => (
+      <div class="build-row">
+        <div class="build-row-label">
+          <span class="build-row-name">{stage.label}</span>
+          <span class="build-row-note">{stage.note}</span>
+        </div>
+        <div class="build-track">
+          <div class="build-zone" style={`left: ${pct(stage.low)}%; width: ${pct(stage.high) - pct(stage.low)}%`}></div>
+          <span class="build-figure" style={`left: ${pct(stage.high)}%`}>{money(stage.low)}&ndash;{money(stage.high)}</span>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p class="build-foot">
+    This is one opening. A whole-house bid multiplies rows like these by however many openings a
+    house has, and every house has a different mix of methods and access -- which is the real
+    reason two honest bids for the same house can still land far apart.
+  </p>
+</figure>
+
+<style>
+  .build-detail {
+    margin: 0;
+  }
+
+  .build-heading {
+    display: block;
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+
+  .build-sub {
+    margin: 0 0 var(--space-l);
+    max-width: var(--measure);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .build-sub a {
+    color: var(--accent-ink);
+    text-underline-offset: 0.2em;
+  }
+
+  .build-rows {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .build-row {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: center;
+  }
+
+  .build-row-label {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .build-row-name {
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .build-row-note {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .build-track {
+    position: relative;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--paper-sunk);
+    border: 1px solid var(--line);
+  }
+
+  .build-zone {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .build-figure {
+    position: absolute;
+    top: 50%;
+    translate: -100% -50%;
+    margin-left: -0.6rem;
+    white-space: nowrap;
+    font-size: var(--step--2);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .build-foot {
+    margin: var(--space-l) 0 0;
+    max-width: var(--measure);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 700px) {
+    .build-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xs);
+    }
+
+    .build-figure {
+      position: static;
+      display: block;
+      translate: none;
+      margin: var(--space-3xs) 0 0;
+      text-align: right;
+    }
+  }
+</style>

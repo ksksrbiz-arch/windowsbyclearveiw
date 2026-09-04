@@ -6,6 +6,7 @@ const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
   ['/replacement', 'Replacement'],
   ['/new-construction', 'New construction'],
+  ['/window-features', 'Features'],
   ['/process', 'Process'],
   ['/tools', 'Tools'],
   ['/guides', 'Guides'],
@@ -14,7 +15,7 @@ const links = [
   ['/about', 'About'],
 ];
 ---
-<header class="site-header" transition:persist data-scrolled="false">
+<header class="site-header" transition:persist data-scrolled="false" data-loading="false">
   <div class="wrap header-inner">
     <Brand />
 
@@ -129,6 +130,19 @@ const links = [
     trackScroll();
   }
 
+  // Branded loading moment: the mark gets a small pulse for the duration of a
+  // page transition, so a slow connection sees the logo breathe instead of a
+  // frozen header. astro:before-preparation fires the instant navigation
+  // starts (well before the new page's own scripts run), astro:page-load
+  // fires once the new page is in and interactive.
+  const header = document.querySelector('.site-header');
+  document.addEventListener('astro:before-preparation', () => {
+    header?.setAttribute('data-loading', 'true');
+  });
+  document.addEventListener('astro:page-load', () => {
+    header?.setAttribute('data-loading', 'false');
+  });
+
   setUpHeader();
   document.addEventListener('astro:page-load', setUpHeader);
 </script>
@@ -183,6 +197,32 @@ const links = [
     transform-origin: left;
     background: linear-gradient(90deg, var(--accent), var(--accent-bright));
     transition: transform 90ms linear;
+  }
+
+  /* The branded loading moment: while a page transition is in flight, the
+     mark in the header gets a slow, deliberate pulse rather than the page
+     just going still. :global() reaches into Brand.astro's own scope, since
+     Astro's per-component CSS isolation would otherwise block it. */
+  .site-header[data-loading='true'] :global(.brand-mark) {
+    animation: brand-pulse 900ms ease-in-out infinite;
+  }
+
+  @keyframes brand-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.55;
+      transform: scale(0.92);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header[data-loading='true'] :global(.brand-mark) {
+      animation: none;
+    }
   }
 
   .nav {
@@ -332,6 +372,14 @@ const links = [
 
     .header-cta-short {
       display: inline;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Below this width the fixed mobile CTA bar owns click-to-call, so the
+       header pill would just be a second, smaller copy of the same action. */
+    .header-cta {
+      display: none;
     }
   }
 </style>

@@ -145,6 +145,7 @@
   --radius-lg: 6px;
   --max: 1240px;
   --measure: 68ch;
+  --mobile-cta-h: 3.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -157,7 +158,24 @@
 
 * { box-sizing: border-box; }
 
+/* An unconditional `display:` rule on a selector beats the browser's own
+   `[hidden]` attribute rule regardless of specificity, since author-origin
+   CSS always wins over user-agent CSS. Every element this site toggles via
+   `.hidden = true/false` (not a class) relies on the native behavior, so
+   this reasserts it globally rather than re-discovering the bug per
+   component — confirmed live on `.ask-starters` (never actually hid after
+   the first question) before this rule existed. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
+
+/* A default blue selection on an otherwise tokenised page is the fastest tell
+   that nobody looked at the last 1%. Tint it with the accent instead — text
+   colour is left alone so this reads correctly on both light and dark
+   sections rather than fixing one and breaking the other. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
 
 body {
   margin: 0;
@@ -253,7 +271,12 @@ p, li { text-wrap: pretty; }
 }
 
 .btn:hover { transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover,
+  .btn:active { transform: none; }
+}
 
 .btn-primary {
   background: var(--ink);
@@ -493,18 +516,53 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* The clip itself is a logo sting: the mark assembles, then the full
+     lockup (wordmark + tagline) holds for most of the loop. Biased upward,
+     the crop keeps the mark and lets the copy's own dark wash swallow the
+     wordmark before it ever reaches the text below, instead of the two
+     fighting for the same few lines. */
+  object-position: 50% 8%;
 }
 
 .video-wash {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(11 12 14 / 0.15), rgb(11 12 14 / 0.72) 70%);
+  background: linear-gradient(
+    180deg,
+    rgb(11 12 14 / 0.2) 0%,
+    rgb(11 12 14 / 0.38) 38%,
+    rgb(11 12 14 / 0.82) 62%,
+    rgb(11 12 14 / 0.94) 100%
+  );
 }
 
 .video-copy {
   position: relative;
   z-index: 1;
   padding: 6rem 0 4rem;
+  /* A beat of black-and-mark-only before the page's own words land, rather
+     than both appearing in the same instant the video starts assembling
+     itself. Reduced-motion drops straight to the end state below. */
+  opacity: 0;
+  animation: video-copy-in 900ms var(--ease-out) 4.1s forwards;
+}
+
+@keyframes video-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-copy {
+    opacity: 1;
+    animation: none;
+  }
 }
 
 .video-copy h1,
@@ -514,6 +572,34 @@ input:focus, textarea:focus, select:focus {
 }
 
 .video-copy .kicker { color: var(--on-dark-faint); }
+
+@media (max-width: 640px) {
+  .video-hero {
+    min-height: min(74vh, 620px);
+  }
+
+  /* Portrait screens crop far less off the top and bottom of a 16:9 clip, so
+     the wordmark reads larger and closer to the copy than on desktop. Push
+     the crop further up and lean harder on the wash to compensate. */
+  .video-stage,
+  .hero-media {
+    object-position: 50% 2%;
+  }
+
+  .video-wash {
+    background: linear-gradient(
+      180deg,
+      rgb(11 12 14 / 0.25) 0%,
+      rgb(11 12 14 / 0.5) 30%,
+      rgb(11 12 14 / 0.9) 55%,
+      rgb(11 12 14 / 0.97) 100%
+    );
+  }
+
+  .video-copy {
+    padding: 4.5rem 0 3rem;
+  }
+}
 
 .btn-light {
   background: var(--on-dark);
@@ -590,6 +676,16 @@ input:focus, textarea:focus, select:focus {
   .split { display: grid; }
 }
 
+@media (max-width: 640px) {
+  /* Room for the fixed mobile CTA bar so it never sits over the last thing
+     on the page — most often the footer's legal line. Scoped away from
+     body.internal: the internal quoting tool uses its own layout and never
+     renders the bar, so it would otherwise lose space to a phantom one. */
+  body:not(.internal) {
+    padding-bottom: calc(var(--mobile-cta-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
@@ -625,6 +721,31 @@ html.reveal-ready [data-reveal].is-revealed {
 
 /* Stagger children of a revealed group. */
 [data-reveal-group] > * { transition-delay: calc(var(--i, 0) * 70ms); }
+
+/* The estimate flow's call-to-action phone number: large, non-underlined,
+   tabular-nums so the digits do not jitter, with an accent hover. Shared
+   because estimate.astro, estimate/sent.astro, and estimate/problem.astro
+   all showed the same number the same way. `.is-large` bumps it to the
+   size the confirmation page uses. */
+.phone-display {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.phone-display.is-large {
+  font-size: var(--step-3);
+}
+
+.phone-display a {
+  text-decoration: none;
+}
+
+.phone-display a:hover {
+  color: var(--accent-ink);
+}
 
 /* A rule-and-label device, the closest thing this site has to a motif. */
 .rule-label {
@@ -695,19 +816,45 @@ html.reveal-ready [data-reveal].is-revealed {
   line-height: 1.65;
 }
 
+/* The dek reads as a pull quote, not the first line of the body — a colour
+   accent here is the first thing a reader sees below the diagram, so the
+   article has one visual beat before the black-on-paper text starts. */
 .prose > p:first-of-type {
   font-size: var(--step-1);
   line-height: 1.5;
   color: var(--ink-soft);
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-m);
 }
 
+/* A short accent bar per h2 gives a long answer visible landmarks to skim
+   for, rather than every section starting identically in black. */
 .prose h2 {
-  margin: var(--space-xl) 0 var(--space-xs);
+  position: relative;
+  margin: calc(var(--space-xl) * 1.3) 0 var(--space-s);
+  padding-top: var(--space-s);
   font-size: var(--step-3);
+}
+
+.prose h2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.75rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+}
+
+.prose h2:first-child {
+  margin-top: 0;
 }
 
 .prose h3 {
   margin: var(--space-l) 0 var(--space-2xs);
+  padding-left: var(--space-s);
+  border-left: 2px solid var(--line-strong);
   font-size: var(--step-1);
 }
 
@@ -735,8 +882,7 @@ html.reveal-ready [data-reveal].is-revealed {
   text-decoration-color: currentColor;
 }
 
-.prose ul,
-.prose ol {
+.prose ul {
   padding-left: var(--space-m);
 }
 
@@ -744,8 +890,41 @@ html.reveal-ready [data-reveal].is-revealed {
   margin-bottom: var(--space-2xs);
 }
 
-.prose li::marker {
+.prose ul li::marker {
   color: var(--accent);
+}
+
+/* Numbered steps get the same filled-circle mark used in the estimator and
+   the process page, rather than a bare browser numeral — a sequence reads
+   as a sequence rather than as more body text. */
+.prose ol {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: prose-step;
+}
+
+.prose ol li {
+  position: relative;
+  counter-increment: prose-step;
+  padding-left: calc(var(--space-l) + 0.2rem);
+  min-height: 1.6rem;
+}
+
+.prose ol li::before {
+  content: counter(prose-step);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-dark);
+  font-size: var(--step--2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .prose table {
@@ -845,13 +1024,18 @@ html.reveal-ready [data-reveal].is-revealed {
   .cta-actions,
   .est-actions,
   .estimate-form button,
+  .mobile-cta-bar,
   .btn {
     display: none !important;
   }
 
+  body {
+    padding-bottom: 0;
+  }
+
   /* One line of provenance so a printed page can be traced back. */
   .site-footer::after {
-    content: 'windowsbyclearveiw.com · Clearveiw Windows, LLC · Vancouver, WA · (564) 208-0801';
+    content: 'windowsbyclearview.com · Clearview Windows · Vancouver, WA · (564) 208-0801';
     display: block;
     margin-top: 0.5rem;
     font-size: 9pt;
