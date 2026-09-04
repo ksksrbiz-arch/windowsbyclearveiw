@@ -54,7 +54,7 @@ import { site, telHref } from '../../data/site';
     <div class="wrap split" data-reveal>
       <div>
         <p class="rule-label">Sooner is fine</p>
-        <p class="sent-phone"><a href={telHref()}>{site.phoneDisplay}</a></p>
+        <p class="phone-display is-large"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>If something changed or you want to talk it through now, call. Mark answers from the truck.</p>
       </div>
       <div>
@@ -146,24 +146,6 @@ import { site, telHref } from '../../data/site';
 
   .sent-note .rule-label {
     margin-bottom: var(--space-s);
-  }
-
-  /* The default link underline ran through the parentheses and read as a
-     typo. Same treatment as the estimate page's number. */
-  .sent-phone {
-    margin: 0 0 var(--space-2xs);
-    font-size: var(--step-3);
-    font-weight: 600;
-    letter-spacing: var(--tracking-display);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .sent-phone a {
-    text-decoration: none;
-  }
-
-  .sent-phone a:hover {
-    color: var(--accent-ink);
   }
 
   @media (max-width: 900px) {
