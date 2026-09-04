@@ -5,9 +5,10 @@ import { mailHref, site, telHref } from '../../data/site';
 ---
 <BaseLayout
   title="That request did not go through"
-  description="The estimate form could not be sent. Call Clearveiw Windows, LLC in Vancouver, WA instead."
+  description="The estimate form could not be sent. Call Clearview Windows in Vancouver, WA instead."
   path="/estimate/problem"
   crumbs={[{ name: 'Request an estimate', href: '/estimate' }]}
+  noindex
 >
   <section class="page-hero">
     <div class="wrap">
@@ -20,16 +21,19 @@ import { mailHref, site, telHref } from '../../data/site';
     </div>
   </section>
   <section class="section">
-    <div class="wrap split">
+    <div class="wrap split" data-reveal>
       <div>
         <p class="kicker">Fastest route</p>
-        <h2><a href={telHref()}>{site.phoneDisplay}</a></h2>
+        <p class="phone-display"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>
-          Leave a name, your city, and a rough window count. You can also email
+          Leave a name, your city, and a rough window count. You can also email{' '}
           <a href={mailHref()}>{site.email}</a>.
         </p>
       </div>
-      <EstimateForm />
+      <div>
+        <p class="kicker">Try again</p>
+        <EstimateForm />
+      </div>
     </div>
   </section>
 </BaseLayout>

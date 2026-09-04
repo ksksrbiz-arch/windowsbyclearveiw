@@ -3,19 +3,24 @@ import { site, phoneDigits } from '../data/site';
 
 interface Props {
   extra?: Record<string, unknown>;
+  /** Absolute URL of a representative photo. BaseLayout already computes one
+   *  per page (the OG image); reusing it here means the business entity
+   *  always points at a real job photo instead of nothing. */
+  image?: string;
 }
 
-const { extra } = Astro.props;
+const { extra, image } = Astro.props;
 const digits = phoneDigits();
 
 const business = {
-  '@context': 'https://schema.org',
   '@type': 'HomeAndConstructionBusiness',
   '@id': `${site.url}/#business`,
   name: site.legalName,
   alternateName: site.shortName,
   url: site.url,
   description: site.description,
+  slogan: site.tagline,
+  ...(image ? { image } : {}),
   areaServed: site.nearby.map((place) => ({
     '@type': 'City',
     name: place.name,
@@ -37,6 +42,7 @@ const business = {
     'Full-frame window replacement',
     'Insert window replacement',
     'Vinyl windows',
+    'Fiberglass windows',
   ],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
@@ -62,6 +68,7 @@ const business = {
   },
   ...(digits ? { telephone: `+1${digits}` } : {}),
   ...(site.email ? { email: site.email } : {}),
+  ...(site.ubiNumber ? { taxID: site.ubiNumber } : {}),
   // Washington requires the contractor registration number in advertising.
   // Publish it in the markup as soon as site.lniNumber is filled in.
   ...(site.lniNumber
@@ -78,6 +85,26 @@ const business = {
     : {}),
 };
 
-const graph = extra ? [business, extra] : business;
+// Pages hand in either a single schema.org node (areas, legal) or their own
+// `{ '@context', '@graph': [...] }` document (guides, the cost calculator).
+// Either way this must end up as ONE flat graph: nesting a page's `@graph`
+// document as a second array element — `[business, { '@context', '@graph' }]`
+// — used to produce a document Google's structured-data parsers cannot read
+// as separate entities. `@context` only needs to appear once, at the top.
+function stripContext(node: Record<string, unknown>) {
+  const { '@context': _context, ...rest } = node;
+  return rest;
+}
+
+const extraNodes = extra
+  ? Array.isArray(extra['@graph'])
+    ? (extra['@graph'] as Record<string, unknown>[]).map(stripContext)
+    : [stripContext(extra)]
+  : [];
+
+const document =
+  extraNodes.length > 0
+    ? { '@context': 'https://schema.org', '@graph': [business, ...extraNodes] }
+    : { '@context': 'https://schema.org', ...business };
 ---
-<script type="application/ld+json" set:html={JSON.stringify(graph)} />
+<script type="application/ld+json" set:html={JSON.stringify(document)} />

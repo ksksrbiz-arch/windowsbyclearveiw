@@ -1,5 +1,6 @@
 ---
 import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { Image, getImage } from 'astro:assets';
 import { site, telHref } from '../data/site';
 import { heroPhoto, findWork } from '../data/work';
@@ -8,7 +9,23 @@ import { heroPhoto, findWork } from '../data/work';
 // the claim the trust strip makes one column to the left.
 const insetPhoto = findWork('blue-pair-installday');
 
-const hasVideo = existsSync(new URL('../../public/video/hero.mp4', import.meta.url));
+// import.meta.url is not safe here: Astro's production build renders this
+// component from a bundled chunk under dist/, not from its source location,
+// so a URL relative to import.meta.url resolves to the wrong tree entirely
+// (silently returning false and falling back to the photo hero). The
+// project root — where "public/" always lives — is process.cwd() in both
+// `astro dev` and `astro build`.
+//
+// Multiple takes of the same brand-reveal animation live side by side
+// (logo-reveal-1, logo-reveal-2, ...) so repeat visitors don't see the
+// identical loop every time. The list is discovered rather than hardcoded
+// to a count, so dropping in a logo-reveal-3.mp4 later is enough on its
+// own. Variant 1 is what renders in the static HTML (and so is what shows
+// with JS disabled); the client script below picks randomly among all of
+// them once the page loads.
+const heroVariants = ['logo-reveal-1', 'logo-reveal-2', 'logo-reveal-3', 'logo-reveal-4']
+  .filter((name) => existsSync(join(process.cwd(), `public/video/${name}.mp4`)));
+const hasVideo = heroVariants.length > 0;
 
 // The poster has to be a plain URL, so render one through the image pipeline.
 const poster = await getImage({
@@ -29,18 +46,22 @@ const poster = await getImage({
         playsinline
         loop
         preload="metadata"
+        data-variants={JSON.stringify(heroVariants)}
       >
-        <source src="/video/hero.webm" type="video/webm" />
-        <source src="/video/hero.mp4" type="video/mp4" />
+        <source src={`/video/${heroVariants[0]}.webm`} type="video/webm" />
+        <source src={`/video/${heroVariants[0]}.mp4`} type="video/mp4" />
       </video>
       <div class="video-wash"></div>
     </div>
 
     <div class="wrap video-copy">
-      <p class="kicker">Vancouver, WA &middot; Clark County</p>
-      <h1>Clear glass. Solid seals.</h1>
+      <p class="kicker">
+        <img class="kicker-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+        Vancouver, WA &middot; Clark County
+      </p>
+      <h1>Great prices. Clean work. Clear windows.</h1>
       <p class="lede">
-        Replacement and new-construction windows, installed by the person who quoted them.
+        Replacement and new-construction windows, quoted in person and installed by a crew that shows up on time.
       </p>
       <p class="hero-actions">
         <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
@@ -53,19 +74,23 @@ const poster = await getImage({
     <div class="photo-hero-grain" aria-hidden="true"></div>
     <div class="wrap photo-hero-inner">
       <div class="photo-hero-copy">
-        <p class="hero-eyebrow"><span aria-hidden="true"></span>Vancouver, WA &middot; Clark County</p>
-        <h1>Clear glass.<br /><em>Solid seals.</em></h1>
+        <p class="hero-eyebrow">
+          <img class="hero-eyebrow-mark" src="/logo/icon-mark@256.png" width="256" height="256" alt="" loading="eager" decoding="async" />
+          Vancouver, WA &middot; Clark County
+        </p>
+        <h1>Great prices.<br />Clean work.<br /><em>Clear windows.</em></h1>
         <p class="lede">
-          {site.shortName} replaces tired windows and sets new ones in Vancouver, Camas,
-          Washougal, Battle Ground, Brush Prairie, Ridgefield, and the rest of Clark County.
+          {site.shortName} replaces tired windows and sets new ones for builders — Vancouver,
+          Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, and the rest of Clark
+          County.
         </p>
         <p class="hero-actions">
           <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
           <a class="btn btn-ghost btn-on-dark" href="/estimate">Request an estimate</a>
         </p>
-        <p class="hero-note">Free measure. A written number before anything comes out of the wall.</p>
+        <p class="hero-note">Free in-home measure. A written estimate before anything comes out of the wall.</p>
         <ul class="trust-strip">
-          <li><strong>Owner</strong><span>on the job, start to finish</span></li>
+          <li><strong>Owner</strong><span>quotes every job in person</span></li>
           <li><strong>Both</strong><span>replacement &amp; new construction</span></li>
           <li><strong>Local</strong><span>Vancouver, WA based</span></li>
           <li><strong>Free</strong><span>written estimate, no pressure</span></li>
@@ -118,6 +143,46 @@ const poster = await getImage({
       video.pause();
       return;
     }
+
+    // Cycle through every take of the reveal in turn, rather than looping
+    // whichever one loads first forever. The server render always ships
+    // variant 1 (so JS-off visitors and crawlers see a real video either
+    // way, via the `loop` attribute in the markup); once JS takes over we
+    // shuffle the run order once and advance on each `ended` event, so
+    // someone watching the hero for a while actually sees the other takes
+    // instead of the same clip on repeat. Guarded by a dataset flag rather
+    // than re-running on every astro:page-load, since a mid-visit restart
+    // would just yank the clip out from under someone already watching it.
+    if (!video.dataset.cycleBound) {
+      video.dataset.cycleBound = '1';
+      try {
+        const order = JSON.parse(video.dataset.variants || '[]');
+        if (Array.isArray(order) && order.length > 1) {
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+          }
+          const sources = video.querySelectorAll('source');
+          const loadVariant = (name) => {
+            if (sources[0]) sources[0].src = `/video/${name}.webm`;
+            if (sources[1]) sources[1].src = `/video/${name}.mp4`;
+            video.load();
+          };
+          let index = 0;
+          video.loop = false;
+          video.addEventListener('ended', () => {
+            index = (index + 1) % order.length;
+            loadVariant(order[index]);
+            video.play().catch(() => {});
+          });
+          loadVariant(order[0]);
+        }
+      } catch {
+        // Malformed data-variants just means everyone gets variant 1,
+        // looping via the markup's `loop` attribute — fine.
+      }
+    }
+
     video.play().catch(() => {});
   }
 
@@ -177,6 +242,12 @@ const poster = await getImage({
     min-width: 0;
   }
 
+  .video-copy .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .hero-eyebrow {
     display: flex;
     align-items: center;
@@ -189,16 +260,16 @@ const poster = await getImage({
     color: var(--on-dark-faint);
   }
 
-  .hero-eyebrow span {
-    width: 0.44rem;
-    height: 0.44rem;
-    border-radius: 50%;
-    background: var(--accent-bright);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-bright) 22%, transparent);
+  .hero-eyebrow-mark,
+  .kicker-mark {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    object-fit: contain;
   }
 
   .photo-hero-copy h1 {
-    max-width: 12ch;
+    max-width: 17ch;
     color: var(--on-dark);
     font-size: var(--step-6);
   }

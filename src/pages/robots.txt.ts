@@ -4,6 +4,8 @@ import { site } from '../data/site';
 export const GET: APIRoute = () => {
   const body = `User-agent: *
 Allow: /
+Disallow: /internal/
+Disallow: /api/
 
 Sitemap: ${site.url}/sitemap-index.xml
 `;

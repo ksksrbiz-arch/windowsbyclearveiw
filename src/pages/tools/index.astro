@@ -1,17 +1,48 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { pricingIsUsable } from '../../data/pricing';
+import { site } from '../../data/site';
+import toolsHeroSrc from '../../assets/hero/tools.jpg';
 
 const showMoney = pricingIsUsable();
+
+// Real stock photography rather than AI imagery -- a tape measure needs no
+// disclaimer for being generic, only for being staged as a Clearview job.
+const heroBg = await getImage({ src: toolsHeroSrc, width: 2400, format: 'webp', quality: 76 });
+
+// Must match the title the calculator page itself gives that URL (see
+// window-replacement-cost-calculator.astro) or the listing and the page it
+// points to disagree.
+const toolName = showMoney
+  ? 'Window replacement cost calculator'
+  : 'Window replacement project planner';
+
+// A single, plain ItemList — not the full business @graph — so this stays
+// legible if a second tool ever lands here and the list grows past one.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Free window planning tools',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      url: `${site.url}/tools/window-replacement-cost-calculator`,
+      name: toolName,
+    },
+  ],
+};
 ---
 <BaseLayout
-  title="Free window tools"
-  description="Free tools for Clark County homeowners planning a window replacement — no email required."
+  title="Free window replacement tools"
+  description="Free tools for Clark County homeowners planning a window replacement, including a cost calculator — no email required."
   path="/tools"
   crumbs={[{ name: 'Tools', href: '/tools' }]}
+  schema={schema}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Tools</p>
       <h1>Work it out yourself first.</h1>
@@ -20,6 +51,7 @@ const showMoney = pricingIsUsable();
         want — we would rather you understood the job than felt rushed into it.
       </p>
     </div>
+    <p class="hero-photo-credit">Stock photography — not an actual Clearview job or job site</p>
   </section>
   <section class="section">
     <div class="wrap" data-reveal>
@@ -45,8 +77,7 @@ const showMoney = pricingIsUsable();
       </a>
 
       <p class="fine-print tool-note">
-        More tools will land here as they earn their place. We would rather ship one that
-        works than four that flatter.
+        More tools are on the way. We would rather ship one that works than several that do not.
       </p>
     </div>
   </section>
@@ -58,6 +89,22 @@ const showMoney = pricingIsUsable();
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* One tool in a three-across card grid looked like two had failed to load.
      Given the whole band, it reads as the offer it actually is. */
   .tool-feature {

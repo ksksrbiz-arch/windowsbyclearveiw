@@ -4,7 +4,7 @@ description: What drives the price of replacement windows in Washington — meth
 kicker: Planning the budget
 topic: Cost
 published: true
-updated: 2026-08-19
+updated: 2026-08-30
 order: 4
 faq:
   - question: How much does one window cost in Washington?
@@ -13,19 +13,21 @@ faq:
     answer: The Section 25C energy-efficient home improvement credit ended for property placed in service after December 31, 2025. Do not count on it for a 2026 install. Some Washington utilities still offer window rebates. Those change by fuel type and U-factor, so we check your utility at estimate time.
   - question: Why is a whole-house price so wide?
     answer: Ten small inserts in a ranch is a different job from fifteen full-frame units on a two-story with custom sizes. Count, method, material, and access swing the total more than the brand name on the glass.
-heroImage: ./img-window-replacement-cost-washington.jpg
-heroImageAlt: A calculator and pen next to a financial chart, illustrating budgeting for a window replacement project.
-heroImageCredit: Stock photo — Pixabay / Pexels (free license)
+heroImage: ./img-window-replacement-cost-washington.png
+heroImageAlt: Illustration of a tape measure and a clipboard with an estimate sheet resting on a window sill, representing the measure a real quote starts from.
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
+heroImageFocus: 62% 62%
+secondaryDiagram: cost-build-up
 ---
 
-A window price on the internet is a guess about someone else’s house. The number that matters is the one that follows a measure. This page is here so that number is not a surprise.
+Short answer: published 2026 industry data puts a standard vinyl replacement window in Washington at roughly **$600 to $1,300 installed per opening**, with Seattle-area labor toward the top of that band. That is a regional average, not a quote — the number that actually matters is the one that follows a measure of your openings. This page is here so that number is not a surprise.
 
 ## What you are actually paying for
 
 Four things move the bid:
 
 1. **Method.** [Insert vs full-frame](/guides/full-frame-vs-insert) changes labor and finish work more than most product upgrades.
-2. **Window line.** Vinyl is the Washington workhorse and what we install, but lines differ. A step up in the window itself costs more per opening for the same install labour.
+2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either, a step up in the window line itself — Cascade to Milgard — adds cost per opening for the same install labour.
 3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or code.
 4. **Access.** A first-floor slider is not a third-story picture window over a roof.
 
@@ -33,9 +35,9 @@ Permits, if the city requires them for the scope, sit on top of that.
 
 ## Ranges, not quotes
 
-Industry write-ups for Washington in 2026 often land around **$600 to $1,300 per typical opening** for standard energy-efficient vinyl, with Seattle-area labor on the higher end of that band. A small handful of windows can land in the low thousands. A mid-size house is often a five-figure project.
+That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once method and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and anything full-frame push well past a "typical opening" number built around a standard vinyl insert.
 
-Treat those as orientation. Your openings, your trim, and your method will move the number.
+Treat all of it as a starting point. Your openings, your trim, and your method will move the number — that is what a measure is for.
 
 ## How to think about value
 
@@ -51,6 +53,17 @@ If someone promises a two-year payback from energy alone, ask them to show the m
 ## Rebates in 2026
 
 The federal 25C window credit is over for new 2026 installs. Some utilities in Washington still rebate qualifying U-factors, especially when you are replacing single-pane or very poor metal-frame units. Programs differ by city and fuel. We will not print a rebate on an estimate unless it still exists for your meter.
+
+## Comparing two bids that don't match
+
+The single biggest cause of "why is this quote double the other one" is not markup — it's scope. Before comparing numbers, check that both bids include the same:
+
+- **Method per opening.** An insert quote and a full-frame quote for the same window are not the same job, even at the same price.
+- **Glass package.** Double-pane Low-E and triple-pane are not interchangeable line items.
+- **Haul-away and disposal.** Some bids quietly exclude it.
+- **Permits, if the scope needs one.** A lower bid that skips a required permit is not actually lower.
+
+Ask each bidder to write the method and glass spec per opening, not just a total. That is the only way two numbers become comparable.
 
 ## What an estimate from us includes
 

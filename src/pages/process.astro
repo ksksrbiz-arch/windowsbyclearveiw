@@ -1,8 +1,14 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { processWork } from '../data/work';
+import processHeroSrc from '../assets/hero/process.png';
+
+// Full-bleed hero background. AI-generated, not a real install, so it is
+// captioned as such — the same rule the guide photos already follow.
+const heroBg = await getImage({ src: processHeroSrc, width: 2400, format: 'webp', quality: 76 });
 
 // Mirrors the four <li> items below exactly — if the steps change, this must
 // change with them, or the markup and the schema will say different things.
@@ -28,8 +34,8 @@ const steps = [
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How Clearveiw Windows installs replacement windows',
-  description: 'The four steps Clearveiw Windows follows on every installation, from the first walkthrough to the final walk-through.',
+  name: 'How Clearview Windows installs replacement windows',
+  description: 'The four steps Clearview Windows follows on every installation, from the first walkthrough to the final walk-through.',
   step: steps.map((step) => ({
     '@type': 'HowToStep',
     name: step.name,
@@ -39,20 +45,20 @@ const schema = {
 ---
 <BaseLayout
   title="How installation works"
-  description="From first measure to final sweep: the Clearveiw Windows installation process for Clark County homeowners."
+  description="From first measure to final sweep: the Clearview Windows installation process for Clark County homeowners."
   path="/process"
   crumbs={[{ name: 'Process', href: '/process' }]}
   schema={schema}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Process</p>
       <h1>Measure once. Install clean.</h1>
       <p class="lede">
-        Four steps, in this order, on every job. Nothing here is a surprise on install day —
-        that is the whole point of writing it down.
+        Four steps, in this order, on every job — so nothing on install day is a surprise.
       </p>
     </div>
+    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
   </section>
 
   <section class="section">
@@ -92,6 +98,24 @@ const schema = {
 </BaseLayout>
 
 <style>
+  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
+     not a photo of a real install — hence the small credit line. */
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
   /* The shared .steps device, given room to be the page rather than a list
      tucked beside a paragraph. */
   .process-steps li {
