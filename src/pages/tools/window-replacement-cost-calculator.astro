@@ -46,6 +46,17 @@ const faq = [
   },
 ];
 
+// Same four steps as the "How to use it" <ol> below (`.steps`), spelled out
+// in full sentences for the structured-data readers that never see the page's
+// terse on-screen fragments. If the step order or count changes there, update
+// this array too — the `name` fields intentionally echo that list's wording.
+const howToSteps = [
+  { name: 'Count the openings', text: 'Walk the house and count every opening you would want done, by type, not by room.' },
+  { name: 'Pick a material', text: 'Vinyl is the Clark County default and the only material Clearveiw installs.' },
+  { name: 'Say how much comes out', text: 'Choose insert, full-frame, or a mix if you are not sure — the calculator prices either way.' },
+  { name: 'Flag the complications', text: 'Note upstairs access, arches or custom shapes, and any soft or rotten sills.' },
+];
+
 const schema = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -58,6 +69,16 @@ const schema = {
       description,
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
       provider: { '@id': `${site.url}/#business` },
+    },
+    {
+      '@type': 'HowTo',
+      name: 'How to use the window replacement cost calculator',
+      description: 'Four steps to a scoped, ranged estimate for a Clark County window replacement.',
+      step: howToSteps.map((step) => ({
+        '@type': 'HowToStep',
+        name: step.name,
+        text: step.text,
+      })),
     },
     {
       '@type': 'FAQPage',
