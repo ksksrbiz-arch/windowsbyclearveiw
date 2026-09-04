@@ -6,7 +6,7 @@ description: Replacement and new-construction window installation for Vancouver,
 published: true
 ---
 
-Vancouver is home base. It is also the Clark County seat, so the housing stock spans a real range: a 19th-century core near Fort Vancouver, waves of postwar and 1960s-and-up suburbs, and newer builds around Salmon Creek and east of I-205. Different decades, same rain and the same heating season.
+Vancouver is home base. It is also the Clark County seat and, at roughly 200,000 people, the fourth-largest city in Washington — set on the Columbia River across from Portland. The housing stock spans a real range: a 19th-century core near Fort Vancouver, waves of postwar and 1960s-and-up suburbs, and newer builds around Salmon Creek and east of I-205. Different decades, same rain and the same heating season.
 
 We measure for insert or full-frame, set vinyl or fiberglass, and leave the rooms usable. Neighborhoods we are in often: Hazel Dell, Salmon Creek, Felida, Orchards, Cascade Park, and downtown Vancouver.
 

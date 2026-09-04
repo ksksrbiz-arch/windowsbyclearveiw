@@ -6,7 +6,7 @@ description: Replacement and new-construction window installation for Battle Gro
 published: true
 ---
 
-Battle Ground is north-county — ranches, two-stories, and a lot of openings that have been leaking through more than one winter. It only incorporated in 1951 and roughly doubled in population through the 2000s, so most of what we see is suburban construction from the last few decades rather than an old town core. We look at the frame first, then recommend insert or full-frame.
+Battle Ground is north-county — ranches, two-stories, and a lot of openings that have been leaking through more than one winter. It only incorporated in 1951 and roughly doubled in population through the 2000s, and it is still growing — past 22,000 residents now — so most of what we see is suburban construction from the last few decades rather than an old town core. We look at the frame first, then recommend insert or full-frame.
 
 Same Vancouver crew. Same written estimate. Nearby Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
 
