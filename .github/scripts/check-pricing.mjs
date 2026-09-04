@@ -44,7 +44,7 @@ try {
 
 const doc = {
   basis: {
-    source: model.isAverage ? 'averages' : 'clearveiw',
+    source: model.isAverage ? 'averages' : 'clearview',
     reviewedAt: model.reviewedAt,
     maxAgeDays: 180,
   },

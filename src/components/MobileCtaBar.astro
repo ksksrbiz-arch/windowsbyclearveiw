@@ -1,0 +1,77 @@
+---
+import { site, telHref } from '../data/site';
+---
+<nav class="mobile-cta-bar" aria-label="Quick contact">
+  <a class="mobile-cta-item" href={telHref()}>
+    <svg viewBox="0 0 22 22" aria-hidden="true">
+      <path d="M5.5 3.5h3l1.2 3.6-2 1.6a11 11 0 0 0 5.6 5.6l1.6-2 3.6 1.2v3a1.5 1.5 0 0 1-1.6 1.5A15 15 0 0 1 4 5.1 1.5 1.5 0 0 1 5.5 3.5Z" />
+    </svg>
+    <span>Call Mark</span>
+  </a>
+  <a class="mobile-cta-item mobile-cta-primary" href="/estimate">
+    <svg viewBox="0 0 22 22" aria-hidden="true">
+      <path d="M6 3h7l4 4v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+      <path d="M13 3v4h4M8 12h6M8 15.5h4" />
+    </svg>
+    <span>Free estimate</span>
+  </a>
+</nav>
+
+<style>
+  /* Hidden on desktop: the sticky header's call button and the CtaBar bands
+     already cover it there. On a phone, this is the one thing on Brightside's
+     site we did not have — an action that stays in thumb reach no matter how
+     far down a 7000px page you have scrolled. */
+  .mobile-cta-bar {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .mobile-cta-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: fixed;
+      inset: auto 0 0;
+      z-index: 30;
+      background: var(--black);
+      border-top: 1px solid var(--dark-line-strong);
+      box-shadow: 0 -10px 24px rgb(0 0 0 / 0.35);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .mobile-cta-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: var(--mobile-cta-h);
+      color: var(--on-dark);
+      text-decoration: none;
+      font-size: var(--step--1);
+      font-weight: 600;
+    }
+
+    .mobile-cta-item svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .mobile-cta-item:active {
+      background: color-mix(in srgb, white 8%, transparent);
+    }
+
+    .mobile-cta-primary {
+      background: var(--accent);
+    }
+
+    .mobile-cta-primary:active {
+      background: var(--accent-bright);
+    }
+  }
+</style>

@@ -1,8 +1,16 @@
 ---
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
-import { allWork } from '../data/work';
+import { allWork, findWork } from '../data/work';
+import { site } from '../data/site';
+
+const ogPhoto = findWork('green-craftsman-upper')!;
+
+// A real job photo for the hero, not stock or AI -- the page's own copy
+// promises exactly that ("None of it is stock"), so the hero has to keep it.
+const heroBg = await getImage({ src: ogPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip
@@ -50,8 +58,10 @@ const total = allWork.length;
   description="Real window replacement and new-construction jobs in Vancouver, WA and Clark County — finished elevations, interiors, and install-day photos."
   path="/gallery"
   crumbs={[{ name: 'Gallery', href: '/gallery' }]}
+  ogImageSrc={ogPhoto.image}
+  ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero">
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Gallery</p>
       <h1>Mark’s work</h1>
@@ -70,6 +80,11 @@ const total = allWork.length;
           ))}
         </span>
       </p>
+      {site.social.facebook && (
+        <p class="gallery-social">
+          More jobs go up on <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a> as they finish.
+        </p>
+      )}
     </div>
   </section>
 
@@ -112,6 +127,12 @@ const total = allWork.length;
 </BaseLayout>
 
 <style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
   /* A jump index in the hero: 26 tiles down one page is a long scroll for a
      builder who only wants the framing shots. */
   /* The link list re-wraps when Outfit replaces the fallback — metric matching
@@ -146,6 +167,23 @@ const total = allWork.length;
   }
 
   .gallery-index a:hover {
+    color: var(--on-dark);
+    text-decoration-color: currentColor;
+  }
+
+  .gallery-social {
+    margin: var(--space-2xs) 0 0;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .gallery-social a {
+    color: var(--on-dark-soft);
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--dark-line-strong);
+  }
+
+  .gallery-social a:hover {
     color: var(--on-dark);
     text-decoration-color: currentColor;
   }
@@ -223,57 +261,10 @@ const total = allWork.length;
     font-variant-numeric: tabular-nums;
   }
 
+  /* Below 700px the label/count pair in .group-head wraps to two lines
+     rather than fighting for a single row next to the group heading. */
   @media (max-width: 700px) {
-    /* Per-group scale. The column counts keep every tile at or below the 450px
-     source width at the widths this page is read at. */
-  .work-grid.is-large {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .work-grid.is-square {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .work-grid.is-dense {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-2xs);
-  }
-
-  .work-grid.is-single {
-    grid-template-columns: minmax(0, 22rem);
-  }
-
-  /* Interiors are room shots, which survive a square crop better than an
-     elevation does — an elevation cropped short loses the roofline that makes
-     it legible. */
-  .work-grid.is-square :global(.work-card img) {
-    aspect-ratio: 1 / 1;
-  }
-
-  @media (max-width: 900px) {
-    .work-grid.is-large,
-    .work-grid.is-square {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .work-grid.is-dense {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 560px) {
-    .work-grid.is-large,
-    .work-grid.is-square,
-    .work-grid.is-dense {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .work-grid.is-single {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  .group-head {
+    .group-head {
       display: grid;
       gap: var(--space-2xs);
     }

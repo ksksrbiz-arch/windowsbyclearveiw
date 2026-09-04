@@ -1,0 +1,6 @@
+# @astrojs/sitemap only ever emits /sitemap-index.xml (which lists
+# /sitemap-0.xml) -- there is no /sitemap.xml route in this build. Plenty of
+# tools, crawlers, and humans still guess the conventional filename first
+# (this is exactly what tripped up Google Search Console), so alias it rather
+# than let it 404.
+/sitemap.xml /sitemap-index.xml 301
