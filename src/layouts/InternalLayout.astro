@@ -12,6 +12,7 @@ const navItems = [
   { href: '/internal/quotes', label: 'Quotes' },
   { href: '/internal/jobs', label: 'Jobs' },
   { href: '/internal/schedule', label: 'Schedule' },
+  { href: '/internal/payments', label: 'Payments' },
   { href: '/internal/tools', label: 'Tools' },
   { href: '/internal/ask-logs', label: 'Ask' },
 ];
@@ -98,8 +99,8 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
         function mountJobPhotoLink() {
           if (location.pathname !== '/internal/jobs/view') return;
           const id = new URLSearchParams(location.search).get('id'); if (!id) return;
-          const actions = document.querySelector('.head-actions'); if (!(actions instanceof HTMLElement) || actions.querySelector('[data-job-photos-link]')) return;
-          const link = document.createElement('a'); link.className = 'btn btn-ghost'; link.href = `/internal/tools/photos?job=${encodeURIComponent(id)}`; link.dataset.jobPhotosLink = 'true'; link.textContent = 'Job photos'; actions.insertBefore(link, actions.firstChild);
+          const actions = document.querySelector('.head-actions'); if (!(actions instanceof HTMLElement) || actions.querySelector('[data-job-photos-link]') || actions.querySelector('[data-photos-link]')) return;
+          const link = document.createElement('a'); link.className = 'btn btn-ghost'; link.href = `/internal/tools/photos?jobId=${encodeURIComponent(id)}`; link.dataset.jobPhotosLink = 'true'; link.textContent = 'Job photos'; actions.insertBefore(link, actions.firstChild);
         }
 
         function mountInternalEnhancements() { mountMeasurementImport(); mountFollowUpPrefill(); mountJobPhotoLink(); }
