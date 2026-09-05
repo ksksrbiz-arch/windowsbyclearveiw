@@ -40,7 +40,8 @@ export async function onRequestGet(context) {
         (SELECT COUNT(*) FROM quotes) AS total_quotes,
         (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open') AS open_tasks,
         (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open' AND due_at IS NOT NULL AND date(due_at) = date('now')) AS tasks_today,
-        (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open' AND due_at IS NOT NULL AND due_at < datetime('now')) AS tasks_overdue
+        (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open' AND due_at IS NOT NULL AND due_at < datetime('now')) AS tasks_overdue,
+        (SELECT COALESCE(SUM(CASE WHEN j.status NOT IN ('completed','cancelled') THEN COALESCE(q.total_cents,0) ELSE 0 END),0) FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id) AS active_job_value_cents
     `).bind(weekAgo).first(),
     env.QUOTES_DB.prepare(`SELECT id, created_at, name, phone, email, city, role FROM leads ORDER BY created_at DESC LIMIT 6`).all(),
     env.QUOTES_DB.prepare(`SELECT id, created_at, status, customer_name, customer_city, total_cents FROM quotes ORDER BY created_at DESC LIMIT 6`).all(),
