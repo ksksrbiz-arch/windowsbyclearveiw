@@ -34,6 +34,11 @@ const links = [
         <span class="header-cta-short" aria-hidden="true">Call</span>
         <span class="visually-hidden">Call {site.phoneDisplay}</span>
       </a>
+      <!-- Desktop nav collapses the estimate link into the link list, which
+           means it is easy to miss without scanning it. A wide viewport has
+           the room for a real button, so give the primary lead-gen action
+           the same standing as click-to-call instead of hiding it in the row. -->
+      <a class="btn btn-primary header-estimate" href="/estimate">Get an estimate</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
         Menu
       </button>
@@ -292,6 +297,23 @@ const links = [
 
   .header-cta {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Hidden by default; only shown at the desktop width where the nav's own
+     "Request an estimate" link is otherwise the sole way to reach it. Below
+     900px the opened nav carries that link, and below 640px the fixed
+     MobileCtaBar owns this action instead, so this would just be a third copy. */
+  .header-estimate {
+    display: none;
+    padding: 0.55rem 1rem;
+    font-size: var(--step--1);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 901px) {
+    .header-estimate {
+      display: inline-flex;
+    }
   }
 
   .nav-toggle {

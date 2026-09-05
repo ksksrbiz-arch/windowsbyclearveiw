@@ -32,6 +32,25 @@ const starters = guides
     </div>
   </section>
 
+  <noscript>
+    <style>
+      .ask-layout {
+        display: none;
+      }
+    </style>
+    <section class="section">
+      <div class="wrap ask-noscript">
+        <p class="kicker">JavaScript required</p>
+        <h2>This assistant needs JavaScript.</h2>
+        <p>
+          It answers as you type, so it cannot run with scripts disabled. For a firm answer right
+          now, <a href="/estimate">request a written estimate</a> or call{' '}
+          <a href={telHref()}>{site.phoneDisplay}</a> — Mark answers from the truck.
+        </p>
+      </div>
+    </section>
+  </noscript>
+
   <section class="section">
     <div class="wrap ask-layout" data-reveal>
       <div class="ask-panel">
@@ -246,6 +265,39 @@ const starters = guides
       transcript.scrollTop = transcript.scrollHeight;
     }
 
+    // A single reusable "typing" bubble, shown for the duration of the
+    // request. Its text lives in the aria-live transcript so screen reader
+    // users hear that the assistant is working, not just sighted users
+    // watching the button — the button's own "Asking…" label alone left
+    // both groups guessing on a slow response.
+    let typingEl: HTMLElement | null = null;
+
+    function showTyping() {
+      if (!(transcript instanceof HTMLElement)) return;
+      typingEl = document.createElement('div');
+      typingEl.className = 'ask-msg ask-msg-assistant ask-msg-typing';
+      const p = document.createElement('p');
+      p.textContent = 'Thinking…';
+      typingEl.append(p);
+      transcript.append(typingEl);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    function hideTyping() {
+      typingEl?.remove();
+      typingEl = null;
+    }
+
+    // Cuts at the last word boundary and marks the cut with an ellipsis, so
+    // notes handed to the estimate form read as "trimmed" rather than as a
+    // sentence that just stops mid-word — which otherwise looks like a bug.
+    function truncateForHandoff(text: string, max: number): string {
+      if (text.length <= max) return text;
+      const cut = text.slice(0, max);
+      const lastSpace = cut.lastIndexOf(' ');
+      return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
+    }
+
     async function ask(question: string) {
       if (!(errorEl instanceof HTMLElement)) return;
       errorEl.hidden = true;
@@ -262,6 +314,7 @@ const starters = guides
         submitBtn.textContent = 'Asking…';
       }
       input.disabled = true;
+      showTyping();
 
       try {
         const response = await fetch('/ask/api/chat', {
@@ -272,6 +325,7 @@ const starters = guides
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || 'Something went wrong.');
 
+        hideTyping();
         const answer = result.answer || "Sorry — I didn't get an answer for that.";
         appendMessage('assistant', answer, result.sources);
         conversation.push({ role: 'assistant', content: answer });
@@ -281,7 +335,7 @@ const starters = guides
         // as the estimate form's starting notes, same mechanism the cost
         // calculator already uses, so nobody has to describe it twice.
         if (photo && handoff instanceof HTMLElement && handoffLink instanceof HTMLAnchorElement) {
-          const scope = answer.slice(0, 400);
+          const scope = truncateForHandoff(answer, 400);
           try {
             sessionStorage.setItem('clearview:scope', scope);
           } catch {
@@ -291,9 +345,11 @@ const starters = guides
           handoff.hidden = false;
         }
       } catch (error) {
+        hideTyping();
         errorEl.hidden = false;
         errorEl.textContent = error instanceof Error ? error.message : 'Something went wrong. Try again in a moment.';
       } finally {
+        hideTyping();
         if (submitBtn instanceof HTMLButtonElement) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Ask';
@@ -333,6 +389,19 @@ const starters = guides
 </script>
 
 <style>
+  .ask-noscript {
+    max-width: 40rem;
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-lg);
+  }
+
+  .ask-noscript .kicker {
+    color: var(--accent);
+  }
+
   .ask-layout {
     display: grid;
     grid-template-columns: 1fr 18rem;
@@ -396,6 +465,40 @@ const starters = guides
     object-fit: cover;
     border-radius: var(--radius);
     margin-bottom: var(--space-2xs);
+  }
+
+  :global(.ask-msg-typing p) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--ink-faint);
+  }
+
+  :global(.ask-msg-typing p::after) {
+    content: '';
+    width: 0.9rem;
+    height: 0.3rem;
+    background-image: radial-gradient(circle, currentColor 40%, transparent 45%);
+    background-size: 0.3rem 0.3rem;
+    background-repeat: space no-repeat;
+    animation: ask-typing-dots 1.1s ease-in-out infinite;
+  }
+
+  @keyframes ask-typing-dots {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.ask-msg-typing p::after) {
+      animation: none;
+      opacity: 0.7;
+    }
   }
 
   .ask-starters {
@@ -487,6 +590,7 @@ const starters = guides
   }
 
   .ask-photo-remove {
+    position: relative;
     border: 1px solid var(--line-strong);
     background: transparent;
     border-radius: 999px;
@@ -495,6 +599,19 @@ const starters = guides
     line-height: 1;
     cursor: pointer;
     color: var(--ink-soft);
+  }
+
+  /* The glyph stays small so it doesn't overpower the thumbnail, but the
+     tappable area extends to the ~44px minimum recommended for touch —
+     an invisible hit box centered on the visible button rather than
+     resizing it. */
+  .ask-photo-remove::before {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    transform: translate(-50%, -50%);
   }
 
   .ask-photo-remove:hover {

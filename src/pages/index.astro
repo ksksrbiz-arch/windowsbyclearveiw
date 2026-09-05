@@ -7,7 +7,7 @@ import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
-import { featuredWork, findWork } from '../data/work';
+import { featuredWork, findWork, workKindLabel } from '../data/work';
 import slidingDoorsTileSrc from '../assets/hero/sliding-glass-doors.png';
 
 const replacementTile = findWork('stone-craftsman')!;
@@ -195,7 +195,7 @@ const signs = [
             image={photo.image}
             alt={photo.alt}
             caption={photo.caption}
-            kind={photo.kind}
+            kind={workKindLabel(photo.kind)}
           />
         ))}
       </div>

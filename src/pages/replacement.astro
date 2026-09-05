@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { replacementWork, findWork } from '../data/work';
+import { replacementWork, findWork, workKindLabel } from '../data/work';
 import replacementHeroSrc from '../assets/hero/replacement.png';
 import { site } from '../data/site';
 
@@ -175,7 +175,7 @@ const spec = [
             image={photo.image}
             alt={photo.alt}
             caption={photo.caption}
-            kind={photo.kind}
+            kind={workKindLabel(photo.kind)}
           />
         ))}
       </div>

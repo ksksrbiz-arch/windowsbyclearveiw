@@ -45,6 +45,8 @@ import { site, telHref } from '../data/site';
       inputmode="tel"
       placeholder="(360) 555-0123"
       maxlength="40"
+      pattern="(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}"
+      title="A 10-digit US phone number, e.g. (360) 555-0123"
     />
   </label>
   <label>

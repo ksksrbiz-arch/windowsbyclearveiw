@@ -142,7 +142,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     {guide.data.faq.length > 0 && (
       <div class="wrap is-narrow" data-reveal>
         <section class="faq">
-          <p class="rule-label">Common questions</p>
+          <h2 class="rule-label">Common questions</h2>
           {guide.data.faq.map((item) => (
             <details>
               <summary>{item.question}</summary>
@@ -156,7 +156,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 
     <div class="wrap is-narrow" data-reveal>
       <section class="related">
-        <p class="rule-label">Keep reading</p>
+        <h2 class="rule-label">Keep reading</h2>
         <ul class="related-list">
           {related.map((item) => (
             <li>

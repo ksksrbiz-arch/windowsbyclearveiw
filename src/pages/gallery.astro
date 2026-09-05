@@ -3,7 +3,7 @@ import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
-import { allWork, findWork } from '../data/work';
+import { allWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
 
 const ogPhoto = findWork('green-craftsman-upper')!;
@@ -106,7 +106,7 @@ const total = allWork.length;
               image={photo.image}
               alt={photo.alt}
               caption={photo.caption}
-              kind={photo.kind}
+              kind={workKindLabel(photo.kind)}
               eager={groupIndex === 0 && index < 3}
               sizes={
                 group.density === 'is-dense'
