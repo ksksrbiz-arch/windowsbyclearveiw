@@ -47,7 +47,7 @@ const links = [
            the same standing as click-to-call instead of hiding it in the row. -->
       <a class="btn btn-primary header-estimate" href="/estimate">Get an estimate</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-        Menu
+        <span data-nav-toggle-label>Menu</span>
       </button>
     </div>
   </div>
@@ -66,9 +66,15 @@ const links = [
     if (nav.dataset.bound === 'true') return;
     nav.dataset.bound = 'true';
 
+    const label = toggle.querySelector('[data-nav-toggle-label]');
+
+    // aria-expanded already tells assistive tech the state; sighted visitors
+    // need the same information some other way, since "Menu" never changed
+    // no matter how open the panel was.
     const setOpen = (open: boolean) => {
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', String(open));
+      if (label) label.textContent = open ? 'Close' : 'Menu';
     };
 
     toggle.addEventListener('click', (event) => {

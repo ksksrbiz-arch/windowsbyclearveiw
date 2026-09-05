@@ -33,7 +33,8 @@ import { site, telHref } from '../data/site';
 
   <label>
     Name
-    <input name="name" type="text" required autocomplete="name" autocapitalize="words" maxlength="120" />
+    <input name="name" type="text" required autocomplete="name" autocapitalize="words" maxlength="120" aria-describedby="field-error-name" />
+    <span class="field-error" id="field-error-name" data-field-error="name" hidden></span>
   </label>
   <label>
     Phone
@@ -47,18 +48,25 @@ import { site, telHref } from '../data/site';
       maxlength="40"
       pattern="(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}"
       title="A 10-digit US phone number, e.g. (360) 555-0123"
+      aria-describedby="field-error-phone"
     />
+    <span class="field-error" id="field-error-phone" data-field-error="phone" hidden></span>
   </label>
   <label>
     Email <span class="field-hint">optional, for a written copy</span>
-    <input name="email" type="email" autocomplete="email" inputmode="email" maxlength="160" />
+    <input name="email" type="email" autocomplete="email" inputmode="email" maxlength="160" aria-describedby="field-error-email" />
+    <span class="field-error" id="field-error-email" data-field-error="email" hidden></span>
   </label>
   <label>
     City
-    <input name="city" type="text" required autocomplete="address-level2" autocapitalize="words" maxlength="80" />
+    <input name="city" type="text" required autocomplete="address-level2" autocapitalize="words" maxlength="80" aria-describedby="field-error-city" />
+    <span class="field-error" id="field-error-city" data-field-error="city" hidden></span>
   </label>
   <label>
     Project notes <span class="field-hint">optional, but it saves a round of back-and-forth</span>
+    <span class="field-hint field-hint-prefilled" data-notes-prefilled-hint hidden>
+      Carried over from your estimator / chat session — edit as needed
+    </span>
     <textarea
       name="notes"
       rows="4"
@@ -68,7 +76,7 @@ import { site, telHref } from '../data/site';
   </label>
 
   <button class="btn btn-primary" type="submit" data-submit>Send estimate request</button>
-  <p class="form-status" data-status role="alert" hidden></p>
+  <p class="form-status" data-status role="alert"></p>
   <p class="fine-print">
     We use this to call you back about the work — no lists, no resale, no
     follow-up sequence. We will not text you unless you ask us to. See the{' '}
@@ -116,11 +124,59 @@ import { site, telHref } from '../data/site';
           scope = null;
         }
       }
-      if (scope) notes.value = scope;
+      if (scope) {
+        notes.value = scope;
+        const prefilledHint = form.querySelector('[data-notes-prefilled-hint]');
+        if (prefilledHint instanceof HTMLElement) prefilledHint.hidden = false;
+      }
     }
 
     const button = form.querySelector('[data-submit]');
     const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
+
+    function clearFieldErrors() {
+      form.querySelectorAll('[data-field-error]').forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.hidden = true;
+          el.textContent = '';
+        }
+      });
+      form.querySelectorAll('[aria-invalid="true"]').forEach((el) => el.removeAttribute('aria-invalid'));
+    }
+
+    // Renders each field's own message next to that field, rather than one
+    // combined sentence ("Name, phone, and city are required.") that leaves
+    // someone who filled in two of three guessing which one is still wrong.
+    function applyFieldErrors(fields) {
+      let firstInvalid = null;
+      for (const [name, message] of Object.entries(fields || {})) {
+        const errorEl = form.querySelector(`[data-field-error="${name}"]`);
+        const input = form.querySelector(`[name="${name}"]`);
+        if (errorEl instanceof HTMLElement) {
+          errorEl.textContent = message;
+          errorEl.hidden = false;
+        }
+        if (input instanceof HTMLElement) {
+          input.setAttribute('aria-invalid', 'true');
+          firstInvalid ||= input;
+        }
+      }
+      if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
+    }
+
+    // Clear a field's own error as soon as it is edited, rather than making
+    // someone resubmit the whole form to find out the fix worked.
+    form.querySelectorAll('[name]').forEach((el) => {
+      if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return;
+      el.addEventListener('input', () => {
+        const errorEl = form.querySelector(`[data-field-error="${el.name}"]`);
+        if (errorEl instanceof HTMLElement && !errorEl.hidden) {
+          errorEl.hidden = true;
+          errorEl.textContent = '';
+        }
+        el.removeAttribute('aria-invalid');
+      });
+    });
 
     // Filled in right before we read the form, not on load, so the visit
     // list is as complete as possible — someone can browse for a while with
@@ -156,7 +212,8 @@ import { site, telHref } from '../data/site';
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      status.hidden = true;
+      status.textContent = '';
+      clearFieldErrors();
       populateVisitJourney();
       if (button instanceof HTMLButtonElement) {
         button.disabled = true;
@@ -183,6 +240,9 @@ import { site, telHref } from '../data/site';
           Object.keys(result).length === 1 &&
           result.ok === true;
         if (!response.ok || !isExactSuccess) {
+          if (result && typeof result === 'object' && result.fields && typeof result.fields === 'object') {
+            applyFieldErrors(result.fields);
+          }
           const reason = result && typeof result.error === 'string' ? result.error : 'Could not send.';
           throw new Error(reason);
         }
@@ -206,7 +266,6 @@ import { site, telHref } from '../data/site';
           // already succeeded.
         }
       } catch (error) {
-        status.hidden = false;
         const reason = error instanceof Error ? error.message : 'Could not send.';
         status.textContent = `${reason} You can always call ${phoneDisplay}.`;
       } finally {
@@ -313,6 +372,26 @@ import { site, telHref } from '../data/site';
     font-size: var(--step--2);
   }
 
+  /* Shown only when the notes textarea was actually filled in from a
+     calculator or /ask session — otherwise a visitor who typed their own
+     notes has no way to tell they weren't the one who wrote them. */
+  .field-hint-prefilled {
+    display: block;
+    color: var(--accent-ink);
+    margin-top: -0.1rem;
+  }
+
+  .field-error {
+    font-weight: 500;
+    color: var(--danger);
+    font-size: var(--step--2);
+  }
+
+  .estimate-form input[aria-invalid='true'],
+  .estimate-form textarea[aria-invalid='true'] {
+    border-bottom-color: var(--danger);
+  }
+
   .estimate-form .btn {
     justify-self: start;
     padding: 0.9rem var(--space-l);
@@ -320,11 +399,20 @@ import { site, telHref } from '../data/site';
     min-height: 2.9rem;
   }
 
+  /* Empty rather than [hidden] up front, hidden here via :empty instead —
+     a role="alert" region needs to already exist in the accessibility tree
+     for assistive tech to be watching it, so toggling it into existence at
+     the same moment its text is set can race and miss the announcement on
+     some screen readers. */
   .form-status {
     margin: 0;
     color: var(--danger);
     border-left: 2px solid var(--danger);
     padding-left: var(--space-2xs);
+  }
+
+  .form-status:empty {
+    display: none;
   }
 
   /* The confirmation replaces the form in place, so it has to look like a

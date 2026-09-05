@@ -699,6 +699,17 @@ input:focus, textarea:focus, select:focus {
   body:not(.internal) {
     padding-bottom: calc(var(--mobile-cta-h) + env(safe-area-inset-bottom, 0px));
   }
+
+  /* The padding above only protects the very end of the page. Anything
+     scrolled to mid-page — an in-page anchor link, a `scrollIntoView()` call,
+     a focused form field — can still land with its bottom edge tucked under
+     the fixed bar. scroll-padding on the scroller applies to every kind of
+     scroll (anchor navigation, :target, scrollIntoView, focus scrolling)
+     without having to add scroll-margin-bottom to each target individually,
+     which is what left ask.astro's own fix as the only page that had it. */
+  html {
+    scroll-padding-bottom: calc(var(--mobile-cta-h) + var(--space-m));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

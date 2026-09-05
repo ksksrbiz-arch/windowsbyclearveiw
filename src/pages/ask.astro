@@ -64,14 +64,19 @@ const starters = guides
         </div>
 
         {starters.length > 0 && (
-          <div class="ask-starters" data-starters>
-            {starters.map((q) => (
-              <button type="button" class="ask-chip" data-starter>{q}</button>
-            ))}
-          </div>
+          <>
+            <div class="ask-starters" data-starters>
+              {starters.map((q) => (
+                <button type="button" class="ask-chip" data-starter>{q}</button>
+              ))}
+            </div>
+            <button type="button" class="ask-starters-toggle" data-starters-toggle hidden>
+              Suggested questions
+            </button>
+          </>
         )}
 
-        <p class="ask-error" data-ask-error hidden role="alert"></p>
+        <p class="ask-error" data-ask-error role="alert"></p>
 
         <p class="ask-handoff" data-ask-handoff hidden>
           <a href="/estimate" data-ask-handoff-link>Turn this into a written estimate &rarr;</a>
@@ -99,6 +104,7 @@ const starters = guides
                 &times;
               </button>
             </div>
+            <span class="ask-photo-hint" data-ask-photo-hint>JPG, PNG, or WEBP, up to 8MB</span>
           </div>
 
           <div class="ask-input-row">
@@ -138,6 +144,7 @@ const starters = guides
     const transcript = document.querySelector('[data-transcript]');
     const errorEl = document.querySelector('[data-ask-error]');
     const starters = document.querySelector('[data-starters]');
+    const startersToggle = document.querySelector('[data-starters-toggle]');
     const photoInput = document.querySelector('[data-ask-photo-input]');
     const photoPreview = document.querySelector('[data-ask-photo-preview]');
     const photoThumb = document.querySelector('[data-ask-photo-thumb]');
@@ -177,10 +184,7 @@ const starters = guides
     }
 
     function showError(message: string) {
-      if (errorEl instanceof HTMLElement) {
-        errorEl.hidden = false;
-        errorEl.textContent = message;
-      }
+      if (errorEl instanceof HTMLElement) errorEl.textContent = message;
     }
 
     function clearAttachedPhoto() {
@@ -212,7 +216,7 @@ const starters = guides
           attachedImage = resized;
           if (photoThumb instanceof HTMLImageElement) photoThumb.src = attachedImage;
           if (photoPreview instanceof HTMLElement) photoPreview.hidden = false;
-          if (errorEl instanceof HTMLElement) errorEl.hidden = true;
+          if (errorEl instanceof HTMLElement) errorEl.textContent = '';
         } catch {
           if (thisPhoto !== photoGeneration) return;
           showError('Could not read that photo — try a different file.');
@@ -300,8 +304,12 @@ const starters = guides
 
     async function ask(question: string) {
       if (!(errorEl instanceof HTMLElement)) return;
-      errorEl.hidden = true;
+      errorEl.textContent = '';
+      // Hidden rather than removed, and behind a toggle rather than gone for
+      // good — someone three questions in might still want a reminder of
+      // what else this can answer.
       if (starters instanceof HTMLElement) starters.hidden = true;
+      if (startersToggle instanceof HTMLElement) startersToggle.hidden = false;
 
       const photo = attachedImage;
       appendMessage('user', question, undefined, photo);
@@ -345,8 +353,6 @@ const starters = guides
           handoff.hidden = false;
         }
       } catch (error) {
-        hideTyping();
-        errorEl.hidden = false;
         errorEl.textContent = error instanceof Error ? error.message : 'Something went wrong. Try again in a moment.';
       } finally {
         hideTyping();
@@ -380,6 +386,13 @@ const starters = guides
         btn.addEventListener('click', () => {
           if (btn instanceof HTMLButtonElement) ask(btn.textContent || '');
         });
+      });
+    }
+
+    if (startersToggle instanceof HTMLElement && starters instanceof HTMLElement) {
+      startersToggle.addEventListener('click', () => {
+        starters.hidden = false;
+        startersToggle.hidden = true;
       });
     }
   }
@@ -521,11 +534,39 @@ const starters = guides
     background: var(--paper-sunk);
   }
 
+  /* Brought back after the chips hide themselves post-first-question — a
+     plain text button rather than another chip, so it reads as "bring these
+     back" and not as one more suggestion. */
+  .ask-starters-toggle {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--2);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+    align-self: start;
+  }
+
+  .ask-starters-toggle:hover {
+    color: var(--accent-ink);
+  }
+
+  /* Empty rather than [hidden] up front, and hidden here via :empty instead
+     of the hidden attribute — a role="alert" region needs to already exist
+     in the accessibility tree for assistive tech to be watching it, so
+     toggling it into existence at the same moment its text is set can race
+     and miss the announcement on some screen readers. */
   .ask-error {
     color: var(--danger);
     border-left: 2px solid var(--danger);
     padding-left: var(--space-2xs);
     margin: 0;
+  }
+
+  .ask-error:empty {
+    display: none;
   }
 
   .ask-form {
@@ -573,6 +614,14 @@ const starters = guides
     stroke-width: 1.4;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  /* Stated up front rather than only after someone hits the limit — the
+     8MB cap and accepted formats used to surface solely as a rejection
+     message on a too-big or wrong-type file. */
+  .ask-photo-hint {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
   }
 
   .ask-photo-preview {
@@ -629,17 +678,6 @@ const starters = guides
     color: var(--accent-ink);
   }
 
-  @media (max-width: 640px) {
-    /* The fixed mobile Call/Estimate bar sits over whatever is at the
-       bottom of the viewport — including the ask form itself, since this
-       panel is tall enough to put it right at the fold. scroll-margin
-       makes both scrollIntoView() and normal scrolling stop with the form
-       clear of the bar, instead of tucked underneath it. */
-    .ask-form {
-      scroll-margin-bottom: calc(var(--mobile-cta-h) + var(--space-m));
-    }
-  }
-
   .ask-form textarea {
     flex: 1;
     resize: vertical;
@@ -660,7 +698,12 @@ const starters = guides
     font-weight: 600;
   }
 
-  @media (max-width: 800px) {
+  /* 900px rather than the more common 800px used elsewhere on the site: at
+     800 the two-column split was still active right around an iPad's 810px
+     logical width, squeezing the 18rem aside against the transcript on
+     exactly the device this most needs to read cleanly on. 900px clears
+     common tablet widths with real margin. */
+  @media (max-width: 900px) {
     .ask-layout {
       grid-template-columns: 1fr;
     }
