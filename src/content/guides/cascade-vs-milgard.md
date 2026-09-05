@@ -6,6 +6,9 @@ topic: Product
 published: true
 updated: 2026-09-04
 order: 5
+heroImage: ./img-cascade-vs-milgard.png
+heroImageAlt: Two white vinyl replacement windows side by side, a simpler standard unit next to a larger unit with more refined trim and glass.
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
 faq:
   - question: Does Clearview install other brands besides these two?
     answer: Cascade and Milgard cover the range Mark orders for most jobs. If a project needs something outside that — a specific historic-district requirement, for example — he will say so at the measure rather than force-fit one of these two.

@@ -14,6 +14,9 @@ faq:
   - question: Does fogged glass mean I need every window replaced?
     answer: Only the failed units are required. We often replace a few now and plan the rest of the house as a second trip.
 diagram: glass-anatomy
+heroImage: ./img-fogged-windows-thumb.png
+heroImageAlt: A window with condensation and haze trapped between the panes, viewed from inside a home.
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
 ---
 
 Western Washington's roughly nine wet months and three dry ones a year is why sealed windows here tend to fog sooner than they would in a steadier climate. Not all "foggy windows" are the same job, though. One kind is a failed window. The other is your house telling you it is damp.
