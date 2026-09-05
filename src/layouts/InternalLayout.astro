@@ -44,6 +44,94 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
     </header>
     <main class="internal-main"><slot /></main>
 
+    <script>
+      (() => {
+        const MEASUREMENT_KEY = 'clearview:measurement-worksheet:v1';
+        const normalize = (value) => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+        function mountMeasurementImport() {
+          if (location.pathname !== '/internal/quotes/new') return;
+          const form = document.getElementById('quote-form');
+          if (!(form instanceof HTMLFormElement) || form.dataset.measurementImportReady === 'true') return;
+          let worksheet;
+          try { worksheet = JSON.parse(localStorage.getItem(MEASUREMENT_KEY) || 'null'); } catch { worksheet = null; }
+          if (!worksheet || !Array.isArray(worksheet.openings) || worksheet.openings.length === 0) return;
+
+          const submit = form.querySelector('[data-submit]');
+          const anchor = submit?.closest('fieldset') || form.firstElementChild;
+          if (!(anchor instanceof Element)) return;
+
+          const bar = document.createElement('div');
+          bar.className = 'measurement-import-bar';
+          bar.innerHTML = `<div><strong>Saved field measurements found</strong><span>${worksheet.openings.length} opening${worksheet.openings.length === 1 ? '' : 's'} ready to import.</span></div><button type="button" class="btn btn-ghost" data-import-measurements>Import measurements</button>`;
+          anchor.before(bar);
+          form.dataset.measurementImportReady = 'true';
+
+          const button = bar.querySelector('[data-import-measurements]');
+          if (!(button instanceof HTMLButtonElement)) return;
+          button.addEventListener('click', () => {
+            if (!window.confirm(`Import ${worksheet.openings.length} measured opening${worksheet.openings.length === 1 ? '' : 's'} into this quote? Existing quote lines will be kept.`)) return;
+            button.disabled = true;
+            button.textContent = 'Importing…';
+
+            const setIfBlank = (name, value) => {
+              const field = form.elements.namedItem(name);
+              if ((field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) && !field.value.trim()) field.value = String(value ?? '');
+            };
+            setIfBlank('name', worksheet.jobName || '');
+            setIfBlank('address', worksheet.jobAddress || '');
+
+            if (worksheet.jobNotes) {
+              const notes = form.elements.namedItem('notes');
+              if (notes instanceof HTMLTextAreaElement && !notes.value.includes('Field measurement notes:')) {
+                notes.value = notes.value.trim() ? `${notes.value.trim()}\n\nField measurement notes:\n${worksheet.jobNotes}` : `Field measurement notes:\n${worksheet.jobNotes}`;
+              }
+            }
+
+            const openingSelect = form.querySelector('[data-catalog-opening]');
+            const qtyInput = form.querySelector('[data-catalog-qty]');
+            const addButton = form.querySelector('[data-catalog-add]');
+            const itemsBody = form.querySelector('[data-items-body]');
+            const options = openingSelect instanceof HTMLSelectElement ? Array.from(openingSelect.options) : [];
+            let imported = 0;
+            let skipped = 0;
+
+            if (openingSelect instanceof HTMLSelectElement && qtyInput instanceof HTMLInputElement && addButton instanceof HTMLButtonElement && itemsBody instanceof HTMLElement) {
+              for (const opening of worksheet.openings) {
+                const target = normalize(opening.type);
+                const option = options.find((candidate) => normalize(candidate.textContent) === target)
+                  || options.find((candidate) => normalize(candidate.textContent).includes(target) || target.includes(normalize(candidate.textContent)));
+                if (!option) { skipped += 1; continue; }
+
+                openingSelect.value = option.value;
+                qtyInput.value = String(Math.max(1, Number(opening.quantity) || 1));
+                addButton.click();
+
+                const rows = itemsBody.querySelectorAll('tr');
+                const lastRow = rows[rows.length - 1];
+                const labelInput = lastRow?.querySelector('td:first-child input');
+                if (labelInput instanceof HTMLInputElement) {
+                  const width = opening.width === '' ? '?' : Number(opening.width).toLocaleString('en-US');
+                  const height = opening.height === '' ? '?' : Number(opening.height).toLocaleString('en-US');
+                  const room = opening.room ? `${opening.room} — ` : '';
+                  labelInput.value = `${room}${opening.type} — ${width}\" W × ${height}\" H`;
+                  labelInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                imported += 1;
+              }
+            }
+
+            const summary = bar.querySelector('span');
+            if (summary) summary.textContent = skipped ? `${imported} imported · ${skipped} skipped (not in price book)` : `${imported} opening${imported === 1 ? '' : 's'} imported into the quote.`;
+            button.textContent = imported ? 'Imported' : 'Nothing imported';
+          });
+        }
+
+        mountMeasurementImport();
+        document.addEventListener('astro:page-load', mountMeasurementImport);
+      })();
+    </script>
+
     <style>
       .internal { background: var(--paper); min-height: 100vh; }
       .internal-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--black) 96%, transparent); color: var(--on-dark); border-bottom: 1px solid var(--dark-line); backdrop-filter: blur(10px); }
@@ -59,10 +147,13 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
       .internal-logout { background: transparent; border: 1px solid var(--dark-line-strong); color: var(--on-dark-soft); border-radius: var(--radius); padding: 0.42rem 0.72rem; font: inherit; font-size: var(--step--2); cursor: pointer; white-space: nowrap; }
       .internal-logout:hover { border-color: var(--accent-bright); color: var(--on-dark); }
       .internal-main { max-width: 68rem; margin-inline: auto; padding: var(--space-l) var(--space-m) var(--space-3xl); }
-      @media (max-width: 980px) { .internal-header-inner { gap: var(--space-s); } .internal-header-right { flex: 1; justify-content: flex-end; } .internal-nav { overflow-x: auto; scrollbar-width: none; } .internal-nav::-webkit-scrollbar { display: none; } .internal-nav a { padding-inline: 0.45rem; } .internal-nav a::after { left: 0.45rem; right: 0.45rem; } }
-      @media (max-width: 520px) { .internal-header-inner { padding-inline: var(--space-s); } .internal-brand span { display: none; } .internal-logout { padding-inline: 0.55rem; } }
+      .measurement-import-bar { margin: 0 0 var(--space-m); padding: .8rem var(--space-m); border: 1px solid color-mix(in srgb,var(--accent) 30%,var(--line)); border-radius: var(--radius); background: var(--accent-wash); display: flex; justify-content: space-between; align-items: center; gap: var(--space-m); }
+      .measurement-import-bar > div { display: grid; gap: .15rem; }
+      .measurement-import-bar span { color: var(--ink-soft); font-size: var(--step--2); }
+      @media (max-width: 980px) { .internal-header-inner { gap: var(--space-s); } .internal-header-right { flex: 1; justify-content: flex-end; } .internal-nav { overflow-x: auto; scrollbar-width: none; } .internal-nav::-webkit-scrollbar { display: none; } .internal-nav a { padding-inline: .45rem; } .internal-nav a::after { left: .45rem; right: .45rem; } }
+      @media (max-width: 520px) { .internal-header-inner { padding-inline: var(--space-s); } .internal-brand span { display: none; } .internal-logout { padding-inline: .55rem; } .measurement-import-bar { align-items: flex-start; flex-direction: column; } }
       @media (prefers-reduced-motion: reduce) { .internal-nav a::after { transition: none; } }
-      @media print { .internal-header { display: none; } .internal-main { max-width: none; padding: 0; } }
+      @media print { .internal-header { display: none; } .internal-main { max-width: none; padding: 0; } .measurement-import-bar { display: none; } }
     </style>
   </body>
 </html>
