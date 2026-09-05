@@ -1,0 +1,115 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Installation photos">
+  <div class="tool-head">
+    <div>
+      <p class="kicker">Field tool</p>
+      <h1>Installation photos</h1>
+      <p class="lede">Capture before, during, and after photos for a job. Photos stay on this device until you export or clear them.</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" href="/internal/jobs">Jobs</a>
+      <button class="btn btn-primary" type="button" data-export>Export photo manifest</button>
+    </div>
+  </div>
+
+  <section class="job-bar panel">
+    <label>Job ID<input type="text" data-job-id placeholder="e.g. J-20260905-ABCD" maxlength="80" /></label>
+    <label>Customer / project<input type="text" data-job-name placeholder="Customer or project name" maxlength="160" /></label>
+    <label>Stage<select data-stage><option value="before">Before</option><option value="during">During</option><option value="after">After</option><option value="issue">Issue / documentation</option></select></label>
+    <span class="save-state" data-status role="status">Ready</span>
+  </section>
+
+  <section class="capture-panel panel">
+    <div class="panel-head"><div><p class="kicker">Capture</p><h2>Add job photos</h2></div><span class="muted">Use the camera on a phone/tablet or choose files.</span></div>
+    <div class="capture-body">
+      <label class="drop-zone">
+        <input type="file" data-files accept="image/*" capture="environment" multiple />
+        <span class="drop-icon">+</span>
+        <strong>Choose or capture photos</strong>
+        <small>Multiple images supported. Add a short note to each photo after capture.</small>
+      </label>
+      <div class="photo-summary"><strong data-count>0</strong><span>photos saved on this device</span></div>
+    </div>
+  </section>
+
+  <section class="photo-panel panel">
+    <div class="panel-head"><div><p class="kicker">Project record</p><h2>Photo log</h2></div><button class="text-button" type="button" data-clear>Clear this job's photos</button></div>
+    <div class="photo-grid" data-grid></div>
+    <div class="empty" data-empty><strong>No photos yet.</strong><span>Capture the first image to start the installation record.</span></div>
+  </section>
+
+  <p class="legal-note">This is a field documentation tool, not a permanent cloud archive. Export the manifest and preserve the originals according to your normal business recordkeeping process.</p>
+</InternalLayout>
+
+<script>
+  type Photo = { id:string; jobId:string; jobName:string; stage:string; name:string; mime:string; createdAt:string; note:string; blob:Blob };
+  const DB_NAME = 'clearview-field-tools';
+  const DB_VERSION = 1;
+  const STORE = 'photos';
+
+  function openDb(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => { if (!request.result.objectStoreNames.contains(STORE)) request.result.createObjectStore(STORE, { keyPath:'id' }); };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('Could not open local photo storage.'));
+    });
+  }
+  function run<T>(db:IDBDatabase, mode:IDBTransactionMode, fn:(store:IDBObjectStore)=>IDBRequest|void):Promise<T|undefined> {
+    return new Promise((resolve,reject)=>{ const tx=db.transaction(STORE,mode); const req=fn(tx.objectStore(STORE)); tx.oncomplete=()=>resolve(req ? (req as IDBRequest).result as T : undefined); tx.onerror=()=>reject(tx.error); });
+  }
+
+  async function initPhotos() {
+    const root = document.querySelector('main');
+    if (!(root instanceof HTMLElement) || root.dataset.photoBound === 'true') return;
+    root.dataset.photoBound='true';
+    const db=await openDb().catch(()=>null);
+    if (!db) return;
+    const jobId=root.querySelector('[data-job-id]') as HTMLInputElement;
+    const jobName=root.querySelector('[data-job-name]') as HTMLInputElement;
+    const stage=root.querySelector('[data-stage]') as HTMLSelectElement;
+    const files=root.querySelector('[data-files]') as HTMLInputElement;
+    const grid=root.querySelector('[data-grid]') as HTMLElement;
+    const empty=root.querySelector('[data-empty]') as HTMLElement;
+    const count=root.querySelector('[data-count]') as HTMLElement;
+    const status=root.querySelector('[data-status]') as HTMLElement;
+    const key='clearview:photo-job';
+    const saved=JSON.parse(localStorage.getItem(key)||'{}');
+    jobId.value=saved.jobId||new URLSearchParams(location.search).get('job')||'';
+    jobName.value=saved.jobName||'';
+    function persistJob(){ localStorage.setItem(key,JSON.stringify({jobId:jobId.value,jobName:jobName.value})); }
+    [jobId,jobName].forEach(el=>el.addEventListener('input',persistJob));
+    const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;};
+    const load=async()=>{
+      const all=await run<Photo[]>(db,'readonly',s=>s.getAll()) as Photo[]||[];
+      return all.filter(p=>!jobId.value.trim()||p.jobId===jobId.value.trim()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+    };
+    const render=async()=>{
+      const photos=await load(); grid.innerHTML=''; count.textContent=String(photos.length); empty.hidden=photos.length>0;
+      photos.forEach(photo=>{ const url=URL.createObjectURL(photo.blob); const card=document.createElement('article'); card.className='photo-card'; card.innerHTML=`<img src="${url}" alt="${esc(photo.stage)} job photo"><div class="photo-info"><span class="stage-tag">${esc(photo.stage.replace('-',' '))}</span><time>${new Date(photo.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</time><textarea maxlength="500" placeholder="Photo note">${esc(photo.note)}</textarea><div class="photo-actions"><button type="button" data-save-note>Save note</button><button type="button" data-delete>Delete</button></div></div>`;
+        card.querySelector('[data-save-note]')?.addEventListener('click',async()=>{const ta=card.querySelector('textarea'); if(!(ta instanceof HTMLTextAreaElement)) return; await run(db,'readwrite',s=>{const req=s.get(photo.id); req.onsuccess=()=>{const item=req.result as Photo; item.note=ta.value.slice(0,500); s.put(item);}; return req;}); status.textContent='Photo note saved';});
+        card.querySelector('[data-delete]')?.addEventListener('click',async()=>{await run(db,'readwrite',s=>s.delete(photo.id)); URL.revokeObjectURL(url); render(); status.textContent='Photo deleted';});
+        grid.append(card);
+      });
+    };
+    files.addEventListener('change',async()=>{
+      const selected=Array.from(files.files||[]); if(!selected.length) return; persistJob();
+      const jid=jobId.value.trim()||'UNASSIGNED';
+      for(const file of selected){ if(!file.type.startsWith('image/')) continue; const photo:Photo={id:crypto.randomUUID(),jobId:jid,jobName:jobName.value.trim(),stage:stage.value,name:file.name,mime:file.type,createdAt:new Date().toISOString(),note:'',blob:file}; await run(db,'readwrite',s=>s.put(photo)); }
+      files.value=''; await render(); status.textContent='Photos saved on this device';
+    });
+    root.querySelector('[data-clear]')?.addEventListener('click',async()=>{const jid=jobId.value.trim()||'UNASSIGNED'; if(!confirm(`Clear all photos for ${jid}?`)) return; const photos=await load(); await Promise.all(photos.map(p=>run(db,'readwrite',s=>s.delete(p.id)))); render(); status.textContent='Job photos cleared';});
+    root.querySelector('[data-export]')?.addEventListener('click',async()=>{const photos=await load(); const manifest={exportedAt:new Date().toISOString(),jobId:jobId.value.trim(),jobName:jobName.value.trim(),photos:photos.map(p=>({id:p.id,name:p.name,stage:p.stage,createdAt:p.createdAt,note:p.note,mime:p.mime,size:p.blob.size}))}; const blob=new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`${(jobId.value||'clearview-job').replace(/[^a-z0-9-]+/gi,'-')}-photo-manifest.json`; a.click(); URL.revokeObjectURL(url); status.textContent=`Exported ${photos.length} photo records`;});
+    await render();
+  }
+  initPhotos(); document.addEventListener('astro:page-load',initPhotos);
+</script>
+
+<style>
+  .tool-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}
+  .head-actions{display:flex;gap:var(--space-xs);flex-wrap:wrap}.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}.job-bar{display:grid;grid-template-columns:1fr 1.2fr .8fr auto;gap:var(--space-s);padding:var(--space-m);align-items:end;margin-bottom:var(--space-s)}.job-bar label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:600}.job-bar input,.job-bar select,textarea{border:1px solid var(--line-strong);border-radius:var(--radius);padding:.6rem;font:inherit;background:var(--paper);color:var(--ink);width:100%}.save-state{color:var(--ink-faint);font-size:var(--step--2);white-space:nowrap;padding-bottom:.55rem}.panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}.panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}.capture-body{display:grid;grid-template-columns:1fr auto;gap:var(--space-m);padding:var(--space-m);align-items:center}.drop-zone{border:2px dashed var(--line-strong);border-radius:var(--radius);min-height:11rem;display:grid;place-items:center;align-content:center;gap:.3rem;text-align:center;padding:var(--space-m);cursor:pointer;background:var(--paper)}.drop-zone input{position:absolute;opacity:0;width:1px;height:1px}.drop-zone:hover{border-color:var(--accent);background:var(--accent-wash)}.drop-icon{font-size:2rem;font-weight:700}.drop-zone small{color:var(--ink-soft)}.photo-summary{display:grid;gap:.2rem;text-align:right}.photo-summary strong{font-size:2.2rem}.photo-summary span{color:var(--ink-soft);font-size:var(--step--2)}.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-s);padding:var(--space-m)}.photo-card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--paper)}.photo-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.photo-info{padding:.7rem;display:grid;gap:.45rem}.photo-info time{font-size:var(--step--2);color:var(--ink-faint)}.stage-tag{justify-self:start;border-radius:999px;padding:.25rem .5rem;background:var(--accent-wash);font-size:.72rem;font-weight:750;text-transform:capitalize}.photo-actions{display:flex;justify-content:space-between;gap:.5rem}.photo-actions button,.text-button{border:0;background:transparent;font:inherit;font-size:var(--step--2);font-weight:700;cursor:pointer;color:var(--ink-soft)}.photo-actions button:hover,.text-button:hover{color:var(--ink)}.empty{min-height:12rem;display:grid;place-items:center;align-content:center;gap:.45rem;text-align:center;color:var(--ink-soft);padding:var(--space-l)}.empty strong{color:var(--ink)}.legal-note{margin-top:var(--space-s);color:var(--ink-faint);font-size:var(--step--2)}
+  @media(max-width:800px){.tool-head{align-items:flex-start;flex-direction:column}.job-bar,.capture-body{grid-template-columns:1fr}.save-state{padding-bottom:0}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.photo-summary{text-align:left}}
+  @media(max-width:520px){.photo-grid{grid-template-columns:1fr}}
+</style>
