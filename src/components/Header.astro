@@ -1,6 +1,7 @@
 ---
 import { site, telHref } from '../data/site';
 import Brand from './Brand.astro';
+import FacebookIcon from './icons/FacebookIcon.astro';
 
 const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
@@ -28,6 +29,12 @@ const links = [
     </nav>
 
     <div class="header-actions">
+      {site.social.facebook && (
+        <a class="header-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+          <FacebookIcon class="header-social-icon" />
+          <span class="visually-hidden">Follow {site.shortName} on Facebook</span>
+        </a>
+      )}
       <!-- Most visitors are on a phone. Keep click-to-call reachable at every width. -->
       <a class="btn btn-light header-cta" href={telHref()}>
         <span class="header-cta-full" aria-hidden="true">{site.phoneDisplay}</span>
@@ -289,6 +296,31 @@ const links = [
     display: flex;
     align-items: center;
     gap: var(--space-2xs);
+  }
+
+  /* Icon-only so it reads as a recognizable brand mark rather than another
+     text link competing with the nav. Its own brand blue, not the site
+     accent — the point is that it is instantly recognizable as Facebook. */
+  .header-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    border-radius: 50%;
+    transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  }
+
+  .header-social:hover,
+  .header-social:focus-visible {
+    background: color-mix(in srgb, white 12%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .header-social-icon {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 
   .header-cta-short {

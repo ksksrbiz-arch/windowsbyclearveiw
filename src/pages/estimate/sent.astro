@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import FacebookIcon from '../../components/icons/FacebookIcon.astro';
 import { site, telHref } from '../../data/site';
 ---
 <BaseLayout
@@ -65,7 +66,12 @@ import { site, telHref } from '../../data/site';
           <li><a href="/guides/window-replacement-cost-washington">What a project costs in Washington</a></li>
           <li><a href="/gallery">See recent work</a></li>
           {site.social.facebook && (
-            <li><a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Follow along on Facebook</a></li>
+            <li>
+              <a class="inline-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+                <FacebookIcon class="inline-social-icon" />
+                Follow along on Facebook
+              </a>
+            </li>
           )}
         </ul>
       </div>

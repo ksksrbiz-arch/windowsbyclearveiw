@@ -5,6 +5,7 @@ import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { allWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
+import FacebookIcon from '../components/icons/FacebookIcon.astro';
 
 const ogPhoto = findWork('green-craftsman-upper')!;
 
@@ -82,7 +83,10 @@ const total = allWork.length;
       </p>
       {site.social.facebook && (
         <p class="gallery-social">
-          More jobs go up on <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a> as they finish.
+          <a class="inline-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+            <FacebookIcon class="inline-social-icon" />
+            More jobs go up on Facebook as they finish
+          </a>
         </p>
       )}
     </div>
