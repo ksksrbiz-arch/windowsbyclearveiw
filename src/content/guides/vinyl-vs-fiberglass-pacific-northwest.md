@@ -6,6 +6,9 @@ topic: Product
 published: true
 updated: 2026-09-04
 order: 6
+heroImage: ./img-vinyl-vs-fiberglass.png
+heroImageAlt: Close-up cross-section of a vinyl window frame corner next to a fiberglass window frame corner, both beaded with rain in a Pacific Northwest setting.
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
 faq:
   - question: Does fiberglass rot or rust like wood or metal?
     answer: No. Fiberglass is a glass-reinforced resin — it doesn't absorb water the way wood does or corrode the way steel and older aluminum frames do. It can still trap moisture behind bad flashing like any frame material; the frame itself just isn't the thing failing.

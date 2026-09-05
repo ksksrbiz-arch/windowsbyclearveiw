@@ -15,6 +15,9 @@ faq:
     answer: Yes. A rotten kitchen sink window may need full-frame while the bedrooms take inserts. The elevations should still read as one house.
 diagram: insert-vs-full-frame
 secondaryDiagram: flashing-order
+heroImage: ./img-full-frame-vs-insert.png
+heroImageAlt: Two windows side by side on a house wall, one finished as an insert replacement inside the old frame and one stripped to bare framing for a full-frame replacement.
+heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
 ---
 
 On our own jobs, full-frame replacement typically adds **$800 to $2,000 per opening** over an insert — the cost of pulling the old frame out, flashing the rough opening, and closing up finish work on both sides. That gap is the real dividing line between the two methods, and it is scope, not upsell: there are two honest ways to put a new window in an old opening, and the right one depends on the frame that is already there.
