@@ -1,0 +1,273 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Window measurements">
+  <div class="tool-head">
+    <div>
+      <p class="kicker">Field tool</p>
+      <h1>Window measurements</h1>
+      <p class="lede">Capture the opening schedule while you are at the house. This worksheet stays on the device until you export or clear it.</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" href="/internal/tools">All tools</a>
+      <button class="btn btn-primary" type="button" data-print>Print</button>
+    </div>
+  </div>
+
+  <section class="job-bar panel">
+    <label>Customer / job name<input type="text" data-job-name placeholder="e.g. Smith residence" maxlength="160" /></label>
+    <label>Address<input type="text" data-job-address placeholder="Optional job address" maxlength="260" /></label>
+    <span class="save-state" data-save-state role="status">Ready</span>
+  </section>
+
+  <section class="summary-grid" aria-label="Measurement summary">
+    <article class="summary-card"><span>Openings</span><strong data-count>0</strong></article>
+    <article class="summary-card"><span>Total units</span><strong data-units>0</strong></article>
+    <article class="summary-card"><span>Total nominal area</span><strong data-area>0 sq ft</strong></article>
+    <article class="summary-card summary-note"><span>Field reminder</span><strong>Measure actual opening, not the visible glass.</strong></article>
+  </section>
+
+  <section class="panel schedule-panel">
+    <div class="panel-head">
+      <div><p class="kicker">Opening schedule</p><h2>Measurements</h2></div>
+      <button class="btn btn-ghost" type="button" data-add>Add opening</button>
+    </div>
+    <div class="table-wrap">
+      <table class="measure-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Room / location</th><th>Type</th><th>Width</th><th>Height</th><th>Qty</th><th>Area</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody data-body></tbody>
+      </table>
+    </div>
+    <div class="empty-state" data-empty>
+      <strong>No openings recorded yet.</strong>
+      <span>Add the first opening to start the schedule.</span>
+      <button class="btn btn-primary" type="button" data-empty-add>Add first opening</button>
+    </div>
+  </section>
+
+  <section class="notes-grid">
+    <section class="panel note-panel">
+      <div class="panel-head"><div><p class="kicker">Site notes</p><h2>Job-wide notes</h2></div></div>
+      <textarea data-job-notes rows="7" maxlength="8000" placeholder="Access notes, trim conditions, rot, unusual openings, customer requests, photos to capture, etc."></textarea>
+    </section>
+    <section class="panel tool-panel">
+      <div class="panel-head"><div><p class="kicker">Workflow</p><h2>Next step</h2></div></div>
+      <p class="muted">Once the schedule is complete, export it or hand the device to the quote builder. The quote workflow can then turn each opening into editable line items.</p>
+      <div class="workflow-actions">
+        <button class="btn btn-primary" type="button" data-export>Export measurements</button>
+        <a class="btn btn-ghost" href="/internal/quotes/new">Open quote builder</a>
+        <button class="text-button" type="button" data-clear>Clear worksheet</button>
+      </div>
+    </section>
+  </section>
+
+  <p class="legal-note">Field measurements are a working worksheet, not a substitute for final verification before ordering.</p>
+</InternalLayout>
+
+<script>
+  type Opening = {
+    room: string;
+    type: string;
+    width: number | '';
+    height: number | '';
+    quantity: number;
+    notes: string;
+  };
+  type Worksheet = {
+    jobName: string;
+    jobAddress: string;
+    jobNotes: string;
+    openings: Opening[];
+  };
+
+  const STORAGE_KEY = 'clearview:measurement-worksheet:v1';
+  const TYPES = ['Single-hung', 'Double-hung', 'Slider', 'Casement', 'Picture', 'Awning', 'Bay / bow', 'Patio door', 'Entry door', 'Other'];
+
+  function initMeasurements() {
+    const root = document.querySelector('[data-body]')?.closest('main');
+    if (!(root instanceof HTMLElement) || root.dataset.measurementsBound === 'true') return;
+    root.dataset.measurementsBound = 'true';
+
+    const body = root.querySelector('[data-body]');
+    const empty = root.querySelector('[data-empty]');
+    const count = root.querySelector('[data-count]');
+    const units = root.querySelector('[data-units]');
+    const area = root.querySelector('[data-area]');
+    const saveState = root.querySelector('[data-save-state]');
+    const jobName = root.querySelector('[data-job-name]');
+    const jobAddress = root.querySelector('[data-job-address]');
+    const jobNotes = root.querySelector('[data-job-notes]');
+    if (!(body instanceof HTMLElement) || !(empty instanceof HTMLElement) || !(count instanceof HTMLElement) || !(units instanceof HTMLElement) || !(area instanceof HTMLElement) || !(saveState instanceof HTMLElement) || !(jobName instanceof HTMLInputElement) || !(jobAddress instanceof HTMLInputElement) || !(jobNotes instanceof HTMLTextAreaElement)) return;
+
+    const defaultOpening = (): Opening => ({ room: '', type: 'Double-hung', width: '', height: '', quantity: 1, notes: '' });
+    let data: Worksheet = { jobName: '', jobAddress: '', jobNotes: '', openings: [] };
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as Partial<Worksheet>;
+        data = {
+          jobName: typeof saved.jobName === 'string' ? saved.jobName : '',
+          jobAddress: typeof saved.jobAddress === 'string' ? saved.jobAddress : '',
+          jobNotes: typeof saved.jobNotes === 'string' ? saved.jobNotes : '',
+          openings: Array.isArray(saved.openings) ? saved.openings.map((o) => ({ ...defaultOpening(), ...o })) : [],
+        };
+      } catch {
+        data = { jobName: '', jobAddress: '', jobNotes: '', openings: [] };
+      }
+    }
+
+    function save(message = 'Saved on this device') {
+      data.jobName = jobName.value;
+      data.jobAddress = jobAddress.value;
+      data.jobNotes = jobNotes.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      saveState.textContent = message;
+    }
+
+    const esc = (v: unknown) => { const d = document.createElement('div'); d.textContent = String(v ?? ''); return d.innerHTML; };
+    const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+    const fmt = (v: number) => v.toFixed(2).replace(/\.00$/, '');
+
+    function render() {
+      body.innerHTML = '';
+      let totalUnits = 0;
+      let totalArea = 0;
+      data.openings.forEach((opening, index) => {
+        const width = num(opening.width);
+        const height = num(opening.height);
+        const qty = Math.max(1, Math.floor(num(opening.quantity) || 1));
+        const oneArea = width && height ? (width * height) / 144 : 0;
+        const rowArea = oneArea * qty;
+        totalUnits += qty;
+        totalArea += rowArea;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="index-cell">${index + 1}</td>
+          <td><input type="text" value="${esc(opening.room)}" data-field="room" maxlength="100" placeholder="Living room" aria-label="Room or location"></td>
+          <td><select data-field="type" aria-label="Window type">${TYPES.map((type) => `<option value="${esc(type)}" ${type === opening.type ? 'selected' : ''}>${esc(type)}</option>`).join('')}</select></td>
+          <td><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.width === '' ? '' : esc(opening.width)}" data-field="width" aria-label="Width in inches"></td>
+          <td><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.height === '' ? '' : esc(opening.height)}" data-field="height" aria-label="Height in inches"></td>
+          <td><input class="qty-input" type="number" min="1" step="1" inputmode="numeric" value="${qty}" data-field="quantity" aria-label="Quantity"></td>
+          <td class="area-cell">${fmt(rowArea)} sq ft</td>
+          <td><input type="text" value="${esc(opening.notes)}" data-field="notes" maxlength="300" placeholder="Trim / rot / glass" aria-label="Opening notes"></td>
+          <td><button type="button" class="remove-button" data-remove aria-label="Remove opening ${index + 1}">×</button></td>
+        `;
+        row.querySelectorAll('[data-field]').forEach((field) => {
+          field.addEventListener('change', () => {
+            const key = (field as HTMLInputElement | HTMLSelectElement).dataset.field as keyof Opening;
+            const value = (field as HTMLInputElement).value;
+            if (key === 'width' || key === 'height') opening[key] = value === '' ? '' : Math.max(0, num(value));
+            else if (key === 'quantity') opening.quantity = Math.max(1, Math.floor(num(value) || 1));
+            else if (key === 'room' || key === 'type' || key === 'notes') opening[key] = value;
+            render();
+            save();
+          });
+        });
+        row.querySelector('[data-remove]')?.addEventListener('click', () => {
+          data.openings.splice(index, 1);
+          render();
+          save();
+        });
+        body.append(row);
+      });
+
+      count.textContent = String(data.openings.length);
+      units.textContent = String(totalUnits);
+      area.textContent = `${fmt(totalArea)} sq ft`;
+      empty.hidden = data.openings.length > 0;
+    }
+
+    function addOpening() {
+      data.openings.push(defaultOpening());
+      render();
+      save('Opening added');
+      window.setTimeout(() => {
+        const inputs = body.querySelectorAll('input[data-field="room"]');
+        (inputs[inputs.length - 1] as HTMLInputElement | undefined)?.focus();
+      }, 0);
+    }
+
+    load();
+    jobName.value = data.jobName;
+    jobAddress.value = data.jobAddress;
+    jobNotes.value = data.jobNotes;
+    render();
+
+    root.querySelector('[data-add]')?.addEventListener('click', addOpening);
+    root.querySelector('[data-empty-add]')?.addEventListener('click', addOpening);
+    [jobName, jobAddress, jobNotes].forEach((field) => field.addEventListener('input', () => save()));
+    root.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+    root.querySelector('[data-export]')?.addEventListener('click', () => {
+      save('Exported');
+      const payload = JSON.stringify({ exportedAt: new Date().toISOString(), ...data }, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      const safeName = (data.jobName || 'clearview-measurements').trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'clearview-measurements';
+      anchor.href = url;
+      anchor.download = `${safeName}-measurements.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+    root.querySelector('[data-clear]')?.addEventListener('click', () => {
+      if (!window.confirm('Clear the measurement worksheet from this device?')) return;
+      data = { jobName: '', jobAddress: '', jobNotes: '', openings: [] };
+      jobName.value = '';
+      jobAddress.value = '';
+      jobNotes.value = '';
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+      saveState.textContent = 'Worksheet cleared';
+    });
+  }
+
+  initMeasurements();
+  document.addEventListener('astro:page-load', initMeasurements);
+</script>
+
+<style>
+  .tool-head { display:flex; justify-content:space-between; align-items:end; gap:var(--space-m); margin-bottom:var(--space-m); }
+  .head-actions { display:flex; gap:var(--space-xs); flex-wrap:wrap; }
+  .panel { border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); overflow:hidden; }
+  .job-bar { display:grid; grid-template-columns:1fr 1.3fr auto; gap:var(--space-s); padding:var(--space-m); align-items:end; margin-bottom:var(--space-s); }
+  .job-bar label { display:grid; gap:.35rem; font-size:var(--step--1); font-weight:600; }
+  .job-bar input, .measure-table input, .measure-table select, textarea { width:100%; border:1px solid var(--line-strong); border-radius:var(--radius); padding:.55rem .6rem; font:inherit; background:var(--paper); color:var(--ink); }
+  .save-state { color:var(--ink-faint); font-size:var(--step--2); padding-bottom:.55rem; white-space:nowrap; }
+  .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-s); margin-bottom:var(--space-m); }
+  .summary-card { border:1px solid var(--line); border-radius:var(--radius); padding:var(--space-m); background:var(--paper-raised); display:grid; gap:.3rem; }
+  .summary-card span { font-size:var(--step--2); color:var(--ink-soft); }
+  .summary-card strong { font-size:var(--step-1); }
+  .summary-note strong { font-size:var(--step--1); line-height:1.35; }
+  .panel-head { padding:var(--space-m); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:end; gap:var(--space-s); }
+  .panel-head h2 { margin:.12rem 0 0; font-size:var(--step-1); }
+  .table-wrap { overflow-x:auto; }
+  .measure-table { width:100%; border-collapse:collapse; min-width:980px; }
+  .measure-table th, .measure-table td { padding:.55rem; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle; }
+  .measure-table th { font-size:var(--step--2); color:var(--ink-soft); background:var(--paper); }
+  .measure-table input, .measure-table select { min-width:5.25rem; }
+  .measure-table td:nth-child(2) input, .measure-table td:nth-child(8) input { min-width:11rem; }
+  .index-cell { width:2rem; color:var(--ink-faint); font-weight:700; }
+  .area-cell { white-space:nowrap; font-weight:650; font-size:var(--step--2); }
+  .qty-input { width:4.5rem; }
+  .remove-button { width:2rem; height:2rem; border:1px solid var(--line); border-radius:50%; background:transparent; cursor:pointer; font-size:1.15rem; }
+  .remove-button:hover { border-color:var(--danger); color:var(--danger); }
+  .empty-state { padding:var(--space-l); text-align:center; display:grid; justify-items:center; gap:.5rem; color:var(--ink-soft); }
+  .empty-state strong { color:var(--ink); }
+  .empty-state button { margin-top:.5rem; }
+  .notes-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:var(--space-m); margin-top:var(--space-m); }
+  .note-panel textarea { border:0; border-radius:0; min-height:13rem; resize:vertical; padding:var(--space-m); }
+  .tool-panel { padding-bottom:var(--space-m); }
+  .tool-panel > p { padding:var(--space-m); padding-top:0; margin:0; }
+  .workflow-actions { display:flex; flex-wrap:wrap; gap:var(--space-xs); padding-inline:var(--space-m); align-items:center; }
+  .text-button { border:0; background:transparent; color:var(--danger); font:inherit; font-size:var(--step--1); cursor:pointer; padding:.5rem; }
+  .legal-note { margin-top:var(--space-s); color:var(--ink-faint); font-size:var(--step--2); }
+  @media (max-width:760px) { .tool-head, .job-bar { grid-template-columns:1fr; align-items:start; flex-direction:column; } .job-bar { display:grid; } .save-state { padding-bottom:0; } .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .notes-grid { grid-template-columns:1fr; } }
+  @media print { .head-actions, .job-bar, .summary-grid, .panel-head button, .workflow-actions, .legal-note, .save-state, .remove-button { display:none !important; } .table-wrap { overflow:visible; } .measure-table { min-width:0; } .measure-table input, .measure-table select, .note-panel textarea { border:0; padding:0; background:transparent; } .empty-state { display:none !important; } }
+</style>
