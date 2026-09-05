@@ -5,10 +5,16 @@ config here and separately configured in the Cloudflare Pages dashboard for
 production. It is not part of the marketing site: it's excluded from the
 sitemap and `robots.txt`, and every page carries `noindex, nofollow`.
 
-What it does: Mark logs in with one shared password, builds a firm-price
-quote starting from `src/data/pricing.ts` (fully editable per line), and gets
-it signed — either on-screen with a finger/mouse signature pad, or printed
-and signed by hand (he confirms it back in the tool once it's actually
+The internal area now opens on a **Command Center** at `/internal/`: a compact,
+field-friendly snapshot of recent leads, draft/finalized quote counts and value,
+lead source/location summaries, and quick links into the existing screens. The
+dashboard uses `/internal/api/dashboard`, a small read-only API that aggregates
+D1 data server-side instead of downloading the full leads and quotes lists.
+
+What the internal tool does: Mark logs in with one shared password, builds a
+firm-price quote starting from `src/data/pricing.ts` (fully editable per line),
+and gets it signed — either on-screen with a finger/mouse signature pad, or
+printed and signed by hand (he confirms it back in the tool once it's actually
 signed). The signed quote doubles as the contract, with the terms from
 `src/data/contractTerms.ts`. A quote stays a fully editable draft — customer
 info, line items, discount, everything — right up until it's signed.
@@ -67,15 +73,15 @@ guarding.
 ## Known gaps, on purpose
 
 - **No attorney review.** `src/data/contractTerms.ts` has a warning at the
-  top. The right-to-cancel language follows the FTC Cooling-Off Rule model
-  language, but it has not been checked by a Washington attorney. Do not
-  treat the printed contract as legally bulletproof until someone has.
+top. The right-to-cancel language follows the FTC Cooling-Off Rule model
+language, but it has not been checked by a Washington attorney. Do not
+treat the printed contract as legally bulletproof until someone has.
 - **No edit-after-finalize.** A draft quote (built but not yet signed —
-  either path) can be edited freely from its "Edit quote" link. Once it's
-  finalized (a digital signature attached, or a printed copy confirmed
-  signed), there is no UI or API path to change it — a mistake at that
-  point means starting a new quote. This is deliberate: a signed contract
-  shouldn't be silently editable.
+either path) can be edited freely from its "Edit quote" link. Once it's
+finalized (a digital signature attached, or a printed copy confirmed
+signed), there is no UI or API path to change it — a mistake at that
+point means starting a new quote. This is deliberate: a signed contract
+shouldn't be silently editable.
 - **Single shared password.** There's no per-user login, audit log of who
-  created which quote, or password reset flow. Fine for one person (Mark);
-  revisit if a second person needs access.
+created which quote, or password reset flow. Fine for one person (Mark);
+revisit if a second person needs access.
