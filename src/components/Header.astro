@@ -331,9 +331,16 @@ const links = [
     font-variant-numeric: tabular-nums;
   }
 
+  /* The full number is one line no matter how tight things get — a phone
+     number folding onto three lines inside a pill looks broken, and the
+     short "Call" label below 1280px exists precisely so it never has to. */
+  .header-cta-full {
+    white-space: nowrap;
+  }
+
   /* Hidden by default; only shown at the desktop width where the nav's own
      "Request an estimate" link is otherwise the sole way to reach it. Below
-     900px the opened nav carries that link, and below 640px the fixed
+     1280px the opened nav carries that link, and below 640px the fixed
      MobileCtaBar owns this action instead, so this would just be a third copy. */
   .header-estimate {
     display: none;
@@ -342,7 +349,7 @@ const links = [
     white-space: nowrap;
   }
 
-  @media (min-width: 901px) {
+  @media (min-width: 1281px) {
     .header-estimate {
       display: inline-flex;
     }
@@ -367,7 +374,11 @@ const links = [
     background: color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
-  @media (max-width: 900px) {
+  /* Ten nav links plus the brand mark and both header buttons need real
+     room — below this, the row was wrapping onto two lines and squeezing
+     the call button's phone number into three, so the hamburger takes over
+     earlier than it used to rather than let that happen. */
+  @media (max-width: 1280px) {
     .header-inner,
     .site-header[data-scrolled='true'] .header-inner {
       position: relative;
