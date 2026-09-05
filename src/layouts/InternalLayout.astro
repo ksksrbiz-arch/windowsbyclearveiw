@@ -127,8 +127,39 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
           });
         }
 
-        mountMeasurementImport();
-        document.addEventListener('astro:page-load', mountMeasurementImport);
+        function mountFollowUpPrefill() {
+          if (location.pathname !== '/internal/follow-up') return;
+          const leadId = new URLSearchParams(location.search).get('leadId');
+          if (!leadId) return;
+          const addButton = document.querySelector('[data-add-open]');
+          const leadField = document.querySelector('input[name="leadId"]');
+          if (!(leadField instanceof HTMLInputElement)) return;
+          leadField.value = leadId;
+          if (addButton instanceof HTMLButtonElement) addButton.click();
+        }
+
+        function mountJobPhotoLink() {
+          if (location.pathname !== '/internal/jobs/view') return;
+          const id = new URLSearchParams(location.search).get('id');
+          if (!id) return;
+          const actions = document.querySelector('.head-actions');
+          if (!(actions instanceof HTMLElement) || actions.querySelector('[data-job-photos-link]')) return;
+          const link = document.createElement('a');
+          link.className = 'btn btn-ghost';
+          link.href = `/internal/tools/photos?job=${encodeURIComponent(id)}`;
+          link.dataset.jobPhotosLink = 'true';
+          link.textContent = 'Job photos';
+          actions.insertBefore(link, actions.firstChild);
+        }
+
+        function mountInternalEnhancements() {
+          mountMeasurementImport();
+          mountFollowUpPrefill();
+          mountJobPhotoLink();
+        }
+
+        mountInternalEnhancements();
+        document.addEventListener('astro:page-load', mountInternalEnhancements);
       })();
     </script>
 
