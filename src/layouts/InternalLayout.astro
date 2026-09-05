@@ -16,6 +16,14 @@ interface Props {
   showLogout?: boolean;
 }
 const { title, showLogout = true } = Astro.props;
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: '/internal/', label: 'Dashboard' },
+  { href: '/internal/leads', label: 'Leads' },
+  { href: '/internal/quotes', label: 'Quotes' },
+  { href: '/internal/ask-logs', label: 'Ask' },
+];
+const isActive = (href: string) => href === '/internal/' ? pathname === href : pathname.startsWith(href);
 ---
 <!doctype html>
 <html lang="en">
@@ -34,10 +42,9 @@ const { title, showLogout = true } = Astro.props;
         {showLogout && (
           <div class="internal-header-right">
             <nav class="internal-nav" aria-label="Internal navigation">
-              <a href="/internal/">Dashboard</a>
-              <a href="/internal/leads">Leads</a>
-              <a href="/internal/quotes">Quotes</a>
-              <a href="/internal/ask-logs">Ask</a>
+              {navItems.map((item) => (
+                <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class:list={{ active: isActive(item.href) }}>{item.label}</a>
+              ))}
             </nav>
             <form method="post" action="/internal/api/logout">
               <button class="internal-logout" type="submit">Log out</button>
@@ -103,18 +110,39 @@ const { title, showLogout = true } = Astro.props;
       }
 
       .internal-nav a {
+        position: relative;
         color: var(--on-dark-soft);
         text-decoration: none;
         font-size: var(--step--2);
         font-weight: 600;
         padding: 0.42rem 0.55rem;
         border-radius: var(--radius);
+        white-space: nowrap;
+      }
+
+      .internal-nav a::after {
+        content: '';
+        position: absolute;
+        left: 0.55rem;
+        right: 0.55rem;
+        bottom: 0.2rem;
+        height: 2px;
+        border-radius: 999px;
+        background: var(--accent-bright);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 140ms ease;
       }
 
       .internal-nav a:hover,
-      .internal-nav a:focus-visible {
+      .internal-nav a:focus-visible,
+      .internal-nav a.active {
         color: var(--on-dark);
         background: rgb(255 255 255 / 0.08);
+      }
+
+      .internal-nav a.active::after {
+        transform: scaleX(1);
       }
 
       .internal-logout {
@@ -151,12 +179,17 @@ const { title, showLogout = true } = Astro.props;
         .internal-nav {
           overflow-x: auto;
           scrollbar-width: none;
+          min-width: 0;
         }
         .internal-nav::-webkit-scrollbar {
           display: none;
         }
         .internal-nav a {
           padding-inline: 0.45rem;
+        }
+        .internal-nav a::after {
+          left: 0.45rem;
+          right: 0.45rem;
         }
       }
 
@@ -169,6 +202,12 @@ const { title, showLogout = true } = Astro.props;
         }
         .internal-logout {
           padding-inline: 0.55rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .internal-nav a::after {
+          transition: none;
         }
       }
 
