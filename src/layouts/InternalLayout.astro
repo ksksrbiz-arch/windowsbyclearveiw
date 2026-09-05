@@ -2,17 +2,13 @@
 import '../styles/global.css';
 
 /**
- * Shell for the internal quoting tool. Deliberately not BaseLayout: that one
- * carries public nav, a customer-facing phone CTA, and marketing chrome that
- * would be actively confusing wrapped around a screen where Mark is typing a
- * customer's address into a contract. This shares the design tokens (global.css)
- * for visual consistency, but owns its own minimal header and no footer at all.
+ * Shell for the internal business tool. Deliberately not BaseLayout: that one
+ * carries customer-facing navigation and marketing chrome that would be
+ * confusing around screens where Mark works with customer records and quotes.
+ * This shares the design tokens but owns the internal navigation and logout.
  *
- * noindex is set three ways, deliberately redundant: this meta tag, the
- * X-Robots-Tag header the middleware adds, and exclusion from the sitemap.
- * None of the three is the actual access control — the session cookie is —
- * but a tool holding customer names, addresses, and signatures should not be
- * one crawler bug away from showing up in search results.
+ * noindex is set redundantly here and by the internal middleware. The session
+ * cookie remains the actual access control.
  */
 interface Props {
   title: string;
@@ -34,11 +30,19 @@ const { title, showLogout = true } = Astro.props;
   <body class="internal">
     <header class="internal-header">
       <div class="internal-header-inner">
-        <span class="internal-brand">Clearview <span>Internal</span></span>
+        <a class="internal-brand" href="/internal/" aria-label="Clearview Command Center">Clearview <span>Internal</span></a>
         {showLogout && (
-          <form method="post" action="/internal/api/logout">
-            <button class="internal-logout" type="submit">Log out</button>
-          </form>
+          <div class="internal-header-right">
+            <nav class="internal-nav" aria-label="Internal navigation">
+              <a href="/internal/">Dashboard</a>
+              <a href="/internal/leads">Leads</a>
+              <a href="/internal/quotes">Quotes</a>
+              <a href="/internal/ask-logs">Ask</a>
+            </nav>
+            <form method="post" action="/internal/api/logout">
+              <button class="internal-logout" type="submit">Log out</button>
+            </form>
+          </div>
         )}
       </div>
     </header>
@@ -53,23 +57,31 @@ const { title, showLogout = true } = Astro.props;
       }
 
       .internal-header {
-        background: var(--black);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: color-mix(in srgb, var(--black) 96%, transparent);
         color: var(--on-dark);
         border-bottom: 1px solid var(--dark-line);
+        backdrop-filter: blur(10px);
       }
 
       .internal-header-inner {
-        max-width: 60rem;
+        max-width: 68rem;
         margin-inline: auto;
-        padding: var(--space-s) var(--space-m);
+        padding: 0.65rem var(--space-m);
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: var(--space-m);
       }
 
       .internal-brand {
-        font-weight: 600;
+        color: var(--on-dark);
+        font-weight: 650;
         letter-spacing: -0.01em;
+        text-decoration: none;
+        white-space: nowrap;
       }
 
       .internal-brand span {
@@ -77,15 +89,44 @@ const { title, showLogout = true } = Astro.props;
         font-weight: 500;
       }
 
+      .internal-header-right {
+        display: flex;
+        align-items: center;
+        gap: var(--space-s);
+        min-width: 0;
+      }
+
+      .internal-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      .internal-nav a {
+        color: var(--on-dark-soft);
+        text-decoration: none;
+        font-size: var(--step--2);
+        font-weight: 600;
+        padding: 0.42rem 0.55rem;
+        border-radius: var(--radius);
+      }
+
+      .internal-nav a:hover,
+      .internal-nav a:focus-visible {
+        color: var(--on-dark);
+        background: rgb(255 255 255 / 0.08);
+      }
+
       .internal-logout {
         background: transparent;
         border: 1px solid var(--dark-line-strong);
         color: var(--on-dark-soft);
         border-radius: var(--radius);
-        padding: 0.4rem 0.8rem;
+        padding: 0.42rem 0.72rem;
         font: inherit;
-        font-size: var(--step--1);
+        font-size: var(--step--2);
         cursor: pointer;
+        white-space: nowrap;
       }
 
       .internal-logout:hover {
@@ -94,9 +135,41 @@ const { title, showLogout = true } = Astro.props;
       }
 
       .internal-main {
-        max-width: 60rem;
+        max-width: 68rem;
         margin-inline: auto;
         padding: var(--space-l) var(--space-m) var(--space-3xl);
+      }
+
+      @media (max-width: 720px) {
+        .internal-header-inner {
+          gap: var(--space-s);
+        }
+        .internal-header-right {
+          flex: 1;
+          justify-content: flex-end;
+        }
+        .internal-nav {
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .internal-nav::-webkit-scrollbar {
+          display: none;
+        }
+        .internal-nav a {
+          padding-inline: 0.45rem;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .internal-header-inner {
+          padding-inline: var(--space-s);
+        }
+        .internal-brand span {
+          display: none;
+        }
+        .internal-logout {
+          padding-inline: 0.55rem;
+        }
       }
 
       @media print {
