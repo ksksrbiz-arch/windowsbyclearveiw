@@ -1,0 +1,130 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Job Prep">
+  <div class="head">
+    <div>
+      <p class="kicker">Operations</p>
+      <h1>Job prep & closeout</h1>
+      <p class="lede" data-subtitle>Loading project…</p>
+    </div>
+    <div class="actions">
+      <a class="btn btn-ghost" data-job-link href="/internal/jobs">Job</a>
+      <a class="btn btn-primary" data-photos-link href="#">Photos</a>
+    </div>
+  </div>
+
+  <p class="error" data-error hidden role="alert"></p>
+
+  <section class="summary-grid" data-summary hidden>
+    <article class="summary-card"><span>Customer</span><strong data-customer>—</strong><small data-location>—</small></article>
+    <article class="summary-card"><span>Schedule</span><strong data-schedule>Not scheduled</strong><small data-window>—</small></article>
+    <article class="summary-card"><span>Progress</span><strong data-progress>0%</strong><small data-progress-detail>0 of 0 complete</small></article>
+    <article class="summary-card"><span>Quoted total</span><strong data-total>—</strong><small>Source quote</small></article>
+  </section>
+
+  <div class="workspace" data-workspace hidden>
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">Field-ready checklist</p><h2>Run the job without missing the handoffs</h2></div><button class="btn btn-ghost btn-small" type="button" data-refresh>Refresh</button></div>
+      <div class="progress-track"><span data-progress-bar></span></div>
+      <div class="checklist" data-checklist></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">Material pull</p><h2>Quoted scope to stage</h2></div></div>
+      <div class="materials" data-materials><p class="muted">Loading quote lines…</p></div>
+      <div class="material-note"><label>Staging / material notes<textarea data-material-notes rows="5" maxlength="5000" placeholder="Record unit counts, sizes, trim, sealant, fasteners, damaged/replacement materials, or pickup needs…"></textarea></label></div>
+      <div class="save-row"><span class="save-state" data-save-state>Saved only on this browser</span><button class="btn btn-primary" type="button" data-save-notes>Save notes</button></div>
+    </section>
+
+    <section class="panel closeout-panel">
+      <div class="panel-head"><div><p class="kicker">Finish line</p><h2>When everything is checked, close the job</h2></div></div>
+      <div class="closeout-grid">
+        <div><strong>Completed</strong><p>Use the job workspace status control to mark the project completed after the checklist and customer walkthrough are finished.</p></div>
+        <a class="btn btn-primary" data-finish-link href="#">Open job workspace</a>
+      </div>
+    </section>
+  </div>
+</InternalLayout>
+
+<script>
+  type Item = { id:number; section:string; label:string; checked:number; notes:string|null; position:number };
+  type Job = { id:string; quote_id:string|null; status:string; scheduled_date:string|null; scheduled_window:string|null; customer_name:string; customer_city:string|null };
+  type QuoteItem = { label:string; quantity:number; unit_price_cents:number; line_total_cents:number };
+  let job:Job|null=null;
+  let items:Item[]=[];
+  let quoteItems:QuoteItem[]=[];
+
+  function init() {
+    const workspace=document.querySelector('[data-workspace]');
+    if(!(workspace instanceof HTMLElement) || workspace.dataset.bound==='true') return;
+    workspace.dataset.bound='true';
+    const params=new URLSearchParams(location.search); const id=params.get('id');
+    const error=document.querySelector('[data-error]');
+    const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;};
+    const money=(c:number)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    const qs=<T extends Element>(s:string)=>document.querySelector(s) as T|null;
+    const showError=(message:string)=>{if(error instanceof HTMLElement){error.hidden=false;error.textContent=message;}};
+    if(!id){showError('No job id in the URL.');return;}
+
+    async function load(){
+      try{
+        const [jr,cr]=await Promise.all([
+          fetch(`/internal/api/jobs?id=${encodeURIComponent(id!)}`,{headers:{'cache-control':'no-cache'}}),
+          fetch(`/internal/api/job-checklist?jobId=${encodeURIComponent(id!)}`,{headers:{'cache-control':'no-cache'}})
+        ]);
+        const jd=await jr.json().catch(()=>({})); const cd=await cr.json().catch(()=>({}));
+        if(!jr.ok) throw new Error(jd.error||'Could not load this job.');
+        if(!cr.ok) throw new Error(cd.error||'Could not load the checklist.');
+        job=jd.job; quoteItems=jd.items||[]; items=cd.items||[]; workspace.hidden=false; render();
+      }catch(e){showError(e instanceof Error?e.message:'Could not load the project.');}
+    }
+
+    function render(){
+      if(!job) return;
+      qs('[data-subtitle]')!.textContent=`${job.id}${job.customer_city?` · ${job.customer_city}`:''}`;
+      qs('[data-customer]')!.textContent=job.customer_name||'—';
+      qs('[data-location]')!.textContent=job.customer_city||'Address on job record';
+      qs('[data-schedule]')!.textContent=job.scheduled_date?new Date(`${job.scheduled_date}T12:00:00`).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}):'Not scheduled';
+      qs('[data-window]')!.textContent=job.scheduled_window||'No crew window set';
+      const total=quoteItems.reduce((s,i)=>s+(Number(i.line_total_cents)||0),0); qs('[data-total]')!.textContent=money(total);
+      const done=items.filter(i=>Number(i.checked)===1).length; const pct=items.length?Math.round(done/items.length*100):0;
+      qs('[data-progress]')!.textContent=`${pct}%`; qs('[data-progress-detail]')!.textContent=`${done} of ${items.length} complete`;
+      const bar=qs<HTMLElement>('[data-progress-bar]'); if(bar) bar.style.width=`${pct}%`;
+      const host=qs('[data-checklist]');
+      const groups=items.reduce<Record<string,Item[]>>((a,i)=>{(a[i.section]??=[]).push(i);return a;},{});
+      if(host) host.innerHTML=Object.entries(groups).map(([section,list])=>`<section class="check-section"><div class="section-title">${esc(section)}</div>${list.map(i=>`<label class="check-row"><input type="checkbox" data-item="${i.id}" ${Number(i.checked)===1?'checked':''}><span>${esc(i.label)}</span><small>${Number(i.checked)===1?'Done':'Open'}</small></label>`).join('')}</section>`).join('') || '<p class="empty">No checklist items.</p>';
+      const mat=qs('[data-materials]'); if(mat) mat.innerHTML=quoteItems.length?quoteItems.map(i=>`<div class="material-row"><span><strong>${esc(i.label)}</strong><small>Qty ${Number(i.quantity)||0}</small></span><strong>${money(Number(i.line_total_cents)||0)}</strong></div>`).join(''):'<p class="empty">No quote line items are attached.</p>';
+      const href=`/internal/jobs/view?id=${encodeURIComponent(job.id)}`; const ph=`/internal/tools/photos?jobId=${encodeURIComponent(job.id)}`;
+      const jobLink=qs<HTMLAnchorElement>('[data-job-link]'); if(jobLink) jobLink.href=href;
+      const finish=qs<HTMLAnchorElement>('[data-finish-link]'); if(finish) finish.href=href;
+      const photos=qs<HTMLAnchorElement>('[data-photos-link]'); if(photos) photos.href=ph;
+    }
+
+    async function toggle(target:HTMLInputElement){
+      target.disabled=true;
+      try{const r=await fetch(`/internal/api/job-checklist?id=${encodeURIComponent(target.dataset.item||'')}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({checked:target.checked})}); if(!r.ok) throw new Error('Could not save checklist item.'); const local=items.find(i=>String(i.id)===target.dataset.item); if(local)local.checked=target.checked?1:0; render();}
+      catch(e){target.checked=!target.checked;showError(e instanceof Error?e.message:'Could not save checklist item.');}finally{target.disabled=false;}
+    }
+
+    qs('[data-checklist]')?.addEventListener('change',(ev)=>{const el=ev.target;if(el instanceof HTMLInputElement&&el.matches('[data-item]'))toggle(el);});
+    qs('[data-refresh]')?.addEventListener('click',load);
+    const noteKey=`clearview:job-prep-notes:${id}`;
+    const note=qs<HTMLTextAreaElement>('[data-material-notes]');
+    if(note){note.value=localStorage.getItem(noteKey)||'';}
+    qs('[data-save-notes]')?.addEventListener('click',()=>{if(note)localStorage.setItem(noteKey,note.value);const state=qs('[data-save-state]');if(state)state.textContent=`Saved ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;});
+    load();
+  }
+  init(); document.addEventListener('astro:page-load',init);
+</script>
+
+<style>
+  .head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}.actions{display:flex;gap:var(--space-xs);flex-wrap:wrap}.btn-small{padding:.45rem .7rem}
+  .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden;margin-bottom:var(--space-m)}.panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}.panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}
+  .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-s);margin-bottom:var(--space-m)}.summary-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);padding:var(--space-m);display:grid;gap:.25rem}.summary-card span,.summary-card small{color:var(--ink-faint);font-size:var(--step--2)}.summary-card strong{font-size:var(--step-1)}
+  .progress-track{height:.45rem;background:var(--line);margin:0 var(--space-m);border-radius:999px;overflow:hidden}.progress-track span{display:block;height:100%;width:0;background:var(--accent);transition:width .2s ease}
+  .checklist{padding:var(--space-s) var(--space-m) var(--space-m)}.check-section+.check-section{margin-top:var(--space-m)}.section-title{font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:.35rem}.check-row{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;padding:.78rem .1rem;border-bottom:1px solid var(--line);cursor:pointer}.check-row:last-child{border-bottom:0}.check-row input{width:1.1rem;height:1.1rem;accent-color:var(--accent)}.check-row small{color:var(--ink-faint)}
+  .materials{padding:0 var(--space-m)}.material-row{display:flex;justify-content:space-between;align-items:center;gap:var(--space-m);padding:.9rem 0;border-bottom:1px solid var(--line)}.material-row:last-child{border-bottom:0}.material-row span{display:grid;gap:.16rem}.material-row small{color:var(--ink-soft)}.material-note{border-top:1px solid var(--line)}.material-note label{display:block;font-size:var(--step--1);font-weight:650;padding:var(--space-m)}.material-note textarea{display:block;width:100%;margin-top:.4rem;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);padding:.7rem;font:inherit;resize:vertical}.save-row{padding:var(--space-s) var(--space-m);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.save-state{font-size:var(--step--2);color:var(--ink-faint)}
+  .closeout-grid{padding:var(--space-m);display:flex;justify-content:space-between;gap:var(--space-m);align-items:center}.closeout-grid p{color:var(--ink-soft);max-width:60ch}.error{padding:var(--space-s);border-left:2px solid var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent);margin-bottom:var(--space-m)}
+  @media(max-width:800px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.head{align-items:flex-start;flex-direction:column}.summary-grid{grid-template-columns:1fr}.closeout-grid{align-items:flex-start;flex-direction:column}}
+</style>
