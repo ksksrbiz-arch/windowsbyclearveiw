@@ -10,10 +10,12 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       <a class="btn btn-ghost" data-duplicate-link href="#">Duplicate</a>
       <a class="btn btn-ghost" data-edit-link hidden href="#">Edit quote</a>
       <button class="btn btn-ghost qv-danger" type="button" data-delete-btn hidden>Delete draft</button>
+      <button class="btn btn-ghost" type="button" data-create-job hidden>Create job</button>
       <button class="btn btn-primary" type="button" data-print-btn>Print</button>
     </div>
   </div>
   <p class="qv-error" data-delete-error hidden role="alert"></p>
+  <p class="qv-error" data-job-error hidden role="alert"></p>
 
   <p data-loading>Loading…</p>
   <p class="qv-error" data-error hidden role="alert"></p>
@@ -191,6 +193,12 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
         setupDelete(quote);
       }
 
+      const createJob = document.querySelector('[data-create-job]');
+      if (createJob instanceof HTMLButtonElement) {
+        createJob.hidden = quote.status !== 'finalized';
+        setupCreateJob(quote);
+      }
+
       const set = (selector: string, value: string) => {
         const el = root.querySelector(selector);
         if (el) el.textContent = value;
@@ -225,6 +233,36 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       renderSignatureState(quote);
     }
 
+    function setupCreateJob(quote: any) {
+      const btn = document.querySelector('[data-create-job]');
+      if (!(btn instanceof HTMLButtonElement) || btn.dataset.bound === 'true') return;
+      btn.dataset.bound = 'true';
+      const error = document.querySelector('[data-job-error]');
+      btn.addEventListener('click', async () => {
+        if (error instanceof HTMLElement) error.hidden = true;
+        btn.disabled = true;
+        btn.textContent = 'Creating…';
+        try {
+          const response = await fetch('/internal/api/jobs', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ quoteId: quote.id }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not create the job.');
+          if (result.id) {
+            window.location.href = `/internal/jobs/view?id=${encodeURIComponent(result.id)}`;
+            return;
+          }
+          throw new Error('The job was not created.');
+        } catch (e) {
+          if (error instanceof HTMLElement) { error.hidden = false; error.textContent = e instanceof Error ? e.message : 'Could not create the job.'; }
+          btn.disabled = false;
+          btn.textContent = 'Create job';
+        }
+      });
+    }
+
     function escapeHtml(s: string) {
       const div = document.createElement('div');
       div.textContent = s ?? '';
@@ -253,8 +291,6 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
           if (atEl) atEl.textContent = quote.signed_at ? new Date(quote.signed_at).toLocaleString('en-US') : '';
         }
       } else if (finalized && quote.signature_method === 'pen') {
-        // No drawn signature to render — the customer signed the printed
-        // page, and this quote row is just recording that it happened.
         if (penBlock instanceof HTMLElement) penBlock.hidden = false;
         if (signedBlock instanceof HTMLElement) {
           signedBlock.hidden = false;
@@ -327,9 +363,6 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Drawn at device pixel ratio for a crisp line, but strokes are
-      // recorded in the canvas's own logical coordinate space (600x180) so
-      // the exported SVG viewBox matches regardless of screen density.
       const ratio = window.devicePixelRatio || 1;
       canvas.width = 600 * ratio;
       canvas.height = 180 * ratio;
@@ -375,8 +408,6 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       canvas.addEventListener('pointerup', stopDrawing);
       canvas.addEventListener('pointerleave', stopDrawing);
       canvas.addEventListener('pointercancel', stopDrawing);
-      // A signature pad has to consume the gesture, or a touch drag scrolls
-      // the page instead of drawing a line.
       canvas.style.touchAction = 'none';
 
       function toSvg(): string {
@@ -599,8 +630,6 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     letter-spacing: 0.04em;
   }
 
-  /* Rows are built at runtime from the fetched line items, so they never
-     get Astro's scoping attribute — :global() or this never matches. */
   :global(.contract-items td) {
     padding: 0.35rem 0.4rem;
     border-bottom: 1px solid var(--line);
@@ -620,10 +649,6 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
     font-size: var(--step--1);
   }
 
-  /* Several rules above set display: flex/grid on elements that also get
-     toggled with the plain [hidden] attribute from script. Author styles
-     beat the browser's own [hidden] rule regardless of selector specificity,
-     so without this an element JS marked hidden could still render. */
   [hidden] {
     display: none !important;
   }
