@@ -1,0 +1,37 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Schedule">
+  <div class="head">
+    <div><p class="kicker">Operations</p><h1>Schedule</h1><p class="lede">A simple installation calendar driven by the jobs already in the system.</p></div>
+    <div class="actions"><a class="btn btn-ghost" href="/internal/jobs">Jobs</a><button class="btn btn-ghost" type="button" data-refresh>Refresh</button></div>
+  </div>
+  <section class="week-nav panel"><button type="button" class="nav-btn" data-prev aria-label="Previous week">←</button><div><strong data-range>Loading…</strong><small data-range-note>Monday–Sunday</small></div><button type="button" class="nav-btn" data-next aria-label="Next week">→</button><button type="button" class="today-btn" data-today>Today</button></section>
+  <section class="calendar panel"><div class="calendar-grid" data-grid></div><div class="empty" data-empty hidden><strong>No installations scheduled this week.</strong><span>Schedule a job from its workspace.</span><a class="btn btn-primary" href="/internal/jobs">Open jobs</a></div></section>
+  <p class="status" data-status role="status">Loading schedule…</p>
+</InternalLayout>
+
+<script>
+  type Job={id:string;status:string;scheduled_date:string|null;scheduled_window:string|null;customer_name:string;customer_city:string|null;customer_phone:string|null;total_cents:number|null};
+  function initSchedule(){
+    const grid=document.querySelector('[data-grid]'); if(!(grid instanceof HTMLElement)||grid.dataset.bound==='true')return;grid.dataset.bound='true';
+    const range=document.querySelector('[data-range]');const status=document.querySelector('[data-status]');const empty=document.querySelector('[data-empty]');let jobs:Job[]=[];let anchor=new Date();
+    const startOfWeek=(d:Date)=>{const x=new Date(d);const day=x.getDay();const delta=day===0?-6:1-day;x.setHours(12,0,0,0);x.setDate(x.getDate()+delta);return x;};
+    const dayKey=(d:Date)=>d.toISOString().slice(0,10); const esc=(v:unknown)=>{const x=document.createElement('div');x.textContent=String(v??'');return x.innerHTML;};
+    const label=(d:Date)=>d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    function render(){
+      const monday=startOfWeek(anchor);const days=[...Array(7)].map((_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
+      if(range)range.textContent=`${days[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      grid.innerHTML='';let any=false;
+      for(const d of days){const key=dayKey(d);const scheduled=jobs.filter(j=>j.scheduled_date===key&&j.status!=='cancelled');if(scheduled.length)any=true;const col=document.createElement('section');col.className='day';col.innerHTML=`<header><strong>${esc(label(d))}</strong><span>${scheduled.length||''}</span></header>`;if(!scheduled.length)col.innerHTML+='<p class="none">Open</p>';else scheduled.forEach(job=>{const card=document.createElement('a');card.className='job';card.href=`/internal/jobs/view?id=${encodeURIComponent(job.id)}`;card.innerHTML=`<span class="job-time">${esc(job.scheduled_window||'Time not set')}</span><strong>${esc(job.customer_name)}</strong><small>${esc(job.customer_city||'')} ${job.status==='in-progress'?'· In progress':''}</small>`;col.append(card);});grid.append(col);}
+      if(empty instanceof HTMLElement)empty.hidden=any;if(status)status.textContent=`Updated ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+    }
+    async function load(){try{const r=await fetch('/internal/api/jobs',{headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error();const d=await r.json();jobs=Array.isArray(d.jobs)?d.jobs:[];render();}catch{if(status)status.textContent='Could not load the installation schedule.';}}
+    document.querySelector('[data-prev]')?.addEventListener('click',()=>{anchor.setDate(anchor.getDate()-7);render();});document.querySelector('[data-next]')?.addEventListener('click',()=>{anchor.setDate(anchor.getDate()+7);render();});document.querySelector('[data-today]')?.addEventListener('click',()=>{anchor=new Date();render();});document.querySelector('[data-refresh]')?.addEventListener('click',load);load();
+  }
+  initSchedule();document.addEventListener('astro:page-load',initSchedule);
+</script>
+<style>
+  .head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}.actions{display:flex;gap:var(--space-xs)}.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}.week-nav{display:grid;grid-template-columns:auto 1fr auto auto;gap:.6rem;align-items:center;padding:var(--space-s);margin-bottom:var(--space-s)}.week-nav>div{display:grid;gap:.15rem}.week-nav small{color:var(--ink-faint);font-size:var(--step--2)}.nav-btn,.today-btn{border:1px solid var(--line);background:var(--paper);border-radius:var(--radius);padding:.55rem .7rem;font:inherit;cursor:pointer}.nav-btn:hover,.today-btn:hover{border-color:var(--line-strong)}.calendar{overflow:auto}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(10rem,1fr));min-width:980px}.day{min-height:18rem;border-right:1px solid var(--line);padding:.7rem}.day:last-child{border-right:0}.day header{display:flex;justify-content:space-between;gap:.4rem;padding-bottom:.65rem;border-bottom:1px solid var(--line);font-size:var(--step--1)}.day header span{color:var(--ink-faint)}.none{color:var(--ink-faint);font-size:var(--step--2);text-align:center;margin-top:1.4rem}.job{display:grid;gap:.25rem;margin-top:.65rem;padding:.7rem;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:inherit;background:var(--paper)}.job:hover{border-color:var(--accent);background:var(--accent-wash)}.job-time{font-size:.7rem;color:var(--accent-ink);font-weight:750}.job small{color:var(--ink-soft);font-size:var(--step--2)}.empty{padding:var(--space-l);text-align:center;display:grid;place-items:center;gap:.45rem;color:var(--ink-soft)}.empty strong{color:var(--ink)}.status{margin-top:var(--space-s);color:var(--ink-faint);font-size:var(--step--2)}
+  @media(max-width:720px){.head{align-items:flex-start;flex-direction:column}.week-nav{grid-template-columns:auto 1fr auto}.today-btn{grid-column:2}.calendar-grid{grid-template-columns:repeat(7,minmax(13rem,1fr));}}
+</style>
