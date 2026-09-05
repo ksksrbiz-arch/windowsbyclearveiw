@@ -1,0 +1,150 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Jobs">
+  <div class="jobs-head">
+    <div>
+      <p class="kicker">Operations</p>
+      <h1>Jobs</h1>
+      <p class="lede">Turn finalized quotes into active projects, schedule the work, and keep installation notes with the job.</p>
+    </div>
+    <a class="btn btn-ghost" href="/internal/tools">All tools</a>
+  </div>
+
+  <section class="jobs-toolbar panel">
+    <div>
+      <strong data-count>—</strong>
+      <span>active jobs</span>
+    </div>
+    <div class="job-filters" role="group" aria-label="Filter jobs">
+      <button type="button" class="filter active" data-filter="all">All</button>
+      <button type="button" class="filter" data-filter="ready">Ready</button>
+      <button type="button" class="filter" data-filter="scheduled">Scheduled</button>
+      <button type="button" class="filter" data-filter="in-progress">In progress</button>
+      <button type="button" class="filter" data-filter="completed">Completed</button>
+    </div>
+  </section>
+
+  <section class="jobs-list panel">
+    <div class="panel-head"><div><p class="kicker">Project queue</p><h2>Jobs</h2></div><span class="muted" data-updated>Loading…</span></div>
+    <div class="list-body" data-list></div>
+  </section>
+
+  <p class="page-note">A job can only be created from a finalized quote. Scheduling and closeout details remain editable until the job is complete.</p>
+</InternalLayout>
+
+<script>
+  type Job = {
+    id: string;
+    quote_id?: string | null;
+    status: string;
+    scheduled_date?: string | null;
+    scheduled_window?: string | null;
+    customer_name: string;
+    customer_phone?: string | null;
+    customer_email?: string | null;
+    customer_address?: string | null;
+    customer_city?: string | null;
+    total_cents?: number | null;
+    created_at: string;
+  };
+
+  function initJobsIndex() {
+    const list = document.querySelector('[data-list]');
+    if (!(list instanceof HTMLElement) || list.dataset.bound === 'true') return;
+    list.dataset.bound = 'true';
+
+    const filters = Array.from(document.querySelectorAll('[data-filter]'));
+    const count = document.querySelector('[data-count]');
+    const updated = document.querySelector('[data-updated]');
+    let jobs: Job[] = [];
+    let activeFilter = 'all';
+
+    const money = (cents: number) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const date = (value?: string | null) => {
+      if (!value) return 'Not scheduled';
+      const d = new Date(`${value}T12:00:00`);
+      return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    };
+    const esc = (v: unknown) => { const d = document.createElement('div'); d.textContent = String(v ?? ''); return d.innerHTML; };
+
+    function render() {
+      const visible = activeFilter === 'all' ? jobs : jobs.filter((job) => job.status === activeFilter);
+      if (count) count.textContent = String(jobs.filter((job) => job.status !== 'completed' && job.status !== 'cancelled').length);
+      filters.forEach((filter) => filter.classList.toggle('active', filter.getAttribute('data-filter') === activeFilter));
+
+      if (!visible.length) {
+        list.innerHTML = `<div class="empty"><strong>No ${activeFilter === 'all' ? '' : activeFilter.replace('-', ' ')} jobs yet.</strong><span>Create one from a finalized quote.</span><a class="btn btn-primary" href="/internal/quotes">Open quotes</a></div>`;
+        return;
+      }
+
+      list.innerHTML = visible.map((job) => {
+        const statusLabel = job.status === 'in-progress' ? 'In progress' : job.status.charAt(0).toUpperCase() + job.status.slice(1);
+        const address = [job.customer_address, job.customer_city].filter(Boolean).join(', ') || 'Address not provided';
+        return `<a class="job-row" href="/internal/jobs/view?id=${encodeURIComponent(job.id)}">
+          <span class="status status-${esc(job.status)}">${esc(statusLabel)}</span>
+          <span class="job-main"><strong>${esc(job.customer_name)}</strong><small>${esc(address)}</small></span>
+          <span class="job-date"><strong>${esc(date(job.scheduled_date))}</strong><small>${esc(job.scheduled_window || 'Schedule window not set')}</small></span>
+          <span class="job-total"><strong>${money(Number(job.total_cents || 0))}</strong><small>${esc(job.quote_id || job.id)}</small></span>
+          <span class="row-arrow">→</span>
+        </a>`;
+      }).join('');
+    }
+
+    async function load() {
+      try {
+        const response = await fetch('/internal/api/jobs', { headers: { 'cache-control': 'no-cache' } });
+        if (!response.ok) throw new Error('Could not load jobs.');
+        const data = await response.json() as { jobs: Job[] };
+        jobs = Array.isArray(data.jobs) ? data.jobs : [];
+        if (updated) updated.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        render();
+      } catch (error) {
+        list.innerHTML = `<div class="empty"><strong>Jobs could not be loaded.</strong><span>${esc(error instanceof Error ? error.message : 'Try again.')}</span></div>`;
+        if (updated) updated.textContent = 'Unable to load';
+      }
+    }
+
+    filters.forEach((filter) => filter.addEventListener('click', () => {
+      activeFilter = filter.getAttribute('data-filter') || 'all';
+      render();
+    }));
+
+    load();
+  }
+
+  initJobsIndex();
+  document.addEventListener('astro:page-load', initJobsIndex);
+</script>
+
+<style>
+  .jobs-head { display:flex; justify-content:space-between; align-items:end; gap:var(--space-m); margin-bottom:var(--space-m); }
+  .panel { border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); overflow:hidden; }
+  .jobs-toolbar { display:flex; justify-content:space-between; align-items:center; gap:var(--space-m); padding:var(--space-m); margin-bottom:var(--space-m); }
+  .jobs-toolbar > div:first-child { display:flex; align-items:baseline; gap:.45rem; }
+  .jobs-toolbar > div:first-child strong { font-size:var(--step-1); }
+  .jobs-toolbar > div:first-child span { color:var(--ink-soft); font-size:var(--step--1); }
+  .job-filters { display:flex; flex-wrap:wrap; gap:.35rem; }
+  .filter { border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); border-radius:999px; padding:.42rem .7rem; font:inherit; font-size:var(--step--2); cursor:pointer; }
+  .filter.active, .filter:hover { background:var(--ink); color:var(--on-dark); border-color:var(--ink); }
+  .panel-head { padding:var(--space-m); border-bottom:1px solid var(--line); display:flex; align-items:end; justify-content:space-between; gap:var(--space-s); }
+  .panel-head h2 { margin:.12rem 0 0; font-size:var(--step-1); }
+  .list-body { min-height:10rem; }
+  .job-row { display:grid; grid-template-columns:auto minmax(12rem,1fr) minmax(10rem,.8fr) auto auto; gap:var(--space-s); align-items:center; padding:.9rem var(--space-m); border-bottom:1px solid var(--line); color:inherit; text-decoration:none; }
+  .job-row:last-child { border-bottom:0; }
+  .job-row:hover { background:var(--accent-wash); }
+  .job-main, .job-date, .job-total { display:grid; gap:.16rem; }
+  .job-main small, .job-date small, .job-total small { color:var(--ink-soft); font-size:var(--step--2); }
+  .job-date, .job-total { text-align:right; }
+  .status { display:inline-block; border-radius:999px; padding:.34rem .55rem; font-size:.72rem; font-weight:750; white-space:nowrap; border:1px solid var(--line); }
+  .status-scheduled { background:color-mix(in srgb,var(--accent) 12%,transparent); border-color:color-mix(in srgb,var(--accent) 30%,var(--line)); }
+  .status-in-progress { background:color-mix(in srgb,var(--ink) 8%,transparent); }
+  .status-completed { opacity:.7; }
+  .row-arrow { color:var(--ink-faint); font-size:1.1rem; }
+  .empty { min-height:12rem; display:grid; place-items:center; align-content:center; gap:.45rem; padding:var(--space-l); text-align:center; color:var(--ink-soft); }
+  .empty strong { color:var(--ink); }
+  .empty .btn { margin-top:.35rem; }
+  .page-note { margin-top:var(--space-s); color:var(--ink-faint); font-size:var(--step--2); }
+  @media (max-width:800px) { .jobs-toolbar, .jobs-head { align-items:flex-start; flex-direction:column; } .job-row { grid-template-columns:auto 1fr auto; } .job-date { text-align:left; grid-column:2; } .job-total { display:none; } .row-arrow { grid-column:3; grid-row:1 / span 2; } }
+  @media (max-width:520px) { .job-row { gap:.55rem; padding:.8rem var(--space-s); } .status { font-size:.66rem; } }
+</style>
