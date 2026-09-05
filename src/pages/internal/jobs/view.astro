@@ -1,0 +1,160 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Job">
+  <div class="job-head">
+    <div>
+      <p class="kicker">Project workspace</p>
+      <h1 data-title>Job</h1>
+      <p class="lede" data-subtitle>Loading project details…</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" href="/internal/jobs">All jobs</a>
+      <a class="btn btn-ghost" data-quote-link href="#" hidden>View quote</a>
+    </div>
+  </div>
+
+  <p class="error" data-error hidden role="alert"></p>
+
+  <div class="workspace" data-workspace hidden>
+    <section class="status-card panel">
+      <div>
+        <p class="kicker">Status</p>
+        <strong data-status-label>—</strong>
+        <small data-status-help>—</small>
+      </div>
+      <label>Status<select data-status>
+        <option value="ready">Ready</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="in-progress">In progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select></label>
+    </section>
+
+    <section class="detail-grid">
+      <section class="panel">
+        <div class="panel-head"><div><p class="kicker">Customer</p><h2 data-customer>—</h2></div></div>
+        <dl class="details">
+          <div><dt>Phone</dt><dd><a data-phone-link href="#">—</a></dd></div>
+          <div><dt>Email</dt><dd><a data-email-link href="#">—</a></dd></div>
+          <div><dt>Address</dt><dd data-address>—</dd></div>
+        </dl>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><p class="kicker">Schedule</p><h2>Installation date</h2></div></div>
+        <div class="schedule-form">
+          <label>Date<input type="date" data-date /></label>
+          <label>Window / crew note<input type="text" data-window maxlength="120" placeholder="e.g. 8–10 AM / crew A" /></label>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">Scope</p><h2>Quoted work</h2></div><strong data-total>—</strong></div>
+      <div class="scope-list" data-items></div>
+    </section>
+
+    <section class="notes-grid">
+      <section class="panel note-panel"><div class="panel-head"><div><p class="kicker">Project notes</p><h2>Customer / site</h2></div></div><textarea data-notes rows="7" maxlength="8000" placeholder="Access, trim, rot, special instructions, customer requests…"></textarea></section>
+      <section class="panel note-panel"><div class="panel-head"><div><p class="kicker">Installation</p><h2>Crew notes</h2></div></div><textarea data-install-notes rows="7" maxlength="8000" placeholder="Arrival, removal, install conditions, materials used, issues…"></textarea></section>
+    </section>
+
+    <section class="closeout panel">
+      <div class="panel-head"><div><p class="kicker">Closeout</p><h2>Project completion</h2></div></div>
+      <textarea data-closeout-notes rows="5" maxlength="8000" placeholder="Final walkthrough, punch-list items, customer sign-off notes, warranty handoff…"></textarea>
+      <div class="save-row">
+        <span class="save-state" data-save-state>Ready</span>
+        <button class="btn btn-primary" type="button" data-save>Save changes</button>
+      </div>
+    </section>
+  </div>
+</InternalLayout>
+
+<script>
+  type Job = { id:string; quote_id:string|null; status:string; scheduled_date:string|null; scheduled_window:string|null; customer_name:string; customer_phone:string|null; customer_email:string|null; customer_address:string|null; customer_city:string|null; notes:string|null; install_notes:string|null; closeout_notes:string|null; completed_at:string|null };
+  type Item = { label:string; quantity:number; unit_price_cents:number; line_total_cents:number };
+
+  function initJobView() {
+    const workspace = document.querySelector('[data-workspace]');
+    if (!(workspace instanceof HTMLElement) || workspace.dataset.bound === 'true') return;
+    workspace.dataset.bound = 'true';
+    const id = new URLSearchParams(location.search).get('id');
+    const error = document.querySelector('[data-error]');
+    if (!id) { showError('No job id in the URL.'); return; }
+    const q = <T extends Element>(s:string) => document.querySelector(s) as T | null;
+    const money = (c:number) => `$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    const esc = (v:unknown) => { const d=document.createElement('div'); d.textContent=String(v??''); return d.innerHTML; };
+    let job: Job;
+
+    function showError(message:string) { if (error instanceof HTMLElement) { error.hidden=false; error.textContent=message; } }
+    function statusLabel(status:string) { return status === 'in-progress' ? 'In progress' : status.charAt(0).toUpperCase()+status.slice(1); }
+
+    async function load() {
+      try {
+        const response = await fetch(`/internal/api/jobs?id=${encodeURIComponent(id!)}`, { headers: {'cache-control':'no-cache'} });
+        const data = await response.json().catch(()=>({}));
+        if (!response.ok) throw new Error(data.error || 'Could not load this job.');
+        job = data.job;
+        workspace.hidden = false;
+        render(data.items || []);
+      } catch (e) { showError(e instanceof Error ? e.message : 'Could not load this job.'); }
+    }
+
+    function render(items:Item[]) {
+      const setText=(s:string,v:string)=>{const el=q(s); if(el) el.textContent=v;};
+      setText('[data-title]', job.customer_name || job.id);
+      setText('[data-subtitle]', `${job.id}${job.customer_city ? ` · ${job.customer_city}` : ''}`);
+      setText('[data-status-label]', statusLabel(job.status));
+      setText('[data-status-help]', job.status==='completed' ? 'Project closed' : job.status==='scheduled' ? 'Installation is on the calendar' : 'Move this job as work progresses');
+      const status=q<HTMLSelectElement>('[data-status]'); if(status) status.value=job.status;
+      setText('[data-customer]', job.customer_name || '—');
+      setText('[data-address]', [job.customer_address, job.customer_city].filter(Boolean).join(', ') || '—');
+      const phone=q<HTMLAnchorElement>('[data-phone-link]'); if(phone){ phone.textContent=job.customer_phone||'—'; phone.href=job.customer_phone?`tel:${job.customer_phone.replace(/\D/g,'')}`:'#'; }
+      const email=q<HTMLAnchorElement>('[data-email-link]'); if(email){ email.textContent=job.customer_email||'—'; email.href=job.customer_email?`mailto:${job.customer_email}`:'#'; }
+      const date=q<HTMLInputElement>('[data-date]'); if(date) date.value=job.scheduled_date||'';
+      const windowEl=q<HTMLInputElement>('[data-window]'); if(windowEl) windowEl.value=job.scheduled_window||'';
+      const notes=q<HTMLTextAreaElement>('[data-notes]'); if(notes) notes.value=job.notes||'';
+      const install=q<HTMLTextAreaElement>('[data-install-notes]'); if(install) install.value=job.install_notes||'';
+      const close=q<HTMLTextAreaElement>('[data-closeout-notes]'); if(close) close.value=job.closeout_notes||'';
+      const quoteLink=q<HTMLAnchorElement>('[data-quote-link]'); if(quoteLink && job.quote_id){ quoteLink.hidden=false; quoteLink.href=`/internal/quotes/view?id=${encodeURIComponent(job.quote_id)}`; }
+      const total=(items||[]).reduce((sum,item)=>sum+(Number(item.line_total_cents)||0),0); setText('[data-total]', money(total));
+      const host=q('[data-items]'); if(host){ host.innerHTML=items.length?items.map(item=>`<div class="scope-row"><span><strong>${esc(item.label)}</strong><small>Qty ${Number(item.quantity)||0}</small></span><strong>${money(Number(item.line_total_cents)||0)}</strong></div>`).join(''):'<p class="muted">No line items were attached to the quote.</p>'; }
+    }
+
+    async function save() {
+      const status=q<HTMLSelectElement>('[data-status]'); const date=q<HTMLInputElement>('[data-date]'); const windowEl=q<HTMLInputElement>('[data-window]'); const notes=q<HTMLTextAreaElement>('[data-notes]'); const install=q<HTMLTextAreaElement>('[data-install-notes]'); const close=q<HTMLTextAreaElement>('[data-closeout-notes]');
+      const saveBtn=q<HTMLButtonElement>('[data-save]'); const state=q('[data-save-state]');
+      if(!status||!date||!windowEl||!notes||!install||!close||!saveBtn) return;
+      saveBtn.disabled=true; saveBtn.textContent='Saving…';
+      try {
+        const response=await fetch(`/internal/api/jobs?id=${encodeURIComponent(job.id)}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:status.value,scheduledDate:date.value,scheduledWindow:windowEl.value,notes:notes.value,installNotes:install.value,closeoutNotes:close.value})});
+        const result=await response.json().catch(()=>({})); if(!response.ok) throw new Error(result.error||'Could not save changes.');
+        if(state) state.textContent=`Saved ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+        await load();
+      } catch(e) { showError(e instanceof Error?e.message:'Could not save changes.'); } finally { saveBtn.disabled=false; saveBtn.textContent='Save changes'; }
+    }
+    q('[data-save]')?.addEventListener('click',save);
+    load();
+  }
+  initJobView();
+  document.addEventListener('astro:page-load',initJobView);
+</script>
+
+<style>
+  .job-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}
+  .head-actions{display:flex;gap:var(--space-xs);flex-wrap:wrap}
+  .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}
+  .status-card{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);padding:var(--space-m);margin-bottom:var(--space-m)}
+  .status-card>div{display:grid;gap:.2rem}.status-card>div>strong{font-size:var(--step-1)}.status-card small{color:var(--ink-soft)}
+  .status-card label,.schedule-form label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:650}.status-card select,.schedule-form input,textarea{border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);padding:.6rem;font:inherit}
+  .detail-grid,.notes-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-m);margin-bottom:var(--space-m)}
+  .panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}
+  .panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}
+  .details{padding:var(--space-m);display:grid;gap:var(--space-s);margin:0}.details div{display:grid;gap:.16rem}.details dt{font-size:var(--step--2);color:var(--ink-faint)}.details dd{margin:0}.details a{color:inherit}
+  .schedule-form{padding:var(--space-m);display:grid;grid-template-columns:.7fr 1.3fr;gap:var(--space-s)}
+  .scope-list{padding:0 var(--space-m)}.scope-row{display:flex;justify-content:space-between;gap:var(--space-m);align-items:center;padding:.9rem 0;border-bottom:1px solid var(--line)}.scope-row:last-child{border-bottom:0}.scope-row span{display:grid;gap:.16rem}.scope-row small{color:var(--ink-soft)}
+  .note-panel textarea,.closeout textarea{display:block;width:100%;min-height:12rem;border:0;border-radius:0;padding:var(--space-m);resize:vertical}.closeout{margin-bottom:var(--space-m)}.closeout textarea{border-bottom:1px solid var(--line);min-height:9rem}.save-row{padding:var(--space-s) var(--space-m);display:flex;justify-content:space-between;align-items:center;gap:var(--space-s)}.save-state{color:var(--ink-faint);font-size:var(--step--2)}
+  .error{padding:var(--space-s);border-left:2px solid var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent);margin-bottom:var(--space-m)}
+  @media(max-width:720px){.job-head{align-items:flex-start;flex-direction:column}.detail-grid,.notes-grid{grid-template-columns:1fr}.status-card{align-items:flex-start;flex-direction:column}.schedule-form{grid-template-columns:1fr}}
+</style>
