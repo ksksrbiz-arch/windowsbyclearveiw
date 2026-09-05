@@ -14,62 +14,38 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   <section class="tool-grid" aria-label="Internal tools">
     <a class="tool-card tool-primary" href="/internal/tools/measurements">
       <span class="tool-icon">⌗</span>
-      <div>
-        <p class="kicker">Field</p>
-        <h2>Window measurements</h2>
-        <p>Capture openings, dimensions, quantities, rooms, replacement method, and notes from the job site.</p>
-      </div>
+      <div><p class="kicker">Field</p><h2>Window measurements</h2><p>Capture openings, dimensions, quantities, rooms, replacement method, and notes from the job site.</p></div>
       <span class="tool-arrow">Open tool →</span>
     </a>
 
     <a class="tool-card" href="/internal/quotes/new">
       <span class="tool-icon">$</span>
-      <div>
-        <p class="kicker">Sales</p>
-        <h2>Smart quote builder</h2>
-        <p>Build an editable quote from the price book, add custom work, and finalize or print.</p>
-      </div>
+      <div><p class="kicker">Sales</p><h2>Smart quote builder</h2><p>Build an editable quote from the price book, add custom work, and finalize or print.</p></div>
       <span class="tool-arrow">Open quote builder →</span>
+    </a>
+
+    <a class="tool-card" href="/internal/jobs">
+      <span class="tool-icon">✓</span>
+      <div><p class="kicker">Operations</p><h2>Job workspace</h2><p>Turn finalized quotes into projects, schedule installation, track progress, and keep crew notes with the job.</p></div>
+      <span class="tool-arrow">Open jobs →</span>
     </a>
 
     <a class="tool-card" href="/internal/leads">
       <span class="tool-icon">↗</span>
-      <div>
-        <p class="kicker">CRM</p>
-        <h2>Lead workspace</h2>
-        <p>Review inbound requests, contact details, attribution, and visitor journeys.</p>
-      </div>
+      <div><p class="kicker">CRM</p><h2>Lead workspace</h2><p>Review inbound requests, contact details, attribution, and visitor journeys.</p></div>
       <span class="tool-arrow">Work leads →</span>
     </a>
 
     <a class="tool-card" href="/internal/ask-logs">
       <span class="tool-icon">✦</span>
-      <div>
-        <p class="kicker">Intelligence</p>
-        <h2>Ask activity</h2>
-        <p>See what prospects are asking the Clearview website assistant before they contact the company.</p>
-      </div>
+      <div><p class="kicker">Intelligence</p><h2>Ask activity</h2><p>See what prospects are asking the Clearview website assistant before they contact the company.</p></div>
       <span class="tool-arrow">Review Ask →</span>
     </a>
 
-    <article class="tool-card coming-soon" aria-label="Coming soon: job workspace">
-      <span class="tool-icon">✓</span>
-      <div>
-        <p class="kicker">Operations</p>
-        <h2>Job workspace</h2>
-        <p>Turn a finalized quote into a job, with scheduling, installation notes, progress, and closeout.</p>
-      </div>
-      <span class="tool-arrow">Planned next →</span>
-    </article>
-
     <article class="tool-card coming-soon" aria-label="Coming soon: installation photos">
       <span class="tool-icon">▧</span>
-      <div>
-        <p class="kicker">Field</p>
-        <h2>Installation photos</h2>
-        <p>Attach before, during, and after photos to a job so the record travels with the project.</p>
-      </div>
-      <span class="tool-arrow">Planned next →</span>
+      <div><p class="kicker">Field</p><h2>Installation photos</h2><p>Attach before, during, and after photos to a job so the record travels with the project.</p></div>
+      <span class="tool-arrow">Next build →</span>
     </article>
   </section>
 
@@ -91,7 +67,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   .tool-card { display:grid; grid-template-columns:auto 1fr; gap:var(--space-s); padding:var(--space-m); border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); color:inherit; text-decoration:none; min-height:13rem; }
   .tool-card:hover { border-color:var(--line-strong); transform:translateY(-1px); box-shadow:var(--shadow-sm); }
   .tool-primary { border-color:color-mix(in srgb,var(--accent) 40%,var(--line)); }
-  .tool-icon { width:2.4rem; height:2.4rem; border-radius:0.8rem; display:grid; place-items:center; background:var(--ink); color:var(--on-dark); font-weight:800; }
+  .tool-icon { width:2.4rem; height:2.4rem; border-radius:.8rem; display:grid; place-items:center; background:var(--ink); color:var(--on-dark); font-weight:800; }
   .tool-primary .tool-icon { background:var(--accent); }
   .tool-card h2 { margin:.15rem 0 .35rem; font-size:var(--step-1); }
   .tool-card p:not(.kicker) { margin:0; color:var(--ink-soft); max-width:42rem; }
