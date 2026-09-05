@@ -4,13 +4,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 <InternalLayout title="Log in" showLogout={false}>
   <div class="login-card">
     <p class="kicker">Clearview internal</p>
-    <h1>Quotes &amp; contracts</h1>
+    <h1>Command Center</h1>
     <p class="lede">One password, shared. Ask Mark if you need it.</p>
 
     <p class="login-error" role="alert" data-login-error hidden></p>
 
     <form method="post" action="/internal/api/login">
-      <input type="hidden" name="next" data-next-field value="/internal/quotes" />
+      <input type="hidden" name="next" data-next-field value="/internal/" />
       <label>
         Password
         <input type="password" name="password" required autofocus autocomplete="current-password" />
@@ -21,19 +21,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
-  // This page is static — prerendered once at build time — so it cannot read
-  // the ?error=/?next= query string on the server the way a dynamic route
-  // could. The login Function still communicates through those params (a
-  // 303 redirect back here is the only channel it has), so this page reads
-  // them itself once it loads in the browser.
   const params = new URLSearchParams(location.search);
   const error = params.get('error');
   const next = params.get('next');
 
   const MESSAGES: Record<string, string> = {
     'wrong-password': 'That password did not match.',
-    'not-configured':
-      'The internal tool is not set up yet — INTERNAL_PASSWORD and INTERNAL_SESSION_SECRET need to be set in the Cloudflare Pages environment.',
+    'not-configured': 'The internal tool is not set up yet — INTERNAL_PASSWORD and INTERNAL_SESSION_SECRET need to be set in the Cloudflare Pages environment.',
     'bad-request': 'Something went wrong submitting the form. Try again.',
   };
 
@@ -47,7 +41,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 
   if (next) {
     const field = document.querySelector('[data-next-field]');
-    if (field instanceof HTMLInputElement) field.value = next;
+    if (field instanceof HTMLInputElement) {
+      // Only allow internal relative destinations. The middleware only creates
+      // this parameter from the current internal request, but keeping the
+      // constraint here prevents this form from becoming an open redirect if
+      // the page is ever linked with a hand-authored `next` value.
+      field.value = next.startsWith('/internal/') ? next : '/internal/';
+    }
   }
 </script>
 
