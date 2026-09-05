@@ -11,6 +11,7 @@ const navItems = [
   { href: '/internal/', label: 'Dashboard' },
   { href: '/internal/leads', label: 'Leads' },
   { href: '/internal/quotes', label: 'Quotes' },
+  { href: '/internal/jobs', label: 'Jobs' },
   { href: '/internal/tools', label: 'Tools' },
   { href: '/internal/ask-logs', label: 'Ask' },
 ];
@@ -63,7 +64,7 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
       .internal-logout { background: transparent; border: 1px solid var(--dark-line-strong); color: var(--on-dark-soft); border-radius: var(--radius); padding: 0.42rem 0.72rem; font: inherit; font-size: var(--step--2); cursor: pointer; white-space: nowrap; }
       .internal-logout:hover { border-color: var(--accent-bright); color: var(--on-dark); }
       .internal-main { max-width: 68rem; margin-inline: auto; padding: var(--space-l) var(--space-m) var(--space-3xl); }
-      @media (max-width: 760px) {
+      @media (max-width: 860px) {
         .internal-header-inner { gap: var(--space-s); }
         .internal-header-right { flex: 1; justify-content: flex-end; }
         .internal-nav { overflow-x: auto; scrollbar-width: none; }
