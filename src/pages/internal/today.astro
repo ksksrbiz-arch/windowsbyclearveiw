@@ -1,0 +1,66 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Today">
+  <div class="today-head">
+    <div><p class="kicker">Daily operations</p><h1>Today</h1><p class="lede">The work that most needs attention across leads, follow-ups, and jobs.</p></div>
+    <div class="head-actions"><a class="btn btn-ghost" href="/internal/">Dashboard</a><a class="btn btn-primary" href="/internal/follow-up">Add follow-up</a></div>
+  </div>
+
+  <section class="summary-grid" aria-label="Today's workload">
+    <article class="summary-card panel"><span>Open follow-ups</span><strong data-open>—</strong><a href="/internal/follow-up">Work queue →</a></article>
+    <article class="summary-card panel"><span>Due today</span><strong data-today>—</strong><a href="/internal/follow-up">Due today →</a></article>
+    <article class="summary-card panel"><span>Overdue</span><strong data-overdue>—</strong><a href="/internal/follow-up">Overdue →</a></article>
+    <article class="summary-card panel"><span>Active jobs</span><strong data-jobs>—</strong><a href="/internal/jobs">View jobs →</a></article>
+  </section>
+
+  <div class="work-grid">
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">CRM</p><h2>Next follow-ups</h2></div><a href="/internal/follow-up">See all</a></div>
+      <div class="list" data-tasks><p class="muted">Loading…</p></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">Operations</p><h2>Upcoming jobs</h2></div><a href="/internal/jobs">See all</a></div>
+      <div class="list" data-jobs-list><p class="muted">Loading…</p></div>
+    </section>
+  </div>
+
+  <section class="panel action-panel">
+    <div class="panel-head"><div><p class="kicker">Workflow</p><h2>Fastest path through the day</h2></div></div>
+    <div class="flow"><a href="/internal/leads"><strong>1. Review leads</strong><span>Respond to new estimate requests</span></a><a href="/internal/follow-up"><strong>2. Clear follow-ups</strong><span>Finish calls and customer actions</span></a><a href="/internal/quotes"><strong>3. Move quotes</strong><span>Finish drafts and send contracts</span></a><a href="/internal/jobs"><strong>4. Prep jobs</strong><span>Confirm dates, notes, and materials</span></a></div>
+  </section>
+
+  <p class="status" data-status role="status">Loading daily operations…</p>
+</InternalLayout>
+
+<script>
+  type Task={id:number;title:string;lead_id:number|null;lead_name?:string|null;lead_phone?:string|null;lead_city?:string|null;due_at:string|null;status:string;notes:string|null};
+  type Job={id:string;status:string;scheduled_date:string|null;scheduled_window:string|null;customer_name:string;customer_city:string|null;total_cents:number|null};
+  function initToday(){
+    const root=document.querySelector('main'); if(!(root instanceof HTMLElement)||root.dataset.bound==='true')return; root.dataset.bound='true';
+    const q=<T extends Element>(s:string)=>root.querySelector(s) as T|null; const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML};
+    const date=(v:string|null)=>{if(!v)return 'No due date';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})};
+    const jobDate=(v:string|null)=>{if(!v)return 'Not scheduled';const d=new Date(`${v}T12:00:00`);return Number.isNaN(d.getTime())?v:d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})};
+    const money=(c:number|null)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    function dueClass(v:string|null){if(!v)return '';const d=new Date(v).getTime();return Number.isFinite(d)&&d<Date.now()?' overdue':''}
+    async function load(){
+      try{
+        const r=await fetch('/internal/api/dashboard',{headers:{'cache-control':'no-cache'}}); const d=await r.json(); if(!r.ok)throw new Error();
+        const c=d.counts||{}, tasks=(d.tasks||[]) as Task[], jobs=(d.recentJobs||[]) as Job[];
+        const open=Number(c.open_tasks)||0, today=Number(c.tasks_today)||0, overdue=Number(c.tasks_overdue)||0;
+        q('[data-open]')!.textContent=String(open); q('[data-today]')!.textContent=String(today); q('[data-overdue]')!.textContent=String(overdue); q('[data-jobs]')!.textContent=String(jobs.length);
+        const taskHost=q('[data-tasks]'); if(taskHost) taskHost.innerHTML=tasks.length?tasks.map(t=>`<article class="row${dueClass(t.due_at)}"><div><strong>${esc(t.title)}</strong><small>${esc(t.lead_name||'Unlinked task')}${t.lead_city?` · ${esc(t.lead_city)}`:''}</small></div><div class="row-right"><time>${esc(date(t.due_at))}</time>${t.lead_phone?`<a href="tel:${esc(t.lead_phone.replace(/\D/g,''))}">Call</a>`:''}<button type="button" data-done="${t.id}">Done</button></div></article>`).join(''):'<p class="empty">No open follow-ups.</p>';
+        taskHost?.querySelectorAll('[data-done]').forEach(b=>b.addEventListener('click',async()=>{const id=(b as HTMLElement).dataset.done||'';await fetch(`/internal/api/tasks?id=${encodeURIComponent(id)}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:'done'})});load();}));
+        const jobHost=q('[data-jobs-list]'); if(jobHost) jobHost.innerHTML=jobs.length?jobs.map(j=>`<a class="row" href="/internal/jobs/view?id=${encodeURIComponent(j.id)}"><div><strong>${esc(j.customer_name)}</strong><small>${esc([j.customer_city,j.scheduled_window].filter(Boolean).join(' · ')||'Schedule details not set')}</small></div><div class="row-right"><time>${esc(jobDate(j.scheduled_date))}</time><strong>${money(j.total_cents)}</strong></div></a>`).join(''):'<p class="empty">No active jobs.</p>';
+        const s=q('[data-status]'); if(s)s.textContent=`Updated ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+      }catch{const s=q('[data-status]');if(s)s.textContent='Could not load today’s operations.';}
+    }
+    load();
+  }
+  initToday();document.addEventListener('astro:page-load',initToday);
+</script>
+
+<style>
+  .today-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}.head-actions{display:flex;gap:var(--space-xs);flex-wrap:wrap}.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-s);margin-bottom:var(--space-m)}.summary-card{padding:var(--space-m);display:grid;gap:.3rem}.summary-card span{font-size:var(--step--2);color:var(--ink-soft)}.summary-card strong{font-size:var(--step-1)}.summary-card a,.panel-head a{font-size:var(--step--2);font-weight:700;color:inherit}.work-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-m);margin-bottom:var(--space-m)}.panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}.panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}.list{padding:0 var(--space-m)}.row{display:flex;justify-content:space-between;align-items:center;gap:var(--space-m);padding:var(--space-m) 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none}.row:last-child{border-bottom:0}.row>div:first-child{display:grid;gap:.16rem;min-width:0}.row small{color:var(--ink-soft);font-size:var(--step--2)}.row-right{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}.row-right time,.row-right a,.row-right button{font-size:var(--step--2)}.row-right button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:.35rem .6rem;font:inherit;font-weight:700;cursor:pointer}.row-right button:hover{border-color:var(--line-strong)}.overdue{border-left:3px solid var(--danger);padding-left:var(--space-s)}.row:hover{background:var(--accent-wash)}.empty{padding:var(--space-l) 0;text-align:center;color:var(--ink-soft)}.action-panel{margin-bottom:var(--space-m)}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.flow a{padding:var(--space-m);display:grid;gap:.25rem;color:inherit;text-decoration:none;border-right:1px solid var(--line)}.flow a:last-child{border-right:0}.flow a:hover{background:var(--accent-wash)}.flow span{color:var(--ink-soft);font-size:var(--step--2)}.status{color:var(--ink-faint);font-size:var(--step--2)}
+  @media(max-width:800px){.today-head{align-items:flex-start;flex-direction:column}.summary-grid,.work-grid{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}.flow a:nth-child(2){border-right:0}.flow a:nth-child(-n+2){border-bottom:1px solid var(--line)}}@media(max-width:560px){.summary-grid,.work-grid,.flow{grid-template-columns:1fr}.flow a{border-right:0;border-bottom:1px solid var(--line)}.flow a:last-child{border-bottom:0}.row{align-items:flex-start;flex-direction:column}.row-right{justify-content:flex-start}}
+</style>
