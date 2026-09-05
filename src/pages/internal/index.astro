@@ -75,7 +75,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   type CountRow={source?:string;city?:string;count:number};
   type Task={id:number;title:string;due_at?:string|null;lead_id?:number|null;lead_name?:string|null;lead_phone?:string|null;lead_city?:string|null};
   type Job={id:string;status:string;scheduled_date?:string|null;scheduled_window?:string|null;customer_name:string;customer_city?:string|null;total_cents?:number|null};
-  type Snapshot={counts:{new_leads?:number;draft_quotes?:number;finalized_quotes?:number;draft_value_cents?:number;finalized_value_cents?:number;total_quotes?:number;open_tasks?:number;tasks_today?:number;tasks_overdue?:number};recentLeads:Lead[];recentQuotes:Quote[];sources:CountRow[];cities:CountRow[];tasks:Task[];recentJobs:Job[]};
+  type Snapshot={counts:{new_leads?:number;draft_quotes?:number;finalized_quotes?:number;draft_value_cents?:number;finalized_value_cents?:number;total_quotes?:number;open_tasks?:number;tasks_today?:number;tasks_overdue?:number;active_job_value_cents?:number};recentLeads:Lead[];recentQuotes:Quote[];sources:CountRow[];cities:CountRow[];tasks:Task[];recentJobs:Job[]};
 
   function initDashboard(){
     if(document.body.dataset.dashboardBound==='true')return; document.body.dataset.dashboardBound='true';
@@ -91,10 +91,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       const refresh=$('[data-refresh]') as HTMLButtonElement|null;if(refresh){refresh.disabled=true;refresh.textContent='Refreshing…';}
       try{
         const response=await fetch('/internal/api/dashboard',{headers:{'cache-control':'no-cache'}});if(!response.ok)throw new Error('Request failed');
-        const data=await response.json() as Snapshot;const counts=data.counts||{};const draftValue=Number(counts.draft_value_cents)||0;const finalValue=Number(counts.finalized_value_cents)||0;const finalized=Number(counts.finalized_quotes)||0;const activeValue=(data.recentJobs||[]).reduce((s,j)=>s+(Number(j.total_cents)||0),0);
-        text('[data-metric="newLeads"]',String(Number(counts.new_leads)||0));text('[data-metric="openTasks"]',String(Number(counts.open_tasks)||0));text('[data-metric="tasksToday]',String(Number(counts.tasks_today)||0));
-        const todayEl=$('[data-metric="tasksToday"]');if(todayEl)todayEl.textContent=String(Number(counts.tasks_today)||0);
-        text('[data-metric="draftQuotes"]',String(Number(counts.draft_quotes)||0));text('[data-metric="activeValue"]',money(activeValue));
+        const data=await response.json() as Snapshot;const counts=data.counts||{};const draftValue=Number(counts.draft_value_cents)||0;const finalValue=Number(counts.finalized_value_cents)||0;const finalized=Number(counts.finalized_quotes)||0;
+        text('[data-metric="newLeads"]',String(Number(counts.new_leads)||0));text('[data-metric="openTasks"]',String(Number(counts.open_tasks)||0));text('[data-metric="tasksToday"]',String(Number(counts.tasks_today)||0));text('[data-metric="draftQuotes"]',String(Number(counts.draft_quotes)||0));text('[data-metric="activeValue"]',money(Number(counts.active_job_value_cents)||0));
         text('[data-attention-leads]',String(Number(counts.new_leads)||0));text('[data-attention-overdue]',String(Number(counts.tasks_overdue)||0));text('[data-attention-drafts]',String(Number(counts.draft_quotes)||0));
         if((Number(counts.new_leads)||0)===1)text('[data-lead-plural]','');if((Number(counts.tasks_overdue)||0)===1)text('[data-overdue-plural]','');if((Number(counts.draft_quotes)||0)===1)text('[data-quote-plural]','');
         text('[data-pipeline-total]',`${Number(counts.total_quotes)||0} quotes`);text('[data-stage-drafts]',String(Number(counts.draft_quotes)||0));text('[data-stage-finalized]',String(finalized));text('[data-stage-drafts-value]',money(draftValue));text('[data-stage-finalized-value]',money(finalValue));text('[data-average-finalized]',finalized?money(finalValue/finalized):'—');
