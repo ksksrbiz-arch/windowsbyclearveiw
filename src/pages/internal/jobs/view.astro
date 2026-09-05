@@ -12,6 +12,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       <a class="btn btn-ghost" href="/internal/jobs">All jobs</a>
       <a class="btn btn-ghost" data-prep-link href="#" hidden>Prep & closeout</a>
       <a class="btn btn-ghost" data-photos-link href="#" hidden>Job photos</a>
+      <a class="btn btn-ghost" data-payment-link href="#" hidden>Payments</a>
       <a class="btn btn-ghost" data-quote-link href="#" hidden>View quote</a>
     </div>
   </div>
@@ -122,6 +123,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       const quoteLink=q<HTMLAnchorElement>('[data-quote-link]'); if(quoteLink && job.quote_id){ quoteLink.hidden=false; quoteLink.href=`/internal/quotes/view?id=${encodeURIComponent(job.quote_id)}`; }
       const prepLink=q<HTMLAnchorElement>('[data-prep-link]'); if(prepLink){ prepLink.hidden=false; prepLink.href=`/internal/jobs/prepare?id=${encodeURIComponent(job.id)}`; }
       const photoLink=q<HTMLAnchorElement>('[data-photos-link]'); if(photoLink){ photoLink.hidden=false; photoLink.href=`/internal/tools/photos?jobId=${encodeURIComponent(job.id)}`; }
+      const paymentLink=q<HTMLAnchorElement>('[data-payment-link]'); if(paymentLink){ paymentLink.hidden=false; paymentLink.href=`/internal/payments?jobId=${encodeURIComponent(job.id)}`; }
       const total=(items||[]).reduce((sum,item)=>sum+(Number(item.line_total_cents)||0),0); setText('[data-total]', money(total));
       const host=q('[data-items]'); if(host){ host.innerHTML=items.length?items.map(item=>`<div class="scope-row"><span><strong>${esc(item.label)}</strong><small>Qty ${Number(item.quantity)||0}</small></span><strong>${money(Number(item.line_total_cents)||0)}</strong></div>`).join(''):'<p class="muted">No line items were attached to the quote.</p>'; }
     }
