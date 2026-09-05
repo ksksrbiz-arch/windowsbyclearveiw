@@ -11,17 +11,25 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     <a class="btn btn-ghost" href="/internal/tools">All tools</a>
   </div>
 
-  <section class="jobs-toolbar panel">
+  <section class="create-job panel">
     <div>
-      <strong data-count>—</strong>
-      <span>active jobs</span>
+      <p class="kicker">Start project</p>
+      <h2>Create a job from a finalized quote</h2>
+      <p class="muted">Customer details and quoted scope are copied into the new job. Nothing on the original quote is changed.</p>
     </div>
+    <div class="create-controls">
+      <label>Finalized quote
+        <select data-quote-select><option value="">Loading finalized quotes…</option></select>
+      </label>
+      <button class="btn btn-primary" type="button" data-create disabled>Create job</button>
+    </div>
+    <p class="create-status" data-create-status role="status"></p>
+  </section>
+
+  <section class="jobs-toolbar panel">
+    <div><strong data-count>—</strong><span>active jobs</span></div>
     <div class="job-filters" role="group" aria-label="Filter jobs">
-      <button type="button" class="filter active" data-filter="all">All</button>
-      <button type="button" class="filter" data-filter="ready">Ready</button>
-      <button type="button" class="filter" data-filter="scheduled">Scheduled</button>
-      <button type="button" class="filter" data-filter="in-progress">In progress</button>
-      <button type="button" class="filter" data-filter="completed">Completed</button>
+      <button type="button" class="filter active" data-filter="all">All</button><button type="button" class="filter" data-filter="ready">Ready</button><button type="button" class="filter" data-filter="scheduled">Scheduled</button><button type="button" class="filter" data-filter="in-progress">In progress</button><button type="button" class="filter" data-filter="completed">Completed</button>
     </div>
   </section>
 
@@ -34,117 +42,30 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
-  type Job = {
-    id: string;
-    quote_id?: string | null;
-    status: string;
-    scheduled_date?: string | null;
-    scheduled_window?: string | null;
-    customer_name: string;
-    customer_phone?: string | null;
-    customer_email?: string | null;
-    customer_address?: string | null;
-    customer_city?: string | null;
-    total_cents?: number | null;
-    created_at: string;
-  };
-
-  function initJobsIndex() {
-    const list = document.querySelector('[data-list]');
-    if (!(list instanceof HTMLElement) || list.dataset.bound === 'true') return;
-    list.dataset.bound = 'true';
-
-    const filters = Array.from(document.querySelectorAll('[data-filter]'));
-    const count = document.querySelector('[data-count]');
-    const updated = document.querySelector('[data-updated]');
-    let jobs: Job[] = [];
-    let activeFilter = 'all';
-
-    const money = (cents: number) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-    const date = (value?: string | null) => {
-      if (!value) return 'Not scheduled';
-      const d = new Date(`${value}T12:00:00`);
-      return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    };
-    const esc = (v: unknown) => { const d = document.createElement('div'); d.textContent = String(v ?? ''); return d.innerHTML; };
-
-    function render() {
-      const visible = activeFilter === 'all' ? jobs : jobs.filter((job) => job.status === activeFilter);
-      if (count) count.textContent = String(jobs.filter((job) => job.status !== 'completed' && job.status !== 'cancelled').length);
-      filters.forEach((filter) => filter.classList.toggle('active', filter.getAttribute('data-filter') === activeFilter));
-
-      if (!visible.length) {
-        list.innerHTML = `<div class="empty"><strong>No ${activeFilter === 'all' ? '' : activeFilter.replace('-', ' ')} jobs yet.</strong><span>Create one from a finalized quote.</span><a class="btn btn-primary" href="/internal/quotes">Open quotes</a></div>`;
-        return;
-      }
-
-      list.innerHTML = visible.map((job) => {
-        const statusLabel = job.status === 'in-progress' ? 'In progress' : job.status.charAt(0).toUpperCase() + job.status.slice(1);
-        const address = [job.customer_address, job.customer_city].filter(Boolean).join(', ') || 'Address not provided';
-        return `<a class="job-row" href="/internal/jobs/view?id=${encodeURIComponent(job.id)}">
-          <span class="status status-${esc(job.status)}">${esc(statusLabel)}</span>
-          <span class="job-main"><strong>${esc(job.customer_name)}</strong><small>${esc(address)}</small></span>
-          <span class="job-date"><strong>${esc(date(job.scheduled_date))}</strong><small>${esc(job.scheduled_window || 'Schedule window not set')}</small></span>
-          <span class="job-total"><strong>${money(Number(job.total_cents || 0))}</strong><small>${esc(job.quote_id || job.id)}</small></span>
-          <span class="row-arrow">→</span>
-        </a>`;
-      }).join('');
-    }
-
-    async function load() {
-      try {
-        const response = await fetch('/internal/api/jobs', { headers: { 'cache-control': 'no-cache' } });
-        if (!response.ok) throw new Error('Could not load jobs.');
-        const data = await response.json() as { jobs: Job[] };
-        jobs = Array.isArray(data.jobs) ? data.jobs : [];
-        if (updated) updated.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-        render();
-      } catch (error) {
-        list.innerHTML = `<div class="empty"><strong>Jobs could not be loaded.</strong><span>${esc(error instanceof Error ? error.message : 'Try again.')}</span></div>`;
-        if (updated) updated.textContent = 'Unable to load';
-      }
-    }
-
-    filters.forEach((filter) => filter.addEventListener('click', () => {
-      activeFilter = filter.getAttribute('data-filter') || 'all';
-      render();
-    }));
-
-    load();
+  type Job = { id:string; quote_id?:string|null; status:string; scheduled_date?:string|null; scheduled_window?:string|null; customer_name:string; customer_address?:string|null; customer_city?:string|null; total_cents?:number|null; };
+  type Quote = { id:string; status:string; customer_name:string; customer_city?:string|null; total_cents?:number|null; };
+  function initJobsIndex(){
+    const list=document.querySelector('[data-list]'); if(!(list instanceof HTMLElement)||list.dataset.bound==='true')return; list.dataset.bound='true';
+    const filters=Array.from(document.querySelectorAll('[data-filter]')); const count=document.querySelector('[data-count]'); const updated=document.querySelector('[data-updated]'); const select=document.querySelector('[data-quote-select]'); const create=document.querySelector('[data-create]'); const createStatus=document.querySelector('[data-create-status]');
+    let jobs:Job[]=[]; let activeFilter='all'; let finalizedQuotes:Quote[]=[];
+    const money=(c:number)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    const date=(value?:string|null)=>{if(!value)return'Not scheduled';const d=new Date(`${value}T12:00:00`);return Number.isNaN(d.getTime())?value:d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});};
+    const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;};
+    function render(){const visible=activeFilter==='all'?jobs:jobs.filter(j=>j.status===activeFilter);if(count)count.textContent=String(jobs.filter(j=>j.status!=='completed'&&j.status!=='cancelled').length);filters.forEach(f=>f.classList.toggle('active',f.getAttribute('data-filter')===activeFilter));if(!visible.length){list.innerHTML=`<div class="empty"><strong>No ${activeFilter==='all'?'':activeFilter.replace('-',' ')} jobs yet.</strong><span>Create one from a finalized quote above.</span></div>`;return;}list.innerHTML=visible.map(job=>{const label=job.status==='in-progress'?'In progress':job.status.charAt(0).toUpperCase()+job.status.slice(1);const address=[job.customer_address,job.customer_city].filter(Boolean).join(', ')||'Address not provided';return `<a class="job-row" href="/internal/jobs/view?id=${encodeURIComponent(job.id)}"><span class="status status-${esc(job.status)}">${esc(label)}</span><span class="job-main"><strong>${esc(job.customer_name)}</strong><small>${esc(address)}</small></span><span class="job-date"><strong>${esc(date(job.scheduled_date))}</strong><small>${esc(job.scheduled_window||'Schedule window not set')}</small></span><span class="job-total"><strong>${money(Number(job.total_cents||0))}</strong><small>${esc(job.quote_id||job.id)}</small></span><span class="row-arrow">→</span></a>`;}).join('');}
+    async function loadJobs(){try{const r=await fetch('/internal/api/jobs',{headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error('Could not load jobs.');const d=await r.json();jobs=Array.isArray(d.jobs)?d.jobs:[];if(updated)updated.textContent=`Updated ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;render();}catch(e){list.innerHTML=`<div class="empty"><strong>Jobs could not be loaded.</strong><span>${esc(e instanceof Error?e.message:'Try again.')}</span></div>`;}}
+    async function loadQuotes(){if(!(select instanceof HTMLSelectElement))return;try{const r=await fetch('/internal/api/quotes');if(!r.ok)throw new Error('Could not load quotes.');const d=await r.json();finalizedQuotes=(d.quotes||[]).filter((q:Quote)=>q.status==='finalized');select.innerHTML=finalizedQuotes.length?'<option value="">Select a finalized quote…</option>'+finalizedQuotes.map(q=>`<option value="${esc(q.id)}">${esc(q.customer_name)} · ${esc(q.id)} · ${money(Number(q.total_cents||0))}</option>`).join(''):'<option value="">No finalized quotes available</option>';}catch(e){select.innerHTML='<option value="">Quotes unavailable</option>';}}
+    create?.addEventListener('click',async()=>{if(!(select instanceof HTMLSelectElement)||!select.value||!(create instanceof HTMLButtonElement))return;create.disabled=true;createStatus!.textContent='Creating job…';try{const r=await fetch('/internal/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({quoteId:select.value})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Could not create job.');createStatus!.textContent=d.existing?'That quote already has a job. Opening it…':'Job created. Opening workspace…';location.href=`/internal/jobs/view?id=${encodeURIComponent(d.id)}`;}catch(e){createStatus!.textContent=e instanceof Error?e.message:'Could not create job.';create.disabled=false;}});
+    select?.addEventListener('change',()=>{if(create instanceof HTMLButtonElement)create.disabled=!(select instanceof HTMLSelectElement&&select.value);});
+    filters.forEach(f=>f.addEventListener('click',()=>{activeFilter=f.getAttribute('data-filter')||'all';render();}));
+    loadJobs();loadQuotes();
   }
-
-  initJobsIndex();
-  document.addEventListener('astro:page-load', initJobsIndex);
+  initJobsIndex();document.addEventListener('astro:page-load',initJobsIndex);
 </script>
 
 <style>
-  .jobs-head { display:flex; justify-content:space-between; align-items:end; gap:var(--space-m); margin-bottom:var(--space-m); }
-  .panel { border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); overflow:hidden; }
-  .jobs-toolbar { display:flex; justify-content:space-between; align-items:center; gap:var(--space-m); padding:var(--space-m); margin-bottom:var(--space-m); }
-  .jobs-toolbar > div:first-child { display:flex; align-items:baseline; gap:.45rem; }
-  .jobs-toolbar > div:first-child strong { font-size:var(--step-1); }
-  .jobs-toolbar > div:first-child span { color:var(--ink-soft); font-size:var(--step--1); }
-  .job-filters { display:flex; flex-wrap:wrap; gap:.35rem; }
-  .filter { border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); border-radius:999px; padding:.42rem .7rem; font:inherit; font-size:var(--step--2); cursor:pointer; }
-  .filter.active, .filter:hover { background:var(--ink); color:var(--on-dark); border-color:var(--ink); }
-  .panel-head { padding:var(--space-m); border-bottom:1px solid var(--line); display:flex; align-items:end; justify-content:space-between; gap:var(--space-s); }
-  .panel-head h2 { margin:.12rem 0 0; font-size:var(--step-1); }
-  .list-body { min-height:10rem; }
-  .job-row { display:grid; grid-template-columns:auto minmax(12rem,1fr) minmax(10rem,.8fr) auto auto; gap:var(--space-s); align-items:center; padding:.9rem var(--space-m); border-bottom:1px solid var(--line); color:inherit; text-decoration:none; }
-  .job-row:last-child { border-bottom:0; }
-  .job-row:hover { background:var(--accent-wash); }
-  .job-main, .job-date, .job-total { display:grid; gap:.16rem; }
-  .job-main small, .job-date small, .job-total small { color:var(--ink-soft); font-size:var(--step--2); }
-  .job-date, .job-total { text-align:right; }
-  .status { display:inline-block; border-radius:999px; padding:.34rem .55rem; font-size:.72rem; font-weight:750; white-space:nowrap; border:1px solid var(--line); }
-  .status-scheduled { background:color-mix(in srgb,var(--accent) 12%,transparent); border-color:color-mix(in srgb,var(--accent) 30%,var(--line)); }
-  .status-in-progress { background:color-mix(in srgb,var(--ink) 8%,transparent); }
-  .status-completed { opacity:.7; }
-  .row-arrow { color:var(--ink-faint); font-size:1.1rem; }
-  .empty { min-height:12rem; display:grid; place-items:center; align-content:center; gap:.45rem; padding:var(--space-l); text-align:center; color:var(--ink-soft); }
-  .empty strong { color:var(--ink); }
-  .empty .btn { margin-top:.35rem; }
-  .page-note { margin-top:var(--space-s); color:var(--ink-faint); font-size:var(--step--2); }
-  @media (max-width:800px) { .jobs-toolbar, .jobs-head { align-items:flex-start; flex-direction:column; } .job-row { grid-template-columns:auto 1fr auto; } .job-date { text-align:left; grid-column:2; } .job-total { display:none; } .row-arrow { grid-column:3; grid-row:1 / span 2; } }
-  @media (max-width:520px) { .job-row { gap:.55rem; padding:.8rem var(--space-s); } .status { font-size:.66rem; } }
+  .jobs-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}
+  .create-job{padding:var(--space-m);margin-bottom:var(--space-m);display:grid;grid-template-columns:1.2fr .9fr;gap:var(--space-m);align-items:end}.create-job h2{margin:.12rem 0 .35rem;font-size:var(--step-1)}.create-controls{display:grid;grid-template-columns:1fr auto;gap:var(--space-xs);align-items:end}.create-controls label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:650}.create-controls select{border:1px solid var(--line-strong);border-radius:var(--radius);padding:.6rem;background:var(--paper);font:inherit;color:var(--ink)}.create-status{grid-column:1/-1;margin:0;color:var(--ink-soft);font-size:var(--step--2)}
+  .jobs-toolbar{display:flex;justify-content:space-between;align-items:center;gap:var(--space-m);padding:var(--space-m);margin-bottom:var(--space-m)}.jobs-toolbar>div:first-child{display:flex;align-items:baseline;gap:.45rem}.jobs-toolbar>div:first-child strong{font-size:var(--step-1)}.jobs-toolbar>div:first-child span{color:var(--ink-soft);font-size:var(--step--1)}.job-filters{display:flex;flex-wrap:wrap;gap:.35rem}.filter{border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);border-radius:999px;padding:.42rem .7rem;font:inherit;font-size:var(--step--2);cursor:pointer}.filter.active,.filter:hover{background:var(--ink);color:var(--on-dark);border-color:var(--ink)}
+  .panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;align-items:end;justify-content:space-between;gap:var(--space-s)}.panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}.list-body{min-height:10rem}.job-row{display:grid;grid-template-columns:auto minmax(12rem,1fr) minmax(10rem,.8fr) auto auto;gap:var(--space-s);align-items:center;padding:.9rem var(--space-m);border-bottom:1px solid var(--line);color:inherit;text-decoration:none}.job-row:last-child{border-bottom:0}.job-row:hover{background:var(--accent-wash)}.job-main,.job-date,.job-total{display:grid;gap:.16rem}.job-main small,.job-date small,.job-total small{color:var(--ink-soft);font-size:var(--step--2)}.job-date,.job-total{text-align:right}.status{display:inline-block;border-radius:999px;padding:.34rem .55rem;font-size:.72rem;font-weight:750;white-space:nowrap;border:1px solid var(--line)}.status-scheduled{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}.status-in-progress{background:color-mix(in srgb,var(--ink) 8%,transparent)}.status-completed{opacity:.7}.row-arrow{color:var(--ink-faint);font-size:1.1rem}.empty{min-height:12rem;display:grid;place-items:center;align-content:center;gap:.45rem;padding:var(--space-l);text-align:center;color:var(--ink-soft)}.empty strong{color:var(--ink)}.page-note{margin-top:var(--space-s);color:var(--ink-faint);font-size:var(--step--2)}
+  @media(max-width:800px){.jobs-toolbar,.jobs-head{align-items:flex-start;flex-direction:column}.create-job{grid-template-columns:1fr}.create-controls{grid-template-columns:1fr}.job-row{grid-template-columns:auto 1fr auto}.job-date{text-align:left;grid-column:2}.job-total{display:none}.row-arrow{grid-column:3;grid-row:1/span 2}}@media(max-width:520px){.job-row{gap:.55rem;padding:.8rem var(--space-s)}.status{font-size:.66rem}}
 </style>
