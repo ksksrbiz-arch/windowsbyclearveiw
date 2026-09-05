@@ -6,123 +6,58 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div>
       <p class="kicker">Clearview internal</p>
       <h1>Command Center</h1>
-      <p class="lede">The daily operating view for leads, quotes, and the work that needs attention.</p>
+      <p class="lede">The daily operating view for leads, quotes, and sales activity.</p>
     </div>
     <div class="dash-actions">
+      <button class="btn btn-ghost" type="button" data-refresh>Refresh</button>
       <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
-      <a class="btn btn-ghost" href="/internal/leads">All leads</a>
     </div>
   </div>
 
   <section class="attention-strip" aria-label="Priority work">
-    <a class="attention-item attention-hot" href="/internal/leads">
-      <span class="attention-icon">!</span>
-      <span><strong data-attention-leads>—</strong> new lead<span data-lead-plural>s</span> to review</span>
-      <span class="attention-arrow">→</span>
-    </a>
-    <a class="attention-item" href="/internal/quotes">
-      <span class="attention-icon">$</span>
-      <span><strong data-attention-drafts>—</strong> quote<span data-quote-plural>s</span> still in draft</span>
-      <span class="attention-arrow">→</span>
-    </a>
-    <a class="attention-item" href="/internal/quotes">
-      <span class="attention-icon">✓</span>
-      <span><strong data-attention-finalized>—</strong> signed contract<span data-final-plural>s</span> on file</span>
-      <span class="attention-arrow">→</span>
-    </a>
+    <a class="attention-item attention-hot" href="/internal/leads"><span class="attention-icon">!</span><span><strong data-attention-leads>—</strong> new lead<span data-lead-plural>s</span> to review</span><span>→</span></a>
+    <a class="attention-item" href="/internal/quotes"><span class="attention-icon">$</span><span><strong data-attention-drafts>—</strong> quote<span data-quote-plural>s</span> still in draft</span><span>→</span></a>
+    <a class="attention-item" href="/internal/quotes"><span class="attention-icon">✓</span><span><strong data-attention-finalized>—</strong> signed contract<span data-final-plural>s</span></span><span>→</span></a>
   </section>
 
   <section class="metric-grid" aria-label="Business snapshot">
-    <article class="metric-card metric-hot">
-      <span class="metric-label">New leads</span>
-      <strong data-metric="newLeads">—</strong>
-      <span class="metric-note">Last 7 days</span>
-      <a href="/internal/leads">Work leads →</a>
-    </article>
-    <article class="metric-card">
-      <span class="metric-label">Open quotes</span>
-      <strong data-metric="draftQuotes">—</strong>
-      <span class="metric-note">Drafts awaiting action</span>
-      <a href="/internal/quotes">Open quote list →</a>
-    </article>
-    <article class="metric-card">
-      <span class="metric-label">Signed quotes</span>
-      <strong data-metric="finalizedQuotes">—</strong>
-      <span class="metric-note">Finalized contracts</span>
-      <a href="/internal/quotes">Review signed work →</a>
-    </article>
-    <article class="metric-card metric-money">
-      <span class="metric-label">Open quoted value</span>
-      <strong data-metric="openValue">—</strong>
-      <span class="metric-note">Current draft pipeline</span>
-      <span class="metric-foot">Not a booked-sales figure</span>
-    </article>
+    <article class="metric-card metric-hot"><span class="metric-label">New leads</span><strong data-metric="newLeads">—</strong><span class="metric-note">Last 7 days</span><a href="/internal/leads">Work leads →</a></article>
+    <article class="metric-card"><span class="metric-label">Open quotes</span><strong data-metric="draftQuotes">—</strong><span class="metric-note">Drafts awaiting action</span><a href="/internal/quotes">Open quote list →</a></article>
+    <article class="metric-card"><span class="metric-label">Signed quotes</span><strong data-metric="finalizedQuotes">—</strong><span class="metric-note">Finalized contracts</span><a href="/internal/quotes">Review signed work →</a></article>
+    <article class="metric-card metric-money"><span class="metric-label">Open quoted value</span><strong data-metric="openValue">—</strong><span class="metric-note">Draft pipeline</span><span class="metric-foot">Not booked sales</span></article>
   </section>
 
   <div class="dash-grid">
     <section class="panel">
-      <div class="panel-head">
-        <div>
-          <p class="kicker">Inbound</p>
-          <h2>Recent leads</h2>
-        </div>
-        <a class="panel-link" href="/internal/leads">See all</a>
-      </div>
-      <div class="panel-body" data-leads-body>
-        <p class="muted">Loading leads…</p>
-      </div>
+      <div class="panel-head"><div><p class="kicker">Inbound</p><h2>Recent leads</h2></div><a class="panel-link" href="/internal/leads">See all</a></div>
+      <div class="panel-body" data-leads-body><p class="muted">Loading leads…</p></div>
     </section>
-
     <section class="panel">
-      <div class="panel-head">
-        <div>
-          <p class="kicker">Sales</p>
-          <h2>Recent quotes</h2>
-        </div>
-        <a class="panel-link" href="/internal/quotes">See all</a>
-      </div>
-      <div class="panel-body" data-quotes-body>
-        <p class="muted">Loading quotes…</p>
-      </div>
+      <div class="panel-head"><div><p class="kicker">Sales</p><h2>Recent quotes</h2></div><a class="panel-link" href="/internal/quotes">See all</a></div>
+      <div class="panel-body" data-quotes-body><p class="muted">Loading quotes…</p></div>
     </section>
   </div>
 
+  <div class="insight-grid">
+    <section class="panel"><div class="panel-head"><div><p class="kicker">Lead intelligence</p><h2>Where leads came from</h2></div></div><div class="insight-list" data-source-body><p class="muted">Loading…</p></div></section>
+    <section class="panel"><div class="panel-head"><div><p class="kicker">Service area</p><h2>Recent lead locations</h2></div></div><div class="insight-list" data-city-body><p class="muted">Loading…</p></div></section>
+  </div>
+
   <section class="pipeline-panel panel">
-    <div class="panel-head">
-      <div>
-        <p class="kicker">Quote pipeline</p>
-        <h2>At a glance</h2>
-      </div>
-      <span class="pipeline-total" data-pipeline-total>—</span>
-    </div>
+    <div class="panel-head"><div><p class="kicker">Quote pipeline</p><h2>Value by stage</h2></div><span class="pipeline-total" data-pipeline-total>—</span></div>
     <div class="pipeline-body">
-      <div class="pipeline-stage">
-        <div class="stage-top"><span>Drafts</span><strong data-stage-drafts>—</strong></div>
-        <div class="progress"><span data-progress-drafts></span></div>
-        <small data-stage-drafts-value>—</small>
-      </div>
-      <div class="pipeline-stage">
-        <div class="stage-top"><span>Finalized</span><strong data-stage-finalized>—</strong></div>
-        <div class="progress"><span data-progress-finalized></span></div>
-        <small data-stage-finalized-value>—</small>
-      </div>
-      <div class="pipeline-stage pipeline-summary">
-        <span>Average finalized quote</span>
-        <strong data-average-finalized>—</strong>
-        <small>Only quotes already finalized</small>
-      </div>
+      <div class="pipeline-stage"><div class="stage-top"><span>Drafts</span><strong data-stage-drafts>—</strong></div><div class="progress"><span data-progress-drafts></span></div><small data-stage-drafts-value>—</small></div>
+      <div class="pipeline-stage"><div class="stage-top"><span>Finalized</span><strong data-stage-finalized>—</strong></div><div class="progress"><span data-progress-finalized></span></div><small data-stage-finalized-value>—</small></div>
+      <div class="pipeline-stage pipeline-summary"><span>Average finalized quote</span><strong data-average-finalized>—</strong><small>Based only on finalized quotes</small></div>
     </div>
   </section>
 
   <section class="quick-actions">
-    <div>
-      <p class="kicker">Quick actions</p>
-      <h2>Keep the workflow moving</h2>
-    </div>
+    <div><p class="kicker">Quick actions</p><h2>Keep the workflow moving</h2></div>
     <div class="quick-links">
       <a href="/internal/quotes/new"><span>＋</span><strong>Build a quote</strong><small>Start a firm-price estimate</small></a>
-      <a href="/internal/leads"><span>↗</span><strong>Work your leads</strong><small>Review contact details and visitor journeys</small></a>
-      <a href="/internal/ask-logs"><span>✦</span><strong>Review Ask activity</strong><small>See what visitors asked before contacting you</small></a>
+      <a href="/internal/leads"><span>↗</span><strong>Work leads</strong><small>Review customer details and visitor journeys</small></a>
+      <a href="/internal/ask-logs"><span>✦</span><strong>Review Ask</strong><small>See what prospects asked the assistant</small></a>
     </div>
   </section>
 
@@ -130,120 +65,81 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
-  type Lead = {
-    id: string;
-    created_at: string;
-    name: string;
-    phone?: string;
-    email?: string;
-    city?: string;
-    role?: string;
-  };
-
-  type Quote = {
-    id: string;
-    created_at: string;
-    status: string;
-    customer_name: string;
-    customer_city?: string;
-    total_cents: number;
-  };
+  type Lead = { id: number|string; created_at: string; name: string; phone?: string; email?: string; city?: string; role?: string; first_utm_source?: string; first_utm_medium?: string; first_referrer?: string; };
+  type Quote = { id: string; created_at: string; status: string; customer_name: string; customer_city?: string; total_cents: number; };
 
   function initDashboard() {
     if (document.body.dataset.dashboardBound === 'true') return;
     document.body.dataset.dashboardBound = 'true';
 
-    const $ = <T extends Element>(selector: string) => document.querySelector(selector) as T | null;
-    const setText = (selector: string, value: string) => { const el = $(selector); if (el) el.textContent = value; };
+    const $ = <T extends Element>(s: string) => document.querySelector(s) as T | null;
+    const text = (s: string, v: string) => { const e = $(s); if (e) e.textContent = v; };
     const money = (cents: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((Number(cents) || 0) / 100);
-    const date = (iso: string) => {
-      const value = new Date(iso);
-      return Number.isNaN(value.getTime()) ? '' : value.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-    const escape = (value: string | undefined) => {
-      const node = document.createElement('div');
-      node.textContent = value || '';
-      return node.innerHTML;
-    };
+    const day = (iso: string) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+    const esc = (v: unknown) => { const d = document.createElement('div'); d.textContent = String(v ?? ''); return d.innerHTML; };
 
     async function load() {
+      const refresh = $('[data-refresh]') as HTMLButtonElement | null;
+      if (refresh) { refresh.disabled = true; refresh.textContent = 'Refreshing…'; }
       try {
-        const [leadsResponse, quotesResponse] = await Promise.all([
+        const [lr, qr] = await Promise.all([
           fetch('/internal/api/leads', { headers: { 'cache-control': 'no-cache' } }),
           fetch('/internal/api/quotes', { headers: { 'cache-control': 'no-cache' } }),
         ]);
-        if (!leadsResponse.ok || !quotesResponse.ok) throw new Error('Request failed');
+        if (!lr.ok || !qr.ok) throw new Error('Request failed');
+        const [{ leads }, { quotes }] = await Promise.all([lr.json(), qr.json()]) as [{ leads: Lead[] }, { quotes: Quote[] }];
+        const weekAgo = Date.now() - 7 * 86400000;
+        const recent = leads.filter((l) => new Date(l.created_at).getTime() >= weekAgo);
+        const drafts = quotes.filter((q) => q.status === 'draft');
+        const finalized = quotes.filter((q) => q.status === 'finalized');
+        const draftValue = drafts.reduce((n, q) => n + (Number(q.total_cents) || 0), 0);
+        const finalValue = finalized.reduce((n, q) => n + (Number(q.total_cents) || 0), 0);
+        const totalValue = draftValue + finalValue;
 
-        const [{ leads }, { quotes }] = await Promise.all([leadsResponse.json(), quotesResponse.json()]) as [{ leads: Lead[] }, { quotes: Quote[] }];
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const recentLeads = leads.filter((lead) => new Date(lead.created_at).getTime() >= weekAgo);
-        const drafts = quotes.filter((quote) => quote.status === 'draft');
-        const finalized = quotes.filter((quote) => quote.status === 'finalized');
-        const draftValue = drafts.reduce((sum, quote) => sum + (Number(quote.total_cents) || 0), 0);
-        const finalizedValue = finalized.reduce((sum, quote) => sum + (Number(quote.total_cents) || 0), 0);
-        const totalQuoted = draftValue + finalizedValue;
-        const averageFinalized = finalized.length ? finalizedValue / finalized.length : 0;
+        text('[data-metric="newLeads"]', String(recent.length));
+        text('[data-metric="draftQuotes"]', String(drafts.length));
+        text('[data-metric="finalizedQuotes"]', String(finalized.length));
+        text('[data-metric="openValue"]', money(draftValue));
+        text('[data-attention-leads]', String(recent.length));
+        text('[data-attention-drafts]', String(drafts.length));
+        text('[data-attention-finalized]', String(finalized.length));
+        if (recent.length === 1) text('[data-lead-plural]', '');
+        if (drafts.length === 1) text('[data-quote-plural]', '');
+        if (finalized.length === 1) text('[data-final-plural]', '');
 
-        setText('[data-metric="newLeads"]', String(recentLeads.length));
-        setText('[data-metric="draftQuotes"]', String(drafts.length));
-        setText('[data-metric="finalizedQuotes"]', String(finalized.length));
-        setText('[data-metric="openValue"]', money(draftValue));
-        setText('[data-attention-leads]', String(recentLeads.length));
-        setText('[data-attention-drafts]', String(drafts.length));
-        setText('[data-attention-finalized]', String(finalized.length));
-        if (recentLeads.length === 1) setText('[data-lead-plural]', '');
-        if (drafts.length === 1) setText('[data-quote-plural]', '');
-        if (finalized.length === 1) setText('[data-final-plural]', '');
-
-        setText('[data-pipeline-total]', `${quotes.length} quotes`);
-        setText('[data-stage-drafts]', String(drafts.length));
-        setText('[data-stage-finalized]', String(finalized.length));
-        setText('[data-stage-drafts-value]', money(draftValue));
-        setText('[data-stage-finalized-value]', money(finalizedValue));
-        setText('[data-average-finalized]', averageFinalized ? money(averageFinalized) : '—');
-        const draftPct = totalQuoted ? (draftValue / totalQuoted) * 100 : 0;
-        const finalizedPct = totalQuoted ? (finalizedValue / totalQuoted) * 100 : 0;
-        const draftProgress = $('[data-progress-drafts]') as HTMLElement | null;
-        const finalProgress = $('[data-progress-finalized]') as HTMLElement | null;
-        if (draftProgress) draftProgress.style.width = `${draftPct}%`;
-        if (finalProgress) finalProgress.style.width = `${finalizedPct}%`;
+        text('[data-pipeline-total]', `${quotes.length} quotes`);
+        text('[data-stage-drafts]', String(drafts.length));
+        text('[data-stage-finalized]', String(finalized.length));
+        text('[data-stage-drafts-value]', money(draftValue));
+        text('[data-stage-finalized-value]', money(finalValue));
+        text('[data-average-finalized]', finalized.length ? money(finalValue / finalized.length) : '—');
+        const dp = $('[data-progress-drafts]') as HTMLElement | null;
+        const fp = $('[data-progress-finalized]') as HTMLElement | null;
+        if (dp) dp.style.width = `${totalValue ? draftValue / totalValue * 100 : 0}%`;
+        if (fp) fp.style.width = `${totalValue ? finalValue / totalValue * 100 : 0}%`;
 
         const leadsBody = $('[data-leads-body]');
-        if (leadsBody) {
-          const rows = recentLeads.slice(0, 6).map((lead) => `<a class="lead-row" href="/internal/leads">
-            <span class="avatar">${escape((lead.name || '?').slice(0, 1).toUpperCase())}</span>
-            <span class="row-main"><strong>${escape(lead.name)}</strong><small>${escape([lead.city, lead.role].filter(Boolean).join(' · ') || 'Estimate request')}</small></span>
-            <span class="row-meta"><time>${date(lead.created_at)}</time></span>
-          </a>`).join('');
-          leadsBody.innerHTML = rows || '<p class="empty">No estimate requests in the last 7 days.</p>';
-        }
+        if (leadsBody) leadsBody.innerHTML = recent.slice(0, 6).map((l) => `<div class="lead-row"><span class="avatar">${esc((l.name || '?')[0].toUpperCase())}</span><span class="row-main"><strong>${esc(l.name)}</strong><small>${esc([l.city, l.role].filter(Boolean).join(' · ') || 'Estimate request')}</small></span><span class="row-actions"><a href="/internal/leads">Open</a>${l.phone ? `<a href="tel:${esc(l.phone.replace(/\D/g, ''))}">Call</a>` : ''}</span><span class="row-meta"><time>${day(l.created_at)}</time></span></div>`).join('') || '<p class="empty">No estimate requests in the last 7 days.</p>';
 
         const quotesBody = $('[data-quotes-body]');
-        if (quotesBody) {
-          const rows = quotes.slice(0, 6).map((quote) => {
-            const finalizedLabel = quote.status === 'finalized' ? 'Finalized' : 'Draft';
-            const statusClass = quote.status === 'finalized' ? 'is-final' : 'is-draft';
-            return `<a class="quote-row" href="/internal/quotes">
-              <span class="quote-status ${statusClass}">${finalizedLabel}</span>
-              <span class="row-main"><strong>${escape(quote.customer_name)}</strong><small>${escape([quote.customer_city, quote.id].filter(Boolean).join(' · '))}</small></span>
-              <span class="row-meta"><strong>${money(Number(quote.total_cents) || 0)}</strong><time>${date(quote.created_at)}</time></span>
-            </a>`;
-          }).join('');
-          quotesBody.innerHTML = rows || '<p class="empty">No quotes yet. Start the first one.</p>';
-        }
+        if (quotesBody) quotesBody.innerHTML = quotes.slice(0, 6).map((q) => `<a class="quote-row" href="/internal/quotes"><span class="quote-status ${q.status === 'finalized' ? 'is-final' : 'is-draft'}">${q.status === 'finalized' ? 'Finalized' : 'Draft'}</span><span class="row-main"><strong>${esc(q.customer_name)}</strong><small>${esc([q.customer_city, q.id].filter(Boolean).join(' · '))}</small></span><span class="row-meta"><strong>${money(Number(q.total_cents) || 0)}</strong><time>${day(q.created_at)}</time></span></a>`).join('') || '<p class="empty">No quotes yet. Start the first one.</p>';
 
-        const status = $('[data-status]');
-        if (status) status.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        const sourceCounts = new Map<string, number>();
+        for (const l of leads) { let source = l.first_utm_source || ''; if (!source && l.first_referrer) { try { source = new URL(l.first_referrer).hostname.replace(/^www\./, ''); } catch {} } source = source || 'Direct / unknown'; sourceCounts.set(source, (sourceCounts.get(source) || 0) + 1); }
+        const cityCounts = new Map<string, number>();
+        for (const l of leads) { const city = l.city || 'City not provided'; cityCounts.set(city, (cityCounts.get(city) || 0) + 1); }
+        const renderCounts = (map: Map<string, number>) => [...map.entries()].sort((a,b) => b[1]-a[1]).slice(0, 6).map(([label, count]) => `<div class="insight-row"><span>${esc(label)}</span><strong>${count}</strong></div>`).join('') || '<p class="empty">Not enough data yet.</p>';
+        const sb = $('[data-source-body]'); if (sb) sb.innerHTML = renderCounts(sourceCounts);
+        const cb = $('[data-city-body]'); if (cb) cb.innerHTML = renderCounts(cityCounts);
+
+        const status = $('[data-status]'); if (status) status.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
       } catch {
-        const status = $('[data-status]');
-        if (status) status.textContent = 'Could not refresh the snapshot. The lead and quote pages are still available.';
-        const leadsBody = $('[data-leads-body]');
-        const quotesBody = $('[data-quotes-body]');
-        if (leadsBody) leadsBody.innerHTML = '<p class="empty">Could not load leads.</p>';
-        if (quotesBody) quotesBody.innerHTML = '<p class="empty">Could not load quotes.</p>';
+        const status = $('[data-status]'); if (status) status.textContent = 'Could not refresh the snapshot. The underlying lead and quote pages are still available.';
+      } finally {
+        if (refresh) { refresh.disabled = false; refresh.textContent = 'Refresh'; }
       }
     }
-
+    const refresh = $('[data-refresh]'); if (refresh) refresh.addEventListener('click', load);
     load();
   }
 
@@ -254,18 +150,15 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 <style>
   .dash-head { display: flex; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-m); }
   .dash-actions { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
-
-  .attention-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xs); margin-bottom: var(--space-m); }
+  .attention-strip { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-xs); margin-bottom: var(--space-m); }
   .attention-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.55rem; padding: 0.75rem 0.85rem; border: 1px solid var(--line); border-radius: var(--radius); color: inherit; text-decoration: none; font-size: var(--step--2); }
-  .attention-item:hover { border-color: var(--line-strong); background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .attention-item:hover { border-color: var(--line-strong); background: var(--accent-wash); }
   .attention-hot { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
   .attention-icon { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--on-dark); font-weight: 800; font-size: 0.75rem; }
   .attention-hot .attention-icon { background: var(--accent); }
   .attention-item strong { font-size: var(--step-0); }
-  .attention-arrow { color: var(--ink-faint); }
-
-  .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-s); margin-bottom: var(--space-l); }
-  .metric-card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-m); display: grid; gap: 0.35rem; min-height: 9rem; background: var(--paper-raised, var(--paper)); }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-s); margin-bottom: var(--space-l); }
+  .metric-card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-m); display: grid; gap: 0.35rem; min-height: 9rem; background: var(--paper-raised); }
   .metric-hot { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
   .metric-money { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
   .metric-label { font-size: var(--step--1); color: var(--ink-soft); font-weight: 600; }
@@ -273,14 +166,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .metric-card strong { font-size: clamp(1.7rem, 3vw, 2.35rem); line-height: 1; letter-spacing: -0.03em; }
   .metric-card a { font-size: var(--step--2); color: inherit; font-weight: 600; margin-top: auto; }
   .metric-note, .metric-foot { font-size: var(--step--2); color: var(--ink-faint); }
-
-  .dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-m); }
-  .panel { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--paper-raised, var(--paper)); }
+  .dash-grid, .insight-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-m); }
+  .panel { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--paper-raised); }
   .panel-head { padding: var(--space-m); display: flex; justify-content: space-between; align-items: end; gap: var(--space-s); border-bottom: 1px solid var(--line); }
   .panel-head h2 { margin: 0.12rem 0 0; font-size: var(--step-1); }
   .panel-link { font-size: var(--step--1); font-weight: 600; white-space: nowrap; }
   .panel-body { padding: 0; }
-  .lead-row, .quote-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-xs); align-items: center; padding: 0.85rem var(--space-m); color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+  .lead-row, .quote-row { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; gap: var(--space-xs); align-items: center; padding: 0.8rem var(--space-m); border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
   .lead-row:last-child, .quote-row:last-child { border-bottom: 0; }
   .lead-row:hover, .quote-row:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
   .avatar { width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--on-dark); font-size: var(--step--2); font-weight: 700; }
@@ -289,49 +181,37 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .row-main small, .row-meta { font-size: var(--step--2); color: var(--ink-soft); }
   .row-meta { display: grid; gap: 0.12rem; text-align: right; white-space: nowrap; }
   .row-meta strong { color: var(--ink); }
+  .row-actions { display: flex; gap: 0.4rem; font-size: var(--step--2); font-weight: 700; }
   .quote-status { padding: 0.25rem 0.45rem; border-radius: 999px; font-size: var(--step--2); font-weight: 700; }
   .is-draft { background: color-mix(in srgb, var(--accent) 14%, var(--paper)); color: var(--ink); }
   .is-final { background: color-mix(in srgb, var(--ink) 10%, var(--paper)); color: var(--ink); }
   .empty, .muted { margin: 0; padding: var(--space-m); color: var(--ink-soft); font-size: var(--step--1); }
-
+  .insight-grid { margin-top: var(--space-m); }
+  .insight-list { padding: 0.25rem 0; }
+  .insight-row { display: flex; justify-content: space-between; gap: var(--space-s); padding: 0.7rem var(--space-m); border-bottom: 1px solid var(--line); font-size: var(--step--1); }
+  .insight-row:last-child { border-bottom: 0; }
+  .insight-row strong { min-width: 1.5rem; text-align: right; }
   .pipeline-panel { margin-top: var(--space-m); }
   .pipeline-total { font-size: var(--step--2); color: var(--ink-soft); }
   .pipeline-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-m); padding: var(--space-m); }
   .pipeline-stage { min-width: 0; }
-  .stage-top { display: flex; justify-content: space-between; gap: var(--space-xs); font-size: var(--step--1); }
+  .stage-top { display: flex; justify-content: space-between; font-size: var(--step--1); }
   .stage-top strong { font-size: var(--step-1); }
   .progress { height: 0.4rem; margin: 0.6rem 0 0.4rem; border-radius: 999px; background: var(--paper-sunk); overflow: hidden; }
-  .progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width 280ms ease; }
+  .progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width 240ms ease; }
   .pipeline-stage small { font-size: var(--step--2); color: var(--ink-soft); }
   .pipeline-summary { display: grid; align-content: center; padding-left: var(--space-m); border-left: 1px solid var(--line); }
   .pipeline-summary span, .pipeline-summary small { color: var(--ink-soft); font-size: var(--step--2); }
   .pipeline-summary strong { display: block; margin: 0.25rem 0; font-size: var(--step-2); letter-spacing: -0.03em; }
-
   .quick-actions { margin-top: var(--space-m); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-m); }
   .quick-actions h2 { margin: 0.12rem 0 0; font-size: var(--step-1); }
-  .quick-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xs); margin-top: var(--space-s); }
+  .quick-links { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-xs); margin-top: var(--space-s); }
   .quick-links a { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem var(--space-xs); padding: 0.85rem; border: 1px solid var(--line); border-radius: var(--radius); color: inherit; text-decoration: none; }
   .quick-links a:hover { border-color: var(--line-strong); transform: translateY(-1px); }
   .quick-links span { grid-row: span 2; font-size: 1.25rem; }
   .quick-links strong { font-size: var(--step--1); }
   .quick-links small { color: var(--ink-soft); font-size: var(--step--2); }
   .dash-status { margin: var(--space-s) 0 0; font-size: var(--step--2); color: var(--ink-faint); text-align: right; }
-
-  @media (max-width: 900px) {
-    .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .attention-strip { grid-template-columns: 1fr; }
-    .dash-grid { grid-template-columns: 1fr; }
-    .pipeline-body { grid-template-columns: 1fr 1fr; }
-    .pipeline-summary { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: var(--space-m) 0 0; }
-  }
-  @media (max-width: 560px) {
-    .dash-head { align-items: start; flex-direction: column; }
-    .metric-grid { grid-template-columns: 1fr 1fr; gap: var(--space-xs); }
-    .metric-card { min-height: 8rem; padding: var(--space-s); }
-    .lead-row, .quote-row { padding-inline: var(--space-s); }
-    .row-meta time { display: none; }
-    .pipeline-body { grid-template-columns: 1fr; }
-    .pipeline-summary { grid-column: auto; }
-    .quick-links { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 900px) { .metric-grid, .attention-strip { grid-template-columns: repeat(2, minmax(0,1fr)); } .attention-strip .attention-item:last-child { grid-column: 1 / -1; } .dash-grid, .insight-grid { grid-template-columns: 1fr; } .pipeline-body { grid-template-columns: 1fr 1fr; } .pipeline-summary { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: var(--space-m) 0 0; } .quick-links { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .dash-head { align-items: start; flex-direction: column; } .metric-grid, .attention-strip { grid-template-columns: 1fr; } .attention-strip .attention-item:last-child { grid-column: auto; } .metric-card { min-height: 8rem; padding: var(--space-s); } .lead-row, .quote-row { grid-template-columns: auto minmax(0,1fr) auto; padding-inline: var(--space-s); } .row-actions { grid-column: 2 / -1; } .row-meta { display: none; } .pipeline-body { grid-template-columns: 1fr; } .pipeline-summary { grid-column: auto; } }
 </style>
