@@ -77,7 +77,8 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const status=root.querySelector('[data-status]') as HTMLElement;
     const key='clearview:photo-job';
     const saved=JSON.parse(localStorage.getItem(key)||'{}');
-    jobId.value=saved.jobId||new URLSearchParams(location.search).get('job')||'';
+    const params=new URLSearchParams(location.search);
+    jobId.value=saved.jobId||params.get('job')||params.get('jobId')||'';
     jobName.value=saved.jobName||'';
     function persistJob(){ localStorage.setItem(key,JSON.stringify({jobId:jobId.value,jobName:jobName.value})); }
     [jobId,jobName].forEach(el=>el.addEventListener('input',persistJob));
