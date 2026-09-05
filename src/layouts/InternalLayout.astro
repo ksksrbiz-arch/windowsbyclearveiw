@@ -6,6 +6,7 @@ const { title, showLogout = true } = Astro.props;
 const pathname = Astro.url.pathname;
 const navItems = [
   { href: '/internal/', label: 'Dashboard' },
+  { href: '/internal/today', label: 'Today' },
   { href: '/internal/leads', label: 'Leads' },
   { href: '/internal/follow-up', label: 'Follow-up' },
   { href: '/internal/quotes', label: 'Quotes' },
@@ -56,135 +57,58 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
           let worksheet;
           try { worksheet = JSON.parse(localStorage.getItem(MEASUREMENT_KEY) || 'null'); } catch { worksheet = null; }
           if (!worksheet || !Array.isArray(worksheet.openings) || worksheet.openings.length === 0) return;
-
           const submit = form.querySelector('[data-submit]');
           const anchor = submit?.closest('fieldset') || form.firstElementChild;
           if (!(anchor instanceof Element)) return;
-
-          const bar = document.createElement('div');
-          bar.className = 'measurement-import-bar';
+          const bar = document.createElement('div'); bar.className = 'measurement-import-bar';
           bar.innerHTML = `<div><strong>Saved field measurements found</strong><span>${worksheet.openings.length} opening${worksheet.openings.length === 1 ? '' : 's'} ready to import.</span></div><button type="button" class="btn btn-ghost" data-import-measurements>Import measurements</button>`;
-          anchor.before(bar);
-          form.dataset.measurementImportReady = 'true';
-
-          const button = bar.querySelector('[data-import-measurements]');
-          if (!(button instanceof HTMLButtonElement)) return;
+          anchor.before(bar); form.dataset.measurementImportReady = 'true';
+          const button = bar.querySelector('[data-import-measurements]'); if (!(button instanceof HTMLButtonElement)) return;
           button.addEventListener('click', () => {
             if (!window.confirm(`Import ${worksheet.openings.length} measured opening${worksheet.openings.length === 1 ? '' : 's'} into this quote? Existing quote lines will be kept.`)) return;
-            button.disabled = true;
-            button.textContent = 'Importing…';
-
-            const setIfBlank = (name, value) => {
-              const field = form.elements.namedItem(name);
-              if ((field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) && !field.value.trim()) field.value = String(value ?? '');
-            };
-            setIfBlank('name', worksheet.jobName || '');
-            setIfBlank('address', worksheet.jobAddress || '');
-
-            if (worksheet.jobNotes) {
-              const notes = form.elements.namedItem('notes');
-              if (notes instanceof HTMLTextAreaElement && !notes.value.includes('Field measurement notes:')) {
-                notes.value = notes.value.trim() ? `${notes.value.trim()}\n\nField measurement notes:\n${worksheet.jobNotes}` : `Field measurement notes:\n${worksheet.jobNotes}`;
-              }
-            }
-
-            const openingSelect = form.querySelector('[data-catalog-opening]');
-            const qtyInput = form.querySelector('[data-catalog-qty]');
-            const addButton = form.querySelector('[data-catalog-add]');
-            const itemsBody = form.querySelector('[data-items-body]');
-            const options = openingSelect instanceof HTMLSelectElement ? Array.from(openingSelect.options) : [];
-            let imported = 0;
-            let skipped = 0;
-
+            button.disabled = true; button.textContent = 'Importing…';
+            const setIfBlank = (name, value) => { const field = form.elements.namedItem(name); if ((field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) && !field.value.trim()) field.value = String(value ?? ''); };
+            setIfBlank('name', worksheet.jobName || ''); setIfBlank('address', worksheet.jobAddress || '');
+            if (worksheet.jobNotes) { const notes = form.elements.namedItem('notes'); if (notes instanceof HTMLTextAreaElement && !notes.value.includes('Field measurement notes:')) notes.value = notes.value.trim() ? `${notes.value.trim()}\n\nField measurement notes:\n${worksheet.jobNotes}` : `Field measurement notes:\n${worksheet.jobNotes}`; }
+            const openingSelect = form.querySelector('[data-catalog-opening]'); const qtyInput = form.querySelector('[data-catalog-qty]'); const addButton = form.querySelector('[data-catalog-add]'); const itemsBody = form.querySelector('[data-items-body]'); const options = openingSelect instanceof HTMLSelectElement ? Array.from(openingSelect.options) : [];
+            let imported = 0; let skipped = 0;
             if (openingSelect instanceof HTMLSelectElement && qtyInput instanceof HTMLInputElement && addButton instanceof HTMLButtonElement && itemsBody instanceof HTMLElement) {
               for (const opening of worksheet.openings) {
                 const target = normalize(opening.type);
-                const option = options.find((candidate) => normalize(candidate.textContent) === target)
-                  || options.find((candidate) => normalize(candidate.textContent).includes(target) || target.includes(normalize(candidate.textContent)));
+                const option = options.find((candidate) => normalize(candidate.textContent) === target) || options.find((candidate) => normalize(candidate.textContent).includes(target) || target.includes(normalize(candidate.textContent)));
                 if (!option) { skipped += 1; continue; }
-
-                openingSelect.value = option.value;
-                qtyInput.value = String(Math.max(1, Number(opening.quantity) || 1));
-                addButton.click();
-
-                const rows = itemsBody.querySelectorAll('tr');
-                const lastRow = rows[rows.length - 1];
-                const labelInput = lastRow?.querySelector('td:first-child input');
-                if (labelInput instanceof HTMLInputElement) {
-                  const width = opening.width === '' ? '?' : Number(opening.width).toLocaleString('en-US');
-                  const height = opening.height === '' ? '?' : Number(opening.height).toLocaleString('en-US');
-                  const room = opening.room ? `${opening.room} — ` : '';
-                  labelInput.value = `${room}${opening.type} — ${width}\" W × ${height}\" H`;
-                  labelInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+                openingSelect.value = option.value; qtyInput.value = String(Math.max(1, Number(opening.quantity) || 1)); addButton.click();
+                const rows = itemsBody.querySelectorAll('tr'); const lastRow = rows[rows.length - 1]; const labelInput = lastRow?.querySelector('td:first-child input');
+                if (labelInput instanceof HTMLInputElement) { const width = opening.width === '' ? '?' : Number(opening.width).toLocaleString('en-US'); const height = opening.height === '' ? '?' : Number(opening.height).toLocaleString('en-US'); const room = opening.room ? `${opening.room} — ` : ''; labelInput.value = `${room}${opening.type} — ${width}\" W × ${height}\" H`; labelInput.dispatchEvent(new Event('input', { bubbles: true })); }
                 imported += 1;
               }
             }
-
-            const summary = bar.querySelector('span');
-            if (summary) summary.textContent = skipped ? `${imported} imported · ${skipped} skipped (not in price book)` : `${imported} opening${imported === 1 ? '' : 's'} imported into the quote.`;
+            const summary = bar.querySelector('span'); if (summary) summary.textContent = skipped ? `${imported} imported · ${skipped} skipped (not in price book)` : `${imported} opening${imported === 1 ? '' : 's'} imported into the quote.`;
             button.textContent = imported ? 'Imported' : 'Nothing imported';
           });
         }
 
         function mountFollowUpPrefill() {
           if (location.pathname !== '/internal/follow-up') return;
-          const leadId = new URLSearchParams(location.search).get('leadId');
-          if (!leadId) return;
-          const addButton = document.querySelector('[data-add-open]');
-          const leadField = document.querySelector('input[name="leadId"]');
-          if (!(leadField instanceof HTMLInputElement)) return;
-          leadField.value = leadId;
-          if (addButton instanceof HTMLButtonElement) addButton.click();
+          const leadId = new URLSearchParams(location.search).get('leadId'); if (!leadId) return;
+          const addButton = document.querySelector('[data-add-open]'); const leadField = document.querySelector('input[name="leadId"]');
+          if (!(leadField instanceof HTMLInputElement)) return; leadField.value = leadId; if (addButton instanceof HTMLButtonElement) addButton.click();
         }
 
         function mountJobPhotoLink() {
           if (location.pathname !== '/internal/jobs/view') return;
-          const id = new URLSearchParams(location.search).get('id');
-          if (!id) return;
-          const actions = document.querySelector('.head-actions');
-          if (!(actions instanceof HTMLElement) || actions.querySelector('[data-job-photos-link]')) return;
-          const link = document.createElement('a');
-          link.className = 'btn btn-ghost';
-          link.href = `/internal/tools/photos?job=${encodeURIComponent(id)}`;
-          link.dataset.jobPhotosLink = 'true';
-          link.textContent = 'Job photos';
-          actions.insertBefore(link, actions.firstChild);
+          const id = new URLSearchParams(location.search).get('id'); if (!id) return;
+          const actions = document.querySelector('.head-actions'); if (!(actions instanceof HTMLElement) || actions.querySelector('[data-job-photos-link]')) return;
+          const link = document.createElement('a'); link.className = 'btn btn-ghost'; link.href = `/internal/tools/photos?job=${encodeURIComponent(id)}`; link.dataset.jobPhotosLink = 'true'; link.textContent = 'Job photos'; actions.insertBefore(link, actions.firstChild);
         }
 
-        function mountInternalEnhancements() {
-          mountMeasurementImport();
-          mountFollowUpPrefill();
-          mountJobPhotoLink();
-        }
-
-        mountInternalEnhancements();
-        document.addEventListener('astro:page-load', mountInternalEnhancements);
+        function mountInternalEnhancements() { mountMeasurementImport(); mountFollowUpPrefill(); mountJobPhotoLink(); }
+        mountInternalEnhancements(); document.addEventListener('astro:page-load', mountInternalEnhancements);
       })();
     </script>
 
     <style>
-      .internal { background: var(--paper); min-height: 100vh; }
-      .internal-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--black) 96%, transparent); color: var(--on-dark); border-bottom: 1px solid var(--dark-line); backdrop-filter: blur(10px); }
-      .internal-header-inner { max-width: 68rem; margin-inline: auto; padding: 0.65rem var(--space-m); display: flex; align-items: center; justify-content: space-between; gap: var(--space-m); }
-      .internal-brand { color: var(--on-dark); font-weight: 650; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
-      .internal-brand span { color: var(--accent-bright); font-weight: 500; }
-      .internal-header-right { display: flex; align-items: center; gap: var(--space-s); min-width: 0; }
-      .internal-nav { display: flex; align-items: center; gap: 0.2rem; min-width: 0; }
-      .internal-nav a { position: relative; color: var(--on-dark-soft); text-decoration: none; font-size: var(--step--2); font-weight: 600; padding: 0.42rem 0.55rem; border-radius: var(--radius); white-space: nowrap; }
-      .internal-nav a::after { content: ''; position: absolute; left: 0.55rem; right: 0.55rem; bottom: 0.2rem; height: 2px; border-radius: 999px; background: var(--accent-bright); transform: scaleX(0); transform-origin: center; transition: transform 140ms ease; }
-      .internal-nav a:hover, .internal-nav a:focus-visible, .internal-nav a.active { color: var(--on-dark); background: rgb(255 255 255 / 0.08); }
-      .internal-nav a.active::after { transform: scaleX(1); }
-      .internal-logout { background: transparent; border: 1px solid var(--dark-line-strong); color: var(--on-dark-soft); border-radius: var(--radius); padding: 0.42rem 0.72rem; font: inherit; font-size: var(--step--2); cursor: pointer; white-space: nowrap; }
-      .internal-logout:hover { border-color: var(--accent-bright); color: var(--on-dark); }
-      .internal-main { max-width: 68rem; margin-inline: auto; padding: var(--space-l) var(--space-m) var(--space-3xl); }
-      .measurement-import-bar { margin: 0 0 var(--space-m); padding: .8rem var(--space-m); border: 1px solid color-mix(in srgb,var(--accent) 30%,var(--line)); border-radius: var(--radius); background: var(--accent-wash); display: flex; justify-content: space-between; align-items: center; gap: var(--space-m); }
-      .measurement-import-bar > div { display: grid; gap: .15rem; }
-      .measurement-import-bar span { color: var(--ink-soft); font-size: var(--step--2); }
-      @media (max-width: 980px) { .internal-header-inner { gap: var(--space-s); } .internal-header-right { flex: 1; justify-content: flex-end; } .internal-nav { overflow-x: auto; scrollbar-width: none; } .internal-nav::-webkit-scrollbar { display: none; } .internal-nav a { padding-inline: .45rem; } .internal-nav a::after { left: .45rem; right: .45rem; } }
-      @media (max-width: 520px) { .internal-header-inner { padding-inline: var(--space-s); } .internal-brand span { display: none; } .internal-logout { padding-inline: .55rem; } .measurement-import-bar { align-items: flex-start; flex-direction: column; } }
-      @media (prefers-reduced-motion: reduce) { .internal-nav a::after { transition: none; } }
-      @media print { .internal-header { display: none; } .internal-main { max-width: none; padding: 0; } .measurement-import-bar { display: none; } }
+      .internal{background:var(--paper);min-height:100vh}.internal-header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--black) 96%,transparent);color:var(--on-dark);border-bottom:1px solid var(--dark-line);backdrop-filter:blur(10px)}.internal-header-inner{max-width:68rem;margin-inline:auto;padding:.65rem var(--space-m);display:flex;align-items:center;justify-content:space-between;gap:var(--space-m)}.internal-brand{color:var(--on-dark);font-weight:650;letter-spacing:-.01em;text-decoration:none;white-space:nowrap}.internal-brand span{color:var(--accent-bright);font-weight:500}.internal-header-right{display:flex;align-items:center;gap:var(--space-s);min-width:0}.internal-nav{display:flex;align-items:center;gap:.2rem;min-width:0}.internal-nav a{position:relative;color:var(--on-dark-soft);text-decoration:none;font-size:var(--step--2);font-weight:600;padding:.42rem .55rem;border-radius:var(--radius);white-space:nowrap}.internal-nav a::after{content:'';position:absolute;left:.55rem;right:.55rem;bottom:.2rem;height:2px;border-radius:999px;background:var(--accent-bright);transform:scaleX(0);transform-origin:center;transition:transform 140ms ease}.internal-nav a:hover,.internal-nav a:focus-visible,.internal-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .08)}.internal-nav a.active::after{transform:scaleX(1)}.internal-logout{background:transparent;border:1px solid var(--dark-line-strong);color:var(--on-dark-soft);border-radius:var(--radius);padding:.42rem .72rem;font:inherit;font-size:var(--step--2);cursor:pointer;white-space:nowrap}.internal-logout:hover{border-color:var(--accent-bright);color:var(--on-dark)}.internal-main{max-width:68rem;margin-inline:auto;padding:var(--space-l) var(--space-m) var(--space-3xl)}.measurement-import-bar{margin:0 0 var(--space-m);padding:.8rem var(--space-m);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:var(--radius);background:var(--accent-wash);display:flex;justify-content:space-between;align-items:center;gap:var(--space-m)}.measurement-import-bar>div{display:grid;gap:.15rem}.measurement-import-bar span{color:var(--ink-soft);font-size:var(--step--2)}@media(max-width:980px){.internal-header-inner{gap:var(--space-s)}.internal-header-right{flex:1;justify-content:flex-end}.internal-nav{overflow-x:auto;scrollbar-width:none}.internal-nav::-webkit-scrollbar{display:none}.internal-nav a{padding-inline:.45rem}.internal-nav a::after{left:.45rem;right:.45rem}}@media(max-width:520px){.internal-header-inner{padding-inline:var(--space-s)}.internal-brand span{display:none}.internal-logout{padding-inline:.55rem}.measurement-import-bar{align-items:flex-start;flex-direction:column}}@media(prefers-reduced-motion:reduce){.internal-nav a::after{transition:none}}@media print{.internal-header{display:none}.internal-main{max-width:none;padding:0}.measurement-import-bar{display:none}}
     </style>
   </body>
 </html>
