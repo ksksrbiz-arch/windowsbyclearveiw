@@ -6,7 +6,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div>
       <p class="kicker">Clearview internal</p>
       <h1>Command Center</h1>
-      <p class="lede">A field-friendly snapshot of leads, quotes, and the work that needs attention.</p>
+      <p class="lede">The daily operating view for leads, quotes, and the work that needs attention.</p>
     </div>
     <div class="dash-actions">
       <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
@@ -14,30 +14,48 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
   </div>
 
+  <section class="attention-strip" aria-label="Priority work">
+    <a class="attention-item attention-hot" href="/internal/leads">
+      <span class="attention-icon">!</span>
+      <span><strong data-attention-leads>—</strong> new lead<span data-lead-plural>s</span> to review</span>
+      <span class="attention-arrow">→</span>
+    </a>
+    <a class="attention-item" href="/internal/quotes">
+      <span class="attention-icon">$</span>
+      <span><strong data-attention-drafts>—</strong> quote<span data-quote-plural>s</span> still in draft</span>
+      <span class="attention-arrow">→</span>
+    </a>
+    <a class="attention-item" href="/internal/quotes">
+      <span class="attention-icon">✓</span>
+      <span><strong data-attention-finalized>—</strong> signed contract<span data-final-plural>s</span> on file</span>
+      <span class="attention-arrow">→</span>
+    </a>
+  </section>
+
   <section class="metric-grid" aria-label="Business snapshot">
     <article class="metric-card metric-hot">
       <span class="metric-label">New leads</span>
       <strong data-metric="newLeads">—</strong>
       <span class="metric-note">Last 7 days</span>
-      <a href="/internal/leads">View leads →</a>
+      <a href="/internal/leads">Work leads →</a>
     </article>
     <article class="metric-card">
       <span class="metric-label">Open quotes</span>
       <strong data-metric="draftQuotes">—</strong>
-      <span class="metric-note">Drafts waiting on action</span>
-      <a href="/internal/quotes">View quotes →</a>
+      <span class="metric-note">Drafts awaiting action</span>
+      <a href="/internal/quotes">Open quote list →</a>
     </article>
     <article class="metric-card">
       <span class="metric-label">Signed quotes</span>
       <strong data-metric="finalizedQuotes">—</strong>
       <span class="metric-note">Finalized contracts</span>
-      <a href="/internal/quotes">Open quote list →</a>
+      <a href="/internal/quotes">Review signed work →</a>
     </article>
     <article class="metric-card metric-money">
-      <span class="metric-label">Quoted value</span>
+      <span class="metric-label">Open quoted value</span>
       <strong data-metric="openValue">—</strong>
       <span class="metric-note">Current draft pipeline</span>
-      <span class="metric-foot">Based on quote totals</span>
+      <span class="metric-foot">Not a booked-sales figure</span>
     </article>
   </section>
 
@@ -45,7 +63,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="kicker">Needs attention</p>
+          <p class="kicker">Inbound</p>
           <h2>Recent leads</h2>
         </div>
         <a class="panel-link" href="/internal/leads">See all</a>
@@ -58,7 +76,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="kicker">Sales pipeline</p>
+          <p class="kicker">Sales</p>
           <h2>Recent quotes</h2>
         </div>
         <a class="panel-link" href="/internal/quotes">See all</a>
@@ -69,6 +87,33 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </section>
   </div>
 
+  <section class="pipeline-panel panel">
+    <div class="panel-head">
+      <div>
+        <p class="kicker">Quote pipeline</p>
+        <h2>At a glance</h2>
+      </div>
+      <span class="pipeline-total" data-pipeline-total>—</span>
+    </div>
+    <div class="pipeline-body">
+      <div class="pipeline-stage">
+        <div class="stage-top"><span>Drafts</span><strong data-stage-drafts>—</strong></div>
+        <div class="progress"><span data-progress-drafts></span></div>
+        <small data-stage-drafts-value>—</small>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-top"><span>Finalized</span><strong data-stage-finalized>—</strong></div>
+        <div class="progress"><span data-progress-finalized></span></div>
+        <small data-stage-finalized-value>—</small>
+      </div>
+      <div class="pipeline-stage pipeline-summary">
+        <span>Average finalized quote</span>
+        <strong data-average-finalized>—</strong>
+        <small>Only quotes already finalized</small>
+      </div>
+    </div>
+  </section>
+
   <section class="quick-actions">
     <div>
       <p class="kicker">Quick actions</p>
@@ -76,8 +121,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
     <div class="quick-links">
       <a href="/internal/quotes/new"><span>＋</span><strong>Build a quote</strong><small>Start a firm-price estimate</small></a>
-      <a href="/internal/leads"><span>↗</span><strong>Work your leads</strong><small>Call, email, and review visitor journeys</small></a>
-      <a href="/internal/ask-logs"><span>✦</span><strong>Review Ask activity</strong><small>See questions visitors asked the AI assistant</small></a>
+      <a href="/internal/leads"><span>↗</span><strong>Work your leads</strong><small>Review contact details and visitor journeys</small></a>
+      <a href="/internal/ask-logs"><span>✦</span><strong>Review Ask activity</strong><small>See what visitors asked before contacting you</small></a>
     </div>
   </section>
 
@@ -93,7 +138,6 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     email?: string;
     city?: string;
     role?: string;
-    notes?: string;
   };
 
   type Quote = {
@@ -103,7 +147,6 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     customer_name: string;
     customer_city?: string;
     total_cents: number;
-    signature_method?: string;
   };
 
   function initDashboard() {
@@ -111,6 +154,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     document.body.dataset.dashboardBound = 'true';
 
     const $ = <T extends Element>(selector: string) => document.querySelector(selector) as T | null;
+    const setText = (selector: string, value: string) => { const el = $(selector); if (el) el.textContent = value; };
     const money = (cents: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((Number(cents) || 0) / 100);
     const date = (iso: string) => {
       const value = new Date(iso);
@@ -120,13 +164,6 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       const node = document.createElement('div');
       node.textContent = value || '';
       return node.innerHTML;
-    };
-    const tel = (phone: string | undefined) => {
-      const digits = String(phone || '').replace(/\D/g, '');
-      if (!digits) return '';
-      if (digits.length === 10) return `tel:+1${digits}`;
-      if (digits.length === 11 && digits.startsWith('1')) return `tel:+${digits}`;
-      return `tel:${digits}`;
     };
 
     async function load() {
@@ -142,27 +179,42 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
         const recentLeads = leads.filter((lead) => new Date(lead.created_at).getTime() >= weekAgo);
         const drafts = quotes.filter((quote) => quote.status === 'draft');
         const finalized = quotes.filter((quote) => quote.status === 'finalized');
-        const openValue = drafts.reduce((sum, quote) => sum + (Number(quote.total_cents) || 0), 0);
+        const draftValue = drafts.reduce((sum, quote) => sum + (Number(quote.total_cents) || 0), 0);
+        const finalizedValue = finalized.reduce((sum, quote) => sum + (Number(quote.total_cents) || 0), 0);
+        const totalQuoted = draftValue + finalizedValue;
+        const averageFinalized = finalized.length ? finalizedValue / finalized.length : 0;
 
-        const setMetric = (name: string, value: string) => {
-          const el = document.querySelector(`[data-metric="${name}"]`);
-          if (el) el.textContent = value;
-        };
-        setMetric('newLeads', String(recentLeads.length));
-        setMetric('draftQuotes', String(drafts.length));
-        setMetric('finalizedQuotes', String(finalized.length));
-        setMetric('openValue', money(openValue));
+        setText('[data-metric="newLeads"]', String(recentLeads.length));
+        setText('[data-metric="draftQuotes"]', String(drafts.length));
+        setText('[data-metric="finalizedQuotes"]', String(finalized.length));
+        setText('[data-metric="openValue"]', money(draftValue));
+        setText('[data-attention-leads]', String(recentLeads.length));
+        setText('[data-attention-drafts]', String(drafts.length));
+        setText('[data-attention-finalized]', String(finalized.length));
+        if (recentLeads.length === 1) setText('[data-lead-plural]', '');
+        if (drafts.length === 1) setText('[data-quote-plural]', '');
+        if (finalized.length === 1) setText('[data-final-plural]', '');
+
+        setText('[data-pipeline-total]', `${quotes.length} quotes`);
+        setText('[data-stage-drafts]', String(drafts.length));
+        setText('[data-stage-finalized]', String(finalized.length));
+        setText('[data-stage-drafts-value]', money(draftValue));
+        setText('[data-stage-finalized-value]', money(finalizedValue));
+        setText('[data-average-finalized]', averageFinalized ? money(averageFinalized) : '—');
+        const draftPct = totalQuoted ? (draftValue / totalQuoted) * 100 : 0;
+        const finalizedPct = totalQuoted ? (finalizedValue / totalQuoted) * 100 : 0;
+        const draftProgress = $('[data-progress-drafts]') as HTMLElement | null;
+        const finalProgress = $('[data-progress-finalized]') as HTMLElement | null;
+        if (draftProgress) draftProgress.style.width = `${draftPct}%`;
+        if (finalProgress) finalProgress.style.width = `${finalizedPct}%`;
 
         const leadsBody = $('[data-leads-body]');
         if (leadsBody) {
-          const rows = recentLeads.slice(0, 6).map((lead) => {
-            const phone = tel(lead.phone);
-            return `<a class="lead-row" href="/internal/leads">
-              <span class="avatar">${escape((lead.name || '?').slice(0, 1).toUpperCase())}</span>
-              <span class="row-main"><strong>${escape(lead.name)}</strong><small>${escape([lead.city, lead.role].filter(Boolean).join(' · ') || 'Estimate request')}</small></span>
-              <span class="row-meta"><time>${date(lead.created_at)}</time>${phone ? `<span>${escape(lead.phone)}</span>` : ''}</span>
-            </a>`;
-          }).join('');
+          const rows = recentLeads.slice(0, 6).map((lead) => `<a class="lead-row" href="/internal/leads">
+            <span class="avatar">${escape((lead.name || '?').slice(0, 1).toUpperCase())}</span>
+            <span class="row-main"><strong>${escape(lead.name)}</strong><small>${escape([lead.city, lead.role].filter(Boolean).join(' · ') || 'Estimate request')}</small></span>
+            <span class="row-meta"><time>${date(lead.created_at)}</time></span>
+          </a>`).join('');
           leadsBody.innerHTML = rows || '<p class="empty">No estimate requests in the last 7 days.</p>';
         }
 
@@ -182,9 +234,9 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 
         const status = $('[data-status]');
         if (status) status.textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-      } catch (error) {
+      } catch {
         const status = $('[data-status]');
-        if (status) status.textContent = 'Could not refresh the snapshot. The underlying lead and quote pages are still available.';
+        if (status) status.textContent = 'Could not refresh the snapshot. The lead and quote pages are still available.';
         const leadsBody = $('[data-leads-body]');
         const quotesBody = $('[data-quotes-body]');
         if (leadsBody) leadsBody.innerHTML = '<p class="empty">Could not load leads.</p>';
@@ -200,8 +252,18 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </script>
 
 <style>
-  .dash-head { display: flex; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-l); }
+  .dash-head { display: flex; justify-content: space-between; align-items: end; gap: var(--space-m); margin-bottom: var(--space-m); }
   .dash-actions { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
+
+  .attention-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xs); margin-bottom: var(--space-m); }
+  .attention-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.55rem; padding: 0.75rem 0.85rem; border: 1px solid var(--line); border-radius: var(--radius); color: inherit; text-decoration: none; font-size: var(--step--2); }
+  .attention-item:hover { border-color: var(--line-strong); background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .attention-hot { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+  .attention-icon { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--on-dark); font-weight: 800; font-size: 0.75rem; }
+  .attention-hot .attention-icon { background: var(--accent); }
+  .attention-item strong { font-size: var(--step-0); }
+  .attention-arrow { color: var(--ink-faint); }
+
   .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-s); margin-bottom: var(--space-l); }
   .metric-card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-m); display: grid; gap: 0.35rem; min-height: 9rem; background: var(--paper-raised, var(--paper)); }
   .metric-hot { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
@@ -232,6 +294,19 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .is-final { background: color-mix(in srgb, var(--ink) 10%, var(--paper)); color: var(--ink); }
   .empty, .muted { margin: 0; padding: var(--space-m); color: var(--ink-soft); font-size: var(--step--1); }
 
+  .pipeline-panel { margin-top: var(--space-m); }
+  .pipeline-total { font-size: var(--step--2); color: var(--ink-soft); }
+  .pipeline-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-m); padding: var(--space-m); }
+  .pipeline-stage { min-width: 0; }
+  .stage-top { display: flex; justify-content: space-between; gap: var(--space-xs); font-size: var(--step--1); }
+  .stage-top strong { font-size: var(--step-1); }
+  .progress { height: 0.4rem; margin: 0.6rem 0 0.4rem; border-radius: 999px; background: var(--paper-sunk); overflow: hidden; }
+  .progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width 280ms ease; }
+  .pipeline-stage small { font-size: var(--step--2); color: var(--ink-soft); }
+  .pipeline-summary { display: grid; align-content: center; padding-left: var(--space-m); border-left: 1px solid var(--line); }
+  .pipeline-summary span, .pipeline-summary small { color: var(--ink-soft); font-size: var(--step--2); }
+  .pipeline-summary strong { display: block; margin: 0.25rem 0; font-size: var(--step-2); letter-spacing: -0.03em; }
+
   .quick-actions { margin-top: var(--space-m); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-m); }
   .quick-actions h2 { margin: 0.12rem 0 0; font-size: var(--step-1); }
   .quick-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xs); margin-top: var(--space-s); }
@@ -242,16 +317,21 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .quick-links small { color: var(--ink-soft); font-size: var(--step--2); }
   .dash-status { margin: var(--space-s) 0 0; font-size: var(--step--2); color: var(--ink-faint); text-align: right; }
 
-  @media (max-width: 800px) {
+  @media (max-width: 900px) {
     .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .attention-strip { grid-template-columns: 1fr; }
     .dash-grid { grid-template-columns: 1fr; }
-    .quick-links { grid-template-columns: 1fr; }
+    .pipeline-body { grid-template-columns: 1fr 1fr; }
+    .pipeline-summary { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: var(--space-m) 0 0; }
   }
   @media (max-width: 560px) {
     .dash-head { align-items: start; flex-direction: column; }
     .metric-grid { grid-template-columns: 1fr 1fr; gap: var(--space-xs); }
     .metric-card { min-height: 8rem; padding: var(--space-s); }
     .lead-row, .quote-row { padding-inline: var(--space-s); }
-    .row-meta span { display: none; }
+    .row-meta time { display: none; }
+    .pipeline-body { grid-template-columns: 1fr; }
+    .pipeline-summary { grid-column: auto; }
+    .quick-links { grid-template-columns: 1fr; }
   }
 </style>
