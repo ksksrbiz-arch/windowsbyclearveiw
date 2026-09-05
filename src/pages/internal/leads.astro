@@ -9,6 +9,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       <p class="lede">Every estimate request, with what the visitor looked at on the site before they asked.</p>
     </div>
     <div class="ld-head-actions">
+      <a class="btn btn-ghost" href="/internal/follow-up">Follow-up</a>
       <a class="btn btn-ghost" href="/internal/ask-logs">Ask activity</a>
       <a class="btn btn-ghost" href="/internal/quotes">Quotes</a>
     </div>
@@ -106,6 +107,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
             card.dataset.search = `${lead.name || ''} ${lead.phone || ''} ${lead.city || ''}`.toLowerCase();
 
             const phoneHref = telHref(lead.phone);
+            const leadId = encodeURIComponent(String(lead.id ?? ''));
             card.innerHTML = `
               <div class="ld-card-top">
                 <div>
@@ -118,6 +120,11 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
                   </p>
                 </div>
                 <time class="ld-when">${formatWhen(lead.created_at)}</time>
+              </div>
+              <div class="ld-card-actions">
+                <a class="ld-action" href="/internal/follow-up?leadId=${leadId}">Add follow-up</a>
+                ${phoneHref ? `<a class="ld-action" href="${phoneHref}">Call</a>` : ''}
+                ${lead.email ? `<a class="ld-action" href="mailto:${escapeHtml(lead.email)}">Email</a>` : ''}
               </div>
               ${lead.notes ? `<p class="ld-notes">${escapeHtml(lead.notes)}</p>` : ''}
               <details class="ld-journey-wrap">
@@ -166,112 +173,26 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </script>
 
 <style>
-  .ld-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    margin-bottom: var(--space-l);
-    gap: var(--space-m);
-  }
-
-  .ld-head-actions {
-    display: flex;
-    gap: var(--space-xs);
-  }
-
-  .ld-error {
-    color: var(--danger);
-  }
-
-  .ld-search {
-    display: grid;
-    gap: 0.2rem;
-    max-width: 20rem;
-    margin-bottom: var(--space-m);
-    font-size: var(--step--1);
-    font-weight: 500;
-  }
-
-  .ld-search input {
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    padding: 0.55rem;
-    font: inherit;
-    font-size: var(--step-0);
-  }
-
-  .ld-empty-filtered {
-    color: var(--ink-soft);
-  }
-
-  .ld-list {
-    display: grid;
-    gap: var(--space-s);
-  }
-
-  :global(.ld-card) {
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: var(--space-s) var(--space-m);
-  }
-
-  :global(.ld-card-top) {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: var(--space-m);
-  }
-
-  :global(.ld-card-top h2) {
-    margin: 0;
-    font-size: var(--step-1);
-  }
-
-  :global(.ld-meta) {
-    margin: 0.2rem 0 0;
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-
-  :global(.ld-when) {
-    font-size: var(--step--2);
-    color: var(--ink-faint);
-    white-space: nowrap;
-  }
-
-  :global(.ld-notes) {
-    margin: var(--space-xs) 0 0;
-    font-size: var(--step--1);
-  }
-
-  :global(.ld-journey-wrap) {
-    margin-top: var(--space-xs);
-    font-size: var(--step--2);
-    color: var(--ink-faint);
-  }
-
-  :global(.ld-journey-wrap summary) {
-    cursor: pointer;
-    color: var(--ink-soft);
-  }
-
-  :global(.ld-journey) {
-    margin: var(--space-2xs) 0 0;
-    padding-left: 1.2em;
-    display: grid;
-    gap: 0.15rem;
-  }
-
-  :global(.ld-journey-title) {
-    color: var(--ink);
-  }
-
-  :global(.ld-journey-path) {
-    color: var(--ink-faint);
-    margin-left: 0.4em;
-  }
-
-  :global(.ld-no-journey) {
-    margin: var(--space-2xs) 0 0;
-  }
+  .ld-head { display:flex; justify-content:space-between; align-items:end; margin-bottom:var(--space-l); gap:var(--space-m); }
+  .ld-head-actions { display:flex; gap:var(--space-xs); flex-wrap:wrap; }
+  .ld-error { color:var(--danger); }
+  .ld-search { display:grid; gap:.2rem; max-width:20rem; margin-bottom:var(--space-m); font-size:var(--step--1); font-weight:500; }
+  .ld-search input { border:1px solid var(--line-strong); border-radius:var(--radius); padding:.55rem; font:inherit; font-size:var(--step-0); }
+  .ld-empty-filtered { color:var(--ink-soft); }
+  .ld-list { display:grid; gap:var(--space-s); }
+  :global(.ld-card) { border:1px solid var(--line); border-radius:var(--radius); padding:var(--space-s) var(--space-m); }
+  :global(.ld-card-top) { display:flex; justify-content:space-between; align-items:start; gap:var(--space-m); }
+  :global(.ld-card-top h2) { margin:0; font-size:var(--step-1); }
+  :global(.ld-meta) { margin:.2rem 0 0; font-size:var(--step--1); color:var(--ink-soft); }
+  :global(.ld-when) { font-size:var(--step--2); color:var(--ink-faint); white-space:nowrap; }
+  :global(.ld-card-actions) { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.65rem; }
+  :global(.ld-action) { display:inline-flex; align-items:center; min-height:2rem; padding:.32rem .6rem; border:1px solid var(--line); border-radius:999px; color:inherit; text-decoration:none; font-size:var(--step--2); font-weight:700; }
+  :global(.ld-action:hover) { border-color:var(--line-strong); background:var(--accent-wash); }
+  :global(.ld-notes) { margin:var(--space-xs) 0 0; font-size:var(--step--1); }
+  :global(.ld-journey-wrap) { margin-top:var(--space-xs); font-size:var(--step--2); color:var(--ink-faint); }
+  :global(.ld-journey-wrap summary) { cursor:pointer; color:var(--ink-soft); }
+  :global(.ld-journey) { margin:var(--space-2xs) 0 0; padding-left:1.2em; display:grid; gap:.15rem; }
+  :global(.ld-journey-title) { color:var(--ink); }
+  :global(.ld-journey-path) { color:var(--ink-faint); margin-left:.4em; }
+  :global(.ld-no-journey) { margin:var(--space-2xs) 0 0; }
 </style>
