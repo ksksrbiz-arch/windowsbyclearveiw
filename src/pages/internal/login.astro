@@ -5,7 +5,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   <div class="login-card">
     <p class="kicker">Clearview internal</p>
     <h1>Command Center</h1>
-    <p class="lede">One password, shared. Ask Mark if you need it.</p>
+    <p class="lede">Lead management, quotes, and sales tools for the Clearview team.</p>
 
     <p class="login-error" role="alert" data-login-error hidden></p>
 
@@ -17,6 +17,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       </label>
       <button class="btn btn-primary" type="submit">Log in</button>
     </form>
+
+    <a class="back-link" href="/">← Back to clearviewwindows.com</a>
   </div>
 </InternalLayout>
 
@@ -94,5 +96,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 
   .btn {
     justify-self: start;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: var(--space-m);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    text-underline-offset: 0.18em;
   }
 </style>
