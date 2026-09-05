@@ -250,9 +250,10 @@ export async function onRequestPost(context) {
   }
 
   const phoneDigits = lead.phone.replace(/\D/g, '');
-  if (phoneDigits.length < 7) {
+  const phoneLooksReal = phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits.startsWith('1'));
+  if (!phoneLooksReal) {
     return asJson
-      ? json({ error: 'That phone number looks incomplete.' }, 400)
+      ? json({ error: 'Enter a 10-digit phone number so Mark can call you back.' }, 400)
       : redirect(request, '/estimate/problem');
   }
 

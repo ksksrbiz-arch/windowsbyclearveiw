@@ -3,7 +3,7 @@ import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { processWork } from '../data/work';
+import { processWork, workKindLabel } from '../data/work';
 import processHeroSrc from '../assets/hero/process.png';
 
 // Full-bleed hero background. AI-generated, not a real install, so it is
@@ -85,7 +85,7 @@ const schema = {
       <h2>What that actually looks like.</h2>
       <div class="work-grid">
         {processWork.map((photo) => (
-          <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={photo.kind} />
+          <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} />
         ))}
       </div>
     </div>

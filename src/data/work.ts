@@ -414,5 +414,20 @@ export function findWork(id: string) {
   return workPhotos.find((photo) => photo.id === id);
 }
 
+// The raw `kind` values are grouping keys, not copy — "after" only makes
+// sense paired with a "before" that most of these pages never show, so a
+// tile landed on directly (search, a shared link) reads as a fragment.
+// WorkCard's figcaption should always show this instead of the raw kind.
+const KIND_LABELS: Record<WorkKind, string> = {
+  after: 'Finished result',
+  interior: 'Interior',
+  process: 'Install day',
+  'new construction': 'New construction',
+};
+
+export function workKindLabel(kind: WorkKind): string {
+  return KIND_LABELS[kind];
+}
+
 /** The strongest single elevation — used for the hero and social preview. */
 export const heroPhoto = findWork('blue-gable-arch') ?? workPhotos[0];
