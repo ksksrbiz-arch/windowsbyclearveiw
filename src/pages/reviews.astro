@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ReviewCard from '../components/ReviewCard.astro';
 import CtaBar from '../components/CtaBar.astro';
+import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { site } from '../data/site';
 
 const reviews = await getCollection('reviews', ({ data }) => data.published);
@@ -78,7 +79,13 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
           <ul class="plain-list">
             <li>Tell Mark you are happy to be quoted here</li>
             {site.social.facebook && (
-              <li>Or leave it on our <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">Facebook page</a></li>
+              <li>
+                Or leave it on our{' '}
+                <a class="inline-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+                  <FacebookIcon class="inline-social-icon" />
+                  Facebook page
+                </a>
+              </li>
             )}
             <li>Or leave it on the Google Business Profile once it is live</li>
           </ul>

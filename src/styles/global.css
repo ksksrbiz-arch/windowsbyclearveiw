@@ -465,6 +465,21 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
   border-bottom: 1px solid var(--line);
 }
 
+/* A brand-icon link used inline in prose (reviews, gallery, the estimate
+   confirmation page) — the platform's own mark instead of a plain text
+   link, so it reads as "Facebook" before anyone reads the word. */
+.inline-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.inline-social-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+}
+
 form {
   display: grid;
   gap: 0.8rem;

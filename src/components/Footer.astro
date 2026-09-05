@@ -1,13 +1,16 @@
 ---
 import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
+import FacebookIcon from './icons/FacebookIcon.astro';
 
 const year = new Date().getFullYear();
 
 const socialLinks = [
-  ['Facebook', site.social.facebook],
-  ['Instagram', site.social.instagram],
-].filter((entry): entry is [string, string] => Boolean(entry[1]));
+  ['Facebook', site.social.facebook, FacebookIcon],
+  ['Instagram', site.social.instagram, null],
+].filter(
+  (entry): entry is [string, string, typeof FacebookIcon | null] => Boolean(entry[1])
+);
 
 const columns = [
   {
@@ -54,6 +57,18 @@ const columns = [
         Replacement and new-construction windows, plus sliding glass doors, in Vancouver, WA and
         surrounding Clark County.
       </p>
+      {socialLinks.length > 0 && (
+        <ul class="footer-social">
+          {socialLinks.map(([label, href, Icon]) => (
+            <li>
+              <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer">
+                {Icon ? <Icon class="footer-social-icon" /> : null}
+                <span>Follow on {label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       <ul class="footer-contact">
         <li>
           <span class="footer-contact-label">Phone</span>
@@ -63,12 +78,6 @@ const columns = [
           <span class="footer-contact-label">Email</span>
           <a href={mailHref()}>{site.email}</a>
         </li>
-        {socialLinks.map(([label, href]) => (
-          <li>
-            <span class="footer-contact-label">{label}</span>
-            <a href={href} target="_blank" rel="noopener noreferrer">Follow along</a>
-          </li>
-        ))}
       </ul>
     </div>
 
@@ -128,6 +137,42 @@ const columns = [
     max-width: 24rem;
     margin: var(--space-s) 0 var(--space-m);
     font-size: var(--step--1);
+  }
+
+  /* A real button with the platform's own icon, not another line in the
+     contact list — the point is to get followed, not just be findable. */
+  .footer-social {
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .footer-social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+    font-weight: 500;
+    transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  }
+
+  .footer-social-link:hover,
+  .footer-social-link:focus-visible {
+    border-color: color-mix(in srgb, #1877f2 45%, var(--line));
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .footer-social-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
   }
 
   .footer-contact {

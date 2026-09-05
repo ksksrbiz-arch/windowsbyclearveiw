@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { featuredWork, findWork } from '../data/work';
@@ -200,6 +201,14 @@ const signs = [
         ))}
       </div>
       <p class="section-link"><a href="/gallery">See the full gallery</a></p>
+      {site.social.facebook && (
+        <p class="section-link">
+          <a class="inline-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+            <FacebookIcon class="inline-social-icon" />
+            New jobs go up on Facebook first
+          </a>
+        </p>
+      )}
       <p class="areas-inline">
         Working in{' '}
         {serviceLinks.map((place, index) => (
