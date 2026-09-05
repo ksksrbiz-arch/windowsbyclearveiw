@@ -243,24 +243,28 @@ export async function onRequestPost(context) {
     notes: clean(form.get('notes'), MAX.notes),
   };
 
-  if (!lead.name || !lead.phone || !lead.city) {
-    return asJson
-      ? json({ error: 'Name, phone, and city are required.' }, 400)
-      : redirect(request, '/estimate/problem');
-  }
+  // Collected per-field rather than stopping at the first problem, so a
+  // visitor who left two fields blank finds out about both at once instead
+  // of fixing one, resubmitting, and hitting the next rejection.
+  const fieldErrors = {};
+  if (!lead.name) fieldErrors.name = 'Enter your name.';
+  if (!lead.phone) fieldErrors.phone = 'Enter a phone number.';
+  if (!lead.city) fieldErrors.city = 'Enter your city.';
 
   const phoneDigits = lead.phone.replace(/\D/g, '');
   const phoneLooksReal = phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits.startsWith('1'));
-  if (!phoneLooksReal) {
-    return asJson
-      ? json({ error: 'Enter a 10-digit phone number so Mark can call you back.' }, 400)
-      : redirect(request, '/estimate/problem');
+  if (lead.phone && !phoneLooksReal) {
+    fieldErrors.phone = 'Enter a 10-digit phone number so Mark can call you back.';
   }
 
   const emailLooksReal = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(lead.email);
   if (lead.email && !emailLooksReal) {
+    fieldErrors.email = 'That email address looks incomplete.';
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
     return asJson
-      ? json({ error: 'That email address looks incomplete.' }, 400)
+      ? json({ error: 'Fix the highlighted fields.', fields: fieldErrors }, 400)
       : redirect(request, '/estimate/problem');
   }
 
