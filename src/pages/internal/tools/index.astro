@@ -13,70 +13,32 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 
   <section class="tool-grid" aria-label="Internal tools">
     <a class="tool-card tool-primary" href="/internal/tools/measurements">
-      <span class="tool-icon">⌗</span>
-      <div><p class="kicker">Field</p><h2>Window measurements</h2><p>Capture openings, dimensions, quantities, rooms, replacement method, and notes from the job site.</p></div>
-      <span class="tool-arrow">Open tool →</span>
+      <span class="tool-icon">⌗</span><div><p class="kicker">Field</p><h2>Window measurements</h2><p>Capture openings, dimensions, quantities, rooms, replacement method, and notes from the job site.</p></div><span class="tool-arrow">Open tool →</span>
     </a>
-
     <a class="tool-card" href="/internal/quotes/new">
-      <span class="tool-icon">$</span>
-      <div><p class="kicker">Sales</p><h2>Smart quote builder</h2><p>Build an editable quote from the price book, add custom work, and finalize or print.</p></div>
-      <span class="tool-arrow">Open quote builder →</span>
+      <span class="tool-icon">$</span><div><p class="kicker">Sales</p><h2>Smart quote builder</h2><p>Build an editable quote from the price book, add custom work, and finalize or print.</p></div><span class="tool-arrow">Open quote builder →</span>
     </a>
-
     <a class="tool-card" href="/internal/jobs">
-      <span class="tool-icon">✓</span>
-      <div><p class="kicker">Operations</p><h2>Job workspace</h2><p>Turn finalized quotes into projects, schedule installation, track progress, and keep crew notes with the job.</p></div>
-      <span class="tool-arrow">Open jobs →</span>
+      <span class="tool-icon">✓</span><div><p class="kicker">Operations</p><h2>Job workspace</h2><p>Turn finalized quotes into projects, schedule installation, track progress, and keep crew notes with the job.</p></div><span class="tool-arrow">Open jobs →</span>
     </a>
-
+    <a class="tool-card" href="/internal/tools/photos">
+      <span class="tool-icon">▧</span><div><p class="kicker">Field</p><h2>Installation photos</h2><p>Capture before, during, after, and issue photos with job IDs, timestamps, and field notes.</p></div><span class="tool-arrow">Open photo log →</span>
+    </a>
     <a class="tool-card" href="/internal/leads">
-      <span class="tool-icon">↗</span>
-      <div><p class="kicker">CRM</p><h2>Lead workspace</h2><p>Review inbound requests, contact details, attribution, and visitor journeys.</p></div>
-      <span class="tool-arrow">Work leads →</span>
+      <span class="tool-icon">↗</span><div><p class="kicker">CRM</p><h2>Lead workspace</h2><p>Review inbound requests, contact details, attribution, and visitor journeys.</p></div><span class="tool-arrow">Work leads →</span>
     </a>
-
     <a class="tool-card" href="/internal/ask-logs">
-      <span class="tool-icon">✦</span>
-      <div><p class="kicker">Intelligence</p><h2>Ask activity</h2><p>See what prospects are asking the Clearview website assistant before they contact the company.</p></div>
-      <span class="tool-arrow">Review Ask →</span>
+      <span class="tool-icon">✦</span><div><p class="kicker">Intelligence</p><h2>Ask activity</h2><p>See what prospects are asking the Clearview website assistant before they contact the company.</p></div><span class="tool-arrow">Review Ask →</span>
     </a>
-
-    <article class="tool-card coming-soon" aria-label="Coming soon: installation photos">
-      <span class="tool-icon">▧</span>
-      <div><p class="kicker">Field</p><h2>Installation photos</h2><p>Attach before, during, and after photos to a job so the record travels with the project.</p></div>
-      <span class="tool-arrow">Next build →</span>
-    </article>
   </section>
 
   <section class="roadmap panel">
-    <div>
-      <p class="kicker">Build sequence</p>
-      <h2>From estimate to completed job</h2>
-      <p class="muted">The internal system is being built around one continuous record instead of separate disconnected utilities.</p>
-    </div>
-    <div class="roadmap-flow" aria-label="Workflow roadmap">
-      <span>Lead</span><i>→</i><span>Measure</span><i>→</i><span>Quote</span><i>→</i><span>Sign</span><i>→</i><span>Schedule</span><i>→</i><span>Install</span><i>→</i><span>Close</span>
-    </div>
+    <div><p class="kicker">Build sequence</p><h2>From estimate to completed job</h2><p class="muted">The internal system is being built around one continuous record instead of separate disconnected utilities.</p></div>
+    <div class="roadmap-flow" aria-label="Workflow roadmap"><span>Lead</span><i>→</i><span>Measure</span><i>→</i><span>Quote</span><i>→</i><span>Sign</span><i>→</i><span>Schedule</span><i>→</i><span>Install</span><i>→</i><span>Close</span></div>
   </section>
 </InternalLayout>
 
 <style>
-  .tools-head { display:flex; justify-content:space-between; align-items:end; gap:var(--space-m); margin-bottom:var(--space-l); }
-  .tool-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-s); }
-  .tool-card { display:grid; grid-template-columns:auto 1fr; gap:var(--space-s); padding:var(--space-m); border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); color:inherit; text-decoration:none; min-height:13rem; }
-  .tool-card:hover { border-color:var(--line-strong); transform:translateY(-1px); box-shadow:var(--shadow-sm); }
-  .tool-primary { border-color:color-mix(in srgb,var(--accent) 40%,var(--line)); }
-  .tool-icon { width:2.4rem; height:2.4rem; border-radius:.8rem; display:grid; place-items:center; background:var(--ink); color:var(--on-dark); font-weight:800; }
-  .tool-primary .tool-icon { background:var(--accent); }
-  .tool-card h2 { margin:.15rem 0 .35rem; font-size:var(--step-1); }
-  .tool-card p:not(.kicker) { margin:0; color:var(--ink-soft); max-width:42rem; }
-  .tool-arrow { grid-column:2; align-self:end; font-size:var(--step--1); font-weight:700; }
-  .coming-soon { cursor:default; opacity:.82; }
-  .roadmap { margin-top:var(--space-l); padding:var(--space-m); }
-  .roadmap h2 { margin:.15rem 0 .35rem; font-size:var(--step-1); }
-  .roadmap-flow { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-top:var(--space-m); }
-  .roadmap-flow span { border:1px solid var(--line); border-radius:999px; padding:.45rem .7rem; font-size:var(--step--2); font-weight:700; background:var(--paper); }
-  .roadmap-flow i { color:var(--ink-faint); font-style:normal; }
-  @media (max-width:700px) { .tools-head { align-items:flex-start; flex-direction:column; } .tool-grid { grid-template-columns:1fr; } }
+  .tools-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-s)}.tool-card{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);padding:var(--space-m);border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);color:inherit;text-decoration:none;min-height:13rem;transition:transform 120ms ease,box-shadow 120ms ease,border-color 120ms ease}.tool-card:hover,.tool-card:focus-visible{border-color:var(--line-strong);transform:translateY(-1px);box-shadow:var(--shadow-sm);outline:none}.tool-primary{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}.tool-icon{width:2.4rem;height:2.4rem;border-radius:.8rem;display:grid;place-items:center;background:var(--ink);color:var(--on-dark);font-weight:800}.tool-primary .tool-icon{background:var(--accent)}.tool-card h2{margin:.15rem 0 .35rem;font-size:var(--step-1)}.tool-card p:not(.kicker){margin:0;color:var(--ink-soft);max-width:42rem}.tool-arrow{grid-column:2;align-self:end;font-size:var(--step--1);font-weight:700}.roadmap{margin-top:var(--space-l);padding:var(--space-m)}.roadmap h2{margin:.15rem 0 .35rem;font-size:var(--step-1)}.roadmap-flow{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:var(--space-m)}.roadmap-flow span{border:1px solid var(--line);border-radius:999px;padding:.45rem .7rem;font-size:var(--step--2);font-weight:700;background:var(--paper)}.roadmap-flow i{color:var(--ink-faint);font-style:normal}
+  @media(max-width:700px){.tools-head{align-items:flex-start;flex-direction:column}.tool-grid{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){.tool-card{transition:none}}
 </style>
