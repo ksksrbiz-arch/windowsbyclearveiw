@@ -1,15 +1,13 @@
 ---
 import '../styles/global.css';
 
-interface Props {
-  title: string;
-  showLogout?: boolean;
-}
+interface Props { title: string; showLogout?: boolean; }
 const { title, showLogout = true } = Astro.props;
 const pathname = Astro.url.pathname;
 const navItems = [
   { href: '/internal/', label: 'Dashboard' },
   { href: '/internal/leads', label: 'Leads' },
+  { href: '/internal/follow-up', label: 'Follow-up' },
   { href: '/internal/quotes', label: 'Quotes' },
   { href: '/internal/jobs', label: 'Jobs' },
   { href: '/internal/tools', label: 'Tools' },
@@ -45,9 +43,7 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
         )}
       </div>
     </header>
-    <main class="internal-main">
-      <slot />
-    </main>
+    <main class="internal-main"><slot /></main>
 
     <style>
       .internal { background: var(--paper); min-height: 100vh; }
@@ -64,19 +60,8 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
       .internal-logout { background: transparent; border: 1px solid var(--dark-line-strong); color: var(--on-dark-soft); border-radius: var(--radius); padding: 0.42rem 0.72rem; font: inherit; font-size: var(--step--2); cursor: pointer; white-space: nowrap; }
       .internal-logout:hover { border-color: var(--accent-bright); color: var(--on-dark); }
       .internal-main { max-width: 68rem; margin-inline: auto; padding: var(--space-l) var(--space-m) var(--space-3xl); }
-      @media (max-width: 860px) {
-        .internal-header-inner { gap: var(--space-s); }
-        .internal-header-right { flex: 1; justify-content: flex-end; }
-        .internal-nav { overflow-x: auto; scrollbar-width: none; }
-        .internal-nav::-webkit-scrollbar { display: none; }
-        .internal-nav a { padding-inline: 0.45rem; }
-        .internal-nav a::after { left: 0.45rem; right: 0.45rem; }
-      }
-      @media (max-width: 520px) {
-        .internal-header-inner { padding-inline: var(--space-s); }
-        .internal-brand span { display: none; }
-        .internal-logout { padding-inline: 0.55rem; }
-      }
+      @media (max-width: 860px) { .internal-header-inner { gap: var(--space-s); } .internal-header-right { flex: 1; justify-content: flex-end; } .internal-nav { overflow-x: auto; scrollbar-width: none; } .internal-nav::-webkit-scrollbar { display: none; } .internal-nav a { padding-inline: 0.45rem; } .internal-nav a::after { left: 0.45rem; right: 0.45rem; } }
+      @media (max-width: 520px) { .internal-header-inner { padding-inline: var(--space-s); } .internal-brand span { display: none; } .internal-logout { padding-inline: 0.55rem; } }
       @media (prefers-reduced-motion: reduce) { .internal-nav a::after { transition: none; } }
       @media print { .internal-header { display: none; } .internal-main { max-width: none; padding: 0; } }
     </style>
