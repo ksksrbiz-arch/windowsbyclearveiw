@@ -2,59 +2,67 @@
 interface Props {
   heading?: string | null;
 }
-const { heading = 'Flashing is a water-management system, not decoration.' } = Astro.props;
+const { heading = 'Window flashing: follow the water path.' } = Astro.props;
 
 const steps = [
-  ['01', 'Sill first', 'Build the low point so water has somewhere safe to go.'],
-  ['02', 'Set the window', 'The frame sits on the sill system and is secured plumb, level, and square.'],
-  ['03', 'Jambs next', 'Side flashing overlaps the sill so water always moves down and out.'],
-  ['04', 'Head last', 'The top layer overlaps the jambs; the WRB laps over the top.'],
+  ['01', 'Sill', 'Create the drainage path first. Water that gets into the opening must have a way back out.'],
+  ['02', 'Window', 'Set the window into the prepared opening and verify it is plumb, level, and square.'],
+  ['03', 'Jambs', 'Side flashing ties into the sill so water moves downward, not behind the wall assembly.'],
+  ['04', 'Head', 'The top layer sheds over the sides; the WRB laps over the head treatment.'],
 ];
 ---
 <figure class="flash-diagram">
   {heading && <figcaption class="diagram-heading">{heading}</figcaption>}
-  <p class="diagram-intro">Read the layers like shingles on a roof: <strong>top layers shed onto lower layers</strong>. Water should never have a seam that points back into the wall.</p>
+  <p class="diagram-intro">This is a <strong>layering diagram</strong>, not a parts catalog. Start at the bottom and trace how incidental water is directed back to the exterior.</p>
 
-  <div class="flash-layout">
-    <div class="flash-visual">
-      <svg viewBox="0 0 720 520" role="img" aria-label="Large cutaway window installation showing sill flashing first, the window set above it, jamb flashing over the sill, head flashing over the jambs, and the weather-resistive barrier lapping over the head. A blue arrow shows water moving down and out.">
+  <div class="flash-board">
+    <div class="wall-section">
+      <svg viewBox="0 0 980 610" role="img" aria-label="Wall section at a window opening showing a sill drainage layer, window frame, jamb flashing, head flashing, weather resistive barrier, and a blue water path that moves down the sides and exits at the sill.">
         <defs>
-          <marker id="flash-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="water-head" /></marker>
+          <marker id="water-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="water-marker"/></marker>
         </defs>
-        <rect x="20" y="24" width="680" height="470" rx="18" class="wall-field" />
-        <rect x="54" y="72" width="612" height="44" rx="7" class="wrb" />
-        <path d="M54 116 H666" class="wrb-line" />
-        <rect x="118" y="124" width="484" height="292" rx="8" class="opening" />
-        <rect x="146" y="152" width="428" height="236" rx="5" class="window" />
-        <line x1="360" y1="152" x2="360" y2="388" class="window-line" />
-        <line x1="146" y1="270" x2="574" y2="270" class="window-line" />
+        <rect x="30" y="30" width="920" height="550" rx="18" class="field"/>
 
-        <!-- 01 sill pan -->
-        <path d="M116 414 H604 L626 450 H94 Z" class="sill" />
-        <path d="M118 414 V390 H146" class="sill-rise" />
-        <path d="M602 414 V390 H574" class="sill-rise" />
-        <circle cx="84" cy="430" r="24" class="num num-accent" /><text x="84" y="437" class="num-text">1</text>
+        <!-- wall assembly -->
+        <rect x="76" y="92" width="178" height="438" class="exterior-wall"/>
+        <rect x="254" y="92" width="36" height="438" class="sheathing"/>
+        <rect x="290" y="92" width="48" height="438" class="wrb"/>
+        <rect x="338" y="92" width="304" height="438" class="opening-zone"/>
+        <rect x="642" y="92" width="48" height="438" class="wrb"/>
+        <rect x="690" y="92" width="36" height="438" class="sheathing"/>
+        <rect x="726" y="92" width="178" height="438" class="interior-wall"/>
 
-        <!-- 02 window -->
-        <rect x="130" y="136" width="456" height="24" rx="4" class="fin-line" />
-        <circle cx="632" cy="168" r="24" class="num" /><text x="632" y="175" class="num-text">2</text>
+        <!-- window -->
+        <rect x="364" y="214" width="252" height="246" rx="5" class="window-frame"/>
+        <rect x="386" y="236" width="208" height="202" class="glass"/>
+        <line x1="490" y1="236" x2="490" y2="438" class="mullion"/>
 
-        <!-- 03 jamb flashing -->
-        <path d="M118 160 V414 H146" class="jamb" />
-        <path d="M602 160 V414 H574" class="jamb" />
-        <circle cx="84" cy="278" r="24" class="num num-accent" /><text x="84" y="285" class="num-text">3</text>
+        <!-- flashing layers -->
+        <path d="M338 458 H642" class="sill-pan"/>
+        <path d="M348 460 H632 L610 486 H370 Z" class="sill-return"/>
+        <path d="M348 214 V458 H364" class="jamb-flash"/>
+        <path d="M632 214 V458 H616" class="jamb-flash"/>
+        <path d="M348 214 H632 V240 H616" class="head-flash"/>
+        <path d="M324 92 V192 H348" class="wrb-lap"/>
+        <path d="M656 192 H676 V92" class="wrb-lap"/>
 
-        <!-- 04 head flashing -->
-        <path d="M118 124 H602 V152 H574" class="head" />
-        <circle cx="632" cy="108" r="24" class="num num-accent" /><text x="632" y="115" class="num-text">4</text>
+        <!-- water path -->
+        <path d="M768 118 C730 145 708 175 688 210 C670 242 660 274 660 320 C660 373 641 415 622 448 C609 470 596 482 574 489" class="water-path" marker-end="url(#water-arrow)"/>
+        <text x="785" y="111" class="water-title">INCIDENTAL WATER</text>
+        <text x="785" y="130" class="water-sub">should move down + out</text>
 
-        <!-- Water path -->
-        <path d="M652 76 C652 150 636 188 636 244 C636 318 612 352 612 408 C612 438 626 456 654 474" class="water" marker-end="url(#flash-arrow)" />
-        <text x="574" y="58" class="water-label">WATER PATH</text>
+        <!-- numbered anchors -->
+        <circle cx="318" cy="476" r="25" class="step-circle accent-circle"/><text x="318" y="484" class="step-number">1</text>
+        <circle cx="654" cy="254" r="25" class="step-circle"/><text x="654" y="262" class="step-number">2</text>
+        <circle cx="318" cy="335" r="25" class="step-circle accent-circle"/><text x="318" y="343" class="step-number">3</text>
+        <circle cx="654" cy="190" r="25" class="step-circle accent-circle"/><text x="654" y="198" class="step-number">4</text>
 
-        <text x="360" y="104" class="wrb-label">WEATHER-RESISTIVE BARRIER</text>
-        <text x="360" y="246" class="window-label">WINDOW</text>
-        <text x="360" y="468" class="sill-label">SILL FLASHING / PAN → DRAIN TO EXTERIOR</text>
+        <!-- minimal structural labels -->
+        <text x="165" y="78" class="zone">EXTERIOR</text>
+        <text x="815" y="78" class="zone">ROOM</text>
+        <text x="490" y="184" class="assembly-label">WINDOW OPENING</text>
+        <text x="490" y="504" class="sill-label">SILL = DRAINAGE PATH</text>
+        <text x="490" y="113" class="wrb-label">WRB / WEATHER BARRIER</text>
       </svg>
     </div>
 
@@ -68,52 +76,15 @@ const steps = [
     </ol>
   </div>
 
-  <div class="flash-key">
-    <span><i class="key-surface"></i>Wall / WRB</span>
-    <span><i class="key-flash"></i>Flashing layer</span>
-    <span><i class="key-water"></i>Water direction</span>
-  </div>
+  <div class="flash-principle"><strong>The rule to remember:</strong><span>Every upper layer should shed onto the layer below it, with the drainage path ultimately reaching the exterior.</span></div>
 </figure>
 
 <style>
-  .flash-diagram { margin: 0; }
-  .diagram-heading { display:block; margin:0 0 var(--space-2xs); font-size:var(--step-2); font-weight:650; letter-spacing:var(--tracking-display); }
-  .diagram-intro { margin:0 0 var(--space-l); max-width:68ch; color:var(--ink-soft); font-size:var(--step--1); }
-  .flash-layout { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(260px,.75fr); gap:var(--space-l); align-items:start; }
-  .flash-visual { min-width:0; padding:var(--space-xs); background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius-lg); }
-  .flash-visual svg { display:block; width:100%; height:auto; background:var(--paper-sunk); border-radius:var(--radius); }
-  .wall-field { fill: color-mix(in srgb,var(--ink) 5%,transparent); stroke:var(--line-strong); stroke-width:2; }
-  .wrb { fill: color-mix(in srgb,var(--accent) 10%,transparent); stroke:var(--accent-ink); stroke-width:2; }
-  .wrb-line { stroke:var(--accent-ink); stroke-width:2; stroke-dasharray:10 8; }
-  .opening { fill: color-mix(in srgb,var(--ink) 5%,transparent); stroke:var(--ink-soft); stroke-width:2; }
-  .window { fill:var(--paper-raised); stroke:var(--ink); stroke-width:4; }
-  .window-line { stroke:var(--ink-soft); stroke-width:2; }
-  .fin-line { stroke:var(--ink); stroke-width:10; }
-  .sill { fill:color-mix(in srgb,var(--accent) 24%,transparent); stroke:var(--accent); stroke-width:4; }
-  .sill-rise { fill:none; stroke:var(--accent); stroke-width:7; }
-  .jamb,.head { fill:none; stroke:var(--accent); stroke-width:10; stroke-linejoin:miter; }
-  .head { stroke-width:11; }
-  .num { fill:var(--ink); }
-  .num-accent { fill:var(--accent); }
-  .num-text { fill:var(--paper); font-family:Outfit,system-ui,sans-serif; font-size:24px; font-weight:700; text-anchor:middle; }
-  .water { fill:none; stroke:var(--accent-ink); stroke-width:8; stroke-linecap:round; }
-  .water-head { fill:var(--accent-ink); }
-  .water-label,.wrb-label,.window-label,.sill-label { fill:var(--ink-soft); font-family:Outfit,system-ui,sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-anchor:middle; }
-  .water-label { fill:var(--accent-ink); font-size:13px; }
-  .window-label { fill:var(--ink); font-size:17px; }
-  .sill-label { fill:var(--accent-ink); font-size:13px; }
-  .flash-steps { margin:0; padding:0; list-style:none; border-top:1px solid var(--line); }
-  .flash-steps li { display:grid; grid-template-columns:2.8rem 1fr; gap:var(--space-s); padding:var(--space-s) 0; border-bottom:1px solid var(--line); }
-  .step-num { width:2.4rem; height:2.4rem; display:grid; place-items:center; border-radius:50%; background:var(--ink); color:var(--paper); font-size:var(--step--1); font-weight:700; }
-  .flash-steps li:nth-child(1) .step-num,.flash-steps li:nth-child(3) .step-num,.flash-steps li:nth-child(4) .step-num { background:var(--accent); }
-  .step-copy { display:grid; gap:.2rem; }
-  .step-copy strong { font-size:var(--step-0); }
-  .step-copy span { font-size:var(--step--1); color:var(--ink-soft); }
-  .flash-key { display:flex; flex-wrap:wrap; gap:var(--space-s); margin-top:var(--space-s); font-size:var(--step--2); color:var(--ink-soft); }
-  .flash-key span { display:inline-flex; align-items:center; gap:.4rem; }
-  .flash-key i { width:.75rem; height:.75rem; display:inline-block; border-radius:2px; }
-  .key-surface { background:color-mix(in srgb,var(--ink) 13%,transparent); border:1px solid var(--line-strong); }
-  .key-flash { background:var(--accent); }
-  .key-water { background:var(--accent-ink); border-radius:50% !important; }
-  @media(max-width:900px){ .flash-layout{grid-template-columns:1fr;} }
+  .flash-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
+  .flash-board{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,.75fr);gap:var(--space-l);align-items:start}.wall-section{padding:var(--space-xs);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.wall-section svg{display:block;width:100%;height:auto;border-radius:var(--radius);background:var(--paper-sunk)}
+  .field{fill:var(--paper-sunk);stroke:var(--line);stroke-width:1.5}.exterior-wall,.interior-wall{fill:color-mix(in srgb,var(--ink) 15%,transparent)}.sheathing{fill:color-mix(in srgb,var(--ink) 8%,transparent)}.wrb{fill:color-mix(in srgb,var(--accent) 10%,transparent)}.opening-zone{fill:color-mix(in srgb,var(--paper-raised) 90%,transparent);stroke:var(--line-strong);stroke-width:2;stroke-dasharray:8 8}.window-frame{fill:var(--paper-raised);stroke:var(--ink);stroke-width:5}.glass{fill:color-mix(in srgb,var(--accent-2) 10%,transparent);stroke:var(--accent-ink);stroke-width:2}.mullion{stroke:var(--ink-soft);stroke-width:2}.sill-pan,.sill-return,.jamb-flash,.head-flash,.wrb-lap{fill:none;stroke:var(--accent);stroke-width:11;stroke-linejoin:miter}.sill-return{fill:color-mix(in srgb,var(--accent) 12%,transparent);stroke-width:7}.head-flash{stroke-width:10}.wrb-lap{stroke-width:7;stroke-dasharray:5 4}.water-path{fill:none;stroke:var(--accent-ink);stroke-width:9;stroke-linecap:round}.water-marker{fill:var(--accent-ink)}
+  .step-circle{fill:var(--ink)}.accent-circle{fill:var(--accent)}.step-number{fill:var(--paper);font:750 22px Outfit,system-ui,sans-serif;text-anchor:middle}.zone,.assembly-label,.sill-label,.wrb-label,.water-title,.water-sub{font-family:Outfit,system-ui,sans-serif;text-anchor:middle}.zone{fill:var(--ink-faint);font-size:13px;font-weight:750;letter-spacing:.12em}.assembly-label{fill:var(--ink-faint);font-size:13px;font-weight:700;letter-spacing:.1em}.sill-label,.wrb-label{fill:var(--accent-ink);font-size:13px;font-weight:750;letter-spacing:.09em}.water-title{fill:var(--accent-ink);font-size:13px;font-weight:750;letter-spacing:.1em;text-anchor:start}.water-sub{fill:var(--ink-soft);font-size:11px;font-weight:550;text-anchor:start}
+  .flash-steps{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}.flash-steps li{display:grid;grid-template-columns:2.8rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.step-num{width:2.45rem;height:2.45rem;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.flash-steps li:nth-child(1) .step-num,.flash-steps li:nth-child(3) .step-num,.flash-steps li:nth-child(4) .step-num{background:var(--accent)}.step-copy{display:grid;gap:.2rem}.step-copy strong{font-size:var(--step-0)}.step-copy span{color:var(--ink-soft);font-size:var(--step--1)}
+  .flash-principle{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);align-items:baseline;margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border-left:3px solid var(--accent);background:var(--paper-raised);font-size:var(--step--1)}.flash-principle span{color:var(--ink-soft)}
+  @media(max-width:900px){.flash-board{grid-template-columns:1fr}}@media(max-width:600px){.flash-principle{grid-template-columns:1fr;gap:.2rem}}
 </style>
