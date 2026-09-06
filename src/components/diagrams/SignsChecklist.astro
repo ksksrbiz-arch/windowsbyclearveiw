@@ -1,74 +1,42 @@
 ---
-interface Props {
-  heading?: string | null;
-}
-const { heading = 'What are you actually seeing at the window?' } = Astro.props;
+interface Props { heading?: string | null; }
+const { heading = 'Inspect the window, not just the symptom.' } = Astro.props;
 
 const signs = [
-  ['01','Air movement','DRAFT','Look at the lock, meeting rail, sash corners, and weatherstrip.'],
-  ['02','Fog inside the glass','GLASS','Haze remains after the room-side surface is wiped.'],
-  ['03','Sash will not stay or lock','OPERATION','Binding or dropping can point to frame, sash, or hardware problems.'],
-  ['04','Soft or stained wood','MOISTURE','Probe the sill and corners. Repeated wetting matters more than the stain alone.'],
-  ['05','Cold zone beside glass','COMFORT','Notice whether one room or one opening is consistently colder than the rest.'],
-  ['06','Bills rose with no other change','EFFICIENCY','Use this as a clue, not proof; compare it with drafts, glass, and room comfort.'],
+  ['01','Air movement','DRAFT','Check the lock, meeting rail, sash corners, and weatherstrip.'],
+  ['02','Fog between panes','GLASS','Haze remains after the room-side surface is wiped.'],
+  ['03','Sash will not stay or lock','OPERATION','Binding, dropping, or a failed lock can point to the sash, frame, or hardware.'],
+  ['04','Soft or stained sill','MOISTURE','Look for swelling, softness, staining, or repeated wetting at the sill and corners.'],
+  ['05','Cold zone beside the glass','COMFORT','Notice whether one opening or one room stays colder than comparable rooms.'],
+  ['06','Room comfort is uneven','PATTERN','A problem becomes more useful as a clue when the same opening repeatedly stands out.'],
 ];
 ---
-<figure class="signs-diagram">
-  {heading && <figcaption class="diagram-heading">{heading}</figcaption>}
-  <p class="diagram-intro">A symptom is a clue, not a diagnosis. The useful pattern is <strong>where the problem is</strong>, <strong>when it happens</strong>, and whether more than one sign appears at the same opening.</p>
+<figure class="inspection-map">
+  {heading && <figcaption class="heading">{heading}</figcaption>}
+  <p class="intro">Use the numbers like a field checklist. <strong>Find the location first, then match the symptom.</strong> One symptom is a clue; a pattern at the same opening is more useful.</p>
 
-  <div class="diagnostic-board">
-    <div class="window-diagnostic" role="img" aria-label="Simplified front view of a replacement window with six numbered inspection zones around the sash, glass, sill, and room side.">
-      <svg viewBox="0 0 760 560" aria-hidden="true">
-        <rect x="28" y="26" width="704" height="508" rx="18" class="field"/>
-        <rect x="160" y="96" width="440" height="350" rx="6" class="wall-frame"/>
-        <rect x="190" y="126" width="380" height="290" rx="4" class="window"/>
-        <rect x="218" y="154" width="324" height="234" class="glass"/>
-        <line x1="380" y1="154" x2="380" y2="388" class="mullion"/>
-        <line x1="218" y1="360" x2="542" y2="360" class="meeting"/>
-        <rect x="190" y="414" width="380" height="20" class="sill"/>
-        <rect x="270" y="434" width="220" height="18" class="stool"/>
-        <line x1="140" y1="452" x2="620" y2="452" class="floor"/>
-
-        <path d="M125 155 H184" class="leader draft"/><circle cx="108" cy="155" r="23" class="marker marker-1"/><text x="108" y="162" class="marker-text">1</text>
-        <path d="M575 180 H650" class="leader glass-leader"/><circle cx="675" cy="180" r="23" class="marker marker-2"/><text x="675" y="187" class="marker-text">2</text>
-        <path d="M545 360 H620" class="leader op"/><circle cx="645" cy="360" r="23" class="marker marker-3"/><text x="645" y="367" class="marker-text">3</text>
-        <path d="M190 425 H124" class="leader moisture"/><circle cx="99" cy="425" r="23" class="marker marker-4"/><text x="99" y="432" class="marker-text">4</text>
-        <path d="M220 280 H135" class="leader comfort"/><circle cx="110" cy="280" r="23" class="marker marker-5"/><text x="110" y="287" class="marker-text">5</text>
-        <path d="M380 468 V500" class="leader efficiency"/><circle cx="380" cy="515" r="23" class="marker marker-6"/><text x="380" y="522" class="marker-text">6</text>
-
-        <text x="380" y="78" class="zone-title">WINDOW</text>
-        <text x="380" y="284" class="glass-label">GLASS / SASH</text>
-        <text x="380" y="404" class="sill-label">SILL</text>
-        <text x="380" y="486" class="room-label">ROOM SIDE</text>
-      </svg>
+  <div class="board">
+    <div class="window-map" role="img" aria-label="Front-view inspection map of a double-hung window with six numbered observation zones for drafts, glass fog, operation, sill condition, cold zones, and uneven room comfort.">
+      <div class="room-label top">ROOM</div>
+      <div class="wall-frame"><div class="window-frame"><div class="glass upper"></div><div class="glass lower"></div><div class="meeting"></div><div class="sill"></div><div class="lock"></div></div></div>
+      <div class="hotspot h1">1</div><div class="hotspot h2">2</div><div class="hotspot h3">3</div><div class="hotspot h4">4</div><div class="hotspot h5">5</div><div class="hotspot h6">6</div>
+      <div class="zone-note n1">lock / rail</div><div class="zone-note n2">glass</div><div class="zone-note n3">sash</div><div class="zone-note n4">sill</div><div class="zone-note n5">perimeter</div><div class="zone-note n6">whole room</div>
     </div>
 
-    <div class="diagnostic-list">
+    <div class="list">
       {signs.map(([number,title,tag,text], index) => (
-        <article class="diagnostic-item">
-          <div class={`diag-num diag-${index + 1}`}>{number}</div>
-          <div>
-            <div class="diag-head"><h3>{title}</h3><span>{tag}</span></div>
-            <p>{text}</p>
-          </div>
+        <article class="item">
+          <span class={`item-num item-${index + 1}`}>{number}</span>
+          <div><div class="item-head"><h3>{title}</h3><span>{tag}</span></div><p>{text}</p></div>
         </article>
       ))}
     </div>
   </div>
 
-  <div class="interpretation">
-    <div><strong>One isolated symptom</strong><span>Start by watching the pattern and locating it.</span></div>
-    <div><strong>Several signs at one opening</strong><span>Worth having that opening evaluated.</span></div>
-    <div><strong>Soft material or active water</strong><span>Condition matters more than appearance.</span></div>
-  </div>
+  <div class="reading-rule"><div><strong>ONE SIGN</strong><span>Observe and locate it.</span></div><div><strong>SEVERAL SIGNS</strong><span>Compare them at the same opening.</span></div><div><strong>SOFT MATERIAL / ACTIVE WATER</strong><span>Condition matters more than appearance.</span></div></div>
 </figure>
 
 <style>
-  .signs-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
-  .diagnostic-board{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:var(--space-l);align-items:start}.window-diagnostic{padding:var(--space-xs);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.window-diagnostic svg{display:block;width:100%;height:auto;border-radius:var(--radius);background:var(--paper-sunk)}
-  .field{fill:var(--paper-sunk);stroke:var(--line);stroke-width:1.5}.wall-frame{fill:color-mix(in srgb,var(--ink) 11%,transparent);stroke:var(--ink);stroke-width:4}.window{fill:var(--paper-raised);stroke:var(--ink);stroke-width:4}.glass{fill:color-mix(in srgb,var(--accent-2) 13%,transparent);stroke:var(--accent-ink);stroke-width:2}.mullion,.meeting{stroke:var(--ink-soft);stroke-width:2}.sill{fill:color-mix(in srgb,var(--danger) 12%,transparent);stroke:var(--danger);stroke-width:2}.stool{fill:color-mix(in srgb,var(--ink) 13%,transparent)}.floor{stroke:var(--line-strong);stroke-width:2}.leader{fill:none;stroke:var(--ink-soft);stroke-width:2}.draft{stroke:var(--accent)}.glass-leader{stroke:var(--danger)}.op{stroke:var(--ink)}.moisture{stroke:var(--danger)}.comfort{stroke:var(--accent)}.efficiency{stroke:var(--accent-ink)}.marker{stroke:var(--paper-raised);stroke-width:3}.marker-1,.marker-5,.marker-6{fill:var(--accent)}.marker-2,.marker-4{fill:var(--danger)}.marker-3{fill:var(--ink)}.marker-text{fill:var(--paper);font:750 18px Outfit,system-ui,sans-serif;text-anchor:middle}.zone-title,.glass-label,.sill-label,.room-label{fill:var(--ink-faint);font:750 12px Outfit,system-ui,sans-serif;letter-spacing:.12em;text-anchor:middle}.glass-label{fill:var(--ink-soft)}.sill-label{fill:var(--danger)}.room-label{fill:var(--ink-faint)}
-  .diagnostic-list{border-top:1px solid var(--line)}.diagnostic-item{display:grid;grid-template-columns:2.7rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.diag-num{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.diag-1,.diag-5,.diag-6{background:var(--accent)}.diag-2,.diag-4{background:var(--danger)}.diag-head{display:flex;gap:var(--space-xs);align-items:baseline;justify-content:space-between}.diag-head h3{margin:0;font-size:var(--step-0)}.diag-head span{flex:none;color:var(--ink-faint);font-size:10px;font-weight:700;letter-spacing:.08em}.diagnostic-item p{margin:.2rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}
-  .interpretation{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-l);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.interpretation div{display:grid;gap:.2rem;padding:var(--space-s);border-right:1px solid var(--line)}.interpretation div:last-child{border-right:0}.interpretation strong{font-size:var(--step--1)}.interpretation span{color:var(--ink-soft);font-size:var(--step--2)}
-  @media(max-width:950px){.diagnostic-board{grid-template-columns:1fr}}@media(max-width:650px){.interpretation{grid-template-columns:1fr}.interpretation div{border-right:0;border-bottom:1px solid var(--line)}.interpretation div:last-child{border-bottom:0}}
+.inspection-map{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.intro{margin:0 0 var(--space-l);max-width:74ch;color:var(--ink-soft);font-size:var(--step--1)}.intro strong{color:var(--ink)}.board{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:var(--space-l);align-items:start}.window-map{position:relative;min-height:31rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:radial-gradient(circle at 50% 45%,var(--paper-raised),var(--paper-sunk));}.room-label{position:absolute;left:0;right:0;text-align:center;top:1rem;font-size:10px;font-weight:750;letter-spacing:.16em;color:var(--ink-faint)}.wall-frame{position:absolute;left:20%;right:20%;top:14%;bottom:12%;padding:1.5rem;background:color-mix(in srgb,var(--ink) 12%,transparent);border:4px solid var(--ink);border-radius:8px}.window-frame{position:relative;width:100%;height:100%;background:var(--paper-raised);border:3px solid var(--ink);padding:1.2rem}.glass{position:absolute;left:1.2rem;right:1.2rem;border:2px solid var(--accent-ink);background:color-mix(in srgb,var(--accent-2) 12%,transparent)}.upper{top:1.2rem;bottom:50%}.lower{top:50%;bottom:1.2rem}.meeting{position:absolute;left:1.2rem;right:1.2rem;top:50%;height:3px;background:var(--ink-soft)}.sill{position:absolute;left:0;right:0;bottom:0;height:1.2rem;background:color-mix(in srgb,var(--danger) 15%,transparent);border-top:3px solid var(--danger)}.lock{position:absolute;right:.8rem;top:48%;width:1rem;height:2.2rem;border:2px solid var(--ink);background:var(--paper-raised)}.hotspot{position:absolute;display:grid;width:2.8rem;height:2.8rem;place-items:center;border:3px solid var(--paper-raised);border-radius:50%;color:var(--paper);font-weight:750;box-shadow:var(--shadow-soft)}.h1{left:10%;top:36%;background:var(--accent)}.h2{right:10%;top:29%;background:var(--danger)}.h3{right:8%;top:54%;background:var(--ink)}.h4{left:9%;bottom:18%;background:var(--danger)}.h5{left:11%;top:57%;background:var(--accent)}.h6{right:10%;bottom:10%;background:var(--accent-ink)}.zone-note{position:absolute;padding:.35rem .5rem;border:1px solid var(--line);background:color-mix(in srgb,var(--paper-raised) 94%,transparent);font-size:10px;font-weight:650;letter-spacing:.04em;color:var(--ink-soft);box-shadow:var(--shadow-soft)}.n1{left:4%;top:44%}.n2{right:4%;top:38%}.n3{right:3%;top:62%}.n4{left:5%;bottom:7%}.n5{left:4%;top:64%}.n6{right:3%;bottom:4%}.list{border-top:1px solid var(--line)}.item{display:grid;grid-template-columns:2.7rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.item-num{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.item-1,.item-5,.item-6{background:var(--accent)}.item-2,.item-4{background:var(--danger)}.item-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-xs)}.item-head h3{margin:0;font-size:var(--step-0)}.item-head span{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink-faint)}.item p{margin:.22rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.reading-rule{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-l);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.reading-rule div{display:grid;gap:.2rem;padding:var(--space-s);border-right:1px solid var(--line)}.reading-rule div:last-child{border-right:0}.reading-rule strong{font-size:var(--step--2);letter-spacing:.06em}.reading-rule span{font-size:var(--step--2);color:var(--ink-soft)}
+@media(max-width:950px){.board{grid-template-columns:1fr}}@media(max-width:650px){.reading-rule{grid-template-columns:1fr}.reading-rule div{border-right:0;border-bottom:1px solid var(--line)}.reading-rule div:last-child{border-bottom:0}.window-map{min-height:24rem}.wall-frame{left:18%;right:18%;}}
 </style>
