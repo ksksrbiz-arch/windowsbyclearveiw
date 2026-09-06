@@ -114,9 +114,10 @@ import { site, telHref } from '../data/site';
 
     // The cost calculator hands a scope over. Prefill the notes so nobody has
     // to describe their project twice.
+    const params = new URLSearchParams(window.location.search);
     const notes = form.querySelector('[name="notes"]');
     if (notes instanceof HTMLTextAreaElement && !notes.value) {
-      let scope = new URLSearchParams(window.location.search).get('scope');
+      let scope = params.get('scope');
       if (!scope) {
         try {
           scope = sessionStorage.getItem('clearview:scope');
@@ -129,6 +130,14 @@ import { site, telHref } from '../data/site';
         const prefilledHint = form.querySelector('[data-notes-prefilled-hint]');
         if (prefilledHint instanceof HTMLElement) prefilledHint.hidden = false;
       }
+    }
+
+    // Builder-facing pages (new-construction's project-inquiry CTA) link
+    // here with ?role=builder so a GC does not have to hunt for the radio
+    // that already applies to them.
+    if (params.get('role') === 'builder') {
+      const builderRadio = form.querySelector('input[name="role"][value="Builder / GC"]');
+      if (builderRadio instanceof HTMLInputElement) builderRadio.checked = true;
     }
 
     const button = form.querySelector('[data-submit]');

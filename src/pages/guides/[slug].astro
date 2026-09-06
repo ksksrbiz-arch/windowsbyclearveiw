@@ -8,6 +8,7 @@ import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -141,15 +142,7 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 
     {guide.data.faq.length > 0 && (
       <div class="wrap is-narrow" data-reveal>
-        <section class="faq">
-          <h2 class="rule-label">Common questions</h2>
-          {guide.data.faq.map((item) => (
-            <details>
-              <summary>{item.question}</summary>
-              <div class="faq-body"><p>{item.answer}</p></div>
-            </details>
-          ))}
-        </section>
+        <FaqAccordion items={guide.data.faq} />
         <p class="faq-ask"><a href="/ask">Still have a question? Ask our guide assistant &rarr;</a></p>
       </div>
     )}
@@ -173,85 +166,6 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   </article>
   <CtaBar />
 </BaseLayout>
-
-<script>
-  // Native <details> snaps open and closed instantly — the content model
-  // hides everything with `display: none` the moment it collapses, which
-  // CSS transitions cannot touch. This intercepts the toggle and animates
-  // the element's own height with the Web Animations API instead, so the
-  // FAQ matches the considered-reveal feel used everywhere else on the
-  // site. JS off, or reduced motion, falls back to the native instant toggle.
-  function initFaqAccordion() {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.querySelectorAll<HTMLDetailsElement>('.faq details').forEach((details) => {
-      if (details.dataset.animBound === 'true' || reduceMotion) return;
-      details.dataset.animBound = 'true';
-
-      const summary = details.querySelector('summary');
-      const body = details.querySelector('.faq-body');
-      if (!(summary instanceof HTMLElement) || !(body instanceof HTMLElement)) return;
-
-      let animation: Animation | null = null;
-      let closing = false;
-      let opening = false;
-      // A click's expand() runs a frame late (see below). If a second click
-      // lands in that single-frame gap, this tells the stale callback to
-      // stand down rather than overriding the click that superseded it.
-      let generation = 0;
-
-      const finish = (open: boolean) => {
-        details.open = open;
-        animation = null;
-        closing = false;
-        opening = false;
-        details.style.height = details.style.overflow = '';
-      };
-
-      const shrink = () => {
-        closing = true;
-        animation?.cancel();
-        animation = details.animate(
-          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight}px`] },
-          { duration: 220, easing: 'ease-out' },
-        );
-        animation.onfinish = () => finish(false);
-        animation.oncancel = () => { closing = false; };
-      };
-
-      const expand = () => {
-        opening = true;
-        animation?.cancel();
-        animation = details.animate(
-          { height: [`${details.offsetHeight}px`, `${summary.offsetHeight + body.offsetHeight}px`] },
-          { duration: 220, easing: 'ease-out' },
-        );
-        animation.onfinish = () => finish(true);
-        animation.oncancel = () => { opening = false; };
-      };
-
-      summary.addEventListener('click', (event) => {
-        event.preventDefault();
-        generation += 1;
-        const thisClick = generation;
-        details.style.overflow = 'hidden';
-        if (closing || !details.open) {
-          opening = true;
-          details.style.height = `${details.offsetHeight}px`;
-          details.open = true;
-          requestAnimationFrame(() => {
-            if (thisClick !== generation) return;
-            expand();
-          });
-        } else if (opening || details.open) {
-          shrink();
-        }
-      });
-    });
-  }
-
-  initFaqAccordion();
-  document.addEventListener('astro:page-load', initFaqAccordion);
-</script>
 
 <style>
   /* ───────────────────────────────────────────────────────────────────────
@@ -329,60 +243,6 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   }
 
   /* FAQ ───────────────────────────────────────────────────────────────── */
-  .faq {
-    margin-top: var(--space-2xl);
-  }
-
-  .faq details {
-    border-top: 1px solid var(--line);
-    padding: 0;
-    overflow: hidden;
-  }
-
-  .faq details:last-of-type {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .faq summary {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2xs);
-    padding: var(--space-s) 0;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: var(--step-0);
-    list-style: none;
-  }
-
-  .faq summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .faq summary::before {
-    content: '';
-    width: 0.7rem;
-    height: 1px;
-    flex: none;
-    translate: 0 -0.3rem;
-    background: var(--accent);
-    transition: rotate var(--dur) var(--ease-out);
-  }
-
-  .faq details[open] summary::before {
-    rotate: 90deg;
-  }
-
-  .faq summary:hover {
-    color: var(--accent-ink);
-  }
-
-  .faq-body p {
-    margin: 0 0 var(--space-s);
-    padding-left: calc(0.7rem + var(--space-2xs));
-    color: var(--ink-soft);
-    font-size: var(--step--1);
-  }
-
   .faq-ask {
     margin-top: var(--space-m);
     font-size: var(--step--1);

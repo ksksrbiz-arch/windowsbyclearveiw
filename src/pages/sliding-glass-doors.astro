@@ -39,6 +39,40 @@ const types = [
   },
 ];
 
+const considerations = [
+  {
+    name: 'Like-for-like replacement',
+    text: 'New door goes into the existing rough opening — same width, same header. This is most patio-door jobs: measure, order, swap, flash the sill. No framing changes, no engineering, no permit conversation beyond what your city already requires for a door swap.',
+  },
+  {
+    name: 'Widening or enlarging the opening',
+    text: 'Want more glass than the door that is there now — going from a single window to a slider, or a two-panel to a four-panel? That moves or resizes the header, which means structural work: a new header sized for the wider span, and in most Clark County jurisdictions, a permit. We size the header conversation before we quote a number, not after a wall is already open.',
+  },
+  {
+    name: 'A new opening on an addition or build',
+    text: 'Framing a patio door into a wall that does not exist yet is a new-construction install, not a replacement — rough opening framed to the door schedule, flashed the same way any new-construction window is. See the full sequence on the new-construction page.',
+  },
+];
+
+const measuring = [
+  {
+    name: 'Rough opening, not the door you have now',
+    text: 'We measure the actual framed opening — width, height, and how square the corners are — because that is what the new door is ordered to fit, not the nominal size printed on the old unit’s spec sheet.',
+  },
+  {
+    name: 'Panel configuration vs. opening width',
+    text: 'A wider opening does not automatically mean more panels. Two panels covering 12 feet is a heavier, harder-operating door than four panels covering the same span. We talk through configuration against how you actually want it to open before ordering.',
+  },
+  {
+    name: 'Sill height and the floor transition',
+    text: 'The sill sits relative to your finished interior floor and whatever is outside it — a deck, a patio slab, or grade. Get that height wrong and you either trip over a lip walking out or send water back inside during a hard rain. We check it against both sides before the door is ordered.',
+  },
+  {
+    name: 'Clearance to swing, stack, and screen',
+    text: 'The fixed panel side needs wall or window trim clear of it, and a stacking multi-panel door needs room for the panels to gather at one end. We check furniture placement and adjacent openings while we are there, not after delivery.',
+  },
+];
+
 const benefits = [
   {
     name: 'Natural light',
@@ -60,20 +94,20 @@ const benefits = [
 
 const steps = [
   {
-    name: 'Walkthrough',
-    text: 'Mark looks at the opening, the deck or patio it leads to, and what you want out of the door — light, access, or both.',
+    name: 'Walkthrough and measure',
+    text: 'Mark measures the rough opening, the sill height against both the interior floor and what is outside it, and talks through configuration — what you want out of the door, light, access, or both.',
   },
   {
-    name: 'Measure and order',
-    text: 'The rough opening is measured to the panel configuration you pick. Doors are ordered to that size; lead times vary by manufacturer.',
+    name: 'Written quote and order',
+    text: 'A quote for the exact configuration you picked, in writing, before anything is ordered. Once you sign off, the door is ordered to that rough opening; lead times vary by manufacturer and panel count, and we tell you the real number rather than a guess.',
   },
   {
-    name: 'Install',
-    text: 'Old unit comes out (or the rough opening is framed, on a new build). New door goes in plumb, level, and flashed at the sill.',
+    name: 'Install day',
+    text: 'Old unit comes out, or the rough opening is framed first on a new build or a widened opening. The new door goes in plumb, level, and flashed at the sill before trim goes back on — usually a one-day job for a like-for-like swap, longer if the header changes.',
   },
   {
     name: 'Walk the job',
-    text: 'We run the panels with you, check the lock and the screen, haul debris, and leave the room usable.',
+    text: 'We run every panel with you, check the lock, latch, and screen, haul debris, and leave the room usable the same day.',
   },
 ];
 
@@ -104,7 +138,7 @@ const schema = {
 ---
 <BaseLayout
   title="Sliding glass door installation"
-  description="Sliding glass patio door installation in Vancouver, WA and Clark County: standard, French rail, and multi-panel doors, installed by Mark."
+  description="Sliding glass patio door installation in Vancouver, WA and Clark County: configurations, replacement vs. new opening, sizing, and what install day looks like."
   path="/sliding-glass-doors"
   crumbs={[{ name: 'Sliding glass doors', href: '/sliding-glass-doors' }]}
   ogImageSrc={ogPhoto.image}
@@ -119,6 +153,10 @@ const schema = {
         Patio doors, measured and installed the same way we do every opening — plumb, flashed,
         and priced before anything is ordered.
       </p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="/estimate?scope=Sliding%20glass%20door">Get a written quote</a>
+        <a class="btn btn-ghost btn-on-dark" href="#configurations">See configurations</a>
+      </div>
       <p class="hero-note">
         Looking for a hinged pair instead of a slider? Mark installs French doors too — ask on
         the same call. Replacing a window instead? See <a href="/replacement">window replacement</a>.
@@ -127,7 +165,7 @@ const schema = {
     <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
   </section>
 
-  <section class="section">
+  <section class="section" id="configurations">
     <div class="wrap" data-reveal>
       <p class="rule-label">What we install</p>
       <h2>Every configuration, one crew.</h2>
@@ -153,6 +191,47 @@ const schema = {
 
   <section class="section section-sunk">
     <div class="wrap" data-reveal>
+      <p class="rule-label">Decide this first</p>
+      <h2>Replacement, widened opening, or new build?</h2>
+      <p class="lede">
+        The single biggest cost and timeline swing on a patio door job is not the door — it is
+        whether the wall around it changes.
+      </p>
+      <div class="style-list">
+        {considerations.map((item) => (
+          <article class="style-row">
+            <h3>{item.name}</h3>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </div>
+      <p class="section-link">
+        <a href="/new-construction">Framing a door into a build going up now? See new construction.</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Before you can get a real number</p>
+      <h2>What we actually measure.</h2>
+      <p class="lede">
+        A patio door quote from a photo is a guess. These four things change the price, the lead
+        time, or both, and we check all of them in person before anything is ordered.
+      </p>
+      <div class="style-list">
+        {measuring.map((item) => (
+          <article class="style-row">
+            <h3>{item.name}</h3>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
       <p class="rule-label">Why homeowners add one</p>
       <h2>More glass than any window in the house.</h2>
       <div class="compare">
@@ -169,9 +248,9 @@ const schema = {
   <section class="section">
     <div class="wrap split" data-reveal>
       <div>
-        <p class="rule-label">How it runs</p>
-        <h2>Four steps, same as every install.</h2>
-        <ol class="plain-list">
+        <p class="rule-label">Install day</p>
+        <h2>Four steps, what each one actually looks like.</h2>
+        <ol class="steps">
           {steps.map((step) => (
             <li><strong>{step.name}.</strong> {step.text}</li>
           ))}
@@ -207,8 +286,35 @@ const schema = {
     </div>
     <div class="wrap" data-reveal>
       <p class="fine-print">
-        A range, not a quote — every opening is measured before anything is ordered. See the{' '}
-        <a href="/tools">free cost estimator</a> to run this against the rest of the house.
+        A range, not a quote — every opening is measured before anything is ordered, and a widened
+        opening or a new header adds to the range above. See the{' '}
+        <a href="/tools/window-replacement-cost-calculator">free cost estimator</a> to run this
+        against the rest of the house.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Real installs</p>
+      <h2>Photos of a finished patio door: coming as jobs finish.</h2>
+      <p>
+        Every photo on this site is a real Clearview job — we do not run stock or staged photos of
+        finished work. We have not yet photographed a completed patio-door install specifically
+        (most of the sliders in the gallery are slider-style windows, not patio doors), so we are
+        not going to caption one as something it is not. As jobs finish, real installs land here
+        the same way the new-construction photos did.
+      </p>
+      <p class="section-link">
+        <a href="/gallery">See the rest of Mark&rsquo;s work</a>
+        {site.social.facebook && (
+          <>
+            {' '}&middot;{' '}
+            <a href={site.social.facebook} target="_blank" rel="noopener noreferrer">
+              recent jobs on Facebook
+            </a>
+          </>
+        )}
       </p>
     </div>
   </section>
@@ -239,8 +345,15 @@ const schema = {
     opacity: 0.75;
   }
 
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin: var(--space-m) 0 0;
+  }
+
   .hero-note {
-    margin: var(--space-s) 0 0;
+    margin: var(--space-m) 0 0;
     max-width: 44rem;
     font-size: var(--step--1);
     color: var(--on-dark-faint);
@@ -259,7 +372,8 @@ const schema = {
   }
 
   /* Same scanning-spine treatment as window-features.astro's style list —
-     four configurations read in order, not as interchangeable cards. */
+     configurations, considerations, and measuring points all read in order,
+     not as interchangeable cards. */
   .style-list {
     margin: var(--space-l) 0 0;
     border-top: 1px solid var(--line);
