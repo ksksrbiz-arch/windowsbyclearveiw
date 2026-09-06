@@ -8,46 +8,74 @@ const base = pricing.openings.find((o) => o.id === 'double-hung')!;
 const fiberglass = pricing.materials.find((m) => m.id === 'fiberglass')!;
 const fullFrame = pricing.fullFrame;
 const trim = pricing.modifiers.find((m) => m.id === 'trim')!;
-
-const stages = [
-  { label: 'Base', note: 'Vinyl · insert · ground floor', low: round(base.low), high: round(base.high) },
-  { label: 'Fiberglass', note: `Frame upgrade · ${fiberglass.multiplier}× base`, low: round(base.low * fiberglass.multiplier - base.low), high: round(base.high * fiberglass.multiplier - base.high) },
-  { label: 'Full-frame', note: 'Opening work instead of insert', low: round(fullFrame.low), high: round(fullFrame.high) },
-  { label: 'Trim', note: trim.label, low: round(trim.low), high: round(trim.high) },
-];
-const total = {
+const illustrative = {
   low: round(base.low * fiberglass.multiplier + fullFrame.low + trim.low),
   high: round(base.high * fiberglass.multiplier + fullFrame.high + trim.high),
 };
+
+const drivers = [
+  { n: '01', label: 'Window', value: `${money(base.low)}–${money(base.high)}`, note: 'Opening size, operating type, and base unit.' },
+  { n: '02', label: 'Material', value: `${fiberglass.multiplier}×`, note: 'A frame-material upgrade changes the unit cost.' },
+  { n: '03', label: 'Installation scope', value: `${money(fullFrame.low)}–${money(fullFrame.high)}`, note: 'Full-frame work can add opening preparation and reconstruction.' },
+  { n: '04', label: 'Finish / access', value: `${money(trim.low)}–${money(trim.high)}`, note: 'Trim, finish details, and site conditions can change labor.' },
+];
 ---
 <figure class="cost-diagram">
-  <figcaption class="diagram-heading">How one window's price builds</figcaption>
-  <p class="diagram-intro">There is not one magic “window price.” Start with the opening, then add the choices or conditions that actually change the job.</p>
+  <figcaption class="diagram-heading">What actually moves a window replacement price?</figcaption>
+  <p class="diagram-intro">Think in <strong>scope drivers</strong>, not a universal price per window. The same product can land differently when the opening or installation method changes.</p>
 
-  <div class="cost-stack" role="img" aria-label={`Illustrative installed cost build-up for one double-hung window. The example totals ${money(total.low)} to ${money(total.high)} after a fiberglass frame, full-frame method, and trim.`}>
-    {stages.map((stage, index) => (
-      <div class={`cost-row cost-row-${index + 1}`}>
-        <span class="cost-index">{String(index + 1).padStart(2,'0')}</span>
-        <div class="cost-main">
-          <div class="cost-head"><strong>{stage.label}</strong><span>{stage.low === stage.high ? money(stage.low) : `${money(stage.low)}–${money(stage.high)}`}</span></div>
-          <p>{stage.note}</p>
-          <div class="cost-bar"><span style={`width:${Math.max(18, Math.min(100, (stage.high / Math.max(total.high, 1)) * 100))}%`}></span></div>
-        </div>
-      </div>
-    ))}
+  <div class="cost-board">
+    <div class="cost-diagram-visual" role="img" aria-label={`Illustrative replacement-window cost model showing four drivers: window unit, material, installation scope, and finish or access. An illustrative combination totals ${money(illustrative.low)} to ${money(illustrative.high)}; actual quotes depend on the opening.`}>
+      <svg viewBox="0 0 760 560" aria-hidden="true">
+        <rect x="25" y="25" width="710" height="510" rx="18" class="field"/>
+        <rect x="95" y="125" width="570" height="300" class="wall"/>
+        <rect x="135" y="165" width="490" height="220" class="rough"/>
+        <rect x="165" y="195" width="430" height="160" class="window"/>
+        <line x1="380" y1="195" x2="380" y2="355" class="mullion"/>
+        <rect x="155" y="355" width="450" height="26" class="sill"/>
+
+        <circle cx="115" cy="118" r="24" class="driver driver-1"/><text x="115" y="126" class="driver-text">1</text>
+        <line x1="139" y1="118" x2="220" y2="118" class="leader"/>
+        <text x="230" y="114" class="callout">WINDOW UNIT</text><text x="230" y="132" class="supporting">size + type + base product</text>
+
+        <circle cx="645" cy="235" r="24" class="driver driver-2"/><text x="645" y="243" class="driver-text">2</text>
+        <line x1="621" y1="235" x2="545" y2="235" class="leader"/>
+        <text x="535" y="231" class="callout end">MATERIAL</text><text x="535" y="249" class="supporting end">vinyl, fiberglass, etc.</text>
+
+        <circle cx="115" cy="435" r="24" class="driver driver-3"/><text x="115" y="443" class="driver-text">3</text>
+        <line x1="139" y1="435" x2="250" y2="435" class="leader"/>
+        <text x="260" y="431" class="callout">INSTALLATION SCOPE</text><text x="260" y="449" class="supporting">insert vs. full-frame work</text>
+
+        <circle cx="645" cy="435" r="24" class="driver driver-4"/><text x="645" y="443" class="driver-text">4</text>
+        <line x1="621" y1="435" x2="515" y2="435" class="leader"/>
+        <text x="505" y="431" class="callout end">FINISH + ACCESS</text><text x="505" y="449" class="supporting end">trim, floors, height, site</text>
+
+        <text x="380" y="98" class="zone">ONE OPENING</text>
+        <text x="380" y="279" class="window-label">WINDOW</text>
+        <text x="380" y="492" class="total-caption">EXAMPLE MODEL</text>
+        <text x="380" y="522" class="total-value">{money(illustrative.low)}–{money(illustrative.high)}</text>
+      </svg>
+    </div>
+
+    <div class="cost-drivers">
+      {drivers.map((driver) => (
+        <article>
+          <span class={`driver-badge driver-badge-${driver.n}`}>{driver.n}</span>
+          <div><h3>{driver.label}</h3><strong>{driver.value}</strong><p>{driver.note}</p></div>
+        </article>
+      ))}
+    </div>
   </div>
 
-  <div class="cost-total">
-    <div><span class="total-label">Illustrative total</span><strong>{money(total.low)}–{money(total.high)}</strong></div>
-    <p>One opening. A whole-house estimate repeats this logic across every opening, with each one measured for its actual method, access, and condition.</p>
-  </div>
-
-  <div class="cost-note"><strong>Use the range as a planning number.</strong> Use the <a href="/tools/window-replacement-cost-calculator">calculator</a> to model your house. Use an in-home measure for the quote.</div>
+  <div class="cost-disclaimer"><strong>Important:</strong><span>The example combines pricing-model inputs to show how scope changes a project. It is not a quote, and the components are not necessarily additive on every job.</span></div>
+  <div class="cost-next"><strong>Use it in this order:</strong><span>calculator for planning → photos/questions for context → in-home measure for the actual quote.</span><a href="/tools/window-replacement-cost-calculator">Open the calculator →</a></div>
 </figure>
 
 <style>
-  .cost-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:68ch;color:var(--ink-soft);font-size:var(--step--1)}
-  .cost-stack{display:grid;gap:var(--space-xs)}.cost-row{display:grid;grid-template-columns:3rem 1fr;gap:var(--space-s);align-items:start;padding:var(--space-s);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.cost-index{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--ink);color:var(--paper);font-weight:700;font-size:var(--step--2)}.cost-row-1 .cost-index{background:var(--accent)}.cost-row-4 .cost-index{background:var(--accent-ink)}.cost-head{display:flex;justify-content:space-between;gap:var(--space-s);align-items:baseline}.cost-head strong{font-size:var(--step-0)}.cost-head span{font-size:var(--step-0);font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}.cost-main p{margin:.15rem 0 .55rem;font-size:var(--step--2);color:var(--ink-soft)}.cost-bar{height:8px;border-radius:999px;background:var(--paper-sunk);overflow:hidden}.cost-bar span{display:block;height:100%;border-radius:999px;background:var(--accent)}.cost-row-2 .cost-bar span{background:var(--accent-2)}.cost-row-3 .cost-bar span{background:var(--ink-faint)}.cost-row-4 .cost-bar span{background:var(--accent-ink)}
-  .cost-total{display:grid;grid-template-columns:auto 1fr;gap:var(--space-l);align-items:center;margin-top:var(--space-s);padding:var(--space-m);border:2px solid var(--ink);border-radius:var(--radius-lg);background:var(--paper-raised)}.total-label{display:block;text-transform:uppercase;letter-spacing:var(--tracking-label);font-size:var(--step--2);color:var(--ink-faint)}.cost-total strong{display:block;font-size:var(--step-3);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}.cost-total p{margin:0;color:var(--ink-soft);font-size:var(--step--1)}.cost-note{margin-top:var(--space-m);padding:var(--space-s) var(--space-m);border-left:3px solid var(--accent);background:var(--paper-raised);font-size:var(--step--1);color:var(--ink-soft)}.cost-note strong{color:var(--ink)}.cost-note a{color:var(--accent-ink);font-weight:600}
-  @media(max-width:700px){.cost-total{grid-template-columns:1fr;gap:var(--space-xs)}.cost-total strong{font-size:var(--step-2)}.cost-head{align-items:flex-start;flex-direction:column;gap:.15rem}}
+  .cost-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
+  .cost-board{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(290px,.65fr);gap:var(--space-l);align-items:start}.cost-diagram-visual{padding:var(--space-xs);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.cost-diagram-visual svg{display:block;width:100%;height:auto;border-radius:var(--radius);background:var(--paper-sunk)}
+  .field{fill:var(--paper-sunk);stroke:var(--line);stroke-width:1.5}.wall{fill:color-mix(in srgb,var(--ink) 13%,transparent)}.rough{fill:color-mix(in srgb,var(--danger) 6%,transparent);stroke:var(--danger);stroke-width:3;stroke-dasharray:10 7}.window{fill:var(--paper-raised);stroke:var(--ink);stroke-width:4}.mullion{stroke:var(--ink-soft);stroke-width:2}.sill{fill:color-mix(in srgb,var(--accent) 18%,transparent);stroke:var(--accent);stroke-width:3}.driver{stroke:var(--paper-raised);stroke-width:3}.driver-1,.driver-3{fill:var(--accent)}.driver-2,.driver-4{fill:var(--ink)}.driver-text{fill:var(--paper);font:750 18px Outfit,system-ui,sans-serif;text-anchor:middle}.leader{stroke:var(--ink-soft);stroke-width:2}.callout{fill:var(--ink);font:750 11px Outfit,system-ui,sans-serif;letter-spacing:.08em}.end{text-anchor:end}.supporting{fill:var(--ink-soft);font:550 10px Outfit,system-ui,sans-serif}.end.supporting{text-anchor:end}.zone,.window-label,.total-caption,.total-value{font-family:Outfit,system-ui,sans-serif;text-anchor:middle}.zone{fill:var(--ink-faint);font-size:12px;font-weight:750;letter-spacing:.12em}.window-label{fill:var(--ink-soft);font-size:14px;font-weight:750;letter-spacing:.08em}.total-caption{fill:var(--ink-faint);font-size:10px;font-weight:750;letter-spacing:.1em}.total-value{fill:var(--ink);font-size:24px;font-weight:650}
+  .cost-drivers{border-top:1px solid var(--line)}.cost-drivers article{display:grid;grid-template-columns:2.8rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.driver-badge{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.driver-badge-01,.driver-badge-03{background:var(--accent)}.cost-drivers h3{display:inline;font-size:var(--step-0);margin:0}.cost-drivers strong{display:block;margin-top:.15rem;font-size:var(--step--1);font-variant-numeric:tabular-nums}.cost-drivers p{margin:.25rem 0 0;color:var(--ink-soft);font-size:var(--step--2)}
+  .cost-disclaimer{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border-left:3px solid var(--ink);background:var(--paper-raised);font-size:var(--step--1)}.cost-disclaimer span{color:var(--ink-soft)}.cost-next{display:flex;flex-wrap:wrap;gap:.35rem var(--space-s);align-items:baseline;margin-top:var(--space-s);padding-top:var(--space-s);border-top:1px solid var(--line);font-size:var(--step--1)}.cost-next span{color:var(--ink-soft)}.cost-next a{margin-left:auto;font-weight:650;color:var(--accent-ink)}
+  @media(max-width:950px){.cost-board{grid-template-columns:1fr}}@media(max-width:620px){.cost-next a{margin-left:0}.cost-disclaimer{grid-template-columns:1fr;gap:.25rem}}
 </style>
