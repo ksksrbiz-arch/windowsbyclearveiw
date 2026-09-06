@@ -25,11 +25,29 @@ export default defineConfig({
       // reads like a broken page if someone lands on it cold — plus the 404
       // page, which Astro builds as a real route (dist/404.html) but which
       // has no canonical URL worth indexing.
-      filter: (page) =>
-        !page.includes('/estimate/sent') &&
-        !page.includes('/estimate/problem') &&
-        !page.includes('/internal/') &&
-        !/\/404\/?$/.test(page),
+      //
+      // `!page.includes('/internal/')` used to be the only internal check
+      // here, which excludes every page *under* /internal but not the
+      // section's own index route -- that page's URL is exactly `/internal`
+      // (trailingSlash: 'never' strips the slash the substring check needs),
+      // so it slipped into the sitemap. Google then discovered and crawled
+      // it from there despite never being able to see it: it's behind
+      // functions/internal/_middleware.js's session check, which 302s an
+      // unauthenticated request straight to /internal/login. That surfaced
+      // in Search Console as a real "Page with redirect" entry -- confirmed
+      // from the 2026-09-06 Coverage export. Matching on the parsed
+      // pathname instead of a raw substring closes that gap for this route
+      // and any future one shaped the same way.
+      filter: (page) => {
+        const path = new URL(page).pathname;
+        return (
+          path !== '/estimate/sent' &&
+          path !== '/estimate/problem' &&
+          path !== '/internal' &&
+          !path.startsWith('/internal/') &&
+          !/^\/404\/?$/.test(path)
+        );
+      },
     }),
   ],
   trailingSlash: 'never',
