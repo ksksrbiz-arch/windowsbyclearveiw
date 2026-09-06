@@ -1,42 +1,48 @@
 ---
+const foggedPhoto = 'https://images.pexels.com/photos/36732584/pexels-photo-36732584.jpeg?auto=compress&cs=tinysrgb&w=1800';
+const condensationPhoto = 'https://images.unsplash.com/photo-1763976431914-5bebc66eb166?auto=format&fit=crop&w=1800&q=80';
 interface Props { heading?: string | null; }
-const { heading = 'Fogged glass: find the moisture in the depth.' } = Astro.props;
+const { heading = 'Fogged glass: see the problem in a real window.' } = Astro.props;
 ---
-<figure class="glass-explainer">
+<figure class="photo-explainer">
   {heading && <figcaption class="heading">{heading}</figcaption>}
-  <p class="intro">The useful question is not “does the glass look foggy?” It is <strong>where the moisture is sitting</strong>.</p>
+  <p class="intro">For this problem, a photograph is more useful than a technical cartoon. Start with what the glass actually looks like, then make one simple check.</p>
 
-  <div class="cases">
-    <article class="case failed">
-      <header><span class="case-badge">A</span><div><p>SEALED-UNIT FAILURE</p><h3>Moisture is between the panes</h3></div></header>
-      <div class="section" role="img" aria-label="Side section of an insulated glass unit showing moisture trapped in the sealed cavity between the outside and inside panes.">
-        <div class="zone outside">OUTSIDE</div><div class="zone inside">ROOM</div>
-        <div class="igu"><div class="pane pane-outer"></div><div class="spacer bad-top"></div><div class="cavity cavity-failed"><span class="fog-dot d1"></span><span class="fog-dot d2"></span><span class="fog-dot d3"></span><span class="fog-dot d4"></span></div><div class="spacer bad-bottom"></div><div class="pane pane-inner"></div><div class="seal-break"></div></div>
-        <div class="callout moisture-callout"><b>1</b><strong>MOISTURE</strong><span>inside the sealed cavity</span></div>
-        <div class="callout seal-callout"><b>2</b><strong>SEAL FAILURE</strong><span>the cavity is no longer protected</span></div>
-        <div class="dimension"><span>OUTER PANE</span><i></i><strong>SEALED CAVITY</strong><i></i><span>INNER PANE</span></div>
+  <div class="photo-grid">
+    <article class="photo-card failed">
+      <div class="photo-wrap">
+        <img src={foggedPhoto} alt="Close-up stock photograph of a window covered in heavy condensation and fogged glass." loading="lazy" decoding="async" />
+        <span class="photo-badge">A · FOGGED GLASS</span>
       </div>
-      <div class="answer"><strong>What you see:</strong> haze or droplets remain after the room-side glass is wiped. The moisture cannot be reached with a cloth.</div>
+      <div class="photo-copy">
+        <h3>Does it stay cloudy after you wipe the room side?</h3>
+        <p>Persistent haze or moisture that remains between the panes is the classic visual sign of an insulated-glass seal problem.</p>
+        <div class="check"><strong>Check:</strong><span>Wipe the room-facing surface. If the haze remains in the glass pack, it is not surface condensation.</span></div>
+      </div>
     </article>
 
-    <article class="case surface">
-      <header><span class="case-badge">B</span><div><p>ROOM-SIDE CONDENSATION</p><h3>Water is on the surface of the inner pane</h3></div></header>
-      <div class="section" role="img" aria-label="Side section of a sound insulated glass unit showing clear space between the panes and water droplets on the room-facing surface of the inside pane.">
-        <div class="zone outside">OUTSIDE</div><div class="zone inside">ROOM</div>
-        <div class="igu"><div class="pane pane-outer"></div><div class="spacer good-top"></div><div class="cavity cavity-good"><span class="gas-label">INSULATING GAS</span></div><div class="spacer good-bottom"></div><div class="pane pane-inner"></div><div class="surface-line"></div><span class="water-drop d1"></span><span class="water-drop d2"></span><span class="water-drop d3"></span><span class="water-drop d4"></span><span class="water-drop d5"></span></div>
-        <div class="callout moisture-callout"><b>1</b><strong>WATER</strong><span>on the room-side surface</span></div>
-        <div class="callout seal-callout"><b>2</b><strong>SEALED CAVITY</strong><span>clear and intact</span></div>
-        <div class="dimension"><span>OUTER PANE</span><i></i><strong>SEALED CAVITY</strong><i></i><span>INNER PANE</span></div>
+    <article class="photo-card surface">
+      <div class="photo-wrap">
+        <img src={condensationPhoto} alt="Free stock photograph of water droplets forming on a window surface." loading="lazy" decoding="async" />
+        <span class="photo-badge">B · SURFACE CONDENSATION</span>
       </div>
-      <div class="answer"><strong>What you see:</strong> water is on the room-facing surface. Humidity and glass temperature affect how much condensation forms.</div>
+      <div class="photo-copy">
+        <h3>Does the moisture wipe away from the glass?</h3>
+        <p>Water sitting on the room-facing surface is a different condition. Indoor humidity and glass temperature can drive it.</p>
+        <div class="check"><strong>Check:</strong><span>Wipe the room-facing surface. If it clears, you were looking at moisture on the surface, not inside the sealed unit.</span></div>
+      </div>
     </article>
   </div>
 
-  <div class="test"><span>QUICK TEST</span><strong>Wipe the room side.</strong><span>Clear → surface condensation.</span><span>Still hazy between panes → failed insulated glass.</span></div>
+  <div class="quick-answer">
+    <div class="qa-label">QUICK ANSWER</div>
+    <div><strong>Fog that stays after wiping = investigate the insulated glass unit.</strong><span>Surface water that wipes away = start with condensation and indoor conditions.</span></div>
+  </div>
+
+  <div class="photo-note"><span>Stock photography</span><span>Used to demonstrate the condition — not a Clearview installation.</span></div>
 </figure>
 
 <style>
-.glass-explainer{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.intro{margin:0 0 var(--space-l);max-width:70ch;color:var(--ink-soft);font-size:var(--step--1)}.cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-l)}.case{padding:var(--space-m);border:1px solid var(--line);border-top:4px solid var(--ink);border-radius:var(--radius-lg);background:var(--paper-raised)}.failed{border-top-color:var(--danger)}.surface{border-top-color:var(--accent)}.case header{display:grid;grid-template-columns:2.9rem 1fr;gap:var(--space-s);align-items:start;margin-bottom:var(--space-s)}.case-badge{display:grid;width:2.7rem;height:2.7rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step-0);font-weight:750}.failed .case-badge{background:var(--danger)}.surface .case-badge{background:var(--accent)}.case header p{margin:0 0 .15rem;font-size:10px;font-weight:750;letter-spacing:.12em;color:var(--ink-faint)}.case h3{margin:0;max-width:28ch;font-size:var(--step-1);line-height:1.12}
-.section{position:relative;min-height:24rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 7%,transparent),var(--paper-sunk) 23%,var(--paper-sunk) 77%,color-mix(in srgb,var(--accent) 7%,transparent))}.zone{position:absolute;top:1rem;font-size:9px;font-weight:750;letter-spacing:.16em;color:var(--ink-faint)}.outside{left:1rem}.inside{right:1rem}.igu{position:absolute;left:20%;right:20%;top:4.4rem;bottom:4.2rem;display:grid;grid-template-columns:1rem 1fr 1rem;grid-template-rows:1.2rem 1fr 1.2rem;border:3px solid var(--ink);background:var(--paper-raised);box-shadow:var(--shadow-soft)}.pane{grid-row:1/4;border:1px solid var(--ink-soft)}.pane-outer{grid-column:1;background:color-mix(in srgb,var(--accent-2) 20%,var(--paper-raised))}.pane-inner{grid-column:3;background:color-mix(in srgb,var(--accent) 18%,var(--paper-raised))}.spacer{grid-column:2;border:2px solid var(--ink);z-index:2}.bad-top,.bad-bottom{background:color-mix(in srgb,var(--danger) 15%,var(--paper-raised));border-color:var(--danger)}.good-top,.good-bottom{background:color-mix(in srgb,var(--accent) 14%,var(--paper-raised));border-color:var(--accent)}.cavity{grid-column:2;grid-row:2;display:grid;place-items:center;border-left:1px solid var(--line);border-right:1px solid var(--line);position:relative}.cavity-failed{background:color-mix(in srgb,var(--danger) 5%,var(--paper-raised))}.cavity-good{background:color-mix(in srgb,var(--accent-2) 5%,var(--paper-raised))}.fog-dot{position:absolute;border-radius:50%;background:color-mix(in srgb,var(--danger) 42%,transparent)}.fog-dot.d1{width:1.8rem;height:1.8rem;left:17%;top:27%}.fog-dot.d2{width:2.7rem;height:2.7rem;left:42%;top:45%}.fog-dot.d3{width:1.5rem;height:1.5rem;left:62%;top:23%}.fog-dot.d4{width:2.2rem;height:2.2rem;left:68%;top:62%}.seal-break{position:absolute;left:18%;right:10%;top:0.45rem;height:.22rem;background:var(--danger);transform:rotate(-2deg)}.surface-line{position:absolute;top:0;right:-.35rem;bottom:0;width:.35rem;background:var(--accent)}.water-drop{position:absolute;right:-1rem;border-radius:50%;background:var(--accent-ink);transform:translateX(50%)}.water-drop.d1{top:27%;width:.85rem;height:.85rem}.water-drop.d2{top:39%;width:1.25rem;height:1.25rem}.water-drop.d3{top:52%;width:.7rem;height:.7rem}.water-drop.d4{top:63%;width:1rem;height:1rem}.water-drop.d5{top:73%;width:.6rem;height:.6rem}.gas-label{font-size:9px;font-weight:750;line-height:1.25;letter-spacing:.08em;text-align:center;color:var(--ink-faint)}.callout{position:absolute;z-index:3;display:grid;grid-template-columns:1.6rem 1fr;column-gap:.4rem;align-items:start;max-width:12rem;padding:.45rem .55rem;background:color-mix(in srgb,var(--paper-raised) 96%,transparent);border:1px solid var(--line);box-shadow:var(--shadow-soft);font-size:var(--step--2);line-height:1.2}.callout b{grid-row:1/3;display:grid;width:1.5rem;height:1.5rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:9px}.failed .callout b{background:var(--danger)}.surface .callout b{background:var(--accent)}.moisture-callout{left:1rem;top:5.8rem;border-left:3px solid var(--danger)}.seal-callout{right:1rem;bottom:5rem;border-left:3px solid var(--ink)}.surface .moisture-callout{left:auto;right:1rem;border-left-color:var(--accent)}.surface .seal-callout{left:1rem;right:auto}.callout strong{display:block;grid-column:2;font-size:10px;letter-spacing:.08em}.failed .moisture-callout strong{color:var(--danger)}.surface .moisture-callout strong{color:var(--accent-ink)}.callout span{grid-column:2;color:var(--ink-soft)}.dimension{position:absolute;left:20%;right:20%;bottom:1.15rem;display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:.3rem;color:var(--ink-faint);font-size:8px;font-weight:700;letter-spacing:.08em}.dimension i{height:1px;background:var(--line-strong)}.dimension strong{color:var(--ink);font-size:8px}.answer{margin-top:var(--space-s);padding:.85rem .95rem;border-left:3px solid var(--ink);background:var(--paper-sunk);color:var(--ink-soft);font-size:var(--step--1)}.failed .answer{border-left-color:var(--danger)}.surface .answer{border-left-color:var(--accent)}.answer strong{color:var(--ink)}.test{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem var(--space-s);margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border:1px solid var(--line);border-left:3px solid var(--ink);background:var(--paper-raised);font-size:var(--step--1);color:var(--ink-soft)}.test>span:first-child{font-size:var(--step--2);font-weight:750;letter-spacing:var(--tracking-label);color:var(--ink)}.test strong{color:var(--ink)}
-@media(max-width:900px){.cases{grid-template-columns:1fr}}@media(max-width:620px){.section{min-height:20rem}.igu{left:16%;right:16%}.dimension{left:16%;right:16%}.callout{position:relative;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;margin:.45rem;max-width:none}.callout+ .dimension{bottom:4.5rem}.test{align-items:flex-start;flex-direction:column;gap:.2rem}}
+.photo-explainer{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.intro{margin:0 0 var(--space-l);max-width:74ch;color:var(--ink-soft);font-size:var(--step--1)}.photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-l)}.photo-card{overflow:hidden;border:1px solid var(--line);border-top:4px solid var(--ink);border-radius:var(--radius-lg);background:var(--paper-raised);box-shadow:var(--shadow-soft)}.photo-card.failed{border-top-color:var(--danger)}.photo-card.surface{border-top-color:var(--accent)}.photo-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--paper-sunk)}.photo-wrap img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}.photo-badge{position:absolute;left:0;bottom:0;padding:.55rem .7rem;background:color-mix(in srgb,var(--ink) 86%,transparent);color:var(--paper);font-size:10px;font-weight:750;letter-spacing:.1em}.failed .photo-badge{background:color-mix(in srgb,var(--danger) 88%,transparent)}.surface .photo-badge{background:color-mix(in srgb,var(--accent-ink) 88%,transparent)}.photo-copy{padding:var(--space-m)}.photo-copy h3{margin:0;font-size:var(--step-1);line-height:1.14}.photo-copy>p{margin:.55rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.check{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--space-xs);margin-top:var(--space-s);padding:.8rem .9rem;background:var(--paper-sunk);border-left:3px solid var(--ink);font-size:var(--step--1)}.failed .check{border-left-color:var(--danger)}.surface .check{border-left-color:var(--accent)}.check strong{color:var(--ink)}.check span{color:var(--ink-soft)}.quick-answer{display:grid;grid-template-columns:auto 1fr;gap:var(--space-m);align-items:start;margin-top:var(--space-l);padding:var(--space-m);border:2px solid var(--ink);background:var(--paper-raised)}.qa-label{font-size:var(--step--2);font-weight:750;letter-spacing:var(--tracking-label);color:var(--ink-faint)}.quick-answer div+div{display:grid;gap:.25rem}.quick-answer strong{font-size:var(--step-0)}.quick-answer span{color:var(--ink-soft);font-size:var(--step--1)}.photo-note{display:flex;flex-wrap:wrap;gap:.3rem var(--space-s);margin-top:var(--space-s);font-size:var(--step--2);color:var(--ink-faint)}.photo-note span:first-child{font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)}
+@media(max-width:800px){.photo-grid{grid-template-columns:1fr}.quick-answer{grid-template-columns:1fr;gap:.35rem}}
 </style>
