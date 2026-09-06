@@ -1,17 +1,30 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
-import guidesHeroSrc from '../../assets/hero/guides.jpg';
 
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
-// Real stock photography, not staged as a Clearview job -- same disclosure
-// rule as the AI hero images elsewhere on the site.
-const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp', quality: 76 });
+const guideById = new Map(guides.map((guide) => [guide.id, guide]));
+const startHere = [
+  {
+    label: 'Something feels wrong',
+    detail: 'Drafts, fogged glass, sticky windows, soft sills, or uneven rooms.',
+    id: 'signs-you-need-new-windows',
+  },
+  {
+    label: 'The glass is fogged',
+    detail: 'Figure out whether the moisture is on the room side or inside the glass.',
+    id: 'fogged-windows',
+  },
+  {
+    label: 'I need to understand the scope',
+    detail: 'See when an insert makes sense, when full-frame work is involved, and what moves the budget.',
+    id: 'full-frame-vs-insert',
+  },
+];
 ---
 <BaseLayout
   title="Window replacement guides"
@@ -19,62 +32,77 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
   path="/guides"
   crumbs={[{ name: 'Guides', href: '/guides' }]}
 >
-  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
-    <div class="wrap">
-      <p class="kicker">Guides</p>
-      <h1>Understand the opening before you buy a window.</h1>
-      <p class="lede">
-        Short answers to the questions people ask before they call. Written for Washington
-        weather, not a national sales script.
-      </p>
+  <section class="guide-hero">
+    <div class="wrap guide-hero-grid">
+      <div class="guide-hero-copy">
+        <p class="kicker">Guides / homeowner reference</p>
+        <h1>Start with the problem you can see.</h1>
+        <p class="lede">
+          These guides are built to help you identify the question before you buy anything:
+          what is happening, what it could mean, and what needs to be measured at the house.
+        </p>
+      </div>
+
+      <aside class="guide-hero-note" aria-label="How to use these guides">
+        <span class="note-index">00</span>
+        <p class="note-label">The point of the guides</p>
+        <strong>Know what you are looking at before you ask for a price.</strong>
+        <p>Photos can suggest a problem. The opening condition, glass, and installation details decide the scope.</p>
+      </aside>
     </div>
-    <p class="hero-photo-credit">Stock photography — not an actual Clearview job or job site</p>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <div class="section-heading guide-section-heading">
+        <div>
+          <p class="rule-label">Start here</p>
+          <h2>What are you trying to figure out?</h2>
+        </div>
+        <p class="section-intro">Choose the closest match. You do not need to know the window terminology first.</p>
+      </div>
+
+      <div class="start-grid">
+        {startHere.map((item, index) => {
+          const guide = guideById.get(item.id);
+          return guide ? (
+            <a class="start-card" href={`/guides/${guide.id}`}>
+              <span class="start-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <span class="start-content">
+                <span class="start-label">{item.label}</span>
+                <strong>{guide.data.title}</strong>
+                <span class="start-detail">{item.detail}</span>
+                <span class="start-link">Open guide <span aria-hidden="true">→</span></span>
+              </span>
+            </a>
+          ) : null;
+        })}
+      </div>
+    </div>
   </section>
 
   <section class="section">
     <div class="wrap" data-reveal>
-      <p class="rule-label">{guides.length} guides</p>
+      <div class="section-heading guide-section-heading">
+        <div>
+          <p class="rule-label">{guides.length} guides</p>
+          <h2>The reference shelf</h2>
+        </div>
+        <p class="section-intro">Read these in order when you are planning a project from scratch, or jump to the question you already have.</p>
+      </div>
+
       <ol class="guide-index">
         {guides.map((guide, index) => (
           <li>
             <a href={`/guides/${guide.id}`}>
               <span class="guide-num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-
-              {/* Three of the four guides carry a photo; the fourth leads with a
-                  drawn cross-section instead. Rather than leave a hole in the
-                  row, that one gets a typographic tile — a deliberate object,
-                  not a missing image. */}
-              {guide.data.heroImage ? (
-                <span class="guide-thumb">
-                  <Image
-                    src={guide.data.heroImage}
-                    alt=""
-                    widths={[160, 320]}
-                    sizes="160px"
-                    format="webp"
-                    quality={70}
-                    loading="lazy"
-                  />
-                </span>
-              ) : (
-                <span class="guide-thumb guide-thumb-drawn" aria-hidden="true">
-                  <svg viewBox="0 0 64 48" role="presentation" focusable="false">
-                    <rect x="4" y="6" width="10" height="36" class="t-wall" />
-                    <rect x="50" y="6" width="10" height="36" class="t-wall" />
-                    <rect x="14" y="6" width="6" height="36" class="t-keep" />
-                    <rect x="44" y="6" width="6" height="36" class="t-keep" />
-                    <rect x="20" y="10" width="24" height="28" class="t-unit" />
-                    <line x1="32" y1="10" x2="32" y2="38" class="t-unit-line" />
-                  </svg>
-                  <span class="guide-thumb-label">Drawn</span>
-                </span>
-              )}
-
               <span class="guide-text">
                 <span class="guide-topic">{guide.data.topic}</span>
                 <strong>{guide.data.title}</strong>
                 <span class="guide-blurb">{guide.data.description}</span>
+                <span class="guide-open">Read guide <span aria-hidden="true">→</span></span>
               </span>
+              <span class="guide-chevron" aria-hidden="true">↗</span>
             </a>
           </li>
         ))}
@@ -82,32 +110,239 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
     </div>
   </section>
 
+  <section class="section is-tight">
+    <div class="wrap" data-reveal>
+      <div class="guide-principle">
+        <div class="principle-mark" aria-hidden="true">CV</div>
+        <div>
+          <p class="rule-label">One useful distinction</p>
+          <h2>A guide can narrow the question. A measure answers it.</h2>
+          <p>
+            Use the reference material to understand the symptom and the terminology. For an actual project,
+            the opening, existing frame, access, glass requirements, and installation conditions still have to be evaluated at the house.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <CtaBar
-    heading="Read enough? Get it measured."
-    body="The guides get you to the right questions. A measure gets you the answer for your house."
+    heading="Ready for the house-specific answer?"
+    body="Bring the rough window count and the problem you noticed. We can start there and schedule the measure from the same conversation."
   />
 </BaseLayout>
 
 <style>
-  .page-hero-photo {
+  .guide-hero {
     position: relative;
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
+    background:
+      linear-gradient(135deg, var(--paper) 0%, var(--paper-raised) 58%, var(--accent-wash) 100%);
+    border-bottom: 1px solid var(--line);
   }
 
-  .hero-photo-credit {
+  .guide-hero::before,
+  .guide-hero::after {
+    content: '';
     position: absolute;
-    right: var(--space-s);
-    bottom: var(--space-2xs);
-    margin: 0;
-    font-size: var(--step--2);
-    color: var(--on-dark-faint);
-    opacity: 0.75;
+    pointer-events: none;
   }
 
-  /* Numbered, because they are meant to be read in order by someone working
-     out whether they have a problem. A card grid implied they were
-     interchangeable. */
+  .guide-hero::before {
+    width: 28rem;
+    height: 28rem;
+    right: -9rem;
+    top: -12rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-radius: 50%;
+  }
+
+  .guide-hero::after {
+    width: 44rem;
+    height: 1px;
+    right: -4rem;
+    bottom: 3.5rem;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    transform: rotate(-18deg);
+    transform-origin: right center;
+  }
+
+  .guide-hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.6fr);
+    gap: var(--space-xl);
+    align-items: end;
+    min-height: 29rem;
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
+
+  .guide-hero-copy {
+    max-width: 47rem;
+  }
+
+  .guide-hero-copy h1 {
+    max-width: 13ch;
+    margin: 0.5rem 0 0;
+  }
+
+  .guide-hero-copy .lede {
+    max-width: 42rem;
+    margin: var(--space-m) 0 0;
+    font-size: var(--step-1);
+  }
+
+  .guide-hero-note {
+    position: relative;
+    display: grid;
+    gap: 0.45rem;
+    align-content: start;
+    padding: var(--space-m);
+    border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+    border-left: 3px solid var(--accent);
+    background: color-mix(in srgb, var(--paper-raised) 82%, transparent);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .note-index {
+    font-size: var(--step-3);
+    line-height: 0.9;
+    font-weight: 700;
+    letter-spacing: var(--tracking-display);
+    color: var(--ink-numeral);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .note-label {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .guide-hero-note strong {
+    font-size: var(--step-1);
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .guide-hero-note p:last-child {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .guide-section-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 28rem);
+    gap: var(--space-xl);
+    align-items: end;
+  }
+
+  .guide-section-heading h2 {
+    margin-top: 0.35rem;
+  }
+
+  .section-intro {
+    max-width: 32rem;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .start-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-s);
+    margin-top: var(--space-l);
+  }
+
+  .start-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-s);
+    min-height: 16rem;
+    padding: var(--space-m);
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-soft);
+    transition: transform var(--dur) var(--ease-out), border-color var(--dur-fast) var(--ease), box-shadow var(--dur) var(--ease-out);
+  }
+
+  .start-card:hover,
+  .start-card:focus-visible {
+    transform: translateY(-0.2rem);
+    border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+    box-shadow: var(--shadow-strong);
+  }
+
+  .start-number {
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    color: var(--ink-numeral);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .start-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .start-label,
+  .guide-topic {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+
+  .start-card strong {
+    margin-top: 0.45rem;
+    font-size: var(--step-1);
+    line-height: 1.15;
+    font-weight: 600;
+  }
+
+  .start-detail {
+    margin-top: 0.65rem;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .start-link,
+  .guide-open {
+    margin-top: auto;
+    padding-top: var(--space-m);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+
+  .start-link span,
+  .guide-open span {
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .start-card:hover .start-link span,
+  .start-card:focus-visible .start-link span,
+  .guide-index a:hover .guide-open span,
+  .guide-index a:focus-visible .guide-open span {
+    transform: translateX(0.25rem);
+  }
+
   .guide-index {
     margin: var(--space-l) 0 0;
     padding: 0;
@@ -121,9 +356,9 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
 
   .guide-index a {
     display: grid;
-    grid-template-columns: 3.5rem 9rem minmax(0, 1fr);
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
     gap: var(--space-m);
-    align-items: start;
+    align-items: center;
     padding: var(--space-m) 0;
     text-decoration: none;
     color: inherit;
@@ -138,10 +373,6 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
 
   .guide-num {
     font-size: var(--step-3);
-    /* 700, not 600, so the large-text contrast bar (3:1) actually applies.
-       WCAG treats "bold" as >=700, and at the mobile size below this numeral
-       lands at 19.4px — under 24px, so weight is what decides which threshold
-       it is judged against. */
     font-weight: 700;
     line-height: 1;
     letter-spacing: var(--tracking-display);
@@ -161,10 +392,6 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
   }
 
   .guide-topic {
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-label);
-    font-size: var(--step--2);
-    font-weight: 500;
     color: var(--ink-faint);
   }
 
@@ -176,86 +403,130 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
   }
 
   .guide-blurb {
+    max-width: 54rem;
+    margin-top: 0.2rem;
     color: var(--ink-soft);
     font-size: var(--step--1);
-    max-width: var(--measure);
   }
 
-  /* Thumbnails ─────────────────────────────────────────────────────────── */
-  .guide-thumb {
-    display: block;
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--paper-sunk);
+  .guide-open {
+    margin-top: 0.65rem;
+    padding-top: 0;
+    justify-self: start;
   }
 
-  .guide-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform var(--dur-slow) var(--ease-out);
-  }
-
-  .guide-index a:hover .guide-thumb img,
-  .guide-index a:focus-visible .guide-thumb img {
-    transform: scale(1.05);
-  }
-
-  .guide-thumb-drawn {
-    display: grid;
+  .guide-chevron {
+    display: inline-grid;
+    width: 2.2rem;
+    height: 2.2rem;
     place-items: center;
-    background: var(--accent-wash);
-    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-  }
-
-  .guide-thumb-drawn svg {
-    width: 62%;
-    height: auto;
-  }
-
-  .t-wall { fill: color-mix(in srgb, var(--ink) 14%, transparent); }
-  .t-keep { fill: color-mix(in srgb, var(--accent) 45%, transparent); }
-  .t-unit { fill: var(--paper-raised); stroke: var(--ink); stroke-width: 2; }
-  .t-unit-line { stroke: var(--ink); stroke-width: 2; }
-
-  .guide-thumb-label {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0.2rem 0.45rem 0.3rem;
-    background: color-mix(in srgb, var(--paper-raised) 82%, transparent);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-label);
-    font-size: var(--step--2);
-    font-weight: 500;
+    border: 1px solid var(--line);
+    border-radius: 50%;
     color: var(--accent-ink);
+    transition: transform var(--dur) var(--ease-out), border-color var(--dur-fast) var(--ease);
+  }
+
+  .guide-index a:hover .guide-chevron,
+  .guide-index a:focus-visible .guide-chevron {
+    transform: translate(0.15rem, -0.15rem);
+    border-color: var(--accent);
+  }
+
+  .guide-principle {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: var(--space-l);
+    align-items: start;
+    padding: var(--space-l);
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .principle-mark {
+    display: grid;
+    width: 4rem;
+    height: 4rem;
+    place-items: center;
+    border: 1px solid var(--line);
+    background: var(--accent-wash);
+    color: var(--accent-ink);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .guide-principle h2 {
+    max-width: 24ch;
+    margin: 0.35rem 0 0;
+  }
+
+  .guide-principle p:last-child {
+    max-width: 58rem;
+    margin-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 900px) {
+    .guide-hero-grid,
+    .guide-section-heading {
+      grid-template-columns: 1fr;
+    }
+
+    .guide-hero-grid {
+      min-height: auto;
+    }
+
+    .guide-hero-copy h1 {
+      max-width: 16ch;
+    }
+
+    .guide-hero-note {
+      max-width: 34rem;
+    }
+
+    .start-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .start-card {
+      min-height: 0;
+    }
   }
 
   @media (max-width: 700px) {
+    .guide-hero::after {
+      display: none;
+    }
+
+    .guide-hero-grid {
+      padding-top: var(--space-l);
+      padding-bottom: var(--space-l);
+    }
+
+    .guide-hero-note {
+      padding: var(--space-s);
+    }
+
     .guide-index a {
       grid-template-columns: 2.5rem minmax(0, 1fr);
       gap: var(--space-2xs) var(--space-s);
-      align-items: center;
+      align-items: start;
+      padding: var(--space-m) 0;
     }
 
-    /* The thumbnail spans under the number so the title keeps the full width
-       rather than being squeezed into a third of a phone screen. */
-    .guide-thumb {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      aspect-ratio: 16 / 7;
-      margin-top: var(--space-2xs);
+    .guide-num {
+      font-size: var(--step-1);
+    }
+
+    .guide-chevron {
+      display: none;
     }
 
     .guide-text {
       align-self: center;
     }
 
-    .guide-num {
+    .guide-text strong {
       font-size: var(--step-1);
     }
 
@@ -263,6 +534,12 @@ const heroBg = await getImage({ src: guidesHeroSrc, width: 2400, format: 'webp',
     .guide-index a:focus-visible {
       padding-left: 0;
       background: transparent;
+    }
+
+    .guide-principle {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+      padding: var(--space-m) 0;
     }
   }
 </style>
