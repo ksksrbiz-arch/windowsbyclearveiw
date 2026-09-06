@@ -1,38 +1,61 @@
 ---
 interface Props { heading?: string | null; }
-const { heading = 'Flashing is easier to understand as a sequence.' } = Astro.props;
+const { heading = 'Window flashing: build the drainage path.' } = Astro.props;
 const steps = [
-  ['01','PREP THE OPENING','Expose and prepare the sill before the window goes in.'],
-  ['02','BUILD THE SILL','Give incidental water a controlled path back outside.'],
-  ['03','TIE IN THE SIDES','Jamb flashing overlaps the sill treatment so water keeps moving down.'],
-  ['04','FINISH THE HEAD','The top treatment sheds over the sides; the water path never turns inward.'],
+  ['01', 'SILL', 'Create the low point first. Water that enters the opening needs a controlled path out.'],
+  ['02', 'WINDOW', 'Set and secure the unit in the prepared opening.'],
+  ['03', 'JAMBS', 'Side flashing ties into the sill so water keeps moving downward.'],
+  ['04', 'HEAD', 'The upper treatment sheds over the sides; the WRB remains part of the water-management layer.'],
 ];
 ---
 <figure class="flashing-explainer">
   {heading && <figcaption class="heading">{heading}</figcaption>}
-  <p class="intro">Think of the installation as a <strong>drainage assembly</strong>. Each layer has to hand water to the layer below it and ultimately to the exterior.</p>
-  <div class="steps">
-    {steps.map(([n,title,desc], i) => (
-      <article class="step">
-        <div class="step-head"><span>{n}</span><div><p>STEP {n}</p><h3>{title}</h3></div></div>
-        <div class={`section section-${i + 1}`} aria-label={title} role="img">
-          <div class="exterior">EXTERIOR</div><div class="room">ROOM</div>
-          <div class="wall-left"></div><div class="wall-right"></div><div class="opening"></div>
-          {i === 0 && <><div class="rough-opening"></div><div class="tool-line"></div></>}
-          {i >= 1 && <div class="sill-pan"></div>}
-          {i >= 2 && <><div class="sill-pan"></div><div class="jamb left"></div><div class="jamb right"></div></>}
-          {i === 3 && <div class="head"></div>}
-          {i >= 1 && <div class="window"></div>}
-          {i >= 1 && <div class="water"></div>}
-        </div>
-        <p class="desc">{desc}</p>
-      </article>
+  <p class="intro">The goal is simple: <strong>water moves down, then out.</strong> The drawing below shows the layers as they relate to the wall, not as a parts list.</p>
+
+  <div class="section-board" role="img" aria-label="Architectural wall section through a window opening. The drawing shows exterior siding, sheathing, weather-resistive barrier, a rough opening, window frame and glazing, sill pan, jamb flashing and head flashing. A blue water path travels down from the head, along the jamb, onto the sill pan and out toward the exterior.">
+    <div class="wall-layer siding">SIDING</div>
+    <div class="wall-layer sheathing">SHEATHING</div>
+    <div class="wall-layer wrb">WRB</div>
+    <div class="opening-zone">
+      <div class="rough-label">ROUGH OPENING</div>
+      <div class="window-unit">
+        <div class="frame-depth"></div>
+        <div class="glass-pane"></div>
+        <div class="meeting-rail"></div>
+        <div class="window-label">WINDOW</div>
+      </div>
+      <div class="sill-pan"></div>
+      <div class="jamb-flash left"></div>
+      <div class="jamb-flash right"></div>
+      <div class="head-flash"></div>
+      <div class="step-tag tag-1"><b>1</b><span>SILL</span></div>
+      <div class="step-tag tag-2"><b>2</b><span>WINDOW</span></div>
+      <div class="step-tag tag-3"><b>3</b><span>JAMBS</span></div>
+      <div class="step-tag tag-4"><b>4</b><span>HEAD</span></div>
+      <div class="water water-1"></div>
+      <div class="water water-2"></div>
+      <div class="water water-3"></div>
+      <div class="water-tip"></div>
+      <div class="water-label">WATER → DOWN → OUT</div>
+    </div>
+    <div class="wall-layer interior">INTERIOR WALL</div>
+    <div class="zone exterior">EXTERIOR</div>
+    <div class="zone room">ROOM</div>
+    <div class="section-note note-top">WRB laps over the head treatment</div>
+    <div class="section-note note-bottom">sill treatment drains toward exterior</div>
+  </div>
+
+  <div class="step-key">
+    {steps.map(([n,title,desc]) => (
+      <article><span class="step-number">{n}</span><div><h3>{title}</h3><p>{desc}</p></div></article>
     ))}
   </div>
-  <div class="rule"><strong>Read the water path.</strong><span>Down the sides → onto the sill → out to the exterior.</span></div>
+
+  <div class="rule"><strong>The rule to remember:</strong><span>Every upper layer needs a path to shed onto the layer below it. A flashing detail is successful when incidental water can leave the wall assembly instead of finding its way inward.</span></div>
 </figure>
 
 <style>
-.flashing-explainer{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-s)}.step{padding:var(--space-s);border:1px solid var(--line);background:var(--paper-raised);border-radius:var(--radius-lg)}.step-head{display:grid;grid-template-columns:2.5rem 1fr;gap:var(--space-xs);align-items:center;margin-bottom:var(--space-s)}.step-head>span{display:grid;width:2.35rem;height:2.35rem;place-items:center;border-radius:50%;background:var(--accent);color:var(--paper);font-weight:750}.step-head p{margin:0;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--ink-faint)}.step-head h3{margin:0;font-size:var(--step-0);line-height:1.12}.section{position:relative;height:17rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 8%,transparent),var(--paper-sunk) 30%,var(--paper-sunk) 70%,color-mix(in srgb,var(--accent) 8%,transparent))}.exterior,.room{position:absolute;top:.8rem;font-size:9px;font-weight:750;letter-spacing:.14em;color:var(--ink-faint)}.exterior{left:.8rem}.room{right:.8rem}.wall-left,.wall-right{position:absolute;top:3rem;bottom:0;width:28%;background:color-mix(in srgb,var(--ink) 14%,transparent);border-top:3px solid var(--line-strong)}.wall-left{left:0}.wall-right{right:0}.opening{position:absolute;left:28%;right:28%;top:3rem;bottom:0;background:var(--paper-raised);border-top:3px solid var(--line-strong)}.rough-opening{position:absolute;left:31%;right:31%;top:4.8rem;bottom:1rem;border:3px dashed var(--danger)}.tool-line{position:absolute;left:27%;right:27%;bottom:2rem;height:3px;background:var(--danger)}.sill-pan{position:absolute;left:25%;right:25%;bottom:1.4rem;height:.75rem;background:var(--accent);transform:skewX(-12deg);box-shadow:0 -.5rem 0 -0.22rem var(--accent)}.window{position:absolute;left:30%;right:30%;top:5rem;bottom:2.7rem;border:4px solid var(--ink);background:color-mix(in srgb,var(--accent-2) 8%,var(--paper-raised))}.window::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink-soft)}.jamb{position:absolute;top:5rem;bottom:2.6rem;width:.55rem;background:var(--accent);z-index:3}.jamb.left{left:29%}.jamb.right{right:29%}.head{position:absolute;left:29%;right:29%;top:4.7rem;height:.6rem;background:var(--accent);z-index:3}.water{position:absolute;right:12%;top:4rem;width:2.3rem;height:9rem;border-right:5px solid var(--accent-ink);border-bottom:5px solid var(--accent-ink);border-radius:0 0 1.5rem 0;transform:skewX(-10deg)}.water::after{content:'';position:absolute;right:-.65rem;bottom:-.75rem;border-left:.55rem solid transparent;border-right:.55rem solid transparent;border-top:1rem solid var(--accent-ink)}.section-1 .opening{background:color-mix(in srgb,var(--danger) 3%,var(--paper-raised))}.section-4 .water{height:11rem}.desc{margin:var(--space-s) 0 0;color:var(--ink-soft);font-size:var(--step--1)}.rule{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);align-items:baseline;margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border-left:3px solid var(--accent);border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-raised);font-size:var(--step--1)}.rule span{color:var(--ink-soft)}
-@media(max-width:1000px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.steps{grid-template-columns:1fr}.rule{grid-template-columns:1fr;gap:.2rem}}
+.flashing-explainer{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.intro{margin:0 0 var(--space-l);max-width:74ch;color:var(--ink-soft);font-size:var(--step--1)}.intro strong{color:var(--ink)}
+.section-board{position:relative;min-height:39rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 8%,transparent),var(--paper-sunk) 20%,var(--paper-raised) 50%,var(--paper-sunk) 80%,color-mix(in srgb,var(--ink) 8%,transparent))}.wall-layer{position:absolute;top:6rem;bottom:3rem;border-top:3px solid var(--line-strong);display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;text-orientation:mixed;font-size:10px;font-weight:750;letter-spacing:.1em;color:var(--ink-faint)}.siding{left:0;width:17%;background:repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 13%,transparent) 0 12px,transparent 12px 23px)}.sheathing{left:17%;width:4%;background:color-mix(in srgb,var(--ink) 8%,transparent)}.wrb{left:21%;width:5%;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink)}.interior{right:0;width:17%;background:repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 7%,transparent) 0 15px,transparent 15px 27px)}.opening-zone{position:absolute;left:26%;right:17%;top:8rem;bottom:4.5rem;background:var(--paper-raised);border:3px solid var(--line-strong);box-shadow:var(--shadow-soft)}.rough-label{position:absolute;top:.7rem;left:1rem;font-size:10px;font-weight:750;letter-spacing:.1em;color:var(--danger)}.window-unit{position:absolute;left:10%;right:10%;top:4rem;bottom:5rem;border:5px solid var(--ink);background:var(--paper-raised);box-shadow:0 .45rem 0 color-mix(in srgb,var(--ink) 12%,transparent)}.frame-depth{position:absolute;inset:.8rem;border:2px solid var(--ink-soft)}.glass-pane{position:absolute;inset:2.1rem;background:color-mix(in srgb,var(--accent-2) 10%,transparent);border:2px solid var(--accent-ink)}.meeting-rail{position:absolute;left:2.1rem;right:2.1rem;top:50%;height:2px;background:var(--ink-soft)}.window-label{position:absolute;left:0;right:0;top:calc(50% + 1rem);text-align:center;font-size:14px;font-weight:750;letter-spacing:.12em;color:var(--ink)}.sill-pan{position:absolute;left:8%;right:8%;bottom:3.5rem;height:1rem;background:var(--accent);border:2px solid var(--accent-ink);transform:skewX(-10deg);z-index:3}.jamb-flash{position:absolute;top:3.8rem;bottom:3.2rem;width:.75rem;background:var(--accent);z-index:3}.jamb-flash.left{left:7.7%}.jamb-flash.right{right:7.7%}.head-flash{position:absolute;left:7.7%;right:7.7%;top:3.55rem;height:.8rem;background:var(--accent);z-index:3}.step-tag{position:absolute;z-index:6;display:flex;align-items:center;gap:.4rem;padding:.3rem .45rem;border:1px solid var(--line);background:color-mix(in srgb,var(--paper-raised) 96%,transparent);box-shadow:var(--shadow-soft);font-size:9px;font-weight:750;letter-spacing:.08em}.step-tag b{display:grid;width:1.45rem;height:1.45rem;place-items:center;border-radius:50%;background:var(--accent);color:var(--paper);font-size:9px}.tag-1{left:2.2rem;bottom:2.2rem}.tag-2{left:43%;top:1.7rem}.tag-3{left:.9rem;top:12rem}.tag-4{right:.9rem;top:10rem}.water{position:absolute;z-index:4;border-color:var(--accent-ink);border-style:solid}.water-1{right:11%;top:1.2rem;width:2rem;height:8rem;border-width:0 5px 5px 0;border-radius:0 0 1rem 0}.water-2{right:7.2%;top:9rem;height:16rem;width:1rem;border-width:0 5px 0 0}.water-3{right:7.2%;bottom:4.1rem;width:7rem;height:5rem;border-width:0 0 5px 5px;border-radius:0 0 0 1rem;transform:skewX(-12deg)}.water-tip{position:absolute;right:0.5rem;bottom:3.4rem;width:0;height:0;border-top:.55rem solid transparent;border-bottom:.55rem solid transparent;border-left:.95rem solid var(--accent-ink);z-index:5}.water-label{position:absolute;right:1.2rem;top:2rem;color:var(--accent-ink);font-size:10px;font-weight:750;letter-spacing:.1em;white-space:nowrap;transform:translateX(-20%)}.zone{position:absolute;top:1rem;font-size:10px;font-weight:750;letter-spacing:.15em;color:var(--ink-faint)}.exterior{left:1rem}.room{right:1rem}.section-note{position:absolute;padding:.4rem .55rem;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--paper-raised) 94%,transparent);box-shadow:var(--shadow-soft);font-size:10px;color:var(--ink-soft);max-width:13rem}.note-top{left:28%;top:4.2rem}.note-bottom{left:28%;bottom:1rem}.step-key{display:grid;grid-template-columns:repeat(4,1fr);margin-top:var(--space-m);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.step-key article{display:grid;grid-template-columns:2.4rem 1fr;gap:var(--space-xs);padding:var(--space-s);border-right:1px solid var(--line)}.step-key article:last-child{border-right:0}.step-number{display:grid;width:2.1rem;height:2.1rem;place-items:center;border-radius:50%;background:var(--accent);color:var(--paper);font-size:10px;font-weight:750}.step-key h3{margin:0;font-size:var(--step--1);letter-spacing:.03em}.step-key p{margin:.2rem 0 0;font-size:var(--step--2);line-height:1.35;color:var(--ink-soft)}.rule{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);align-items:baseline;margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border-left:3px solid var(--accent);border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-raised);font-size:var(--step--1)}.rule span{color:var(--ink-soft)}
+@media(max-width:900px){.step-key{grid-template-columns:repeat(2,1fr)}.step-key article:nth-child(2){border-right:0}.step-key article:nth-child(3),.step-key article:nth-child(4){border-top:1px solid var(--line)}}@media(max-width:650px){.section-board{min-height:34rem}.wall-layer{font-size:8px}.opening-zone{left:19%;right:14%}.step-key{grid-template-columns:1fr}.step-key article{border-right:0;border-bottom:1px solid var(--line)}.step-key article:last-child{border-bottom:0}.note-top,.note-bottom{display:none}.tag-3{left:.6rem}.tag-4{right:.4rem}}
 </style>
