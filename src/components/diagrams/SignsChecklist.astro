@@ -1,263 +1,52 @@
 ---
-/**
- * The six signs from the guide body, laid out as icon callouts flanking a
- * drawn window rather than another wall of paragraphs. Modeled on the kind
- * of "signs it's time" infographic a window company would run as a
- * standalone social asset — badge icon, short label, one line — but built
- * as token-driven inline SVG/HTML so it stays in the site's own palette and
- * needs no image export pipeline. The window art in the middle is
- * decorative (aria-hidden); the six items are real text in a real list, so
- * nothing here depends on the drawing to be understood or to reflow on a
- * narrow screen.
- */
 interface Props {
   heading?: string | null;
 }
-const { heading = 'Six signs, at a glance' } = Astro.props;
+const { heading = 'Six signs a window may be the problem' } = Astro.props;
+
+const signs = [
+  ['01','Draft','Air moves at the lock, stool, or meeting rail.','DRAFTY'],
+  ['02','Fogged glass','Haze sits between panes where a cloth cannot reach.','SEALED UNIT'],
+  ['03','Hard to operate','Sash sticks, drops, rattles, or will not lock.','HARDWARE / FRAME'],
+  ['04','Soft sill','Wood is soft, stained, swollen, or repeatedly wet.','MOISTURE'],
+  ['05','Cold room','One room feels cold beside the glass even when the heat is on.','COMFORT'],
+  ['06','Rising bills','Tired glass and frames can leave a room harder to heat.','EFFICIENCY'],
+];
 ---
-<figure class="signs-detail">
-  {heading && <figcaption class="signs-heading">{heading}</figcaption>}
+<figure class="signs-diagram">
+  {heading && <figcaption class="diagram-heading">{heading}</figcaption>}
+  <p class="diagram-intro">You do not need six problems. <strong>Two or three persistent signs in the same room</strong> are enough reason to have the opening looked at.</p>
 
-  <div class="signs-layout">
-    <ul class="signs-col signs-col-left">
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><path d="M9 16q4-5 8 0t8 0t8 0" class="si-line" /><path d="M9 24q4-5 8 0t8 0t8 0" class="si-line" /><path d="M9 32q4-5 8 0t8 0t8 0" class="si-line" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>Drafts at the frame</strong>
-          <span>Air moves at the lock, the stool, or the meeting rail.</span>
-        </span>
-      </li>
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><circle cx="16" cy="20" r="4" class="si-fill" /><circle cx="24" cy="26" r="5.5" class="si-fill" /><circle cx="31" cy="19" r="3.5" class="si-fill" /><circle cx="21" cy="16" r="3" class="si-fill" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>Fog between the panes</strong>
-          <span>Seal has failed inside the glass — cannot wipe it off.</span>
-        </span>
-      </li>
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><rect x="14" y="20" width="16" height="13" rx="2" class="si-stroke" /><path d="M18 20v-4a4 4 0 0 1 8 0v4" class="si-line" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>Sash sticks or won't lock</strong>
-          <span>Hardware is fighting paint, swelling, or a frame gone out of square.</span>
-        </span>
-      </li>
-    </ul>
-
-    <svg class="signs-window" viewBox="0 0 260 380" aria-hidden="true" focusable="false">
-      <rect x="10" y="10" width="240" height="360" rx="6" class="sw-frame" />
-      <rect x="30" y="30" width="200" height="150" class="sw-sash" />
-      <line x1="130" y1="30" x2="130" y2="180" class="sw-mullion" />
-      <line x1="30" y1="105" x2="230" y2="105" class="sw-mullion" />
-      <rect x="20" y="188" width="220" height="18" rx="2" class="sw-rail" />
-      <rect x="30" y="216" width="200" height="150" class="sw-sash" />
-      <line x1="130" y1="216" x2="130" y2="366" class="sw-mullion" />
-      <line x1="30" y1="291" x2="230" y2="291" class="sw-mullion" />
-      <rect x="120" y="192" width="20" height="10" rx="1.5" class="sw-latch" />
-    </svg>
-
-    <ul class="signs-col signs-col-right">
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><path d="M16 12c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14Z" class="si-stroke" /><path d="M27 18c0 5-5 7-5 12a5 5 0 0 0 10 0c0-5-5-7-5-12Z" class="si-stroke" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>Soft or stained sill</strong>
-          <span>Water has been getting into the opening.</span>
-        </span>
-      </li>
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><rect x="19" y="8" width="6" height="20" rx="3" class="si-stroke" /><circle cx="22" cy="32" r="6" class="si-fill" /><line x1="22" y1="14" x2="22" y2="28" class="si-line-thin" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>One room never matches</strong>
-          <span>Cold glass wins even with the furnace running.</span>
-        </span>
-      </li>
-      <li>
-        <span class="signs-badge" aria-hidden="true">
-          <svg viewBox="0 0 44 44"><path d="M9 28l7-6 6 4 8-9 5 4" class="si-line" fill="none" /><path d="M31 15h6v6" class="si-line" fill="none" /></svg>
-        </span>
-        <span class="signs-text">
-          <strong>The bill keeps climbing</strong>
-          <span>Leaky glass is the common leftover once insulation is decent.</span>
-        </span>
-      </li>
-    </ul>
+  <div class="sign-grid">
+    {signs.map(([n,title,text,tag], index) => (
+      <article class={`sign-card sign-card-${index + 1}`}>
+        <div class="sign-top">
+          <span class="sign-num">{n}</span>
+          <span class="sign-tag">{tag}</span>
+        </div>
+        <div class="sign-icon" aria-hidden="true">
+          {index === 0 && <svg viewBox="0 0 64 64"><path d="M8 24c7-9 14 9 21 0s14 9 21 0"/><path d="M8 39c7-9 14 9 21 0s14 9 21 0"/></svg>}
+          {index === 1 && <svg viewBox="0 0 64 64"><circle cx="22" cy="29" r="7"/><circle cx="34" cy="38" r="9"/><circle cx="46" cy="27" r="6"/></svg>}
+          {index === 2 && <svg viewBox="0 0 64 64"><rect x="16" y="27" width="32" height="23" rx="4"/><path d="M24 27v-6a8 8 0 0 1 16 0v6"/></svg>}
+          {index === 3 && <svg viewBox="0 0 64 64"><path d="M17 17c0 10-9 13-9 23a14 14 0 0 0 28 0c0-10-9-13-9-23"/><path d="M39 29c0 7-6 9-6 16a10 10 0 0 0 20 0c0-7-6-9-6-16"/></svg>}
+          {index === 4 && <svg viewBox="0 0 64 64"><path d="M32 10v44"/><path d="M19 23a18 18 0 1 0 26 0"/><path d="M25 28l7 5 7-5"/></svg>}
+          {index === 5 && <svg viewBox="0 0 64 64"><path d="M10 47l12-11 9 7 13-17 10 8"/><path d="M43 17h11v11"/></svg>}
+        </div>
+        <h3>{title}</h3>
+        <p>{text}</p>
+      </article>
+    ))}
   </div>
 
-  <p class="signs-foot">
-    One of these is worth watching. Two or more in the same room is worth a measure — see the
-    full list below for how urgent each one really is.
-  </p>
+  <div class="sign-bottom">
+    <div><strong>1 sign</strong><span>Watch it.</span></div>
+    <div class="active"><strong>2+ signs</strong><span>Worth a measure.</span></div>
+    <div><strong>Soft wood / active leak</strong><span>Do not wait on cosmetics.</span></div>
+  </div>
 </figure>
 
 <style>
-  .signs-detail {
-    margin: 0;
-  }
-
-  .signs-heading {
-    display: block;
-    margin: 0 0 var(--space-m);
-    font-size: var(--step-2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-display);
-    line-height: var(--leading-display);
-  }
-
-  .signs-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(140px, 200px) minmax(0, 1fr);
-    align-items: center;
-    gap: var(--space-l);
-  }
-
-  .signs-window {
-    width: 100%;
-    height: auto;
-    justify-self: center;
-  }
-
-  .sw-frame {
-    fill: var(--paper-raised);
-    stroke: var(--ink);
-    stroke-width: 3;
-  }
-
-  .sw-sash {
-    fill: color-mix(in srgb, var(--accent) 14%, transparent);
-    stroke: var(--ink-soft);
-    stroke-width: 1.5;
-  }
-
-  .sw-mullion {
-    stroke: var(--ink-soft);
-    stroke-width: 2;
-  }
-
-  .sw-rail {
-    fill: color-mix(in srgb, var(--ink) 16%, transparent);
-    stroke: var(--ink);
-    stroke-width: 1.5;
-  }
-
-  .sw-latch {
-    fill: var(--ink);
-  }
-
-  .signs-col {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: grid;
-    gap: var(--space-l);
-  }
-
-  .signs-col li {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-s);
-  }
-
-  .signs-col-right li {
-    flex-direction: row-reverse;
-    text-align: right;
-  }
-
-  .signs-badge {
-    flex: none;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: var(--paper-raised);
-    border: 2px solid var(--accent-ink);
-    color: var(--accent-ink);
-  }
-
-  .signs-badge svg {
-    width: 1.65rem;
-    height: 1.65rem;
-  }
-
-  .si-line,
-  .si-line-thin {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .si-line-thin {
-    stroke-width: 1.8;
-  }
-
-  .si-stroke {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.4;
-  }
-
-  .si-fill {
-    fill: currentColor;
-    opacity: 0.75;
-  }
-
-  .signs-text {
-    display: grid;
-    gap: 0.2rem;
-  }
-
-  .signs-text strong {
-    font-size: var(--step-0);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  .signs-text span {
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-    max-width: 26ch;
-  }
-
-  .signs-col-right .signs-text span {
-    margin-left: auto;
-  }
-
-  .signs-foot {
-    margin: var(--space-l) 0 0;
-    max-width: var(--measure);
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-
-  @media (max-width: 800px) {
-    .signs-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .signs-window {
-      max-width: 220px;
-      order: -1;
-      margin: 0 auto var(--space-m);
-    }
-
-    .signs-col-right li {
-      flex-direction: row;
-      text-align: left;
-    }
-
-    .signs-col-right .signs-text span {
-      margin-left: 0;
-    }
-  }
+  .signs-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:70ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
+  .sign-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-xs)}.sign-card{padding:var(--space-m);min-height:220px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.sign-top{display:flex;justify-content:space-between;align-items:center;gap:var(--space-xs)}.sign-num{font-size:var(--step--2);font-weight:750;letter-spacing:.08em;color:var(--accent-ink)}.sign-tag{padding:.22rem .45rem;border:1px solid var(--line);border-radius:999px;color:var(--ink-faint);font-size:10px;font-weight:650;letter-spacing:.08em}.sign-icon{width:3.5rem;height:3.5rem;margin:var(--space-m) 0 var(--space-s);display:grid;place-items:center;border-radius:var(--radius);background:var(--paper-sunk);color:var(--accent-ink)}.sign-icon svg{width:2rem;height:2rem;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.sign-card-2 .sign-icon{color:var(--danger)}.sign-card-3 .sign-icon{color:var(--ink)}.sign-card-4 .sign-icon{color:var(--danger)}.sign-card-5 .sign-icon{color:var(--accent)}.sign-card-6 .sign-icon{color:var(--accent-ink)}.sign-card h3{margin:0 0 .35rem;font-size:var(--step-0)}.sign-card p{margin:0;color:var(--ink-soft);font-size:var(--step--1);max-width:34ch}.sign-bottom{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-s);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.sign-bottom div{display:grid;gap:.15rem;padding:var(--space-s);border-right:1px solid var(--line)}.sign-bottom div:last-child{border-right:0}.sign-bottom strong{font-size:var(--step--1)}.sign-bottom span{color:var(--ink-soft);font-size:var(--step--2)}.sign-bottom .active{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+  @media(max-width:850px){.sign-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.sign-grid,.sign-bottom{grid-template-columns:1fr}.sign-bottom div{border-right:0;border-bottom:1px solid var(--line)}.sign-bottom div:last-child{border-bottom:0}}
 </style>
