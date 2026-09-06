@@ -2,51 +2,73 @@
 interface Props {
   heading?: string | null;
 }
-const { heading = 'Six signs a window may be the problem' } = Astro.props;
+const { heading = 'What are you actually seeing at the window?' } = Astro.props;
 
 const signs = [
-  ['01','Draft','Air moves at the lock, stool, or meeting rail.','DRAFTY'],
-  ['02','Fogged glass','Haze sits between panes where a cloth cannot reach.','SEALED UNIT'],
-  ['03','Hard to operate','Sash sticks, drops, rattles, or will not lock.','HARDWARE / FRAME'],
-  ['04','Soft sill','Wood is soft, stained, swollen, or repeatedly wet.','MOISTURE'],
-  ['05','Cold room','One room feels cold beside the glass even when the heat is on.','COMFORT'],
-  ['06','Rising bills','Tired glass and frames can leave a room harder to heat.','EFFICIENCY'],
+  ['01','Air movement','DRAFT','Look at the lock, meeting rail, sash corners, and weatherstrip.'],
+  ['02','Fog inside the glass','GLASS','Haze remains after the room-side surface is wiped.'],
+  ['03','Sash will not stay or lock','OPERATION','Binding or dropping can point to frame, sash, or hardware problems.'],
+  ['04','Soft or stained wood','MOISTURE','Probe the sill and corners. Repeated wetting matters more than the stain alone.'],
+  ['05','Cold zone beside glass','COMFORT','Notice whether one room or one opening is consistently colder than the rest.'],
+  ['06','Bills rose with no other change','EFFICIENCY','Use this as a clue, not proof; compare it with drafts, glass, and room comfort.'],
 ];
 ---
 <figure class="signs-diagram">
   {heading && <figcaption class="diagram-heading">{heading}</figcaption>}
-  <p class="diagram-intro">You do not need six problems. <strong>Two or three persistent signs in the same room</strong> are enough reason to have the opening looked at.</p>
+  <p class="diagram-intro">A symptom is a clue, not a diagnosis. The useful pattern is <strong>where the problem is</strong>, <strong>when it happens</strong>, and whether more than one sign appears at the same opening.</p>
 
-  <div class="sign-grid">
-    {signs.map(([n,title,text,tag], index) => (
-      <article class={`sign-card sign-card-${index + 1}`}>
-        <div class="sign-top">
-          <span class="sign-num">{n}</span>
-          <span class="sign-tag">{tag}</span>
-        </div>
-        <div class="sign-icon" aria-hidden="true">
-          {index === 0 && <svg viewBox="0 0 64 64"><path d="M8 24c7-9 14 9 21 0s14 9 21 0"/><path d="M8 39c7-9 14 9 21 0s14 9 21 0"/></svg>}
-          {index === 1 && <svg viewBox="0 0 64 64"><circle cx="22" cy="29" r="7"/><circle cx="34" cy="38" r="9"/><circle cx="46" cy="27" r="6"/></svg>}
-          {index === 2 && <svg viewBox="0 0 64 64"><rect x="16" y="27" width="32" height="23" rx="4"/><path d="M24 27v-6a8 8 0 0 1 16 0v6"/></svg>}
-          {index === 3 && <svg viewBox="0 0 64 64"><path d="M17 17c0 10-9 13-9 23a14 14 0 0 0 28 0c0-10-9-13-9-23"/><path d="M39 29c0 7-6 9-6 16a10 10 0 0 0 20 0c0-7-6-9-6-16"/></svg>}
-          {index === 4 && <svg viewBox="0 0 64 64"><path d="M32 10v44"/><path d="M19 23a18 18 0 1 0 26 0"/><path d="M25 28l7 5 7-5"/></svg>}
-          {index === 5 && <svg viewBox="0 0 64 64"><path d="M10 47l12-11 9 7 13-17 10 8"/><path d="M43 17h11v11"/></svg>}
-        </div>
-        <h3>{title}</h3>
-        <p>{text}</p>
-      </article>
-    ))}
+  <div class="diagnostic-board">
+    <div class="window-diagnostic" role="img" aria-label="Simplified front view of a replacement window with six numbered inspection zones around the sash, glass, sill, and room side.">
+      <svg viewBox="0 0 760 560" aria-hidden="true">
+        <rect x="28" y="26" width="704" height="508" rx="18" class="field"/>
+        <rect x="160" y="96" width="440" height="350" rx="6" class="wall-frame"/>
+        <rect x="190" y="126" width="380" height="290" rx="4" class="window"/>
+        <rect x="218" y="154" width="324" height="234" class="glass"/>
+        <line x1="380" y1="154" x2="380" y2="388" class="mullion"/>
+        <line x1="218" y1="360" x2="542" y2="360" class="meeting"/>
+        <rect x="190" y="414" width="380" height="20" class="sill"/>
+        <rect x="270" y="434" width="220" height="18" class="stool"/>
+        <line x1="140" y1="452" x2="620" y2="452" class="floor"/>
+
+        <path d="M125 155 H184" class="leader draft"/><circle cx="108" cy="155" r="23" class="marker marker-1"/><text x="108" y="162" class="marker-text">1</text>
+        <path d="M575 180 H650" class="leader glass-leader"/><circle cx="675" cy="180" r="23" class="marker marker-2"/><text x="675" y="187" class="marker-text">2</text>
+        <path d="M545 360 H620" class="leader op"/><circle cx="645" cy="360" r="23" class="marker marker-3"/><text x="645" y="367" class="marker-text">3</text>
+        <path d="M190 425 H124" class="leader moisture"/><circle cx="99" cy="425" r="23" class="marker marker-4"/><text x="99" y="432" class="marker-text">4</text>
+        <path d="M220 280 H135" class="leader comfort"/><circle cx="110" cy="280" r="23" class="marker marker-5"/><text x="110" y="287" class="marker-text">5</text>
+        <path d="M380 468 V500" class="leader efficiency"/><circle cx="380" cy="515" r="23" class="marker marker-6"/><text x="380" y="522" class="marker-text">6</text>
+
+        <text x="380" y="78" class="zone-title">WINDOW</text>
+        <text x="380" y="284" class="glass-label">GLASS / SASH</text>
+        <text x="380" y="404" class="sill-label">SILL</text>
+        <text x="380" y="486" class="room-label">ROOM SIDE</text>
+      </svg>
+    </div>
+
+    <div class="diagnostic-list">
+      {signs.map(([number,title,tag,text], index) => (
+        <article class="diagnostic-item">
+          <div class={`diag-num diag-${index + 1}`}>{number}</div>
+          <div>
+            <div class="diag-head"><h3>{title}</h3><span>{tag}</span></div>
+            <p>{text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
   </div>
 
-  <div class="sign-bottom">
-    <div><strong>1 sign</strong><span>Watch it.</span></div>
-    <div class="active"><strong>2+ signs</strong><span>Worth a measure.</span></div>
-    <div><strong>Soft wood / active leak</strong><span>Do not wait on cosmetics.</span></div>
+  <div class="interpretation">
+    <div><strong>One isolated symptom</strong><span>Start by watching the pattern and locating it.</span></div>
+    <div><strong>Several signs at one opening</strong><span>Worth having that opening evaluated.</span></div>
+    <div><strong>Soft material or active water</strong><span>Condition matters more than appearance.</span></div>
   </div>
 </figure>
 
 <style>
-  .signs-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:70ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
-  .sign-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-xs)}.sign-card{padding:var(--space-m);min-height:220px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.sign-top{display:flex;justify-content:space-between;align-items:center;gap:var(--space-xs)}.sign-num{font-size:var(--step--2);font-weight:750;letter-spacing:.08em;color:var(--accent-ink)}.sign-tag{padding:.22rem .45rem;border:1px solid var(--line);border-radius:999px;color:var(--ink-faint);font-size:10px;font-weight:650;letter-spacing:.08em}.sign-icon{width:3.5rem;height:3.5rem;margin:var(--space-m) 0 var(--space-s);display:grid;place-items:center;border-radius:var(--radius);background:var(--paper-sunk);color:var(--accent-ink)}.sign-icon svg{width:2rem;height:2rem;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.sign-card-2 .sign-icon{color:var(--danger)}.sign-card-3 .sign-icon{color:var(--ink)}.sign-card-4 .sign-icon{color:var(--danger)}.sign-card-5 .sign-icon{color:var(--accent)}.sign-card-6 .sign-icon{color:var(--accent-ink)}.sign-card h3{margin:0 0 .35rem;font-size:var(--step-0)}.sign-card p{margin:0;color:var(--ink-soft);font-size:var(--step--1);max-width:34ch}.sign-bottom{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-s);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.sign-bottom div{display:grid;gap:.15rem;padding:var(--space-s);border-right:1px solid var(--line)}.sign-bottom div:last-child{border-right:0}.sign-bottom strong{font-size:var(--step--1)}.sign-bottom span{color:var(--ink-soft);font-size:var(--step--2)}.sign-bottom .active{background:color-mix(in srgb,var(--accent) 9%,transparent)}
-  @media(max-width:850px){.sign-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.sign-grid,.sign-bottom{grid-template-columns:1fr}.sign-bottom div{border-right:0;border-bottom:1px solid var(--line)}.sign-bottom div:last-child{border-bottom:0}}
+  .signs-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
+  .diagnostic-board{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:var(--space-l);align-items:start}.window-diagnostic{padding:var(--space-xs);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}.window-diagnostic svg{display:block;width:100%;height:auto;border-radius:var(--radius);background:var(--paper-sunk)}
+  .field{fill:var(--paper-sunk);stroke:var(--line);stroke-width:1.5}.wall-frame{fill:color-mix(in srgb,var(--ink) 11%,transparent);stroke:var(--ink);stroke-width:4}.window{fill:var(--paper-raised);stroke:var(--ink);stroke-width:4}.glass{fill:color-mix(in srgb,var(--accent-2) 13%,transparent);stroke:var(--accent-ink);stroke-width:2}.mullion,.meeting{stroke:var(--ink-soft);stroke-width:2}.sill{fill:color-mix(in srgb,var(--danger) 12%,transparent);stroke:var(--danger);stroke-width:2}.stool{fill:color-mix(in srgb,var(--ink) 13%,transparent)}.floor{stroke:var(--line-strong);stroke-width:2}.leader{fill:none;stroke:var(--ink-soft);stroke-width:2}.draft{stroke:var(--accent)}.glass-leader{stroke:var(--danger)}.op{stroke:var(--ink)}.moisture{stroke:var(--danger)}.comfort{stroke:var(--accent)}.efficiency{stroke:var(--accent-ink)}.marker{stroke:var(--paper-raised);stroke-width:3}.marker-1,.marker-5,.marker-6{fill:var(--accent)}.marker-2,.marker-4{fill:var(--danger)}.marker-3{fill:var(--ink)}.marker-text{fill:var(--paper);font:750 18px Outfit,system-ui,sans-serif;text-anchor:middle}.zone-title,.glass-label,.sill-label,.room-label{fill:var(--ink-faint);font:750 12px Outfit,system-ui,sans-serif;letter-spacing:.12em;text-anchor:middle}.glass-label{fill:var(--ink-soft)}.sill-label{fill:var(--danger)}.room-label{fill:var(--ink-faint)}
+  .diagnostic-list{border-top:1px solid var(--line)}.diagnostic-item{display:grid;grid-template-columns:2.7rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.diag-num{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.diag-1,.diag-5,.diag-6{background:var(--accent)}.diag-2,.diag-4{background:var(--danger)}.diag-head{display:flex;gap:var(--space-xs);align-items:baseline;justify-content:space-between}.diag-head h3{margin:0;font-size:var(--step-0)}.diag-head span{flex:none;color:var(--ink-faint);font-size:10px;font-weight:700;letter-spacing:.08em}.diagnostic-item p{margin:.2rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}
+  .interpretation{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-l);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.interpretation div{display:grid;gap:.2rem;padding:var(--space-s);border-right:1px solid var(--line)}.interpretation div:last-child{border-right:0}.interpretation strong{font-size:var(--step--1)}.interpretation span{color:var(--ink-soft);font-size:var(--step--2)}
+  @media(max-width:950px){.diagnostic-board{grid-template-columns:1fr}}@media(max-width:650px){.interpretation{grid-template-columns:1fr}.interpretation div{border-right:0;border-bottom:1px solid var(--line)}.interpretation div:last-child{border-bottom:0}}
 </style>
