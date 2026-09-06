@@ -29,22 +29,26 @@ const diagramNotes = {
   'insert-vs-full-frame': {
     eyebrow: 'Visual explainer',
     title: 'See what actually changes at the opening.',
-    body: 'The easiest way to understand the two methods is to look at what stays in place — and what comes out.',
+    body: 'The easiest way to understand the two methods is to look at how far the existing assembly is opened up.',
+    answer: 'Insert replacement keeps the existing frame. Full-frame replacement removes that frame and takes the work back to the rough opening.',
   },
   'flashing-order': {
     eyebrow: 'Visual explainer',
-    title: 'Read the water path from the outside in.',
-    body: 'The layers are shown in the order they need to shed water so the wall assembly stays protected.',
+    title: 'Follow the water path, not the product names.',
+    body: 'The drawing shows the wall layers together so you can see how sill, jamb, head, and WRB treatments relate to one another.',
+    answer: 'The objective is controlled drainage: water moves down through the exterior layers and leaves the wall assembly instead of turning inward.',
   },
   'glass-anatomy': {
     eyebrow: 'Visual explainer',
-    title: 'The location of the fog tells you what failed.',
-    body: 'Compare moisture between the panes with condensation that forms on the room-facing surface.',
+    title: 'The location of the moisture tells you what failed.',
+    body: 'Compare moisture inside the insulated glass unit with condensation sitting on the room-facing surface.',
+    answer: 'Fog trapped between panes points to an insulated-glass seal failure. Water on the room-side surface is surface condensation.',
   },
   'signs-checklist': {
     eyebrow: 'Visual checklist',
-    title: 'Look for the pattern, not just one symptom.',
-    body: 'One nuisance can be seasonal. Several signs together are a better reason to investigate the window system.',
+    title: 'Inspect the opening before you decide what the symptom means.',
+    body: 'Use the numbered zones to locate the symptom first, then compare multiple signs at the same opening.',
+    answer: 'A symptom is a clue, not a diagnosis. Location, repetition, and the condition of the opening matter more than one isolated nuisance.',
   },
 };
 
@@ -84,8 +88,6 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
-// Rendered markdown is not available here, so estimate from the source body.
-// 200 wpm, floored at one minute — it is a reading cue, not a measurement.
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
 ---
@@ -123,6 +125,11 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
   {currentDiagramNote && (
     <section class="section is-tight section-sunk visual-section">
       <div class="wrap" data-reveal>
+        <div class="answer-strip">
+          <span class="answer-mark">ANSWER</span>
+          <strong>{currentDiagramNote.answer}</strong>
+        </div>
+
         <div class="visual-intro">
           <div>
             <p class="rule-label">{currentDiagramNote.eyebrow}</p>
@@ -279,7 +286,34 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     text-decoration-color: currentColor;
   }
 
-  /* Visual explainer frame ────────────────────────────────────────────── */
+  .answer-strip {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-s);
+    align-items: center;
+    margin-bottom: var(--space-l);
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--line-strong);
+    border-left: 4px solid var(--accent);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .answer-mark {
+    padding: .28rem .45rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .11em;
+  }
+
+  .answer-strip strong {
+    max-width: 72ch;
+    font-size: var(--step-0);
+    line-height: 1.3;
+  }
+
   .visual-section .wrap {
     max-width: 92rem;
   }
@@ -310,7 +344,6 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     box-shadow: var(--shadow-soft);
   }
 
-  /* Guide photo ───────────────────────────────────────────────────────── */
   .guide-photo {
     margin: 0;
   }
@@ -332,7 +365,6 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     color: var(--ink-faint);
   }
 
-  /* Secondary diagram ─────────────────────────────────────────────────── */
   .secondary-diagram {
     margin-top: var(--space-2xl);
     padding-top: var(--space-xl);
@@ -350,7 +382,6 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     text-transform: uppercase;
   }
 
-  /* FAQ ───────────────────────────────────────────────────────────────── */
   .faq-ask {
     margin-top: var(--space-m);
     font-size: var(--step--1);
@@ -360,7 +391,6 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     font-weight: 500;
   }
 
-  /* Related ───────────────────────────────────────────────────────────── */
   .related {
     margin-top: var(--space-2xl);
   }
@@ -443,6 +473,12 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
       align-items: start;
       flex-direction: column;
       gap: var(--space-2xs);
+    }
+
+    .answer-strip {
+      grid-template-columns: 1fr;
+      gap: .4rem;
+      align-items: start;
     }
   }
 </style>
