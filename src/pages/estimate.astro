@@ -14,9 +14,14 @@ import { mailHref, site, telHref } from '../data/site';
       <p class="kicker">Estimate</p>
       <h1>Tell us about the house.</h1>
       <p class="lede">
-        A rough window count, the city, and what you have noticed are enough to start. We will follow up
-        to schedule a measure. <a href="/tools/window-replacement-cost-calculator">Already comparing costs?</a>
+        Start with your name, phone, city, and a rough idea of the job. You do not need exact measurements
+        before you contact us — Mark confirms the opening details at the house. <a href="/tools/window-replacement-cost-calculator">Already comparing costs?</a>
       </p>
+      <div class="start-points" aria-label="What to have ready">
+        <span><strong>1</strong> Rough window count</span>
+        <span><strong>2</strong> City</span>
+        <span><strong>3</strong> What you&rsquo;ve noticed</span>
+      </div>
     </div>
   </section>
   <section class="section">
@@ -31,12 +36,21 @@ import { mailHref, site, telHref } from '../data/site';
           count, or email <a href={mailHref()}>{site.email}</a>.
         </p>
 
-        <p class="rule-label">What happens next</p>
+        <p class="rule-label">What to expect</p>
         <ol class="steps">
-          <li><strong>A call back.</strong> Usually the same day.</li>
-          <li><strong>A measure.</strong> Every opening, at the house.</li>
-          <li><strong>A written estimate.</strong> Method listed per opening.</li>
+          <li><strong>Tell us the basics.</strong> A rough count and what you&rsquo;ve noticed is enough to start.</li>
+          <li><strong>Get a call back.</strong> Mark confirms the project and schedules the next step.</li>
+          <li><strong>Get measured.</strong> Every opening is checked at the house before anything is ordered.</li>
+          <li><strong>Get it in writing.</strong> The estimate reflects the method and openings actually measured.</li>
         </ol>
+
+        <div class="estimate-path">
+          <p class="rule-label">Not ready for a call?</p>
+          <a href="/tools/window-replacement-cost-calculator">
+            Run the free cost estimator first <span aria-hidden="true">→</span>
+          </a>
+          <p>It gives you a planning range without asking for your contact information.</p>
+        </div>
 
         <p class="fine-print">
           No lists, no resale, no follow-up sequence. One person calls you back.
@@ -47,8 +61,40 @@ import { mailHref, site, telHref } from '../data/site';
 </BaseLayout>
 
 <style>
-  /* The form gets the wider column: it is the reason the page exists, and the
-     previous even split gave equal weight to a paragraph beside it. */
+  .page-hero {
+    overflow: hidden;
+  }
+
+  .start-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-top: var(--space-m);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .start-points span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--space-xs) var(--space-m) var(--space-xs) 0;
+    margin-right: var(--space-m);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .start-points strong {
+    display: inline-grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    font-size: var(--step--2);
+    color: var(--accent-ink);
+  }
+
   .estimate-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -62,6 +108,55 @@ import { mailHref, site, telHref } from '../data/site';
 
   .estimate-aside .rule-label:first-child {
     margin-top: 0;
+  }
+
+  .estimate-path {
+    margin-top: var(--space-l);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--line);
+  }
+
+  .estimate-path .rule-label {
+    margin: 0 0 var(--space-2xs);
+  }
+
+  .estimate-path a {
+    font-size: var(--step-0);
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+
+  .estimate-path a span {
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .estimate-path a:hover span,
+  .estimate-path a:focus-visible span {
+    transform: translateX(0.25rem);
+  }
+
+  .estimate-path p:last-child {
+    margin-top: var(--space-2xs);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 700px) {
+    .start-points {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .start-points span {
+      margin-right: 0;
+      padding-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .start-points span:last-child {
+      border-bottom: 0;
+    }
   }
 
   @media (max-width: 900px) {
