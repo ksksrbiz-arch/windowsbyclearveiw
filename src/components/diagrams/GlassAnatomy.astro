@@ -2,78 +2,174 @@
 interface Props {
   heading?: string | null;
 }
-const { heading = 'Fog between the panes or condensation on the room side?' } = Astro.props;
+const { heading = 'Where is the moisture? The depth tells you.' } = Astro.props;
 ---
 <figure class="glass-diagram">
   {heading && <figcaption class="diagram-heading">{heading}</figcaption>}
-  <p class="diagram-intro">The location of the moisture tells you what is wrong. <strong>Inside the sealed gap = failed glass.</strong> <strong>On the room-side surface = condensation.</strong></p>
+  <p class="diagram-intro">Stop looking at the fog as a spot on the glass. Look at the <strong>depth</strong>: between the panes, or on the room-facing surface.</p>
 
-  <div class="glass-grid">
-    <article class="glass-card glass-fail">
-      <header><span class="status-dot">A</span><div><h3>Failed insulated glass</h3><p>Fog is trapped between the panes.</p></div></header>
-      <svg class="glass-svg" viewBox="0 0 560 360" role="img" aria-label="Cross-section of insulated glass with two panes, a sealed cavity between them containing moisture droplets, and a failed seal marked in red.">
-        <defs><linearGradient id="glass-fade-a" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="currentColor" stop-opacity=".08"/><stop offset="1" stop-color="currentColor" stop-opacity=".02"/></linearGradient></defs>
-        <rect x="24" y="36" width="512" height="286" rx="18" class="glass-frame" />
-        <rect x="120" y="76" width="30" height="200" rx="4" class="pane" />
-        <rect x="410" y="76" width="30" height="200" rx="4" class="pane" />
-        <rect x="150" y="88" width="260" height="176" rx="8" fill="url(#glass-fade-a)" class="cavity" />
-        <rect x="150" y="78" width="260" height="18" rx="6" class="spacer-bad" />
-        <rect x="150" y="258" width="260" height="18" rx="6" class="spacer-bad" />
-        <g class="fog"><circle cx="205" cy="126" r="12"/><circle cx="248" cy="178" r="18"/><circle cx="301" cy="136" r="13"/><circle cx="350" cy="204" r="20"/><circle cx="224" cy="226" r="10"/><circle cx="323" cy="242" r="11"/></g>
-        <path d="M164 84 H396" class="seal-crack" />
-        <line x1="436" y1="110" x2="492" y2="86" class="leader" />
-        <text x="500" y="82" class="callout callout-end">ROOM SIDE</text>
-        <line x1="410" y1="176" x2="474" y2="176" class="leader leader-bad" />
-        <text x="482" y="172" class="callout callout-end">FOG IS HERE</text>
-        <text x="482" y="190" class="caption caption-end">between panes</text>
-        <line x1="150" y1="304" x2="150" y2="332" class="leader" />
-        <text x="150" y="350" class="caption">outer pane</text>
-        <line x1="280" y1="304" x2="280" y2="332" class="leader" />
-        <text x="280" y="350" class="caption">sealed gap</text>
-        <line x1="410" y1="304" x2="410" y2="332" class="leader" />
-        <text x="410" y="350" class="caption">inner pane</text>
-      </svg>
-      <div class="glass-answer glass-answer-bad"><strong>What it means:</strong> the sealed unit has failed. A cloth cannot reach this moisture.</div>
+  <div class="glass-cases">
+    <article class="glass-case glass-failed">
+      <div class="case-head">
+        <div class="case-index">A</div>
+        <div>
+          <p class="case-kicker">Seal failure</p>
+          <h3>Fog is trapped inside the insulated glass unit</h3>
+        </div>
+      </div>
+
+      <div class="section-drawing" role="img" aria-label="Side section of an insulated glass unit. Two glass panes are separated by a sealed cavity. Fog and moisture droplets are inside that cavity, between the panes. The room is shown on the right.">
+        <svg viewBox="0 0 860 390" aria-hidden="true">
+          <defs>
+            <linearGradient id="failed-cavity" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="currentColor" stop-opacity=".02" />
+              <stop offset=".5" stop-color="currentColor" stop-opacity=".10" />
+              <stop offset="1" stop-color="currentColor" stop-opacity=".02" />
+            </linearGradient>
+            <marker id="failed-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L10 5 L0 10 Z" class="marker-danger" />
+            </marker>
+          </defs>
+          <rect x="24" y="32" width="812" height="326" rx="18" class="drawing-field" />
+          <text x="65" y="62" class="zone-label">EXTERIOR</text>
+          <text x="720" y="62" class="zone-label room-zone">ROOM</text>
+
+          <rect x="220" y="98" width="22" height="205" class="glass-pane pane-out" />
+          <rect x="550" y="98" width="22" height="205" class="glass-pane pane-in" />
+          <rect x="242" y="116" width="308" height="169" rx="4" class="sealed-cavity" />
+          <rect x="242" y="98" width="308" height="18" rx="4" class="spacer-failed" />
+          <rect x="242" y="285" width="308" height="18" rx="4" class="spacer-failed" />
+          <path d="M242 102 H550" class="failed-seal" />
+
+          <g class="fog-group">
+            <circle cx="300" cy="160" r="12" />
+            <circle cx="355" cy="220" r="18" />
+            <circle cx="415" cy="148" r="10" />
+            <circle cx="470" cy="205" r="20" />
+            <circle cx="435" cy="250" r="11" />
+            <circle cx="325" cy="265" r="8" />
+          </g>
+
+          <line x1="230" y1="318" x2="230" y2="340" class="dim-line" />
+          <line x1="550" y1="318" x2="550" y2="340" class="dim-line" />
+          <line x1="230" y1="331" x2="550" y2="331" class="dim-line" />
+          <text x="390" y="354" class="dimension-label">INSULATED CAVITY</text>
+
+          <line x1="390" y1="142" x2="390" y2="84" class="leader danger" marker-end="url(#failed-arrow)" />
+          <text x="390" y="70" class="callout danger-text">1 · MOISTURE IS HERE</text>
+          <text x="390" y="86" class="supporting danger-text">between the panes</text>
+
+          <line x1="242" y1="102" x2="150" y2="80" class="leader danger" />
+          <text x="50" y="105" class="callout">2 · FAILED SEAL</text>
+          <text x="50" y="123" class="supporting">cavity is no longer protected</text>
+
+          <line x1="572" y1="200" x2="650" y2="200" class="leader" />
+          <text x="660" y="195" class="callout">3 · ROOM-SIDE PANE</text>
+          <text x="660" y="213" class="supporting">cloth cannot reach the fog</text>
+        </svg>
+      </div>
+
+      <div class="case-answer"><strong>What you are seeing:</strong> permanent haze or droplets that remain after wiping the room-side surface.</div>
     </article>
 
-    <article class="glass-card glass-ok">
-      <header><span class="status-dot">B</span><div><h3>Room-side condensation</h3><p>Water is sitting on the inside surface.</p></div></header>
-      <svg class="glass-svg" viewBox="0 0 560 360" role="img" aria-label="Cross-section of sound insulated glass with a sealed gas-filled cavity and water droplets forming on the room-side surface of the inner pane.">
-        <defs><linearGradient id="glass-fade-b" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="currentColor" stop-opacity=".08"/><stop offset="1" stop-color="currentColor" stop-opacity=".02"/></linearGradient></defs>
-        <rect x="24" y="36" width="512" height="286" rx="18" class="glass-frame" />
-        <rect x="120" y="76" width="30" height="200" rx="4" class="pane" />
-        <rect x="410" y="76" width="30" height="200" rx="4" class="pane" />
-        <rect x="150" y="88" width="260" height="176" rx="8" fill="url(#glass-fade-b)" class="cavity" />
-        <rect x="150" y="78" width="260" height="18" rx="6" class="spacer-good" />
-        <rect x="150" y="258" width="260" height="18" rx="6" class="spacer-good" />
-        <text x="280" y="176" class="gas-label">INSULATING GAS</text>
-        <text x="280" y="196" class="gas-sub">sealed cavity remains intact</text>
-        <g class="drops"><circle cx="450" cy="118" r="9"/><circle cx="474" cy="148" r="6"/><circle cx="448" cy="176" r="7"/><circle cx="482" cy="208" r="9"/><circle cx="452" cy="240" r="6"/></g>
-        <path d="M440 88 V276" class="room-line" />
-        <line x1="450" y1="126" x2="492" y2="126" class="leader leader-ok" />
-        <text x="500" y="122" class="callout callout-end">CONDENSATION</text>
-        <text x="500" y="140" class="caption caption-end">on room-side face</text>
-        <line x1="436" y1="284" x2="492" y2="310" class="leader" />
-        <text x="500" y="314" class="callout callout-end">CAN WIPE OFF</text>
-        <line x1="150" y1="304" x2="150" y2="332" class="leader" />
-        <text x="150" y="350" class="caption">outer pane</text>
-        <line x1="280" y1="304" x2="280" y2="332" class="leader" />
-        <text x="280" y="350" class="caption">sealed gap</text>
-        <line x1="410" y1="304" x2="410" y2="332" class="leader" />
-        <text x="410" y="350" class="caption">inner pane</text>
-      </svg>
-      <div class="glass-answer glass-answer-ok"><strong>What it means:</strong> the insulated unit can still be sound. Moisture is on the room side, so humidity and surface temperature matter.</div>
+    <article class="glass-case glass-condensation">
+      <div class="case-head">
+        <div class="case-index">B</div>
+        <div>
+          <p class="case-kicker">Surface condensation</p>
+          <h3>Water is on the room-facing surface of the glass</h3>
+        </div>
+      </div>
+
+      <div class="section-drawing" role="img" aria-label="Side section of a sound insulated glass unit. Two glass panes are separated by an intact sealed cavity. Water droplets form on the room-facing surface of the inner pane, outside the sealed unit.">
+        <svg viewBox="0 0 860 390" aria-hidden="true">
+          <defs>
+            <marker id="condense-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L10 5 L0 10 Z" class="marker-accent" />
+            </marker>
+          </defs>
+          <rect x="24" y="32" width="812" height="326" rx="18" class="drawing-field" />
+          <text x="65" y="62" class="zone-label">EXTERIOR</text>
+          <text x="720" y="62" class="zone-label room-zone">ROOM</text>
+
+          <rect x="220" y="98" width="22" height="205" class="glass-pane pane-out" />
+          <rect x="550" y="98" width="22" height="205" class="glass-pane pane-in" />
+          <rect x="242" y="116" width="308" height="169" rx="4" class="sealed-cavity" />
+          <rect x="242" y="98" width="308" height="18" rx="4" class="spacer-good" />
+          <rect x="242" y="285" width="308" height="18" rx="4" class="spacer-good" />
+
+          <text x="396" y="195" class="gas-title">SEALED CAVITY</text>
+          <text x="396" y="216" class="gas-sub">insulating gas stays between panes</text>
+
+          <g class="drops">
+            <circle cx="600" cy="142" r="8" />
+            <circle cx="625" cy="175" r="11" />
+            <circle cx="594" cy="210" r="6" />
+            <circle cx="635" cy="238" r="9" />
+            <circle cx="600" cy="270" r="7" />
+          </g>
+          <path d="M575 100 V302" class="room-surface" />
+
+          <line x1="610" y1="176" x2="610" y2="83" class="leader accent" marker-end="url(#condense-arrow)" />
+          <text x="610" y="70" class="callout accent-text">1 · WATER IS HERE</text>
+          <text x="610" y="88" class="supporting accent-text">on the room-side face</text>
+
+          <line x1="550" y1="118" x2="650" y2="105" class="leader" />
+          <text x="660" y="105" class="callout">2 · INNER PANE</text>
+          <text x="660" y="123" class="supporting">the sealed unit can still be intact</text>
+
+          <line x1="396" y1="255" x2="396" y2="318" class="leader" />
+          <text x="396" y="340" class="callout centered">3 · SEALED CAVITY STAYS CLEAR</text>
+        </svg>
+      </div>
+
+      <div class="case-answer"><strong>What you are seeing:</strong> water that can be wiped from the room-side surface. Humidity and the glass temperature affect how much forms.</div>
     </article>
   </div>
 
-  <div class="wipe-test"><span class="wipe-icon" aria-hidden="true">↔</span><strong>The quickest test:</strong> wipe the room-side glass. Clear after wiping? Condensation. Still hazy between panes? The seal has failed.</div>
+  <div class="field-test">
+    <div class="test-index">TEST</div>
+    <div><strong>Wipe the room side first.</strong> Clear after wiping = surface condensation. Still hazy between the panes = failed insulated glass.</div>
+  </div>
 </figure>
 
 <style>
-  .glass-diagram{margin:0}.diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.diagram-intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.diagram-intro strong{color:var(--ink)}
-  .glass-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-m)}.glass-card{padding:clamp(1rem,2vw,1.35rem);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}
-  .glass-card header{display:flex;gap:var(--space-s);align-items:center;margin-bottom:var(--space-s)}.status-dot{width:2.5rem;height:2.5rem;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-weight:700}.glass-fail .status-dot{background:var(--danger)}.glass-ok .status-dot{background:var(--accent)}.glass-card h3{margin:0 0 .15rem;font-size:var(--step-1)}.glass-card header p{margin:0;color:var(--ink-soft);font-size:var(--step--1)}
-  .glass-svg{display:block;width:100%;height:auto;background:var(--paper-sunk);border:1px solid var(--line);border-radius:var(--radius)}.glass-frame{fill:none;stroke:var(--ink);stroke-width:3}.pane{fill:color-mix(in srgb,var(--accent) 15%,transparent);stroke:var(--ink-soft);stroke-width:2}.cavity{stroke:var(--line);stroke-width:1}.spacer-bad{fill:color-mix(in srgb,var(--danger) 18%,transparent);stroke:var(--danger);stroke-width:2}.spacer-good{fill:color-mix(in srgb,var(--accent) 18%,transparent);stroke:var(--accent);stroke-width:2}.fog circle{fill:color-mix(in srgb,var(--ink) 34%,transparent)}.drops circle{fill:var(--accent-ink)}.seal-crack{stroke:var(--danger);stroke-width:5;stroke-dasharray:9 7}.room-line{stroke:var(--accent-ink);stroke-width:4;stroke-dasharray:4 6}.leader{stroke:var(--ink-faint);stroke-width:2}.leader-bad{stroke:var(--danger)}.leader-ok{stroke:var(--accent)}.callout{fill:var(--ink);font-family:Outfit,system-ui,sans-serif;font-size:12px;font-weight:750;letter-spacing:.08em}.callout-end{text-anchor:start}.caption{fill:var(--ink-soft);font-family:Outfit,system-ui,sans-serif;font-size:11px;font-weight:550}.caption-end{text-anchor:start}.gas-label{fill:var(--ink);font-family:Outfit,system-ui,sans-serif;font-size:14px;font-weight:750;text-anchor:middle;letter-spacing:.08em}.gas-sub{fill:var(--ink-faint);font-family:Outfit,system-ui,sans-serif;font-size:11px;text-anchor:middle}.glass-answer{margin-top:var(--space-s);padding:.75rem .9rem;border-radius:var(--radius);font-size:var(--step--1);color:var(--ink-soft)}.glass-answer-bad{background:color-mix(in srgb,var(--danger) 9%,transparent);border-left:3px solid var(--danger)}.glass-answer-ok{background:color-mix(in srgb,var(--accent) 10%,transparent);border-left:3px solid var(--accent)}.glass-answer strong{color:var(--ink)}
-  .wipe-test{display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-m);padding:var(--space-s) var(--space-m);border-radius:var(--radius-lg);background:var(--paper-raised);border:1px solid var(--line);font-size:var(--step--1);color:var(--ink-soft)}.wipe-icon{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--ink);color:var(--paper);font-size:1.2rem}.wipe-test strong{color:var(--ink)}
-  @media(max-width:800px){.glass-grid{grid-template-columns:1fr}}
+  .glass-diagram{margin:0}
+  .diagram-heading{display:block;margin:0 0 var(--space-2xs);font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}
+  .diagram-intro{margin:0 0 var(--space-l);max-width:68ch;color:var(--ink-soft);font-size:var(--step--1)}
+  .diagram-intro strong{color:var(--ink)}
+  .glass-cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-l)}
+  .glass-case{padding:var(--space-m);border:1px solid var(--line);border-top:3px solid var(--ink);border-radius:var(--radius-lg);background:var(--paper-raised)}
+  .glass-failed{border-top-color:var(--danger)}.glass-condensation{border-top-color:var(--accent)}
+  .case-head{display:grid;grid-template-columns:2.8rem 1fr;gap:var(--space-s);align-items:start;margin-bottom:var(--space-s)}
+  .case-index{display:grid;width:2.6rem;height:2.6rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step-0);font-weight:750}
+  .glass-failed .case-index{background:var(--danger)}.glass-condensation .case-index{background:var(--accent)}
+  .case-kicker{margin:0 0 .15rem;text-transform:uppercase;letter-spacing:var(--tracking-label);font-size:var(--step--2);font-weight:650;color:var(--ink-faint)}
+  .case-head h3{margin:0;font-size:var(--step-1);line-height:1.15}
+  .section-drawing{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-sunk)}
+  .section-drawing svg{display:block;width:100%;height:auto}
+  .drawing-field{fill:var(--paper-sunk);stroke:var(--line);stroke-width:1.5}
+  .zone-label{fill:var(--ink-faint);font:700 12px Outfit,system-ui,sans-serif;letter-spacing:.14em}
+  .room-zone{text-anchor:end}
+  .glass-pane{fill:color-mix(in srgb,var(--accent) 18%,transparent);stroke:var(--ink);stroke-width:2.5}
+  .pane-out{fill:color-mix(in srgb,var(--accent-2) 22%,transparent)}
+  .pane-in{fill:color-mix(in srgb,var(--accent) 24%,transparent)}
+  .sealed-cavity{fill:url(#failed-cavity);stroke:var(--line);stroke-width:1.5}
+  .spacer-failed{fill:color-mix(in srgb,var(--danger) 15%,transparent);stroke:var(--danger);stroke-width:2}
+  .spacer-good{fill:color-mix(in srgb,var(--accent) 14%,transparent);stroke:var(--accent);stroke-width:2}
+  .failed-seal{stroke:var(--danger);stroke-width:4;stroke-dasharray:8 6}
+  .fog-group circle{fill:color-mix(in srgb,var(--danger) 34%,transparent)}
+  .drops circle{fill:var(--accent-ink)}
+  .room-surface{stroke:var(--accent);stroke-width:5;stroke-dasharray:4 6}
+  .gas-title{fill:var(--ink);font:750 15px Outfit,system-ui,sans-serif;letter-spacing:.08em;text-anchor:middle}.gas-sub{fill:var(--ink-faint);font:11px Outfit,system-ui,sans-serif;text-anchor:middle}
+  .leader{fill:none;stroke:var(--ink-soft);stroke-width:2}.danger{stroke:var(--danger)}.accent{stroke:var(--accent)}
+  .marker-danger{fill:var(--danger)}.marker-accent{fill:var(--accent)}
+  .callout{fill:var(--ink);font:750 12px Outfit,system-ui,sans-serif;letter-spacing:.08em}.danger-text{fill:var(--danger)}.accent-text{fill:var(--accent-ink)}
+  .supporting{fill:var(--ink-soft);font:550 11px Outfit,system-ui,sans-serif}.centered{text-anchor:middle}
+  .dim-line{stroke:var(--ink-faint);stroke-width:1.5}.dimension-label{fill:var(--ink-faint);font:700 11px Outfit,system-ui,sans-serif;letter-spacing:.1em;text-anchor:middle}
+  .case-answer{margin-top:var(--space-s);padding:.8rem .9rem;border-left:3px solid var(--ink);background:var(--paper-sunk);color:var(--ink-soft);font-size:var(--step--1)}
+  .glass-failed .case-answer{border-left-color:var(--danger)}.glass-condensation .case-answer{border-left-color:var(--accent)}.case-answer strong{color:var(--ink)}
+  .field-test{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);align-items:center;margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border:1px solid var(--line);border-left:3px solid var(--ink);background:var(--paper-raised);font-size:var(--step--1);color:var(--ink-soft)}
+  .test-index{font-size:var(--step--2);font-weight:750;letter-spacing:.08em;color:var(--ink)}
+  @media(max-width:900px){.glass-cases{grid-template-columns:1fr}}
 </style>
