@@ -19,6 +19,9 @@ const {
       <p class="cta-label">Next step</p>
       <strong>{heading}</strong>
       <p>{body}</p>
+      <p class="cta-tool-link">
+        <a href="/tools/window-replacement-cost-calculator">Need a rough number first? Use the free cost estimator <span aria-hidden="true">→</span></a>
+      </p>
     </div>
     <div class="cta-actions">
       <a class="cta-phone" href={telHref()}>
@@ -32,16 +35,6 @@ const {
 </section>
 
 <style>
-  /* ───────────────────────────────────────────────────────────────────────
-     This band closes all seventeen pages, so a visitor sees it more than any
-     other element on the site. It used to be a thin dark strip with a 13px
-     label and two small buttons — the least emphatic thing on the page, in
-     the position that should carry the most.
-
-     Now the phone number is the object: set at display size, tappable across
-     its whole area, and the only place on the site where the accent becomes
-     a surface rather than a line.
-     ─────────────────────────────────────────────────────────────────────── */
   .cta-band {
     position: relative;
     isolation: isolate;
@@ -110,6 +103,26 @@ const {
     max-width: 36rem;
   }
 
+  .cta-tool-link {
+    margin-top: var(--space-xs) !important;
+  }
+
+  .cta-tool-link a {
+    color: var(--on-dark);
+    font-size: var(--step--1);
+    text-underline-offset: 0.2em;
+  }
+
+  .cta-tool-link span {
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .cta-tool-link a:hover span,
+  .cta-tool-link a:focus-visible span {
+    transform: translateX(0.25rem);
+  }
+
   .cta-actions {
     display: grid;
     gap: var(--space-xs);
@@ -117,8 +130,6 @@ const {
     flex: none;
   }
 
-  /* Deliberately not a .btn. On a contractor's site the phone number is the
-     conversion, and shrinking it to match a secondary link wastes it. */
   .cta-phone {
     display: grid;
     gap: 0.1rem;
