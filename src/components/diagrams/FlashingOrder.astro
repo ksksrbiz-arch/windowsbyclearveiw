@@ -18,9 +18,6 @@ const steps = [
   <div class="flash-board">
     <div class="wall-section">
       <svg viewBox="0 0 980 610" role="img" aria-label="Wall section at a window opening showing a sill drainage layer, window frame, jamb flashing, head flashing, weather resistive barrier, and a blue water path that moves down the sides and exits at the sill.">
-        <defs>
-          <marker id="water-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="water-marker"/></marker>
-        </defs>
         <rect x="30" y="30" width="920" height="550" rx="18" class="field"/>
 
         <!-- wall assembly -->
@@ -46,8 +43,9 @@ const steps = [
         <path d="M324 92 V192 H348" class="wrb-lap"/>
         <path d="M656 192 H676 V92" class="wrb-lap"/>
 
-        <!-- water path -->
-        <path d="M768 118 C730 145 708 175 688 210 C670 242 660 274 660 320 C660 373 641 415 622 448 C609 470 596 482 574 489" class="water-path" marker-end="url(#water-arrow)"/>
+        <!-- water path and explicit arrowhead (no reusable SVG marker id) -->
+        <path d="M768 118 C730 145 708 175 688 210 C670 242 660 274 660 320 C660 373 641 415 622 448 C609 470 596 482 574 489" class="water-path"/>
+        <polygon points="574,489 594,478 589,497" class="water-marker"/>
         <text x="785" y="111" class="water-title">INCIDENTAL WATER</text>
         <text x="785" y="130" class="water-sub">should move down + out</text>
 
