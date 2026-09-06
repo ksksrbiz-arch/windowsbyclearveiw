@@ -91,8 +91,15 @@ const scopeSplit = {
   ],
 };
 
-const projectInquiryMailto = mailHref() + `?subject=${encodeURIComponent('New construction project — plans/schedule attached')}` +
-  `&body=${encodeURIComponent('Project address or subdivision:\nBuilder / GC company:\nApproximate opening count:\nTarget set date:\n\n(Attach the plan set or window schedule if you have one.)')}`;
+// mailHref() falls back to /estimate when site.email is unset — appending a
+// mailto-style query string to that would silently get ignored by
+// EstimateForm, dropping the builder role prefill along with it. Route the
+// no-email case through ?role=builder instead so the fallback still lands
+// where it's supposed to.
+const projectInquiryMailto = site.email
+  ? mailHref() + `?subject=${encodeURIComponent('New construction project — plans/schedule attached')}` +
+    `&body=${encodeURIComponent('Project address or subdivision:\nBuilder / GC company:\nApproximate opening count:\nTarget set date:\n\n(Attach the plan set or window schedule if you have one.)')}`
+  : '/estimate?role=builder';
 ---
 <BaseLayout
   title="New construction windows for builders and GCs"
