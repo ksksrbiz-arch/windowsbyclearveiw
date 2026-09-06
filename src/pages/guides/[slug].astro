@@ -25,6 +25,29 @@ const related = (await getCollection('guides', ({ data, id }) => data.published 
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 
+const diagramNotes = {
+  'insert-vs-full-frame': {
+    eyebrow: 'Visual explainer',
+    title: 'See what actually changes at the opening.',
+    body: 'The easiest way to understand the two methods is to look at what stays in place — and what comes out.',
+  },
+  'flashing-order': {
+    eyebrow: 'Visual explainer',
+    title: 'Read the water path from the outside in.',
+    body: 'The layers are shown in the order they need to shed water so the wall assembly stays protected.',
+  },
+  'glass-anatomy': {
+    eyebrow: 'Visual explainer',
+    title: 'The location of the fog tells you what failed.',
+    body: 'Compare moisture between the panes with condensation that forms on the room-facing surface.',
+  },
+  'signs-checklist': {
+    eyebrow: 'Visual checklist',
+    title: 'Look for the pattern, not just one symptom.',
+    body: 'One nuisance can be seasonal. Several signs together are a better reason to investigate the window system.',
+  },
+};
+
 const article = {
   '@type': 'Article',
   headline: guide.data.title,
@@ -64,6 +87,7 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
 // Rendered markdown is not available here, so estimate from the source body.
 // 200 wpm, floored at one minute — it is a reading cue, not a measurement.
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
+const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
 ---
 <BaseLayout
   title={guide.data.title}
@@ -83,6 +107,10 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
       <p class="kicker">{guide.data.kicker}</p>
       <h1>{guide.data.title}</h1>
       <p class="lede">{guide.data.description}</p>
+      <div class="article-tools" aria-label="Guide actions">
+        <a href="/guides">All guides</a>
+        <a href="/ask">Ask a question</a>
+      </div>
       <p class="article-meta">
         <span>Written by <a href="/about">{site.owner}</a>, owner and installer</span>
         <span>{guide.data.topic}</span>
@@ -92,15 +120,25 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     </div>
   </section>
 
-  {guide.data.diagram && (
-    <section class="section is-tight section-sunk">
+  {currentDiagramNote && (
+    <section class="section is-tight section-sunk visual-section">
       <div class="wrap" data-reveal>
-        {guide.data.diagram === 'insert-vs-full-frame' && (
-          <InsertVsFullFrame heading={null} />
-        )}
-        {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
-        {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
-        {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
+        <div class="visual-intro">
+          <div>
+            <p class="rule-label">{currentDiagramNote.eyebrow}</p>
+            <h2>{currentDiagramNote.title}</h2>
+          </div>
+          <p>{currentDiagramNote.body}</p>
+        </div>
+
+        <div class="visual-frame">
+          {guide.data.diagram === 'insert-vs-full-frame' && (
+            <InsertVsFullFrame heading={null} />
+          )}
+          {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
+          {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
+          {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
+        </div>
       </div>
     </section>
   )}
@@ -134,6 +172,10 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     {guide.data.secondaryDiagram && (
       <div class="wrap is-narrow" data-reveal>
         <section class="section-tight secondary-diagram">
+          <div class="secondary-label">
+            <span>More detail</span>
+            <span aria-hidden="true">↓</span>
+          </div>
           {guide.data.secondaryDiagram === 'flashing-order' && <FlashingOrder />}
           {guide.data.secondaryDiagram === 'cost-build-up' && <EstimateBuildUp />}
         </section>
@@ -149,7 +191,13 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 
     <div class="wrap is-narrow" data-reveal>
       <section class="related">
-        <h2 class="rule-label">Keep reading</h2>
+        <div class="related-head">
+          <div>
+            <h2 class="rule-label">Keep reading</h2>
+            <p>Continue from the question you just answered.</p>
+          </div>
+          <a href="/guides">View all guides →</a>
+        </div>
         <ul class="related-list">
           {related.map((item) => (
             <li>
@@ -168,15 +216,36 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 </BaseLayout>
 
 <style>
-  /* ───────────────────────────────────────────────────────────────────────
-     Guide pages were the weakest type on the site: an h1 dropped onto paper
-     with no hero, no measure, and body copy set at the same weight as the
-     rest of the page. These are the pages that earn organic traffic, so they
-     get proper article typography — a real masthead, a held measure, and
-     enough hierarchy that a long answer is skimmable.
-     ─────────────────────────────────────────────────────────────────────── */
   .article-hero h1 {
     max-width: 20ch;
+  }
+
+  .article-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    margin: var(--space-m) 0 0;
+  }
+
+  .article-tools a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.4rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--dark-line-strong);
+    color: var(--on-dark);
+    text-decoration: none;
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  }
+
+  .article-tools a:hover,
+  .article-tools a:focus-visible {
+    background: color-mix(in srgb, var(--on-dark) 9%, transparent);
+    border-color: var(--on-dark-soft);
   }
 
   .article-meta {
@@ -210,6 +279,37 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     text-decoration-color: currentColor;
   }
 
+  /* Visual explainer frame ────────────────────────────────────────────── */
+  .visual-section .wrap {
+    max-width: 92rem;
+  }
+
+  .visual-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 32rem);
+    gap: var(--space-xl);
+    align-items: end;
+    margin-bottom: var(--space-m);
+  }
+
+  .visual-intro h2 {
+    max-width: 23ch;
+    margin: 0.35rem 0 0;
+  }
+
+  .visual-intro > p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .visual-frame {
+    padding: clamp(var(--space-s), 2.5vw, var(--space-m));
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--ink);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-soft);
+  }
+
   /* Guide photo ───────────────────────────────────────────────────────── */
   .guide-photo {
     margin: 0;
@@ -232,14 +332,22 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
     color: var(--ink-faint);
   }
 
-  /* Secondary diagram ───────────────────────────────────────────────────
-     A second, more detailed visual after the body copy has set up the
-     context to use it — the cost guide's build-up chart, or the flashing
-     sequence after the full-frame explanation. */
+  /* Secondary diagram ─────────────────────────────────────────────────── */
   .secondary-diagram {
     margin-top: var(--space-2xl);
     padding-top: var(--space-xl);
     border-top: 1px solid var(--line);
+  }
+
+  .secondary-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-s);
+    color: var(--ink-faint);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
   }
 
   /* FAQ ───────────────────────────────────────────────────────────────── */
@@ -255,6 +363,29 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   /* Related ───────────────────────────────────────────────────────────── */
   .related {
     margin-top: var(--space-2xl);
+  }
+
+  .related-head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-l);
+    align-items: end;
+    margin-bottom: var(--space-s);
+  }
+
+  .related-head h2 {
+    margin-bottom: 0;
+  }
+
+  .related-head p {
+    margin: 0.35rem 0 0;
+    color: var(--ink-soft);
+  }
+
+  .related-head > a {
+    flex: 0 0 auto;
+    font-size: var(--step--1);
+    font-weight: 600;
   }
 
   .related-list {
@@ -300,5 +431,18 @@ const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
   .related-blurb {
     color: var(--ink-soft);
     font-size: var(--step--1);
+  }
+
+  @media (max-width: 800px) {
+    .visual-intro {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+    }
+
+    .related-head {
+      align-items: start;
+      flex-direction: column;
+      gap: var(--space-2xs);
+    }
   }
 </style>
