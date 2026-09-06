@@ -114,7 +114,7 @@ const signs = [
         <a class="service-tile" href="/sliding-glass-doors">
           <img src={slidingDoorsTile.src} alt="" loading="lazy" decoding="async" />
           <div class="service-tile-copy">
-            <p class="kicker">Homeowners</p>
+            <p class="kicker">Homeowners <span class="tile-badge">Concept imagery</span></p>
             <h2>Sliding glass doors</h2>
             <p>Standard, multi-panel, and French rail patio doors.</p>
           </div>
@@ -309,6 +309,20 @@ const signs = [
     margin: 0;
     color: var(--on-dark-soft);
     font-size: var(--step--1);
+  }
+
+  .tile-badge {
+    display: inline-block;
+    margin-left: 0.45rem;
+    padding: 0.18rem 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--accent-bright) 46%, transparent);
+    border-radius: 999px;
+    color: var(--on-dark-faint);
+    font-size: 0.68em;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    vertical-align: 0.12em;
   }
 
   /* An accent rule that draws in on hover: the only motion on the tile that
