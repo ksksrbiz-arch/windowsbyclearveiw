@@ -10,6 +10,16 @@ const cities = defineCollection({
     title: z.string(),
     description: z.string(),
     published: z.boolean().default(true),
+    /** Localized FAQ, same shape as the guides collection's. Optional — a
+     *  town with nothing distinct to ask about can leave it empty. */
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      )
+      .default([]),
   }),
 });
 

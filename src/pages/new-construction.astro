@@ -6,7 +6,7 @@ import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { newBuildWork, findWork, workKindLabel } from '../data/work';
 import newConstructionHeroSrc from '../assets/hero/new-construction.png';
-import { site } from '../data/site';
+import { site, mailHref, telHref } from '../data/site';
 
 const ogPhoto = findWork('new-construction-sheathed')!;
 
@@ -14,11 +14,49 @@ const ogPhoto = findWork('new-construction-sheathed')!;
 // captioned as such — the same rule the guide photos already follow.
 const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format: 'webp', quality: 76 });
 
+// Mirrors the numbered list below exactly — if the sequence changes, this
+// must change with it, or the markup and the schema will say different
+// things. See process.astro for the homeowner-side equivalent.
+const sequence = [
+  {
+    name: 'Send the schedule',
+    text: 'Plan set or a window schedule, whichever you have. We confirm opening sizes, styles, and quantities against it before quoting anything.',
+  },
+  {
+    name: 'Written quote and lead time',
+    text: 'One number for the whole opening count, with the manufacturer lead time attached — so you can put a real date on your own schedule, not a placeholder.',
+  },
+  {
+    name: 'Order placed, framing checked',
+    text: 'Units are ordered to the schedule. Before your set date, we confirm the openings are framed to the sizes we quoted — a framing change after ordering is the single most common cause of a delay.',
+  },
+  {
+    name: 'Set day, on your sequence',
+    text: 'We set once the shell is sheathed and wrapped, ahead of siding or stucco. Shimmed plumb and square, sill pan flashed first, fins taped into the weather barrier in lap order.',
+  },
+  {
+    name: 'Walk and sign-off',
+    text: 'We walk every opening with your super or PM, note anything that needs a callback, and hand the elevation back ready for the next trade.',
+  },
+];
+
+const rowSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How Clearview Windows sets windows on a new-construction build',
+  description: 'The sequence Clearview Windows follows on a builder or GC job, from the opening schedule to the final walk with the site super.',
+  step: sequence.map((step) => ({
+    '@type': 'HowToStep',
+    name: step.name,
+    text: step.text,
+  })),
+};
+
 // Same shape as the per-city Service schema in areas/[slug].astro, scoped to
 // this service rather than one town. The sitewide hasOfferCatalog entry
 // (JsonLd.astro) is just a name + url; this gives the service its own
 // describable entity, so it is additive rather than a duplicate.
-const schema = {
+const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   serviceType: 'New construction window installation',
@@ -32,10 +70,40 @@ const schema = {
     containedInPlace: { '@type': 'State', name: place.state },
   })),
 };
+
+const schema = { '@context': 'https://schema.org', '@graph': [serviceSchema, rowSchema] };
+
+const scopeSplit = {
+  clearview: [
+    'Measuring every opening against the schedule before ordering, not after',
+    'Ordering the units and carrying the manufacturer lead time',
+    'Sill pan flashing, setting the unit plumb and square, and shimming it',
+    'Jamb and head flashing lapped over the fins in the correct order',
+    'Taping the fins into the weather-resistive barrier',
+    'A walk-through with your super or PM before we leave the site',
+  ],
+  builder: [
+    'Framing the rough openings to the sizes on the schedule',
+    'Sheathing and housewrap (or equivalent WRB) on before we set',
+    'A safe, clear path to each opening — no scaffolding or material staged in front of it',
+    'Telling us about sequence changes before your set date, not on it',
+    'Siding, trim, or stucco crews scheduled after our walk-through, not around us',
+  ],
+};
+
+// mailHref() falls back to /estimate when site.email is unset — appending a
+// mailto-style query string to that would silently get ignored by
+// EstimateForm, dropping the builder role prefill along with it. Route the
+// no-email case through ?role=builder instead so the fallback still lands
+// where it's supposed to.
+const projectInquiryMailto = site.email
+  ? mailHref() + `?subject=${encodeURIComponent('New construction project — plans/schedule attached')}` +
+    `&body=${encodeURIComponent('Project address or subdivision:\nBuilder / GC company:\nApproximate opening count:\nTarget set date:\n\n(Attach the plan set or window schedule if you have one.)')}`
+  : '/estimate?role=builder';
 ---
 <BaseLayout
-  title="New construction windows"
-  description="Window setting for new Clark County builds: flashed openings, nailing-fin units, and a crew that works with your GC."
+  title="New construction windows for builders and GCs"
+  description="Window setting for new Clark County builds: send the plan or window schedule, get a written quote and lead time, and a crew that sets to your sequence."
   path="/new-construction"
   crumbs={[{ name: 'New construction', href: '/new-construction' }]}
   ogImageSrc={ogPhoto.image}
@@ -44,59 +112,176 @@ const schema = {
 >
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
-      <p class="kicker">Services</p>
-      <h1>New construction installs</h1>
+      <p class="kicker">For builders and GCs</p>
+      <h1>Windows set to your schedule, not around it.</h1>
       <p class="lede">
-        Framed opening, housewrap, nailing fin, shims, and a unit that is plumb before the siding
-        crew shows up.
+        Send the plan or window schedule, get a written quote with a lead time attached, and a set
+        date your siding crew can actually plan around.
       </p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href={projectInquiryMailto}>Email the plans or schedule</a>
+        <a class="btn btn-ghost btn-on-dark" href={telHref()}>Call {site.phoneDisplay}</a>
+      </div>
       <p class="hero-note">
-        Replacing windows in a house that is already standing? See <a href="/replacement">window replacement</a> instead.
-        Setting a patio door on the build? See <a href="/sliding-glass-doors">sliding glass doors</a>.
+        Homeowner replacing windows in a house that is already standing? See{' '}
+        <a href="/replacement">window replacement</a> instead. Setting a patio door on the build?
+        See <a href="/sliding-glass-doors">sliding glass doors</a>.
       </p>
     </div>
     <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
   </section>
+
   <section class="section">
-    <div class="wrap" data-reveal>
-      <p class="rule-label">The part that decides whether it leaks</p>
-      <h2>Lap order at the opening.</h2>
-      <p class="lede">
-        A set window looks the same from the street whether or not it was flashed in the
-        right sequence. It does not stay that way. Here is the order we work in, every time.
-      </p>
-      <FlashingOrder />
+    <div class="wrap split" data-reveal>
+      <article>
+        <p class="rule-label">Why builders call Mark</p>
+        <h2>One crew, one owner, no dispatcher.</h2>
+        <p>
+          Clearview is Mark — the person who measures the opening is the person who sets it and
+          the person who answers the phone when your schedule moves. There is no office to route a
+          question through and no rotating crew to re-brief every visit.
+        </p>
+        <p>
+          That matters more on a build than a remodel: a set date that slips because a sub never
+          called back costs you a siding crew standing around. Tell us the schedule is moving and
+          we move with it, or tell you plainly if we cannot.
+        </p>
+      </article>
+      <article>
+        <p class="rule-label">The business behind it</p>
+        <p>
+          Clearview Windows is operated by {site.legalName}, a registered Washington LLC
+          (UBI {site.ubiNumber}). The separate WA L&amp;I contractor registration number is not
+          published here yet — ask for it on the first call and verify it yourself at the{' '}
+          <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
+            L&amp;I contractor lookup
+          </a>. We would rather say that plainly than dress it up.
+        </p>
+      </article>
     </div>
   </section>
 
-  <section class="section section-sunk">
+  <section class="section section-sunk" id="schedule">
     <div class="wrap split" data-reveal>
       <article>
-        <p class="rule-label">What we set</p>
-        <h2>Fins, shims, and a plumb unit.</h2>
+        <p class="rule-label">What we need from you</p>
+        <h2>The window schedule, or the plan set.</h2>
         <p>
-          New-construction vinyl and fiberglass with nailing fins, sized to the rough opening.
-          We flash the sill, set the unit, and leave you ready for wrap and cladding.
+          Either one works. A window schedule gives us opening sizes, styles, and quantities in
+          one pass; a full plan set lets us pull that ourselves and flag anything ambiguous before
+          it becomes a change order. Either way we confirm sizes against the schedule and price
+          the whole job as one number, not a per-opening guess.
         </p>
-        <h3>How it runs</h3>
         <p>
-          Confirm openings, confirm lead time, then a scheduled set — not a surprise on a framing
-          day. Tell us if you are the GC or the owner so the quote is written for the right person.
-        </p>
-        <p class="section-link">
-          <a href="/window-features">Vinyl vs fiberglass, glass packages, and every style — in detail</a>
+          If the schedule calls out egress sizing for bedrooms, tempered glass at doors and wet
+          locations, or a specific U-factor for Washington's energy code path, tell us — we order
+          to what the schedule and the code official require, not a default spec.
         </p>
       </article>
       <article>
         <p class="rule-label">Bring to the first call</p>
         <ul class="plain-list">
-          <li>Plan or opening schedule</li>
-          <li>Window style and finish</li>
-          <li>Target set date</li>
-          <li>Who is buying: builder or owner</li>
+          <li>Plan set or window schedule</li>
+          <li>Approximate opening count</li>
+          <li>Window style, brand preference if any, and finish</li>
+          <li>Target set date and who to coordinate sequence with</li>
         </ul>
-        <p class="fine-print">Ask for a reference on a build we set this season.</p>
+        <p class="fine-print">
+          Not sure which materials or brands fit the spec? See{' '}
+          <a href="/window-features">vinyl vs fiberglass, glass packages, and every style</a>.
+        </p>
       </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">The part that decides whether it leaks</p>
+      <h2>Rough opening and flashing expectations.</h2>
+      <p class="lede">
+        A set window looks the same from the street whether or not it was flashed in the right
+        sequence, and whether or not the rough opening was actually square. It does not stay that
+        way. Here is what we need at the opening, and the order we flash it in, every time.
+      </p>
+      <div class="ro-notes">
+        <article>
+          <h3>Opening tolerance</h3>
+          <p>
+            We work from the manufacturer's rough-opening spec for the exact unit ordered —
+            typically the frame size plus a shim gap on each side, but it varies by line and we
+            confirm the number per order rather than assume a round figure. What we ask of framing
+            is tighter: no more than about 1/4&Prime; out of square corner-to-corner. Past that, a
+            unit can still be shimmed plumb, but it takes longer and the trim reveal shows it.
+          </p>
+        </article>
+        <article>
+          <h3>Sequence at the wall</h3>
+          <p>
+            Sheathed and wrapped before we show up — housewrap or another WRB lapped correctly at
+            the seams, not stapled loose and left for us to fix. We do not set into an opening
+            that is still bare OSB with no barrier; that is a callback waiting to happen for
+            everyone on the job.
+          </p>
+        </article>
+      </div>
+      <FlashingOrder />
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">In this order, every build</p>
+      <h2>The set, start to finish.</h2>
+      <ol class="steps">
+        {sequence.map((step) => (
+          <li><strong>{step.name}.</strong> {step.text}</li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Jobsite coordination</p>
+      <h2>What has to be true before we set a date.</h2>
+      <p class="lede">
+        Most delays on a new-construction job are not about the window — they are about the
+        opening not being ready for it, or a trade sequence nobody told us changed. This is what
+        we ask for so your set date holds.
+      </p>
+      <ul class="plain-list">
+        <li>Openings framed to the sizes on the schedule we quoted — not "close enough"</li>
+        <li>Sheathing and housewrap on, with a clear path to every opening</li>
+        <li>A super or PM we can reach directly if the schedule moves, in either direction</li>
+        <li>Siding, stucco, or EIFS scheduled after our walk-through, so nothing gets flashed over a problem</li>
+        <li>A rain-day understanding — flashing goes in dry or it does not go in at all</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Scope, in writing</p>
+      <h2>What Clearview handles. What the builder handles.</h2>
+      <div class="scope-split">
+        <article class="scope-card">
+          <h3>Clearview</h3>
+          <ul class="plain-list">
+            {scopeSplit.clearview.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="scope-card">
+          <h3>Builder / GC</h3>
+          <ul class="plain-list">
+            {scopeSplit.builder.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+      </div>
+      <p class="fine-print">
+        Anything outside this split — interior or exterior trim, a rot repair found mid-set, an
+        opening that does not match the schedule — gets called out before we do it, not billed
+        after.
+      </p>
     </div>
   </section>
 
@@ -107,7 +292,8 @@ const schema = {
         <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
         <p class="lede">
           Nailing fins taped into the weather barrier, sill flashed, unit plumb. This is what we
-          hand back to the builder.
+          hand back to the builder. We have two of these jobs photographed so far — more go up as
+          each build finishes.
         </p>
         <p class="section-link"><a href="/gallery">More of the work</a></p>
       </div>
@@ -121,6 +307,33 @@ const schema = {
           />
         ))}
       </div>
+    </div>
+  </section>
+
+  <section class="section section-sunk" id="project-inquiry">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Start a project</p>
+      <h2>Send the plans or the schedule. We take it from there.</h2>
+      <p>
+        Two ways to start, both land with Mark directly:
+      </p>
+      <ol class="steps">
+        <li>
+          <strong>Email the plan set or window schedule.</strong> Attach whatever you have —
+          a full PDF plan set, a window schedule pulled from it, or a photo of a hand-marked
+          elevation. <a href={projectInquiryMailto}>{site.email}</a> opens with a template for
+          the address, opening count, and target date filled in.
+        </li>
+        <li>
+          <strong>Or start with the estimate form.</strong> Pick "Builder or GC" and describe the
+          job in the notes — city, rough opening count, and target set date is enough to get a
+          callback going. <a href="/estimate?role=builder">Open the builder estimate form</a>.
+        </li>
+      </ol>
+      <p class="fine-print">
+        Either way you get a call back, usually the same day, and a written quote with a lead time
+        attached before anything is ordered.
+      </p>
     </div>
   </section>
 
@@ -149,11 +362,18 @@ const schema = {
     opacity: 0.75;
   }
 
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin: var(--space-m) 0 0;
+  }
+
   /* Cross-link to the other service page, set into the dark hero. The global
      `a { color: var(--ink) }` reads as invisible on this background, so the
      link gets its own on-dark treatment rather than inheriting it. */
   .hero-note {
-    margin: var(--space-s) 0 0;
+    margin: var(--space-m) 0 0;
     max-width: 44rem;
     font-size: var(--step--1);
     color: var(--on-dark-faint);
@@ -171,6 +391,63 @@ const schema = {
     color: var(--accent-bright);
   }
 
+  /* Two short notes beside the flashing diagram — framing tolerance and wall
+     sequence — read better as a pair of cards than as more paragraph text
+     competing with the diagram's own callouts below. */
+  .ro-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+    margin: var(--space-l) 0 var(--space-xl);
+  }
+
+  .ro-notes article {
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+  }
+
+  .ro-notes h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  .ro-notes p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* Same two-card device as window-features.astro's material/brand compare,
+     reused for a scope split rather than a binary choice. */
+  .scope-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-m);
+    margin: var(--space-l) 0 var(--space-m);
+  }
+
+  .scope-card {
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+  }
+
+  .scope-card h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-1);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--accent-ink);
+  }
+
+  .scope-card .plain-list li {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
   /* A single tall framing shot needs a partner, not a full-width grid row of
      its own — stretched across the page it read as a missing image. */
   .newbuild-band {
@@ -184,6 +461,11 @@ const schema = {
     .newbuild-band {
       grid-template-columns: 1fr;
       gap: var(--space-l);
+    }
+
+    .ro-notes,
+    .scope-split {
+      grid-template-columns: 1fr;
     }
   }
 </style>

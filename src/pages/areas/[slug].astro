@@ -3,7 +3,10 @@ import { getCollection, render } from 'astro:content';
 import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
 import { site } from '../../data/site';
+import { replacementWork, workKindLabel } from '../../data/work';
 import areasHeroSrc from '../../assets/hero/areas.jpg';
 
 export async function getStaticPaths() {
@@ -23,8 +26,50 @@ const others = cities
   .filter((entry) => entry.id !== city.id)
   .sort((a, b) => a.data.name.localeCompare(b.data.name));
 
-const schema = {
-  '@context': 'https://schema.org',
+// A handful of real finished-job photos, rotated per city so the nine area
+// pages don't all show the identical three tiles. Deterministic (not
+// random) so a rebuild doesn't shuffle what's on a live page for no reason.
+// These are genuinely Mark's work, just never claimed to be IN this specific
+// city -- there is no per-photo location tag to make that claim honestly.
+const hash = [...city.id].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+const offset = hash % replacementWork.length;
+const localWork = Array.from({ length: Math.min(3, replacementWork.length) }, (_, i) =>
+  replacementWork[(offset + i) % replacementWork.length],
+);
+
+const relatedGuides = [
+  {
+    href: '/guides/full-frame-vs-insert',
+    topic: 'Method',
+    title: 'Insert vs. full-frame replacement',
+    blurb: 'The actual dividing line between the two, and why it depends on the frame, not the house.',
+  },
+  {
+    href: '/guides/vinyl-vs-fiberglass-pacific-northwest',
+    topic: 'Material',
+    title: 'Vinyl vs. fiberglass in the Pacific Northwest',
+    blurb: 'Which material actually holds up to this climate, and where the extra cost is worth it.',
+  },
+  {
+    href: '/guides/window-replacement-cost-washington',
+    topic: 'Cost',
+    title: 'What a Washington replacement actually costs',
+    blurb: 'A real build-up of the numbers, not a single average that hides the range.',
+  },
+];
+
+const faqPage = city.data.faq.length
+  ? {
+      '@type': 'FAQPage',
+      mainEntity: city.data.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    }
+  : null;
+
+const serviceSchema = {
   '@type': 'Service',
   serviceType: 'Window installation',
   name: city.data.title,
@@ -38,6 +83,11 @@ const schema = {
       name: city.data.region === 'Oregon' ? 'Oregon' : 'Washington',
     },
   },
+};
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': faqPage ? [serviceSchema, faqPage] : [serviceSchema],
 };
 
 // Same Cascades stock photo the areas index uses, with the same disclosure --
@@ -82,7 +132,56 @@ const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', 
     </div>
   </section>
 
-  <CtaBar />
+  {localWork.length > 0 && (
+    <section class="section section-sunk">
+      <div class="wrap is-wide" data-reveal>
+        <p class="rule-label">Real work, real crew</p>
+        <h2>What we actually send a crew out for.</h2>
+        <p class="lede">
+          Every photo below is a real Clearview job — not stock, not staged. We don't tag which
+          town each one was shot in, so we won't claim these three are in {city.data.name}
+          specifically; they're a fair sample of the finished result you'd get here, from the same
+          crew and the same install standard.
+        </p>
+        <div class="work-grid">
+          {localWork.map((photo) => (
+            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} />
+          ))}
+        </div>
+        <p class="section-link"><a href="/gallery">See the full gallery</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="wrap is-narrow" data-reveal>
+      <FaqAccordion items={city.data.faq} heading={`Questions from ${city.data.name} homeowners`} />
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <section class="related">
+        <h2 class="rule-label">Worth reading before you call</h2>
+        <ul class="related-list">
+          {relatedGuides.map((item) => (
+            <li>
+              <a href={item.href}>
+                <span class="related-topic">{item.topic}</span>
+                <strong>{item.title}</strong>
+                <span class="related-blurb">{item.blurb}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </section>
+
+  <CtaBar
+    heading={`Get a written estimate in ${city.data.name}.`}
+    body={`Mark measures every opening in person before anything is ordered — no lists, no resale, no follow-up sequence.`}
+  />
 </BaseLayout>
 
 <style>
@@ -100,5 +199,55 @@ const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', 
     font-size: var(--step--2);
     color: var(--on-dark-faint);
     opacity: 0.75;
+  }
+
+  /* Same "Keep reading" treatment as guides/[slug].astro's related list. */
+  .related {
+    margin-top: 0;
+  }
+
+  .related-list {
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .related-list li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .related-list a {
+    display: grid;
+    gap: 0.2rem;
+    padding: var(--space-s) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
+  }
+
+  .related-list a:hover,
+  .related-list a:focus-visible {
+    padding-left: var(--space-2xs);
+    background: var(--accent-wash);
+  }
+
+  .related-topic {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .related-list strong {
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .related-blurb {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
   }
 </style>
