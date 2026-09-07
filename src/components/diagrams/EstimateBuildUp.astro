@@ -1,43 +1,7 @@
 ---
-import { pricing } from '../../data/pricing';
-const base = pricing.openings.find((o) => o.id === 'double-hung')!;
-const fiberglass = pricing.materials.find((m) => m.id === 'fiberglass')!;
-const fullFrame = pricing.fullFrame;
-const trim = pricing.modifiers.find((m) => m.id === 'trim')!;
-const money = (n: number) => `$${Math.round(n / pricing.displayRounding) * pricing.displayRounding}`;
-const drivers = [
-  ['01','THE WINDOW','Size, operating type, glass, base product.'],
-  ['02','MATERIAL','Vinyl vs. fiberglass and other frame choices.'],
-  ['03','INSTALLATION','Insert vs. full-frame changes the scope of work.'],
-  ['04','CONDITION + FINISH','Opening repairs, trim, access, height, site conditions.'],
-];
+import PhotoGuide from './PhotoGuide.astro';
+
+interface Props { heading?: string | null; }
+const { heading = 'What changes the price? See the scope behind the number.' } = Astro.props;
 ---
-<figure class="scope-explainer">
-  <figcaption class="heading">What actually changes the price?</figcaption>
-  <p class="intro">There is no reliable universal “price per window.” Start with the <strong>scope at the opening</strong>, then price the product and finish choices that belong to that opening.</p>
-
-  <div class="scope-map">
-    <div class="opening-visual" role="img" aria-label="Illustration of a replacement window opening surrounded by four pricing drivers: window, material, installation scope, and condition and finish.">
-      <div class="wall-band top"></div><div class="wall-band side left"></div><div class="wall-band side right"></div>
-      <div class="rough-opening"><div class="new-window"><div class="pane left"></div><div class="pane right"></div></div></div>
-      <div class="driver-tag tag-1">01<br /><small>WINDOW</small></div>
-      <div class="driver-tag tag-2">02<br /><small>MATERIAL</small></div>
-      <div class="driver-tag tag-3">03<br /><small>INSTALL</small></div>
-      <div class="driver-tag tag-4">04<br /><small>CONDITION</small></div>
-    </div>
-    <div class="driver-list">
-      {drivers.map(([n,title,text]) => <article><span class="num">{n}</span><div><h3>{title}</h3><p>{text}</p></div></article>)}
-    </div>
-  </div>
-
-  <div class="example">
-    <div><p>MODEL ONLY</p><strong>{money(base.low * fiberglass.multiplier + fullFrame.low + trim.low)}–{money(base.high * fiberglass.multiplier + fullFrame.high + trim.high)}</strong></div>
-    <span>This combination uses the site's current planning-model inputs. It is not a quote and the inputs are not necessarily additive on every project.</span>
-  </div>
-  <div class="next"><strong>Use each tool for its job:</strong><span>calculator = planning · measure = actual opening · estimate = project scope</span><a href="/tools/window-replacement-cost-calculator">Open calculator →</a></div>
-</figure>
-
-<style>
-.scope-explainer{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}.intro strong{color:var(--ink)}.scope-map{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:var(--space-l);align-items:stretch}.opening-visual{position:relative;min-height:28rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-sunk)}.wall-band{position:absolute;background:color-mix(in srgb,var(--ink) 13%,transparent);border:1px solid var(--line-strong)}.wall-band.top{left:7%;right:7%;top:10%;height:3rem}.wall-band.side{top:21%;bottom:12%;width:14%}.wall-band.left{left:7%}.wall-band.right{right:7%}.rough-opening{position:absolute;left:27%;right:27%;top:23%;bottom:15%;border:4px solid var(--danger);background:color-mix(in srgb,var(--danger) 3%,var(--paper-raised));box-shadow:inset 0 0 0 1rem color-mix(in srgb,var(--accent) 8%,transparent)}.new-window{position:absolute;inset:1.8rem 1.5rem;border:4px solid var(--ink);background:var(--paper-raised)}.pane{position:absolute;top:1.7rem;bottom:1.7rem;width:39%;border:2px solid var(--accent-ink);background:color-mix(in srgb,var(--accent-2) 12%,transparent)}.pane.left{left:8%}.pane.right{right:8%}.pane::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink-soft)}.driver-tag{position:absolute;display:grid;place-items:center;min-width:4.9rem;min-height:4.2rem;padding:.3rem;border:1px solid var(--line);background:var(--paper-raised);box-shadow:var(--shadow-soft);font-size:var(--step--1);font-weight:750;line-height:1.05;color:var(--ink)}.driver-tag small{font-size:9px;letter-spacing:.1em;color:var(--ink-faint)}.tag-1{left:10%;top:31%;border-left:3px solid var(--accent)}.tag-2{right:10%;top:31%;border-left:3px solid var(--ink)}.tag-3{left:10%;bottom:20%;border-left:3px solid var(--danger)}.tag-4{right:10%;bottom:20%;border-left:3px solid var(--accent-ink)}.driver-list{border-top:1px solid var(--line)}.driver-list article{display:grid;grid-template-columns:2.7rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.num{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.driver-list article:nth-child(1) .num,.driver-list article:nth-child(3) .num{background:var(--accent)}.driver-list h3{margin:0;font-size:var(--step-0)}.driver-list p{margin:.2rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.example{display:grid;grid-template-columns:auto 1fr;gap:var(--space-l);align-items:center;margin-top:var(--space-l);padding:var(--space-m);border:2px solid var(--ink);background:var(--paper-raised)}.example p{margin:0 0 .2rem;font-size:var(--step--2);font-weight:750;letter-spacing:var(--tracking-label);color:var(--ink-faint)}.example strong{display:block;font-size:var(--step-2);font-weight:650;white-space:nowrap}.example span{color:var(--ink-soft);font-size:var(--step--1)}.next{display:flex;flex-wrap:wrap;gap:.35rem var(--space-s);align-items:baseline;margin-top:var(--space-s);padding-top:var(--space-s);border-top:1px solid var(--line);font-size:var(--step--1)}.next span{color:var(--ink-soft)}.next a{margin-left:auto;font-weight:650;color:var(--accent-ink)}
-@media(max-width:950px){.scope-map{grid-template-columns:1fr}}@media(max-width:620px){.opening-visual{min-height:22rem}.example{grid-template-columns:1fr;gap:.5rem}.example strong{font-size:var(--step-1)}.next a{margin-left:0}}
-</style>
+<PhotoGuide type="cost" heading={heading} />
