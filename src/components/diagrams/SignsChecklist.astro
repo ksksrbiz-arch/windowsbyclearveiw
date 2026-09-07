@@ -1,42 +1,7 @@
 ---
+import PhotoGuide from './PhotoGuide.astro';
+
 interface Props { heading?: string | null; }
-const { heading = 'Inspect the window, not just the symptom.' } = Astro.props;
-
-const signs = [
-  ['01','Air movement','DRAFT','Check the lock, meeting rail, sash corners, and weatherstrip.'],
-  ['02','Fog between panes','GLASS','Haze remains after the room-side surface is wiped.'],
-  ['03','Sash will not stay or lock','OPERATION','Binding, dropping, or a failed lock can point to the sash, frame, or hardware.'],
-  ['04','Soft or stained sill','MOISTURE','Look for swelling, softness, staining, or repeated wetting at the sill and corners.'],
-  ['05','Cold zone beside the glass','COMFORT','Notice whether one opening or one room stays colder than comparable rooms.'],
-  ['06','Room comfort is uneven','PATTERN','A problem becomes more useful as a clue when the same opening repeatedly stands out.'],
-];
+const { heading = 'Signs of trouble: start with what you can actually see.' } = Astro.props;
 ---
-<figure class="inspection-map">
-  {heading && <figcaption class="heading">{heading}</figcaption>}
-  <p class="intro">Use the numbers like a field checklist. <strong>Find the location first, then match the symptom.</strong> One symptom is a clue; a pattern at the same opening is more useful.</p>
-
-  <div class="board">
-    <div class="window-map" role="img" aria-label="Front-view inspection map of a double-hung window with six numbered observation zones for drafts, glass fog, operation, sill condition, cold zones, and uneven room comfort.">
-      <div class="room-label top">ROOM</div>
-      <div class="wall-frame"><div class="window-frame"><div class="glass upper"></div><div class="glass lower"></div><div class="meeting"></div><div class="sill"></div><div class="lock"></div></div></div>
-      <div class="hotspot h1">1</div><div class="hotspot h2">2</div><div class="hotspot h3">3</div><div class="hotspot h4">4</div><div class="hotspot h5">5</div><div class="hotspot h6">6</div>
-      <div class="zone-note n1">lock / rail</div><div class="zone-note n2">glass</div><div class="zone-note n3">sash</div><div class="zone-note n4">sill</div><div class="zone-note n5">perimeter</div><div class="zone-note n6">whole room</div>
-    </div>
-
-    <div class="list">
-      {signs.map(([number,title,tag,text], index) => (
-        <article class="item">
-          <span class={`item-num item-${index + 1}`}>{number}</span>
-          <div><div class="item-head"><h3>{title}</h3><span>{tag}</span></div><p>{text}</p></div>
-        </article>
-      ))}
-    </div>
-  </div>
-
-  <div class="reading-rule"><div><strong>ONE SIGN</strong><span>Observe and locate it.</span></div><div><strong>SEVERAL SIGNS</strong><span>Compare them at the same opening.</span></div><div><strong>SOFT MATERIAL / ACTIVE WATER</strong><span>Condition matters more than appearance.</span></div></div>
-</figure>
-
-<style>
-.inspection-map{margin:0}.heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display)}.intro{margin:0 0 var(--space-l);max-width:74ch;color:var(--ink-soft);font-size:var(--step--1)}.intro strong{color:var(--ink)}.board{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:var(--space-l);align-items:start}.window-map{position:relative;min-height:31rem;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:radial-gradient(circle at 50% 45%,var(--paper-raised),var(--paper-sunk));}.room-label{position:absolute;left:0;right:0;text-align:center;top:1rem;font-size:10px;font-weight:750;letter-spacing:.16em;color:var(--ink-faint)}.wall-frame{position:absolute;left:20%;right:20%;top:14%;bottom:12%;padding:1.5rem;background:color-mix(in srgb,var(--ink) 12%,transparent);border:4px solid var(--ink);border-radius:8px}.window-frame{position:relative;width:100%;height:100%;background:var(--paper-raised);border:3px solid var(--ink);padding:1.2rem}.glass{position:absolute;left:1.2rem;right:1.2rem;border:2px solid var(--accent-ink);background:color-mix(in srgb,var(--accent-2) 12%,transparent)}.upper{top:1.2rem;bottom:50%}.lower{top:50%;bottom:1.2rem}.meeting{position:absolute;left:1.2rem;right:1.2rem;top:50%;height:3px;background:var(--ink-soft)}.sill{position:absolute;left:0;right:0;bottom:0;height:1.2rem;background:color-mix(in srgb,var(--danger) 15%,transparent);border-top:3px solid var(--danger)}.lock{position:absolute;right:.8rem;top:48%;width:1rem;height:2.2rem;border:2px solid var(--ink);background:var(--paper-raised)}.hotspot{position:absolute;display:grid;width:2.8rem;height:2.8rem;place-items:center;border:3px solid var(--paper-raised);border-radius:50%;color:var(--paper);font-weight:750;box-shadow:var(--shadow-soft)}.h1{left:10%;top:36%;background:var(--accent)}.h2{right:10%;top:29%;background:var(--danger)}.h3{right:8%;top:54%;background:var(--ink)}.h4{left:9%;bottom:18%;background:var(--danger)}.h5{left:11%;top:57%;background:var(--accent)}.h6{right:10%;bottom:10%;background:var(--accent-ink)}.zone-note{position:absolute;padding:.35rem .5rem;border:1px solid var(--line);background:color-mix(in srgb,var(--paper-raised) 94%,transparent);font-size:10px;font-weight:650;letter-spacing:.04em;color:var(--ink-soft);box-shadow:var(--shadow-soft)}.n1{left:4%;top:44%}.n2{right:4%;top:38%}.n3{right:3%;top:62%}.n4{left:5%;bottom:7%}.n5{left:4%;top:64%}.n6{right:3%;bottom:4%}.list{border-top:1px solid var(--line)}.item{display:grid;grid-template-columns:2.7rem 1fr;gap:var(--space-s);padding:var(--space-s) 0;border-bottom:1px solid var(--line)}.item-num{display:grid;width:2.45rem;height:2.45rem;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:var(--step--2);font-weight:750}.item-1,.item-5,.item-6{background:var(--accent)}.item-2,.item-4{background:var(--danger)}.item-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-xs)}.item-head h3{margin:0;font-size:var(--step-0)}.item-head span{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink-faint)}.item p{margin:.22rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.reading-rule{display:grid;grid-template-columns:repeat(3,1fr);margin-top:var(--space-l);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.reading-rule div{display:grid;gap:.2rem;padding:var(--space-s);border-right:1px solid var(--line)}.reading-rule div:last-child{border-right:0}.reading-rule strong{font-size:var(--step--2);letter-spacing:.06em}.reading-rule span{font-size:var(--step--2);color:var(--ink-soft)}
-@media(max-width:950px){.board{grid-template-columns:1fr}}@media(max-width:650px){.reading-rule{grid-template-columns:1fr}.reading-rule div{border-right:0;border-bottom:1px solid var(--line)}.reading-rule div:last-child{border-bottom:0}.window-map{min-height:24rem}.wall-frame{left:18%;right:18%;}}
-</style>
+<PhotoGuide type="symptoms" heading={heading} />
