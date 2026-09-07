@@ -16,16 +16,15 @@ const insetPhoto = findWork('blue-pair-installday');
 // project root — where "public/" always lives — is process.cwd() in both
 // `astro dev` and `astro build`.
 //
-// Multiple takes of the same brand-reveal animation live side by side
-// (logo-reveal-1, logo-reveal-2, ...) so repeat visitors don't see the
-// identical loop every time. The list is discovered rather than hardcoded
-// to a count, so dropping in a logo-reveal-3.mp4 later is enough on its
-// own. Variant 1 is what renders in the static HTML (and so is what shows
-// with JS disabled); the client script below picks randomly among all of
-// them once the page loads.
-const heroVariants = ['logo-reveal-1', 'logo-reveal-2', 'logo-reveal-3', 'logo-reveal-4']
-  .filter((name) => existsSync(join(process.cwd(), `public/video/${name}.mp4`)));
-const hasVideo = heroVariants.length > 0;
+// The original brand-reveal take plays once when the hero first mounts,
+// then crossfades into the static hero photo below (the same image used
+// as the video's poster, so there is no visible jump at the handoff).
+// Earlier versions cycled randomly through logo-reveal-1..4 forever; that
+// novelty wasn't worth losing a settled, static first impression, so this
+// only ever plays variant 1. The other takes stay in public/video/ unused
+// for now rather than deleted, in case they find a home elsewhere.
+const HERO_VIDEO = 'logo-reveal-1';
+const hasVideo = existsSync(join(process.cwd(), `public/video/${HERO_VIDEO}.mp4`));
 
 // The poster has to be a plain URL, so render one through the image pipeline.
 const poster = await getImage({
@@ -44,13 +43,12 @@ const poster = await getImage({
         poster={poster.src}
         muted
         playsinline
-        loop
         preload="metadata"
-        data-variants={JSON.stringify(heroVariants)}
       >
-        <source src={`/video/${heroVariants[0]}.webm`} type="video/webm" />
-        <source src={`/video/${heroVariants[0]}.mp4`} type="video/mp4" />
+        <source src={`/video/${HERO_VIDEO}.webm`} type="video/webm" />
+        <source src={`/video/${HERO_VIDEO}.mp4`} type="video/mp4" />
       </video>
+      <img class="hero-static" id="hero-static" src={poster.src} alt="" />
       <div class="video-wash"></div>
     </div>
 
@@ -148,55 +146,31 @@ const poster = await getImage({
 
 <script>
   function calmHero() {
+    const stage = document.querySelector('.video-stage');
     const video = document.getElementById('hero-video');
-    if (!(video instanceof HTMLVideoElement)) return;
+    if (!(stage instanceof HTMLElement) || !(video instanceof HTMLVideoElement)) return;
+
+    const settleOnStatic = () => stage.classList.add('is-static');
+
     // No autoplay attribute: a static one would start the clip before this
     // check runs, and would play for people with JS off who never opted in.
+    // Reduced motion skips the animation entirely and lands straight on the
+    // static photo, rather than freezing mid-reveal.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       video.pause();
+      settleOnStatic();
       return;
     }
 
-    // Cycle through every take of the reveal in turn, rather than looping
-    // whichever one loads first forever. The server render always ships
-    // variant 1 (so JS-off visitors and crawlers see a real video either
-    // way, via the `loop` attribute in the markup); once JS takes over we
-    // shuffle the run order once and advance on each `ended` event, so
-    // someone watching the hero for a while actually sees the other takes
-    // instead of the same clip on repeat. Guarded by a dataset flag rather
-    // than re-running on every astro:page-load, since a mid-visit restart
-    // would just yank the clip out from under someone already watching it.
-    if (!video.dataset.cycleBound) {
-      video.dataset.cycleBound = '1';
-      try {
-        const order = JSON.parse(video.dataset.variants || '[]');
-        if (Array.isArray(order) && order.length > 1) {
-          for (let i = order.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [order[i], order[j]] = [order[j], order[i]];
-          }
-          const sources = video.querySelectorAll('source');
-          const loadVariant = (name) => {
-            if (sources[0]) sources[0].src = `/video/${name}.webm`;
-            if (sources[1]) sources[1].src = `/video/${name}.mp4`;
-            video.load();
-          };
-          let index = 0;
-          video.loop = false;
-          video.addEventListener('ended', () => {
-            index = (index + 1) % order.length;
-            loadVariant(order[index]);
-            video.play().catch(() => {});
-          });
-          loadVariant(order[0]);
-        }
-      } catch {
-        // Malformed data-variants just means everyone gets variant 1,
-        // looping via the markup's `loop` attribute — fine.
-      }
-    }
+    // Plays the single reveal take once, then crossfades to the static hero
+    // photo on the `ended` event. `{ once: true }` covers the guard a
+    // dataset flag used to handle, and a fresh video element is rendered on
+    // every real page load/navigation, so this can't double-fire.
+    video.addEventListener('ended', settleOnStatic, { once: true });
 
-    video.play().catch(() => {});
+    // If autoplay is blocked, or the file fails to load, land on the static
+    // photo instead of leaving a frozen first frame.
+    video.play().catch(settleOnStatic);
   }
 
   calmHero();
@@ -213,6 +187,49 @@ const poster = await getImage({
      full-bleed it reads as soft. Framed at an honest size, against a large
      dark field and large type, it reads as deliberate.
      ─────────────────────────────────────────────────────────────────────── */
+  /* Crossfade target for the reveal video. `.hero-media`'s own positioning
+     (absolute, inset:0, object-fit:cover) is defined globally alongside
+     `.video-stage`/`.video-wash`; this only adds the fade behavior, scoped
+     here since `.hero-static` exists only in this component. The image is
+     the exact same photo already used as the video's `poster`, so settling
+     on it is invisible rather than a jump-cut to a different shot. */
+  .hero-media {
+    transition: opacity 1100ms ease;
+  }
+
+  .hero-static {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 8%;
+    opacity: 0;
+    transition: opacity 1100ms ease;
+    pointer-events: none;
+  }
+
+  .video-stage.is-static .hero-media {
+    opacity: 0;
+  }
+
+  .video-stage.is-static .hero-static {
+    opacity: 1;
+  }
+
+  @media (max-width: 640px) {
+    .hero-static {
+      /* Matches .video-stage .hero-media's mobile crop in global.css. */
+      object-position: 50% 2%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-static {
+      transition: none;
+    }
+  }
+
   .photo-hero {
     position: relative;
     isolation: isolate;
