@@ -195,4 +195,17 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   :global(.ld-journey-title) { color:var(--ink); }
   :global(.ld-journey-path) { color:var(--ink-faint); margin-left:.4em; }
   :global(.ld-no-journey) { margin:var(--space-2xs) 0 0; }
+
+  @media(max-width:760px){
+    .ld-head{align-items:flex-start;flex-direction:column}
+    .ld-head-actions{width:100%}
+    .ld-head-actions .btn{flex:1}
+    .ld-search{max-width:none}
+  }
+  @media(max-width:620px){
+    :global(.ld-card-top){flex-direction:column;align-items:flex-start;gap:.3rem}
+    :global(.ld-when){white-space:normal}
+    :global(.ld-action){min-height:2.75rem;padding-inline:.9rem}
+    .ld-search input{min-height:2.9rem;font-size:1rem}
+  }
 </style>
