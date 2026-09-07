@@ -4,14 +4,12 @@ import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
 import { pricingIsRegionalAverage } from '../data/pricing';
 import { getImage } from 'astro:assets';
-import aboutHeroSrc from '../assets/hero/about.png';
+import { findWork } from '../data/work';
 
 const pricesAreAverages = pricingIsRegionalAverage();
 
 const description = `${site.owner} measures, installs, and answers the phone himself — no call center, no subcontractors. Serving Vancouver, WA and Clark County.`;
 
-// Accurate, not fabricated: this just points the existing business entity at
-// the About page rather than asserting anything new about it.
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
@@ -22,9 +20,11 @@ const schema = {
   mainEntity: { '@id': `${site.url}/#business` },
 };
 
-// Full-bleed hero background. AI-generated, not a real job site, so it is
-// captioned as such — the same rule the guide photos already follow.
-const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// Use an actual Clearview installation photo here. The About page is making
+// claims about the people doing the work, so showing the crew actually
+// setting a window is more useful than an illustrative rendering.
+const heroPhoto = findWork('cabin-gable-install-crew')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="About"
@@ -45,7 +45,7 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
         your openings and wrote the number down.
       </p>
     </div>
-    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview property</p>
+    <p class="hero-photo-credit">Clearview job photo — crew setting gable windows</p>
   </section>
   <section class="section">
     <div class="wrap split" data-reveal>
@@ -134,7 +134,7 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
   .page-hero-photo {
     position: relative;
     background-size: cover;
-    background-position: center;
+    background-position: center 35%;
   }
 
   .hero-photo-credit {
@@ -144,7 +144,7 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
     margin: 0;
     font-size: var(--step--2);
     color: var(--on-dark-faint);
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
   .about-kicker {
@@ -160,9 +160,6 @@ const heroBg = await getImage({ src: aboutHeroSrc, width: 2400, format: 'webp', 
     object-fit: contain;
   }
 
-  /* Naming the gaps outright is the strongest thing a new company can do on
-     an About page, and it keeps the site's claims inside what RCW 18.27.100
-     allows a registered contractor to advertise. */
   .honest {
     margin: var(--space-l) 0 0;
     border-top: 1px solid var(--line);
