@@ -32,8 +32,8 @@ const reviews = defineCollection({
     source: z.string().default('Customer'),
     /**
      * Off by default on purpose. Only real quotes Mark has permission to
-     * republish should ever reach the page — inventing testimonials is both a
-     * trust problem and an FTC one.
+     * republish should ever reach the page — inventing testimonials is both
+     * a trust problem and an FTC one.
      */
     published: z.boolean().default(false),
   }),
@@ -57,19 +57,17 @@ const guides = defineCollection({
       diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist']).optional(),
       /**
        * A second, deeper diagram rendered after the article body, before the
-       * FAQ -- for a guide that already uses the top slot for a heroImage
+       * FAQ — for a guide that already uses the top slot for a heroImage
        * (like the cost guide) or wants a second, more detailed diagram after
        * the reader has the context to use it (like flashing order after the
        * full-frame-vs-insert explanation).
        */
       secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
       /**
-       * Optional topical stock photo for the same slot the diagram uses —
-       * never both on one guide. Never a real Clearview job photo (those live
-       * in src/assets/work and only appear in the Gallery and homepage, where
-       * the "after" claim is true). Sourced under a license that permits
-       * commercial use with no attribution required; heroImageCredit records
-       * source + license for the record even though display isn't required.
+       * Optional topical hero image. These may be properly licensed stock
+       * photography or an actual Clearview job photo when the image genuinely
+       * represents the topic. heroImageCredit records which it is so the page
+       * never implies stock or company work incorrectly.
        */
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
@@ -91,12 +89,8 @@ const legal = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/legal' }),
   schema: z.object({
     title: z.string(),
-    description: z.string(),
-    /** Shown on the page and used for the "last updated" line. */
-    updated: z.coerce.date(),
-    order: z.number().default(99),
-    /** Appears above the body, before the legal text proper. */
-    summary: z.string(),
+    description: z.string().optional(),
+    published: z.boolean().default(true),
   }),
 });
 
