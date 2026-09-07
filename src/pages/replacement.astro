@@ -5,19 +5,17 @@ import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { replacementWork, findWork, workKindLabel } from '../data/work';
-import replacementHeroSrc from '../assets/hero/replacement.png';
 import { site } from '../data/site';
 
 const ogPhoto = findWork('vaulted-grids')!;
 
-// Full-bleed hero background. AI-generated, not a real elevation, so it is
-// captioned as such — the same rule the guide photos already follow.
-const heroBg = await getImage({ src: replacementHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// The replacement page should lead with a finished replacement, not a
+// generated house. The gallery already has a strong real Clearview elevation
+// that makes the service immediately legible without implying a specific
+// product line.
+const heroPhoto = findWork('stone-craftsman')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
-// Same shape as the per-city Service schema in areas/[slug].astro, scoped to
-// this service rather than one town. The sitewide hasOfferCatalog entry
-// (JsonLd.astro) is just a name + url; this gives the service its own
-// describable entity, so it is additive rather than a duplicate.
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -90,7 +88,7 @@ const spec = [
         Replacing a patio door? See <a href="/sliding-glass-doors">sliding glass doors</a>.
       </p>
     </div>
-    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
+    <p class="hero-photo-credit">Clearview job photo — completed replacement elevation</p>
   </section>
 
   <section class="section">
@@ -190,13 +188,10 @@ const spec = [
 </BaseLayout>
 
 <style>
-  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
-     not a photo of a real job — hence the small credit line — so it earns
-     no "after" tag the way the real work photos elsewhere on the site do. */
   .page-hero-photo {
     position: relative;
     background-size: cover;
-    background-position: center;
+    background-position: center 40%;
   }
 
   .hero-photo-credit {
@@ -206,12 +201,9 @@ const spec = [
     margin: 0;
     font-size: var(--step--2);
     color: var(--on-dark-faint);
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
-  /* Cross-link to the other service page, set into the dark hero. The global
-     `a { color: var(--ink) }` reads as invisible on this background, so the
-     link gets its own on-dark treatment rather than inheriting it. */
   .hero-note {
     margin: var(--space-s) 0 0;
     max-width: 44rem;
@@ -231,9 +223,6 @@ const spec = [
     color: var(--accent-bright);
   }
 
-  /* The decision table is the spine of this page: it is what a homeowner
-     actually needs, and it is the reason the page is no longer a single
-     paragraph band between two dark strips. */
   .decide {
     display: grid;
     grid-template-columns: 1fr 1fr;
