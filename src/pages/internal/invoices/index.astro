@@ -3,13 +3,13 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 ---
 <InternalLayout title="Invoices">
   <div class="il-head">
-    <div><p class="kicker">Clearview internal</p><h1>Invoices</h1><p class="lede">Invoices are created automatically from quotes and locked when the quote is finalized.</p></div>
+    <div><p class="kicker">Clearview internal</p><h1>Invoices</h1><p class="lede">Invoices are created automatically with quotes; finalized invoices become ready to send.</p></div>
     <a class="btn btn-ghost" href="/internal/quotes">Quotes</a>
   </div>
 
   <p data-loading>Loading…</p>
   <p class="il-error" data-error hidden role="alert"></p>
-  <p data-empty hidden>No invoices yet. Finalize a quote to create one.</p>
+  <p data-empty hidden>No invoices yet. Start a quote to create one automatically.</p>
 
   <table class="il-table" data-table hidden>
     <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
@@ -41,5 +41,5 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 </script>
 
 <style>
-.il-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.il-table{width:100%;border-collapse:collapse;font-size:var(--step--1)}.il-table th{text-align:left;padding:.55rem;border-bottom:1px solid var(--ink);font-size:var(--step--2);text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}:global(.il-table td){padding:.7rem .55rem;border-bottom:1px solid var(--line);vertical-align:middle}:global(.il-table td:first-child){display:grid;gap:.15rem}.il-table small{display:block;color:var(--ink-faint);font-size:var(--step--2)}:global(.il-status){display:inline-block;padding:.18rem .5rem;border-radius:999px;font-size:var(--step--2);font-weight:600}.il-status-draft{background:color-mix(in srgb,var(--ink) 9%,transparent);color:var(--ink-soft)}.il-status-open{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink)}.il-status-sent{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink)}.il-status-paid{background:color-mix(in srgb,var(--accent-ink) 14%,transparent);color:var(--accent-ink)}.il-status-void{background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}.il-error{color:var(--danger)}.il-open{padding:.35rem .55rem;font-size:var(--step--2)}@media(max-width:720px){.il-head{align-items:flex-start;flex-direction:column}.il-table{display:block;overflow-x:auto;white-space:nowrap}}
+.il-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.il-table{width:100%;border-collapse:collapse;font-size:var(--step--1)}.il-table th{text-align:left;padding:.55rem;border-bottom:1px solid var(--ink);font-size:var(--step--2);text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}:global(.il-table td){padding:.7rem .55rem;border-bottom:1px solid var(--line);vertical-align:middle}:global(.il-table td:first-child){display:grid;gap:.15rem}:global(.il-table small){display:block;color:var(--ink-faint);font-size:var(--step--2)}:global(.il-status){display:inline-block;padding:.18rem .5rem;border-radius:999px;font-size:var(--step--2);font-weight:600}:global(.il-status-draft){background:color-mix(in srgb,var(--ink) 9%,transparent);color:var(--ink-soft)}:global(.il-status-open){background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink)}:global(.il-status-sent){background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink)}:global(.il-status-paid){background:color-mix(in srgb,var(--accent-ink) 14%,transparent);color:var(--accent-ink)}:global(.il-status-void){background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}.il-error{color:var(--danger)}:global(.il-open){padding:.35rem .55rem;font-size:var(--step--2)}@media(max-width:720px){.il-head{align-items:flex-start;flex-direction:column}.il-table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
