@@ -1,4 +1,5 @@
 import { TERMS_VERSION, json, parseQuoteBody } from '../../_lib/quotes.mjs';
+import { ensureInvoiceForQuote } from '../../_lib/invoices.mjs';
 
 function newQuoteId() {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -12,8 +13,11 @@ function newQuoteId() {
 export async function onRequestGet(context) {
   const { env } = context;
   const { results } = await env.QUOTES_DB.prepare(
-    `SELECT id, created_at, status, customer_name, customer_city, total_cents, signature_method
-     FROM quotes ORDER BY created_at DESC LIMIT 200`,
+    `SELECT q.id, q.created_at, q.status, q.customer_name, q.customer_city, q.total_cents, q.signature_method,
+            i.id AS invoice_id, i.invoice_number, i.status AS invoice_status, i.sent_at AS invoice_sent_at
+     FROM quotes q
+     LEFT JOIN invoices i ON i.quote_id = q.id
+     ORDER BY q.created_at DESC LIMIT 200`,
   ).all();
   return json({ quotes: results });
 }
@@ -33,11 +37,6 @@ export async function onRequestPost(context) {
   const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
 
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
-  // Both paths start as a draft: nothing is actually signed yet the moment
-  // this row is created, and a draft can still be edited (PUT) to fix a
-  // typo before anyone signs anything. A digital quote is finalized when
-  // the drawn signature is PATCHed in; a pen quote is finalized when Mark
-  // confirms the printed copy actually got signed.
   const status = 'draft';
   const now = new Date().toISOString();
   const id = newQuoteId();
@@ -65,5 +64,7 @@ export async function onRequestPost(context) {
     ),
   ]);
 
-  return json({ id, status, totalCents }, 201);
+  const invoice = await ensureInvoiceForQuote(env.QUOTES_DB);
+  await ensureInvoiceForQuote(env.QUOTES_DB, id);
+  return json({ id, status, totalCents, invoiceId: invoice?.invoice?.id || `INV-${id.replace(/^Q-/, '')}` }, 201);
 }
