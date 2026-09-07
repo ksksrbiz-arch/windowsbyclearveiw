@@ -13,10 +13,10 @@ faq:
     answer: The Section 25C energy-efficient home improvement credit ended for property placed in service after December 31, 2025. Do not count on it for a 2026 install. Some Washington utilities still offer window rebates. Those change by fuel type and U-factor, so we check your utility at estimate time.
   - question: Why is a whole-house price so wide?
     answer: Ten small inserts in a ranch is a different job from fifteen full-frame units on a two-story with custom sizes. Count, method, material, and access swing the total more than the brand name on the glass.
-heroImage: ./img-window-replacement-cost-washington.png
-heroImageAlt: Illustration of a tape measure and a clipboard with an estimate sheet resting on a window sill, representing the measure a real quote starts from.
-heroImageCredit: AI-generated illustration (Higgsfield / Z Image) — not a Clearview job or job site
-heroImageFocus: 62% 62%
+heroImage: ../../assets/work/gray-side-slider.jpg
+heroImageAlt: Side elevation of a gray lap-siding house with a new white slider and upper windows, showing the finished scale of a replacement project.
+heroImageCredit: Clearview job photo — finished side elevation
+heroImageFocus: 50% 50%
 secondaryDiagram: cost-build-up
 ---
 
