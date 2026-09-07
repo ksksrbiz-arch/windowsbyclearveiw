@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { newBuildWork } from '../../data/work';
+import { findWork, newBuildWork } from '../../data/work';
 
 interface Props { type: 'installation' | 'flashing' | 'symptoms' | 'cost'; heading?: string | null; }
 const { type, heading = null } = Astro.props;
@@ -62,7 +62,12 @@ const photo = {
   },
 }[type];
 
-const clearviewPhoto = type === 'flashing' ? newBuildWork[0]?.image : null;
+const clearviewPhoto = type === 'flashing'
+  ? newBuildWork[0]
+  : type === 'installation'
+    ? findWork('blue-ladder')
+    : null;
+const isClearviewPhoto = Boolean(clearviewPhoto?.image);
 ---
 <figure class="photo-guide">
   {heading && <figcaption class="guide-heading">{heading}</figcaption>}
@@ -70,12 +75,12 @@ const clearviewPhoto = type === 'flashing' ? newBuildWork[0]?.image : null;
 
   <div class="photo-lead">
     <div class="photo-wrap">
-      {type === 'flashing' && clearviewPhoto ? (
-        <Image src={clearviewPhoto} alt="Clearview installation showing a newly installed window in a sheathed opening." widths={[700, 1000, 1400]} sizes="(max-width: 800px) 100vw, 62vw" format="webp" quality={78} loading="eager" fetchpriority="high" />
+      {isClearviewPhoto ? (
+        <Image src={clearviewPhoto!.image} alt={clearviewPhoto!.alt} widths={[700, 1000, 1400]} sizes="(max-width: 800px) 100vw, 62vw" format="webp" quality={78} loading="eager" fetchpriority="high" />
       ) : (
         <img src={photo.image} alt={photo.alt} loading="eager" fetchpriority="high" decoding="async" />
       )}
-      <span class="photo-label">{type === 'flashing' ? 'CLEARVIEW JOB PHOTO' : 'STOCK PHOTOGRAPHY'}</span>
+      <span class="photo-label">{isClearviewPhoto ? 'CLEARVIEW JOB PHOTO' : 'STOCK PHOTOGRAPHY'}</span>
     </div>
     <div class="photo-lead-copy">
       <p class="eyebrow">What to look for</p>
@@ -99,8 +104,8 @@ const clearviewPhoto = type === 'flashing' ? newBuildWork[0]?.image : null;
   </div>
 
   <figcaption class="photo-credit">
-    {type === 'flashing' ? (
-      'Clearview installation photo — actual company work.'
+    {isClearviewPhoto ? (
+      <>Clearview installation photo — actual company work. <a href="/gallery">See more project photos</a>.</>
     ) : (
       <>Stock photo — {photo.source}. Used to demonstrate the condition or process, not a Clearview job. <a href={photo.sourceUrl} target="_blank" rel="noreferrer">Source</a></>
     )}
