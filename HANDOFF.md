@@ -22,12 +22,12 @@ river into Portland.
   `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold
   the trade name.
 - **On the spelling:** the domain has migrated to windowsbyclearview.com and
-  every trade-facing string in the codebase now reads "Clear**view**". The
-  repo's GitHub name (`windowsbyclearveiw`) and a couple of legacy defaults
-  (e.g. the `NOTIFY_EMAIL` fallback) still carry the old "veiw" spelling —
-  that's expected, GitHub repo renames and default-value churn aren't worth
-  doing just for cosmetics, and the old domain 301-redirects to the new one
-  so nothing breaks either way.
+  every trade-facing string in the codebase now reads "Clearview". The repo's
+  GitHub name (`windowsbyclearveiw`) and a couple of legacy defaults (e.g. the
+  `NOTIFY_EMAIL` fallback) still carry the old "veiw" spelling — that's expected,
+  GitHub repo renames and default-value churn aren't worth doing just for
+  cosmetics, and the old domain 301-redirects to the new one so nothing breaks
+  either way.
 
 ## Where it stands
 
@@ -40,6 +40,12 @@ Working and deployed:
   Both templates (lead-to-Mark and receipt-to-customer) are full HTML with
   click-to-call / click-to-email buttons, and the lead email attaches a
   vCard so Mark can save the customer's contact info in one tap.
+- A protected Command Center production-mail test is available under
+  `/internal/tools`; it uses the exact production Resend configuration and
+  returns the provider message ID without creating a lead. This proves the
+  Pages environment can submit a test message to the configured notification
+  address, but the checkbox below remains open until Mark confirms the message
+  was actually received in the inbox.
 - Free cost estimator at `/tools/window-replacement-cost-calculator`
 - Pricing worker with KV, validation, monthly cron, and a GitHub Actions
   health check
@@ -93,7 +99,7 @@ These came out of real problems and are easy to undo by accident.
 | --- | --- |
 | **L&I registration number** | The last real blocker on this being legitimate advertising in WA. Set `lniNumber` in `src/data/site.ts`. |
 | **Mark's real pricing** | Replaces the regional averages. Format and basis are documented under "Pricing" in the README. |
-| **Estimate form end-to-end test** | `RESEND_API_KEY` is set on Pages now, but no real lead has been confirmed delivered. A valid submission emails Mark for real. |
+| **Estimate form end-to-end test** | `RESEND_API_KEY` is set on Pages and a protected production mail-test now exists under `/internal/tools`, but no real customer-form submission has been confirmed delivered to Mark's inbox. The remaining proof step is a controlled production form submission followed by inbox confirmation. |
 | **Hero video** | Drop a 15–25s clip at `public/video/hero.mp4` and the homepage hero switches from photo to video automatically. |
 | **`ADMIN_TOKEN`** | Unset, so the worker's `PUT /` is closed and pricing changes go through the repo. Optional. |
 | **Google Business Profile** | Not set up. For a local installer this matters as much as the site. |
