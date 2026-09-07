@@ -1,0 +1,45 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Invoices">
+  <div class="il-head">
+    <div><p class="kicker">Clearview internal</p><h1>Invoices</h1><p class="lede">Invoices are created automatically from quotes and locked when the quote is finalized.</p></div>
+    <a class="btn btn-ghost" href="/internal/quotes">Quotes</a>
+  </div>
+
+  <p data-loading>Loading…</p>
+  <p class="il-error" data-error hidden role="alert"></p>
+  <p data-empty hidden>No invoices yet. Finalize a quote to create one.</p>
+
+  <table class="il-table" data-table hidden>
+    <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+    <tbody data-rows></tbody>
+  </table>
+</InternalLayout>
+
+<script>
+  function initInvoiceList() {
+    const table = document.querySelector('[data-table]');
+    if (!(table instanceof HTMLElement) || table.dataset.bound === 'true') return;
+    table.dataset.bound = 'true';
+    const loading = document.querySelector('[data-loading]'); const errorEl = document.querySelector('[data-error]'); const emptyEl = document.querySelector('[data-empty]'); const rows = document.querySelector('[data-rows]');
+    const money = (cents) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const labels = { draft:'Draft', open:'Open', sent:'Sent', paid:'Paid', void:'Void' };
+    const esc = (s) => { const d=document.createElement('div'); d.textContent=String(s??''); return d.innerHTML; };
+    async function load() {
+      try {
+        const response = await fetch('/internal/api/invoices', { headers:{'cache-control':'no-cache'} }); const data = await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||'Could not load invoices.');
+        if(loading instanceof HTMLElement) loading.hidden=true;
+        if(!data.invoices?.length){ if(emptyEl instanceof HTMLElement) emptyEl.hidden=false; return; }
+        if(table instanceof HTMLElement) table.hidden=false;
+        if(rows instanceof HTMLElement) rows.innerHTML=data.invoices.map((invoice)=>`<tr><td><a href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}"><strong>${esc(invoice.invoice_number)}</strong></a><small>Quote ${esc(invoice.quote_id)}</small></td><td>${esc(invoice.customer_name)}${invoice.customer_city?`<small>${esc(invoice.customer_city)}</small>`:''}</td><td>${new Date(invoice.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td><td>${money(invoice.total_cents)}</td><td><span class="il-status il-status-${invoice.status}">${labels[invoice.status]||esc(invoice.status)}</span></td><td><a class="btn btn-ghost il-open" href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}">Open</a></td></tr>`).join('');
+      } catch(e){ if(loading instanceof HTMLElement) loading.hidden=true; if(errorEl instanceof HTMLElement){errorEl.hidden=false;errorEl.textContent=e instanceof Error?e.message:'Could not load invoices.';} }
+    }
+    load();
+  }
+  initInvoiceList(); document.addEventListener('astro:page-load', initInvoiceList);
+</script>
+
+<style>
+.il-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.il-table{width:100%;border-collapse:collapse;font-size:var(--step--1)}.il-table th{text-align:left;padding:.55rem;border-bottom:1px solid var(--ink);font-size:var(--step--2);text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}:global(.il-table td){padding:.7rem .55rem;border-bottom:1px solid var(--line);vertical-align:middle}:global(.il-table td:first-child){display:grid;gap:.15rem}.il-table small{display:block;color:var(--ink-faint);font-size:var(--step--2)}:global(.il-status){display:inline-block;padding:.18rem .5rem;border-radius:999px;font-size:var(--step--2);font-weight:600}.il-status-draft{background:color-mix(in srgb,var(--ink) 9%,transparent);color:var(--ink-soft)}.il-status-open{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink)}.il-status-sent{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink)}.il-status-paid{background:color-mix(in srgb,var(--accent-ink) 14%,transparent);color:var(--accent-ink)}.il-status-void{background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}.il-error{color:var(--danger)}.il-open{padding:.35rem .55rem;font-size:var(--step--2)}@media(max-width:720px){.il-head{align-items:flex-start;flex-direction:column}.il-table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
