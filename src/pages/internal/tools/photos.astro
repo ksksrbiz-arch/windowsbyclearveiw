@@ -87,11 +87,17 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       const all=await run<Photo[]>(db,'readonly',s=>s.getAll()) as Photo[]||[];
       return all.filter(p=>!jobId.value.trim()||p.jobId===jobId.value.trim()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
     };
+    // Every render() mints a fresh object URL per photo. Nothing revoked them
+    // between renders, so a busy job (dozens of captures, each triggering a
+    // re-render on save/delete) leaked one blob URL per photo per render —
+    // unbounded growth in a page meant for a long session on a phone.
+    let activeUrls:string[]=[];
     const render=async()=>{
+      activeUrls.forEach(u=>URL.revokeObjectURL(u)); activeUrls=[];
       const photos=await load(); grid.innerHTML=''; count.textContent=String(photos.length); empty.hidden=photos.length>0;
-      photos.forEach(photo=>{ const url=URL.createObjectURL(photo.blob); const card=document.createElement('article'); card.className='photo-card'; card.innerHTML=`<img src="${url}" alt="${esc(photo.stage)} job photo"><div class="photo-info"><span class="stage-tag">${esc(photo.stage.replace('-',' '))}</span><time>${new Date(photo.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</time><textarea maxlength="500" placeholder="Photo note">${esc(photo.note)}</textarea><div class="photo-actions"><button type="button" data-save-note>Save note</button><button type="button" data-delete>Delete</button></div></div>`;
+      photos.forEach(photo=>{ const url=URL.createObjectURL(photo.blob); activeUrls.push(url); const card=document.createElement('article'); card.className='photo-card'; card.innerHTML=`<img src="${url}" alt="${esc(photo.stage)} job photo"><div class="photo-info"><span class="stage-tag">${esc(photo.stage.replace('-',' '))}</span><time>${new Date(photo.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</time><textarea maxlength="500" placeholder="Photo note">${esc(photo.note)}</textarea><div class="photo-actions"><button type="button" data-save-note>Save note</button><button type="button" data-delete>Delete</button></div></div>`;
         card.querySelector('[data-save-note]')?.addEventListener('click',async()=>{const ta=card.querySelector('textarea'); if(!(ta instanceof HTMLTextAreaElement)) return; await run(db,'readwrite',s=>{const req=s.get(photo.id); req.onsuccess=()=>{const item=req.result as Photo; item.note=ta.value.slice(0,500); s.put(item);}; return req;}); status.textContent='Photo note saved';});
-        card.querySelector('[data-delete]')?.addEventListener('click',async()=>{await run(db,'readwrite',s=>s.delete(photo.id)); URL.revokeObjectURL(url); render(); status.textContent='Photo deleted';});
+        card.querySelector('[data-delete]')?.addEventListener('click',async()=>{await run(db,'readwrite',s=>s.delete(photo.id)); render(); status.textContent='Photo deleted';});
         grid.append(card);
       });
     };
