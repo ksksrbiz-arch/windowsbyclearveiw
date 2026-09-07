@@ -218,7 +218,7 @@ Environment variables it reads:
 | --- | --- | --- |
 | `RESEND_API_KEY` | yes | — |
 | `NOTIFY_EMAIL` | no | `owner@windowsbyclearveiw.com` |
-| `RESEND_FROM` | no | `Clearview Windows <estimates@windowsbyclearview.com>` |
+| `RESEND_FROM` | no | `Clearview Windows <estimates@windowsbyclearveiw.com>` |
 
 With JavaScript the page swaps in a confirmation panel. Without it, the function
 redirects to `/estimate/sent` or `/estimate/problem`, so the form still works.
@@ -293,8 +293,8 @@ GEMINI_API_KEY=... node scripts/build-guides-index.mjs
 ```
 
 Get a free key at <https://aistudio.google.com/apikey>. `GROQ_API_KEY` is
-free at <https://console.groq.com>. Set both in Cloudflare Pages → Settings
-→ Environment variables — `GEMINI_API_KEY` alone is enough for the feature to
+free at <https://console.groq.com>. Set both in Cloudflare Pages → Settings →
+Environment variables — `GEMINI_API_KEY` alone is enough for the feature to
 work (it's its own fallback and what retrieval depends on); `GROQ_API_KEY` is
 what makes the common case fast. No key set at all → the page still loads,
 answering with a message pointing to the phone number instead of crashing.
@@ -317,72 +317,4 @@ and production.
 
 There is no rate limiting on `/ask/api/chat` beyond message-length and
 history caps; the worst case of abuse is hitting a provider's free-tier
-limits, at which point the fallback chain (and, ultimately, the graceful
-"unavailable" message) takes over. Revisit if that turns out to matter.
-
-## Performance: keep `astro:page-load` handlers cheap
-
-The site uses Astro View Transitions (`<ClientRouter />`), so an in-site link
-click does a client-side DOM swap rather than a full navigation. Everything
-wired to the `astro:page-load` event in `BaseLayout.astro` — the GTM
-`dataLayer` pushes, the scroll-reveal `IntersectionObserver` setup — reruns on
-*every* navigation, including the very first page load, so it sits directly in
-front of the LCP element.
-
-Two real regressions came from this, both measured with the browser's
-Performance API rather than assumed:
-
-- **Synchronous analytics pushes.** `trackPageView()` and `trackVisitJourney()`
-  used to push to `window.dataLayer` synchronously inside the `astro:page-load`
-  handler. GTM evaluates every tag/trigger synchronously on each push, which
-  measured as ~465ms of blocked main thread on a single in-site click. Fixed by
-  deferring both through `requestIdleCallback` (with a `setTimeout` fallback),
-  so tracking still fires every navigation, just after the page has painted.
-- **Interleaved layout reads/writes.** `initReveal()`'s "reveal anything
-  already in view" pass used to loop over each `[data-reveal]` element doing
-  `el.getBoundingClientRect()` (read) immediately followed by
-  `el.classList.add('is-revealed')` (write) in the same iteration. Since that
-  class change affects the reveal animation's transform/opacity, each write
-  invalidated layout, forcing the next read to synchronously recompute it — a
-  forced-reflow thrash that a live DevTools trace measured at ~540ms of Layout
-  work, over half of the homepage's LCP. Fixed by splitting it into two
-  passes: read every element's position first, then apply all the class
-  changes after.
-
-The lesson generalizes: anything hung on `astro:page-load` runs on the
-critical path of every navigation, not just once. Batch DOM reads and writes
-separately, and push non-essential work (analytics, logging) off the main
-thread with `requestIdleCallback` rather than firing it inline.
-
-## Notes
-
-The legal / domain spelling **Clearview** is used throughout. Public copy can still
-say "Clearview" if you decide that is the brand.
-
-## Images: why WebP, and why not Cloudflare Transformations
-
-Cloudflare Image Transformations is enabled on the zone. It is deliberately
-not used, and AVIF is deliberately not generated. Both were measured rather
-than assumed, on this site's own photos:
-
-| | Result |
-| --- | --- |
-| Worst-case page image weight | `/gallery`, 26 photos, **182 KB** after a full scroll at 1280px |
-| Homepage image weight | **101 KB** |
-| AVIF q50 vs WebP q72 | 36% smaller — **but measurably lower quality** (higher RMSE against the lossless original on all four photos tested) |
-| AVIF q60 vs WebP q72 | quality-matched, and only **10% smaller** (161 KB across all 26 photos at every width) |
-| AVIF encode cost | **1866 ms/image** vs 55 ms for WebP — roughly 34x, which would take the build from ~4 s to several minutes |
-
-So AVIF buys about 5 KB per page at equivalent quality, for a build that is
-orders of magnitude slower. Transformations would mainly buy the same AVIF via
-`format=auto`, while moving images off immutable fingerprinted `/_astro/` URLs
-onto edge-transformed ones and introducing a 5,000/month quota where there is
-currently none.
-
-Leaving Transformations enabled costs nothing while unused, so it stays on for
-any future need. It just is not wired into this site.
-
-**The real ceiling is the source photos.** Every one is 450x600 from a phone.
-Tiles are sized never to exceed that (measured: 450px at a 1440px viewport,
-397px at 1280px), but a retina display still wants 900px and there is no such
-file. No format or CDN fixes that — only a reshoot does.
+limits,... (truncated)
