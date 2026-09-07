@@ -35,16 +35,11 @@ const links = [
           <span class="visually-hidden">Follow {site.shortName} on Facebook</span>
         </a>
       )}
-      <!-- Most visitors are on a phone. Keep click-to-call reachable at every width. -->
       <a class="btn btn-light header-cta" href={telHref()}>
         <span class="header-cta-full" aria-hidden="true">{site.phoneDisplay}</span>
         <span class="header-cta-short" aria-hidden="true">Call</span>
         <span class="visually-hidden">Call {site.phoneDisplay}</span>
       </a>
-      <!-- Desktop nav collapses the estimate link into the link list, which
-           means it is easy to miss without scanning it. A wide viewport has
-           the room for a real button, so give the primary lead-gen action
-           the same standing as click-to-call instead of hiding it in the row. -->
       <a class="btn btn-primary header-estimate" href="/estimate">Get an estimate</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
         <span data-nav-toggle-label>Menu</span>
@@ -55,10 +50,6 @@ const links = [
 </header>
 
 <script>
-  // The header carries transition:persist, so it survives client-side
-  // navigation. Handlers must therefore be attached exactly once, while the
-  // current-page marker has to be recomputed on every load — the server-rendered
-  // aria-current belongs to whichever page happened to be loaded first.
   function bindNav() {
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.getElementById('site-nav');
@@ -68,9 +59,6 @@ const links = [
 
     const label = toggle.querySelector('[data-nav-toggle-label]');
 
-    // aria-expanded already tells assistive tech the state; sighted visitors
-    // need the same information some other way, since "Menu" never changed
-    // no matter how open the panel was.
     const setOpen = (open: boolean) => {
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', String(open));
@@ -86,8 +74,6 @@ const links = [
       if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
     });
 
-    // A menu you can only close by hitting the same small button is a trap on
-    // a phone. Let Escape and any outside tap dismiss it too.
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || toggle.getAttribute('aria-expanded') !== 'true') return;
       setOpen(false);
@@ -112,8 +98,6 @@ const links = [
     });
   }
 
-  // A header that never changes as you move down a 7000px page gives no sense
-  // of position. This condenses it and reveals a reading rail instead.
   function trackScroll() {
     const header = document.querySelector('.site-header');
     if (!(header instanceof HTMLElement)) return;
@@ -149,11 +133,6 @@ const links = [
     trackScroll();
   }
 
-  // Branded loading moment: the mark gets a small pulse for the duration of a
-  // page transition, so a slow connection sees the logo breathe instead of a
-  // frozen header. astro:before-preparation fires the instant navigation
-  // starts (well before the new page's own scripts run), astro:page-load
-  // fires once the new page is in and interactive.
   const header = document.querySelector('.site-header');
   document.addEventListener('astro:before-preparation', () => {
     header?.setAttribute('data-loading', 'true');
@@ -167,16 +146,6 @@ const links = [
 </script>
 
 <style>
-  /* ───────────────────────────────────────────────────────────────────────
-     Header chrome, scoped. This is the one element present on every page, so
-     it is also the one that most needs to feel machined rather than merely
-     placed.
-
-     Two behaviours the previous header had none of: it condenses once you
-     leave the top of the page, and it carries a reading rail showing how far
-     through a long page you are. Both are driven from data attributes and a
-     custom property so nothing here depends on a class the markup might drop.
-     ─────────────────────────────────────────────────────────────────────── */
   .site-header {
     position: sticky;
     top: 0;
@@ -200,7 +169,7 @@ const links = [
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-s);
+    gap: .65rem;
     min-height: 72px;
     transition: min-height var(--dur) var(--ease);
   }
@@ -209,7 +178,6 @@ const links = [
     min-height: 60px;
   }
 
-  /* Reading rail. Width comes from --scroll-progress, set on scroll. */
   .header-progress {
     height: 2px;
     transform: scaleX(var(--scroll-progress, 0));
@@ -218,36 +186,27 @@ const links = [
     transition: transform 90ms linear;
   }
 
-  /* The branded loading moment: while a page transition is in flight, the
-     mark in the header gets a slow, deliberate pulse rather than the page
-     just going still. :global() reaches into Brand.astro's own scope, since
-     Astro's per-component CSS isolation would otherwise block it. */
   .site-header[data-loading='true'] :global(.brand-mark) {
     animation: brand-pulse 900ms ease-in-out infinite;
   }
 
   @keyframes brand-pulse {
-    0%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.55;
-      transform: scale(0.92);
-    }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.92); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .site-header[data-loading='true'] :global(.brand-mark) {
-      animation: none;
-    }
+    .site-header[data-loading='true'] :global(.brand-mark) { animation: none; }
   }
 
   .nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.1rem var(--space-m);
+    flex-wrap: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    gap: 0.1rem .9rem;
+    white-space: nowrap;
   }
 
   .nav a {
@@ -274,39 +233,20 @@ const links = [
   }
 
   .nav a:hover,
-  .nav a:focus-visible {
-    color: var(--on-dark);
-  }
-
+  .nav a:focus-visible { color: var(--on-dark); }
   .nav a:hover::after,
-  .nav a:focus-visible::after {
-    transform: scaleX(1);
-  }
-
-  /* The old treatment dimmed the current page to 45% opacity, which read as
-     "disabled" rather than "you are here". */
-  .nav a[aria-current='page'] {
-    color: var(--on-dark);
-  }
-
-  .nav a[aria-current='page']::after {
-    transform: scaleX(1);
-    background: var(--accent-bright);
-  }
-
-  .nav-estimate {
-    display: none;
-  }
+  .nav a:focus-visible::after { transform: scaleX(1); }
+  .nav a[aria-current='page'] { color: var(--on-dark); }
+  .nav a[aria-current='page']::after { transform: scaleX(1); background: var(--accent-bright); }
+  .nav-estimate { display: none; }
 
   .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-2xs);
+    gap: .35rem;
+    flex: none;
   }
 
-  /* Icon-only so it reads as a recognizable brand mark rather than another
-     text link competing with the nav. Its own brand blue, not the site
-     accent — the point is that it is instantly recognizable as Facebook. */
   .header-social {
     display: flex;
     align-items: center;
@@ -324,41 +264,16 @@ const links = [
     transform: translateY(-1px);
   }
 
-  .header-social-icon {
-    width: 1.4rem;
-    height: 1.4rem;
-  }
+  .header-social-icon { width: 1.4rem; height: 1.4rem; }
+  .header-cta-short { display: none; }
+  .header-cta { font-variant-numeric: tabular-nums; }
+  .header-cta-full { white-space: nowrap; }
 
-  .header-cta-short {
-    display: none;
-  }
-
-  .header-cta {
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* The full number is one line no matter how tight things get — a phone
-     number folding onto three lines inside a pill looks broken, and the
-     short "Call" label below 1280px exists precisely so it never has to. */
-  .header-cta-full {
-    white-space: nowrap;
-  }
-
-  /* Hidden by default; only shown at the desktop width where the nav's own
-     "Request an estimate" link is otherwise the sole way to reach it. Below
-     1280px the opened nav carries that link, and below 640px the fixed
-     MobileCtaBar owns this action instead, so this would just be a third copy. */
   .header-estimate {
-    display: none;
-    padding: 0.55rem 1rem;
+    display: inline-flex;
+    padding: .55rem 1rem;
     font-size: var(--step--1);
     white-space: nowrap;
-  }
-
-  @media (min-width: 1281px) {
-    .header-estimate {
-      display: inline-flex;
-    }
   }
 
   .nav-toggle {
@@ -380,10 +295,13 @@ const links = [
     background: color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
-  /* Ten nav links plus the brand mark and both header buttons need real
-     room — below this, the row was wrapping onto two lines and squeezing
-     the call button's phone number into three, so the hamburger takes over
-     earlier than it used to rather than let that happen. */
+  @media (max-width: 1400px) {
+    .header-estimate { display: none; }
+    .header-inner,
+    .site-header[data-scrolled='true'] .header-inner { min-height: 64px; }
+    .nav { gap: .1rem .7rem; }
+  }
+
   @media (max-width: 1280px) {
     .header-inner,
     .site-header[data-scrolled='true'] .header-inner {
@@ -405,24 +323,14 @@ const links = [
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
       min-width: 240px;
+      justify-content: initial;
+      white-space: normal;
     }
 
-    .nav.is-open {
-      display: flex;
-    }
-
-    .nav a {
-      padding: 0.6rem 0;
-      font-size: var(--step-0);
-    }
-
-    .nav a::after {
-      display: none;
-    }
-
-    .nav-toggle {
-      display: inline-flex;
-    }
+    .nav.is-open { display: flex; }
+    .nav a { padding: 0.6rem 0; font-size: var(--step-0); }
+    .nav a::after { display: none; }
+    .nav-toggle { display: inline-flex; }
 
     .nav-estimate {
       display: block;
@@ -433,25 +341,12 @@ const links = [
       font-weight: 600;
     }
 
-    /* Click-to-call is the highest-value action on a phone. Shrink it, never hide it. */
-    .header-cta {
-      padding: 0.55rem 0.85rem;
-    }
-
-    .header-cta-full {
-      display: none;
-    }
-
-    .header-cta-short {
-      display: inline;
-    }
+    .header-cta { padding: 0.55rem 0.85rem; }
+    .header-cta-full { display: none; }
+    .header-cta-short { display: inline; }
   }
 
   @media (max-width: 640px) {
-    /* Below this width the fixed mobile CTA bar owns click-to-call, so the
-       header pill would just be a second, smaller copy of the same action. */
-    .header-cta {
-      display: none;
-    }
+    .header-cta { display: none; }
   }
 </style>
