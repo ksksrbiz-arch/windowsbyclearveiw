@@ -3,15 +3,14 @@ import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { processWork, workKindLabel } from '../data/work';
-import processHeroSrc from '../assets/hero/process.png';
+import { processWork, workKindLabel, findWork } from '../data/work';
 
-// Full-bleed hero background. AI-generated, not a real install, so it is
-// captioned as such — the same rule the guide photos already follow.
-const heroBg = await getImage({ src: processHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// The process page should show the process. This is an actual Clearview
+// installation photo, cropped as a hero and backed by the install-day gallery
+// immediately below.
+const heroPhoto = findWork('blue-ladder')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
-// Mirrors the four <li> items below exactly — if the steps change, this must
-// change with them, or the markup and the schema will say different things.
 const steps = [
   {
     name: 'Walkthrough',
@@ -58,7 +57,7 @@ const schema = {
         Four steps, in this order, on every job — so nothing on install day is a surprise.
       </p>
     </div>
-    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
+    <p class="hero-photo-credit">Clearview job photo — installer setting a replacement window</p>
   </section>
 
   <section class="section">
@@ -98,12 +97,10 @@ const schema = {
 </BaseLayout>
 
 <style>
-  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
-     not a photo of a real install — hence the small credit line. */
   .page-hero-photo {
     position: relative;
     background-size: cover;
-    background-position: center;
+    background-position: center 42%;
   }
 
   .hero-photo-credit {
@@ -113,11 +110,9 @@ const schema = {
     margin: 0;
     font-size: var(--step--2);
     color: var(--on-dark-faint);
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
-  /* The shared .steps device, given room to be the page rather than a list
-     tucked beside a paragraph. */
   .process-steps li {
     padding-top: var(--space-m);
     padding-bottom: var(--space-m);
