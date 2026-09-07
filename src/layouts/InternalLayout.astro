@@ -10,6 +10,7 @@ const navItems = [
   { href: '/internal/leads', label: 'Leads' },
   { href: '/internal/follow-up', label: 'Follow-up' },
   { href: '/internal/quotes', label: 'Quotes' },
+  { href: '/internal/invoices', label: 'Invoices' },
   { href: '/internal/jobs', label: 'Jobs' },
   { href: '/internal/schedule', label: 'Schedule' },
   { href: '/internal/payments', label: 'Payments' },
@@ -103,13 +104,86 @@ const isActive = (href: string) => href === '/internal/' ? pathname === href : p
           const link = document.createElement('a'); link.className = 'btn btn-ghost'; link.href = `/internal/tools/photos?jobId=${encodeURIComponent(id)}`; link.dataset.jobPhotosLink = 'true'; link.textContent = 'Job photos'; actions.insertBefore(link, actions.firstChild);
         }
 
-        function mountInternalEnhancements() { mountMeasurementImport(); mountFollowUpPrefill(); mountJobPhotoLink(); }
-        mountInternalEnhancements(); document.addEventListener('astro:page-load', mountInternalEnhancements);
+        function mountQuoteInvoiceActions() {
+          if (location.pathname !== '/internal/quotes/view') return;
+          const id = new URLSearchParams(location.search).get('id');
+          const actions = document.querySelector('.qv-toolbar-actions');
+          if (!id || !(actions instanceof HTMLElement) || actions.dataset.invoiceReady === 'true') return;
+          actions.dataset.invoiceReady = 'true';
+
+          const status = document.createElement('span');
+          status.className = 'quote-invoice-status';
+          status.hidden = true;
+          actions.prepend(status);
+
+          fetch(`/internal/api/quotes/${encodeURIComponent(id)}`, { headers: { 'cache-control': 'no-cache' } })
+            .then(async (response) => {
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(data.error || 'Could not load invoice status.');
+              return data;
+            })
+            .then((data) => {
+              const quote = data.quote;
+              const invoice = data.invoice;
+              if (!quote || quote.status !== 'finalized' || !invoice) return;
+
+              const view = document.createElement('a');
+              view.className = 'btn btn-ghost';
+              view.href = `/internal/invoices/view?id=${encodeURIComponent(invoice.id)}`;
+              view.textContent = 'View invoice';
+              actions.insertBefore(view, actions.firstChild);
+
+              const email = document.createElement('button');
+              email.type = 'button';
+              email.className = 'btn btn-primary';
+              email.textContent = invoice.status === 'sent' ? 'Email invoice again' : 'Email invoice';
+              email.disabled = !invoice.customer_email;
+              email.title = invoice.customer_email ? `Send to ${invoice.customer_email}` : 'Customer email is missing';
+              actions.insertBefore(email, view.nextSibling);
+
+              email.addEventListener('click', async () => {
+                if (!invoice.customer_email) return;
+                if (!window.confirm(`Email ${invoice.invoice_number} to ${invoice.customer_email}?`)) return;
+                email.disabled = true; email.textContent = 'Sending…';
+                status.hidden = true;
+                try {
+                  const response = await fetch(`/internal/api/invoices/${encodeURIComponent(invoice.id)}`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ action: 'email' }),
+                  });
+                  const result = await response.json().catch(() => ({}));
+                  if (!response.ok) throw new Error(result.error || 'Could not send the invoice.');
+                  email.textContent = 'Email invoice again';
+                  status.hidden = false;
+                  status.textContent = `Sent ${new Date(result.sentAt || Date.now()).toLocaleString('en-US')}`;
+                  email.disabled = false;
+                } catch (error) {
+                  status.hidden = false;
+                  status.textContent = error instanceof Error ? error.message : 'Could not send the invoice.';
+                  email.textContent = 'Email invoice';
+                  email.disabled = false;
+                }
+              });
+            })
+            .catch(() => {
+              actions.dataset.invoiceReady = 'true';
+            });
+        }
+
+        function mountInternalEnhancements() {
+          mountMeasurementImport();
+          mountFollowUpPrefill();
+          mountJobPhotoLink();
+          mountQuoteInvoiceActions();
+        }
+        mountInternalEnhancements();
+        document.addEventListener('astro:page-load', mountInternalEnhancements);
       })();
     </script>
 
     <style>
-      .internal{background:var(--paper);min-height:100vh}.internal-header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--black) 96%,transparent);color:var(--on-dark);border-bottom:1px solid var(--dark-line);backdrop-filter:blur(10px)}.internal-header-inner{max-width:68rem;margin-inline:auto;padding:.65rem var(--space-m);display:flex;align-items:center;justify-content:space-between;gap:var(--space-m)}.internal-brand{color:var(--on-dark);font-weight:650;letter-spacing:-.01em;text-decoration:none;white-space:nowrap}.internal-brand span{color:var(--accent-bright);font-weight:500}.internal-header-right{display:flex;align-items:center;gap:var(--space-s);min-width:0}.internal-nav{display:flex;align-items:center;gap:.2rem;min-width:0}.internal-nav a{position:relative;color:var(--on-dark-soft);text-decoration:none;font-size:var(--step--2);font-weight:600;padding:.42rem .55rem;border-radius:var(--radius);white-space:nowrap}.internal-nav a::after{content:'';position:absolute;left:.55rem;right:.55rem;bottom:.2rem;height:2px;border-radius:999px;background:var(--accent-bright);transform:scaleX(0);transform-origin:center;transition:transform 140ms ease}.internal-nav a:hover,.internal-nav a:focus-visible,.internal-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .08)}.internal-nav a.active::after{transform:scaleX(1)}.internal-logout{background:transparent;border:1px solid var(--dark-line-strong);color:var(--on-dark-soft);border-radius:var(--radius);padding:.42rem .72rem;font:inherit;font-size:var(--step--2);cursor:pointer;white-space:nowrap}.internal-logout:hover{border-color:var(--accent-bright);color:var(--on-dark)}.internal-main{max-width:68rem;margin-inline:auto;padding:var(--space-l) var(--space-m) var(--space-3xl)}.measurement-import-bar{margin:0 0 var(--space-m);padding:.8rem var(--space-m);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:var(--radius);background:var(--accent-wash);display:flex;justify-content:space-between;align-items:center;gap:var(--space-m)}.measurement-import-bar>div{display:grid;gap:.15rem}.measurement-import-bar span{color:var(--ink-soft);font-size:var(--step--2)}@media(max-width:980px){.internal-header-inner{gap:var(--space-s)}.internal-header-right{flex:1;justify-content:flex-end}.internal-nav{overflow-x:auto;scrollbar-width:none}.internal-nav::-webkit-scrollbar{display:none}.internal-nav a{padding-inline:.45rem}.internal-nav a::after{left:.45rem;right:.45rem}}@media(max-width:520px){.internal-header-inner{padding-inline:var(--space-s)}.internal-brand span{display:none}.internal-logout{padding-inline:.55rem}.measurement-import-bar{align-items:flex-start;flex-direction:column}}@media(prefers-reduced-motion:reduce){.internal-nav a::after{transition:none}}@media print{.internal-header{display:none}.internal-main{max-width:none;padding:0}.measurement-import-bar{display:none}}
+      .internal{background:var(--paper);min-height:100vh}.internal-header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--black) 96%,transparent);color:var(--on-dark);border-bottom:1px solid var(--dark-line);backdrop-filter:blur(10px)}.internal-header-inner{max-width:68rem;margin-inline:auto;padding:.65rem var(--space-m);display:flex;align-items:center;justify-content:space-between;gap:var(--space-m)}.internal-brand{color:var(--on-dark);font-weight:650;letter-spacing:-.01em;text-decoration:none;white-space:nowrap}.internal-brand span{color:var(--accent-bright);font-weight:500}.internal-header-right{display:flex;align-items:center;gap:var(--space-s);min-width:0}.internal-nav{display:flex;align-items:center;gap:.2rem;min-width:0}.internal-nav a{position:relative;color:var(--on-dark-soft);text-decoration:none;font-size:var(--step--2);font-weight:600;padding:.42rem .55rem;border-radius:var(--radius);white-space:nowrap}.internal-nav a::after{content:'';position:absolute;left:.55rem;right:.55rem;bottom:.2rem;height:2px;border-radius:999px;background:var(--accent-bright);transform:scaleX(0);transform-origin:center;transition:transform 140ms ease}.internal-nav a:hover,.internal-nav a:focus-visible,.internal-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .08)}.internal-nav a.active::after{transform:scaleX(1)}.internal-logout{background:transparent;border:1px solid var(--dark-line-strong);color:var(--on-dark-soft);border-radius:var(--radius);padding:.42rem .72rem;font:inherit;font-size:var(--step--2);cursor:pointer;white-space:nowrap}.internal-logout:hover{border-color:var(--accent-bright);color:var(--on-dark)}.internal-main{max-width:68rem;margin-inline:auto;padding:var(--space-l) var(--space-m) var(--space-3xl)}.measurement-import-bar{margin:0 0 var(--space-m);padding:.8rem var(--space-m);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:var(--radius);background:var(--accent-wash);display:flex;justify-content:space-between;align-items:center;gap:var(--space-m)}.measurement-import-bar>div{display:grid;gap:.15rem}.measurement-import-bar span{color:var(--ink-soft);font-size:var(--step--2)}.quote-invoice-status{display:inline-flex;align-items:center;padding:.42rem .65rem;border:1px solid var(--line);border-radius:var(--radius);font-size:var(--step--2);color:var(--ink-soft);white-space:nowrap}@media(max-width:980px){.internal-header-inner{gap:var(--space-s)}.internal-header-right{flex:1;justify-content:flex-end}.internal-nav{overflow-x:auto;scrollbar-width:none}.internal-nav::-webkit-scrollbar{display:none}.internal-nav a{padding-inline:.45rem}.internal-nav a::after{left:.45rem;right:.45rem}}@media(max-width:720px){.quote-invoice-status{width:100%}}@media(max-width:520px){.internal-header-inner{padding-inline:var(--space-s)}.internal-brand span{display:none}.internal-logout{padding-inline:.55rem}.measurement-import-bar{align-items:flex-start;flex-direction:column}}@media(prefers-reduced-motion:reduce){.internal-nav a::after{transition:none}}@media print{.internal-header{display:none}.internal-main{max-width:none;padding:0}.measurement-import-bar,.quote-invoice-status{display:none}}
     </style>
   </body>
 </html>
