@@ -1,0 +1,108 @@
+---
+import { Image } from 'astro:assets';
+import { newBuildWork, processWork } from '../../data/work';
+
+interface Props { type: 'installation' | 'flashing' | 'symptoms' | 'cost'; heading?: string | null; }
+const { type, heading = null } = Astro.props;
+
+const photo = {
+  installation: {
+    intro: 'A replacement window is easier to understand when you can see the work happening at the opening.',
+    source: 'Pexels',
+    sourceUrl: 'https://www.pexels.com/photo/interior-of-room-under-renovation-with-window-frames-5691507/',
+    image: 'https://images.pexels.com/photos/5691507/pexels-photo-5691507.jpeg?auto=compress&cs=tinysrgb&w=1800',
+    alt: 'Renovation room with a window frame removed and construction tools nearby.',
+    title: 'The opening tells you how much work is involved.',
+    points: [
+      ['01', 'INSERT / POCKET', 'The existing frame stays. The new unit is fitted inside it.'],
+      ['02', 'FULL-FRAME', 'The old frame comes out. The opening is exposed before the new unit goes in.'],
+      ['03', 'WHAT CHANGES', 'Trim, siding, flashing, and interior finish can become part of the scope when the frame comes out.'],
+    ],
+  },
+  flashing: {
+    intro: 'Flashing is easiest to understand from actual installation work: the opening is prepared first, then the layers overlap so water has a path out.',
+    source: 'Pexels',
+    sourceUrl: 'https://www.pexels.com/photo/crop-worker-applying-sealant-on-seam-of-window-in-house-6124242/',
+    image: 'https://images.pexels.com/photos/6124242/pexels-photo-6124242.jpeg?auto=compress&cs=tinysrgb&w=1800',
+    alt: 'Close-up stock photograph of a worker applying sealant around a window during installation.',
+    title: 'Think in layers, not a single bead of caulk.',
+    points: [
+      ['01', 'SILL', 'The bottom of the opening gets the first weather-management treatment.'],
+      ['02', 'SIDES', 'Jamb treatment ties the window into the prepared opening.'],
+      ['03', 'HEAD', 'Upper flashing and the wall weather barrier overlap so water is directed outward.'],
+    ],
+  },
+  symptoms: {
+    intro: 'Real windows are the best reference for symptoms. Start with what you can see and touch before deciding what failed.',
+    source: 'Pexels',
+    sourceUrl: 'https://www.pexels.com/photo/aged-wooden-window-with-peeling-paint-on-wall-32025083/',
+    image: 'https://images.pexels.com/photos/32025083/pexels-photo-32025083.jpeg?auto=compress&cs=tinysrgb&w=1800',
+    alt: 'Weathered old wooden window with peeling paint, illustrating visible deterioration at an opening.',
+    title: 'Inspect the window like a technician, not a checklist.',
+    points: [
+      ['01', 'AIR', 'Feel around the sash, meeting rail, lock, and corners with the window closed.'],
+      ['02', 'GLASS', 'Look for fog that stays between panes after the room-side surface is wiped.'],
+      ['03', 'WOOD / SILL', 'Probe stained or soft areas. Moisture damage changes the scope.'],
+      ['04', 'OPERATION', 'Binding, dropping, or failed locks can point to movement, hardware, or frame condition.'],
+    ],
+  },
+  cost: {
+    intro: 'Price makes more sense when you can see what the crew is actually changing. The same window count can represent very different scopes.',
+    source: 'Pexels',
+    sourceUrl: 'https://www.pexels.com/photo/a-room-with-a-window-and-a-door-that-is-being-renovated-28184693/',
+    image: 'https://images.pexels.com/photos/28184693/pexels-photo-28184693.jpeg?auto=compress&cs=tinysrgb&w=1800',
+    alt: 'Residential renovation area with large windows and construction materials visible.',
+    title: 'The price follows the scope, not the window count alone.',
+    points: [
+      ['01', 'WINDOW', 'Size, style, material, and glass package change the unit cost.'],
+      ['02', 'METHOD', 'Insert and full-frame replacement require different amounts of labor and finish work.'],
+      ['03', 'OPENING', 'Rot, out-of-square framing, or repairs can expand the scope.'],
+      ['04', 'ACCESS / FINISH', 'Height, siding, trim, disposal, and other site conditions affect the finished job.'],
+    ],
+  },
+}[type];
+
+const clearviewPhoto = type === 'flashing' ? newBuildWork[0]?.image : processWork[0]?.image;
+---
+<figure class="photo-guide">
+  {heading && <figcaption class="guide-heading">{heading}</figcaption>}
+  <p class="guide-intro">{photo.intro}</p>
+
+  <div class="photo-lead">
+    <div class="photo-wrap">
+      {type === 'flashing' && clearviewPhoto ? (
+        <Image src={clearviewPhoto} alt="Clearview installation showing a newly installed window in a sheathed opening." widths={[700, 1000, 1400]} sizes="(max-width: 800px) 100vw, 62vw" format="webp" quality={78} loading="lazy" />
+      ) : (
+        <img src={photo.image} alt={photo.alt} loading="lazy" decoding="async" />
+      )}
+      <span class="photo-label">{type === 'flashing' ? 'CLEARVIEW JOB PHOTO' : 'STOCK PHOTOGRAPHY'}</span>
+    </div>
+    <div class="photo-lead-copy">
+      <p class="eyebrow">What to look for</p>
+      <h3>{photo.title}</h3>
+      <p>Use the photo to orient yourself, then use the numbered notes to decide what matters at your own opening.</p>
+    </div>
+  </div>
+
+  <div class="point-grid">
+    {photo.points.map(([n, label, body]) => (
+      <article class="point">
+        <span class="point-number">{n}</span>
+        <div><strong>{label}</strong><p>{body}</p></div>
+      </article>
+    ))}
+  </div>
+
+  <div class="photo-rule">
+    <strong>Use the photograph as a reference, not a diagnosis.</strong>
+    <span>Every house has different framing, cladding, access, and opening conditions.</span>
+  </div>
+
+  <figcaption class="photo-credit">{type === 'flashing' ? 'Clearview installation photo — actual company work.' : `Stock photo — ${photo.source}. Used to demonstrate the condition or process, not a Clearview job.`} <a href={photo.sourceUrl} target="_blank" rel="noreferrer">Source</a></figcaption>
+</figure>
+
+<style>
+.photo-guide{margin:0}.guide-heading{display:block;margin:0 0 .4rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}.guide-intro{margin:0 0 var(--space-l);max-width:76ch;color:var(--ink-soft);font-size:var(--step--1)}.photo-lead{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(18rem,.72fr);gap:var(--space-l);align-items:stretch}.photo-wrap{position:relative;overflow:hidden;min-height:25rem;border-radius:var(--radius-lg);background:var(--paper-sunk);border:1px solid var(--line);box-shadow:var(--shadow-md)}.photo-wrap img{display:block;width:100%;height:100%;min-height:25rem;object-fit:cover}.photo-label{position:absolute;left:.75rem;bottom:.75rem;padding:.4rem .55rem;background:color-mix(in srgb,var(--ink) 88%,transparent);color:var(--paper);font-size:10px;font-weight:750;letter-spacing:.1em}.photo-lead-copy{display:grid;align-content:center;padding:var(--space-l);border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--paper-raised)}.eyebrow{margin:0;color:var(--accent-ink);font-size:var(--step--2);font-weight:750;letter-spacing:var(--tracking-label);text-transform:uppercase}.photo-lead-copy h3{margin:.45rem 0 .65rem;font-size:var(--step-3);line-height:1.08}.photo-lead-copy p:last-child{margin:0;color:var(--ink-soft);font-size:var(--step--1)}.point-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;margin-top:var(--space-l)}.point{display:grid;grid-template-columns:auto 1fr;gap:.7rem;padding:var(--space-s);border-top:2px solid var(--ink);background:var(--paper-raised)}.point-number{width:2rem;height:2rem;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);font-size:.72rem;font-weight:800}.point strong{font-size:var(--step--2);letter-spacing:.08em}.point p{margin:.35rem 0 0;color:var(--ink-soft);font-size:var(--step--1);line-height:1.45}.photo-rule{display:grid;grid-template-columns:auto 1fr;gap:var(--space-s);margin-top:var(--space-l);padding:var(--space-s) var(--space-m);border-left:3px solid var(--ink);background:var(--paper-raised);font-size:var(--step--1)}.photo-rule span{color:var(--ink-soft)}.photo-credit{margin-top:var(--space-s);font-size:var(--step--2);color:var(--ink-faint)}.photo-credit a{color:inherit}.photo-credit a:hover{text-decoration-thickness:2px}
+@media(max-width:900px){.photo-lead{grid-template-columns:1fr}.photo-wrap,.photo-wrap img{min-height:20rem}.point-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.photo-lead-copy{padding:var(--space-m)}.photo-lead-copy h3{font-size:var(--step-2)}.point-grid{grid-template-columns:1fr}.point{padding:.85rem}.photo-rule{grid-template-columns:1fr;gap:.25rem}}
+</style>
