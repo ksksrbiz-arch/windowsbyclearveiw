@@ -8,6 +8,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       <h1>Quotes</h1>
     </div>
     <div class="ql-head-actions">
+      <a class="btn btn-ghost" href="/internal/invoices">Invoices</a>
       <a class="btn btn-ghost" href="/internal/leads">Leads</a>
       <a class="btn btn-ghost" href="/internal/ask-logs">Ask activity</a>
       <a class="btn btn-primary" href="/internal/quotes/new">New quote</a>
@@ -26,7 +27,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 
   <table class="ql-table" data-table hidden>
     <thead>
-      <tr><th>Date</th><th>Customer</th><th>City</th><th>Total</th><th>Status</th></tr>
+      <tr><th>Date</th><th>Customer</th><th>City</th><th>Total</th><th>Quote</th><th>Invoice</th></tr>
     </thead>
     <tbody data-rows></tbody>
   </table>
@@ -47,24 +48,16 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const searchInput = document.querySelector('[data-search]');
 
     const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-    const STATUS_LABEL: Record<string, string> = {
-      draft: 'Awaiting signature',
-      finalized: 'Finalized',
-    };
+    const STATUS_LABEL: Record<string, string> = { draft: 'Awaiting signature', finalized: 'Finalized' };
+    const INVOICE_LABEL: Record<string, string> = { draft: 'Draft', open: 'Open', sent: 'Sent', paid: 'Paid', void: 'Void' };
 
     async function load() {
       try {
         const response = await fetch('/internal/api/quotes');
         if (!response.ok) throw new Error();
         const { quotes } = await response.json();
-
         if (loading instanceof HTMLElement) loading.hidden = true;
-
-        if (!quotes.length) {
-          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
-          return;
-        }
-
+        if (!quotes.length) { if (emptyEl instanceof HTMLElement) emptyEl.hidden = false; return; }
         if (table instanceof HTMLElement) table.hidden = false;
         if (searchWrap instanceof HTMLElement) searchWrap.hidden = quotes.length < 6;
         if (rows instanceof HTMLElement) {
@@ -73,12 +66,16 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
             const row = document.createElement('tr');
             const date = new Date(q.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             row.dataset.search = `${q.customer_name || ''} ${q.customer_city || ''}`.toLowerCase();
+            const invoice = q.invoice_id
+              ? `<a class="ql-invoice-link" href="/internal/invoices/view?id=${encodeURIComponent(q.invoice_id)}">${escapeHtml(q.invoice_number || 'Invoice')}</a><span class="ql-invoice-state">${escapeHtml(INVOICE_LABEL[q.invoice_status] || q.invoice_status || '')}</span>`
+              : '<span class="ql-muted">—</span>';
             row.innerHTML = `
               <td>${date}</td>
               <td><a href="/internal/quotes/view?id=${encodeURIComponent(q.id)}">${escapeHtml(q.customer_name)}</a></td>
               <td>${escapeHtml(q.customer_city || '—')}</td>
               <td>${money(q.total_cents)}</td>
               <td><span class="ql-status ql-status-${q.status}">${STATUS_LABEL[q.status] || q.status}</span></td>
+              <td>${invoice}</td>
             `;
             rows.append(row);
           }
@@ -86,122 +83,38 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         applyFilter();
       } catch {
         if (loading instanceof HTMLElement) loading.hidden = true;
-        if (errorEl instanceof HTMLElement) {
-          errorEl.hidden = false;
-          errorEl.textContent = 'Could not load quotes.';
-        }
+        if (errorEl instanceof HTMLElement) { errorEl.hidden = false; errorEl.textContent = 'Could not load quotes.'; }
       }
     }
 
-    function escapeHtml(s: string) {
-      const div = document.createElement('div');
-      div.textContent = s ?? '';
-      return div.innerHTML;
-    }
+    function escapeHtml(s: string) { const div = document.createElement('div'); div.textContent = s ?? ''; return div.innerHTML; }
 
     function applyFilter() {
       if (!(searchInput instanceof HTMLInputElement) || !(rows instanceof HTMLElement)) return;
-      const query = searchInput.value.trim().toLowerCase();
-      let visibleCount = 0;
-      for (const row of rows.querySelectorAll('tr')) {
-        const match = !query || (row.dataset.search || '').includes(query);
-        row.hidden = !match;
-        if (match) visibleCount += 1;
-      }
-      if (emptyFilteredEl instanceof HTMLElement) {
-        emptyFilteredEl.hidden = !(query && visibleCount === 0);
-      }
+      const query = searchInput.value.trim().toLowerCase(); let visibleCount = 0;
+      for (const row of rows.querySelectorAll('tr')) { const match = !query || (row.dataset.search || '').includes(query); row.hidden = !match; if (match) visibleCount += 1; }
+      if (emptyFilteredEl instanceof HTMLElement) emptyFilteredEl.hidden = !(query && visibleCount === 0);
     }
 
-    if (searchInput instanceof HTMLInputElement && searchInput.dataset.bound !== 'true') {
-      searchInput.dataset.bound = 'true';
-      searchInput.addEventListener('input', applyFilter);
-    }
-
+    if (searchInput instanceof HTMLInputElement && searchInput.dataset.bound !== 'true') { searchInput.dataset.bound = 'true'; searchInput.addEventListener('input', applyFilter); }
     load();
   }
-
   initQuoteList();
   document.addEventListener('astro:page-load', initQuoteList);
 </script>
 
 <style>
-  .ql-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    margin-bottom: var(--space-l);
-  }
-
-  .ql-head-actions {
-    display: flex;
-    gap: var(--space-xs);
-  }
-
-  .ql-error {
-    color: var(--danger);
-  }
-
-  .ql-empty-filtered {
-    color: var(--ink-soft);
-  }
-
-  .ql-search {
-    display: grid;
-    gap: 0.2rem;
-    max-width: 20rem;
-    margin-bottom: var(--space-m);
-    font-size: var(--step--1);
-    font-weight: 500;
-  }
-
-  .ql-search input {
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    padding: 0.55rem;
-    font: inherit;
-    font-size: var(--step-0);
-  }
-
-  .ql-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--step--1);
-  }
-
-  .ql-table th {
-    text-align: left;
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--ink);
-    font-size: var(--step--2);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-faint);
-  }
-
-  :global(.ql-table td) {
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--line);
-  }
-
-  /* Every row (and this badge inside it) is built at runtime from the
-     fetched quote list, so these never receive Astro's scoping attribute —
-     has to be :global() or the rule silently never matches anything. */
-  :global(.ql-status) {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: var(--step--2);
-    font-weight: 500;
-  }
-
-  :global(.ql-status-draft) {
-    background: color-mix(in srgb, var(--danger) 12%, transparent);
-    color: var(--danger);
-  }
-
-  :global(.ql-status-finalized) {
-    background: color-mix(in srgb, var(--accent) 15%, transparent);
-    color: var(--accent-ink);
-  }
+  .ql-head { display:flex; justify-content:space-between; align-items:end; margin-bottom:var(--space-l); }
+  .ql-head-actions { display:flex; gap:var(--space-xs); flex-wrap:wrap; }
+  .ql-error { color:var(--danger); }.ql-empty-filtered { color:var(--ink-soft); }
+  .ql-search { display:grid; gap:.2rem; max-width:20rem; margin-bottom:var(--space-m); font-size:var(--step--1); font-weight:500; }
+  .ql-search input { border:1px solid var(--line-strong); border-radius:var(--radius); padding:.55rem; font:inherit; font-size:var(--step-0); }
+  .ql-table { width:100%; border-collapse:collapse; font-size:var(--step--1); }
+  .ql-table th { text-align:left; padding:.5rem; border-bottom:1px solid var(--ink); font-size:var(--step--2); text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); }
+  :global(.ql-table td) { padding:.6rem .5rem; border-bottom:1px solid var(--line); vertical-align:middle; }
+  :global(.ql-status) { display:inline-block; padding:.15rem .5rem; border-radius:999px; font-size:var(--step--2); font-weight:500; }
+  :global(.ql-status-draft) { background:color-mix(in srgb,var(--danger) 12%,transparent); color:var(--danger); }
+  :global(.ql-status-finalized) { background:color-mix(in srgb,var(--accent) 15%,transparent); color:var(--accent-ink); }
+  :global(.ql-invoice-link) { display:block; font-weight:600; }.ql-invoice-state { display:block; margin-top:.15rem; font-size:var(--step--2); color:var(--ink-faint); }.ql-muted { color:var(--ink-faint); }
+  @media(max-width:780px){.ql-head{align-items:flex-start;flex-direction:column;gap:var(--space-s)}.ql-table{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
