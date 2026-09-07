@@ -1,6 +1,6 @@
-import { clean, json } from './quotes.mjs';
+import { clean } from './quotes.mjs';
 
-const FROM = 'Clearview Windows <estimates@windowsbyclearview.com>';
+const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const REPLY_TO = 'owner@windowsbyclearveiw.com';
 
 export async function ensureInvoiceSchema(db) {
@@ -56,7 +56,6 @@ export async function getInvoice(db, invoiceId) {
   return { invoice, items };
 }
 
-/** Draft invoices mirror editable quotes; finalized invoices become stable snapshots. */
 export async function ensureInvoiceForQuote(db, quoteId, { finalize = false } = {}) {
   await ensureInvoiceSchema(db);
   const quote = await db.prepare('SELECT * FROM quotes WHERE id = ?').bind(quoteId).first();
@@ -126,5 +125,3 @@ export async function emailInvoice(context, invoiceId) {
   await env.QUOTES_DB.prepare(`UPDATE invoices SET status = 'sent', sent_at = ?, updated_at = ? WHERE id = ?`).bind(now, now, invoiceId).run();
   return { ok: true, sentAt: now };
 }
-
-export { renderEmail, money };
