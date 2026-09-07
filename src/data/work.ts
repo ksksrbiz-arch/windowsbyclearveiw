@@ -28,7 +28,6 @@ import dormerSet from '../assets/work/dormer-set.jpg';
 import gableArchLadders from '../assets/work/gable-arch-ladders.jpg';
 import graySideSlider from '../assets/work/gray-side-slider.jpg';
 import greenCraftsmanUpper from '../assets/work/green-craftsman-upper.jpg';
-import newConstructionSheathed from '../assets/work/new-construction-sheathed.jpg';
 import newUnitInterior from '../assets/work/new-unit-interior.jpg';
 import pinkBungalow from '../assets/work/pink-bungalow.jpg';
 import pinkGable from '../assets/work/pink-gable.jpg';
@@ -102,15 +101,6 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'after',
     featured: true,
     order: 5,
-  },
-  {
-    id: 'new-construction-sheathed',
-    image: newConstructionSheathed,
-    alt: 'Windows set and flashed in a sheathed two-story new build, taped seams, before siding',
-    caption: 'Set and flashed, ready for siding',
-    kind: 'new construction',
-    featured: true,
-    order: 6,
   },
   {
     id: 'blue-pair-installday',
