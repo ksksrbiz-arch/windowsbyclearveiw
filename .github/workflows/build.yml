@@ -20,4 +20,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Keep the production branch build path explicit; this commit also
+      # forces a connected Cloudflare Pages project to see a fresh main push.
       - run: npm run build
