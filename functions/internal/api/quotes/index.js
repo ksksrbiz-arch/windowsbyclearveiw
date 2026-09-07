@@ -8,8 +8,6 @@ function newQuoteId() {
   return `Q-${date}-${suffix}`;
 }
 
-/** List recent quotes. Summary fields only — line items and signatures load
- *  on the individual quote page, not in the list. */
 export async function onRequestGet(context) {
   const { env } = context;
   const { results } = await env.QUOTES_DB.prepare(
@@ -24,18 +22,12 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ error: 'Body must be JSON.' }, 400);
-  }
+  try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
 
   const parsed = parseQuoteBody(body);
   if (parsed.error) return json({ error: parsed.error }, 400);
   const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
-
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
   const status = 'draft';
   const now = new Date().toISOString();
@@ -64,7 +56,6 @@ export async function onRequestPost(context) {
     ),
   ]);
 
-  const invoice = await ensureInvoiceForQuote(env.QUOTES_DB);
-  await ensureInvoiceForQuote(env.QUOTES_DB, id);
-  return json({ id, status, totalCents, invoiceId: invoice?.invoice?.id || `INV-${id.replace(/^Q-/, '')}` }, 201);
+  const record = await ensureInvoiceForQuote(env.QUOTES_DB, id);
+  return json({ id, status, totalCents, invoiceId: record?.invoice?.id || `INV-${id.replace(/^Q-/, '')}` }, 201);
 }
