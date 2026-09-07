@@ -62,3 +62,43 @@ CREATE TABLE IF NOT EXISTS quote_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
+
+-- Invoices are snapshots of quotes, not live views of pricing data. A draft
+-- invoice follows a draft quote; once the quote is finalized, the invoice is
+-- frozen as the document that was created from that finalized scope.
+CREATE TABLE IF NOT EXISTS invoices (
+  id                 TEXT PRIMARY KEY,
+  invoice_number     TEXT NOT NULL UNIQUE,
+  quote_id           TEXT NOT NULL UNIQUE REFERENCES quotes(id),
+  created_at         TEXT NOT NULL,
+  updated_at         TEXT NOT NULL,
+  status             TEXT NOT NULL DEFAULT 'draft', -- draft | open | sent | paid | void
+  customer_name      TEXT NOT NULL,
+  customer_phone     TEXT,
+  customer_email     TEXT,
+  customer_address   TEXT,
+  customer_city      TEXT,
+  subtotal_cents     INTEGER NOT NULL DEFAULT 0,
+  discount_cents     INTEGER NOT NULL DEFAULT 0,
+  discount_reason    TEXT,
+  total_cents        INTEGER NOT NULL DEFAULT 0,
+  sent_at            TEXT,
+  paid_at            TEXT,
+  voided_at          TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_created_at ON invoices(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  invoice_id         TEXT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  sort_order         INTEGER NOT NULL,
+  label              TEXT NOT NULL,
+  description        TEXT,
+  quantity           INTEGER NOT NULL DEFAULT 1,
+  unit_price_cents   INTEGER NOT NULL,
+  line_total_cents   INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice_id ON invoice_items(invoice_id);
