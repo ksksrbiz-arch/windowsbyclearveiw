@@ -1,4 +1,4 @@
-import { json } from '../../_lib/quotes.mjs';
+import { json } from '../_lib/quotes.mjs';
 
 const DEFAULT_FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const DEFAULT_TO = 'owner@windowsbyclearveiw.com';
