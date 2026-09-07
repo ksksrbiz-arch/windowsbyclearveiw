@@ -1,9 +1,10 @@
 import { json, clean, parseQuoteBody } from '../../_lib/quotes.mjs';
-import { ensureInvoiceForQuote } from '../../_lib/invoices.mjs';
+import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
 
 export async function onRequestGet(context) {
   const { env, params } = context;
   const id = String(params.id || '');
+  await ensureInvoiceSchema(env.QUOTES_DB);
 
   const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(id).first();
   if (!quote) return json({ error: 'Not found.' }, 404);
@@ -12,12 +13,9 @@ export async function onRequestGet(context) {
     'SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC',
   ).bind(id).all();
 
-  let invoice = null;
-  if (quote.status === 'finalized') {
-    invoice = await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true });
-  } else {
-    invoice = await env.QUOTES_DB.prepare('SELECT * FROM invoices WHERE quote_id = ?').bind(id).first();
-  }
+  const invoice = quote.status === 'finalized'
+    ? await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true })
+    : await env.QUOTES_DB.prepare('SELECT * FROM invoices WHERE quote_id = ?').bind(id).first();
 
   return json({ quote, items, invoice: invoice?.invoice || invoice || null });
 }
