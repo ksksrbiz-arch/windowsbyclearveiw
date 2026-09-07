@@ -2,44 +2,15 @@
 import InternalLayout from '../../../layouts/InternalLayout.astro';
 ---
 <InternalLayout title="Invoices">
-  <div class="il-head">
-    <div><p class="kicker">Clearview internal</p><h1>Invoices</h1><p class="lede">Invoices are created automatically with quotes; finalized invoices become ready to send.</p></div>
-    <a class="btn btn-ghost" href="/internal/quotes">Quotes</a>
-  </div>
-
-  <p data-loading>Loading…</p>
-  <p class="il-error" data-error hidden role="alert"></p>
-  <p data-empty hidden>No invoices yet. Start a quote to create one automatically.</p>
-
-  <table class="il-table" data-table hidden>
-    <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
-    <tbody data-rows></tbody>
-  </table>
+  <div class="il-head"><div><p class="kicker">Accounts receivable</p><h1>Invoices</h1><p class="lede">Every invoice created from a quote, with its current delivery state and amount.</p></div><a class="btn btn-ghost" href="/internal/quotes">Quotes</a></div>
+  <section class="invoice-command"><div><span>SALES → CASH</span><strong>Finalize the quote. Send the invoice.</strong><p>Invoices are snapshots of the finalized quote and remain stable after the quote is locked.</p></div><a href="/internal/payments">Open balances →</a></section>
+  <p data-loading>Loading…</p><p class="il-error" data-error hidden role="alert"></p><p data-empty hidden>No invoices yet. Start a quote to create one automatically.</p>
+  <div class="invoice-list" data-list></div>
 </InternalLayout>
-
 <script>
-  function initInvoiceList() {
-    const table = document.querySelector('[data-table]');
-    if (!(table instanceof HTMLElement) || table.dataset.bound === 'true') return;
-    table.dataset.bound = 'true';
-    const loading = document.querySelector('[data-loading]'); const errorEl = document.querySelector('[data-error]'); const emptyEl = document.querySelector('[data-empty]'); const rows = document.querySelector('[data-rows]');
-    const money = (cents) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-    const labels = { draft:'Draft', open:'Open', sent:'Sent', paid:'Paid', void:'Void' };
-    const esc = (s) => { const d=document.createElement('div'); d.textContent=String(s??''); return d.innerHTML; };
-    async function load() {
-      try {
-        const response = await fetch('/internal/api/invoices', { headers:{'cache-control':'no-cache'} }); const data = await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||'Could not load invoices.');
-        if(loading instanceof HTMLElement) loading.hidden=true;
-        if(!data.invoices?.length){ if(emptyEl instanceof HTMLElement) emptyEl.hidden=false; return; }
-        if(table instanceof HTMLElement) table.hidden=false;
-        if(rows instanceof HTMLElement) rows.innerHTML=data.invoices.map((invoice)=>`<tr><td><a href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}"><strong>${esc(invoice.invoice_number)}</strong></a><small>Quote ${esc(invoice.quote_id)}</small></td><td>${esc(invoice.customer_name)}${invoice.customer_city?`<small>${esc(invoice.customer_city)}</small>`:''}</td><td>${new Date(invoice.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td><td>${money(invoice.total_cents)}</td><td><span class="il-status il-status-${invoice.status}">${labels[invoice.status]||esc(invoice.status)}</span></td><td><a class="btn btn-ghost il-open" href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}">Open</a></td></tr>`).join('');
-      } catch(e){ if(loading instanceof HTMLElement) loading.hidden=true; if(errorEl instanceof HTMLElement){errorEl.hidden=false;errorEl.textContent=e instanceof Error?e.message:'Could not load invoices.';} }
-    }
-    load();
-  }
-  initInvoiceList(); document.addEventListener('astro:page-load', initInvoiceList);
+  function initInvoiceList(){const list=document.querySelector('[data-list]');if(!(list instanceof HTMLElement)||list.dataset.bound==='true')return;list.dataset.bound='true';const loading=document.querySelector('[data-loading]'),errorEl=document.querySelector('[data-error]'),emptyEl=document.querySelector('[data-empty]');const money=(c)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;const labels={draft:'Draft',open:'Open',sent:'Sent',paid:'Paid',void:'Void'};const esc=(s)=>{const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML};async function load(){try{const response=await fetch('/internal/api/invoices',{headers:{'cache-control':'no-cache'}});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Could not load invoices.');if(loading instanceof HTMLElement)loading.hidden=true;if(!data.invoices?.length){if(emptyEl instanceof HTMLElement)emptyEl.hidden=false;return}list.innerHTML=data.invoices.map((invoice)=>`<article class="invoice-card"><div class="invoice-main"><div class="invoice-top"><span class="invoice-status invoice-status-${esc(invoice.status)}">${labels[invoice.status]||esc(invoice.status)}</span><span>${esc(invoice.invoice_number)}</span><time>${new Date(invoice.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</time></div><h2>${esc(invoice.customer_name)}</h2><p>${esc([invoice.customer_city,invoice.quote_id].filter(Boolean).join(' · ')||'Linked quote')}</p></div><div class="invoice-value"><strong>${money(invoice.total_cents)}</strong><span>${invoice.sent_at?`Sent ${new Date(invoice.sent_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`:'Not sent'}</span></div><div class="invoice-actions"><a class="btn btn-ghost btn-small" href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}">Open invoice</a><a class="btn btn-ghost btn-small" href="/internal/quotes/view?id=${encodeURIComponent(invoice.quote_id)}">Source quote</a>${invoice.status==='open'||invoice.status==='sent'?`<a class="btn btn-primary btn-small" href="/internal/invoices/view?id=${encodeURIComponent(invoice.id)}">${invoice.status==='sent'?'Email again':'Send invoice'}</a>`:''}</div></article>`).join('')}catch(e){if(loading instanceof HTMLElement)loading.hidden=true;if(errorEl instanceof HTMLElement){errorEl.hidden=false;errorEl.textContent=e instanceof Error?e.message:'Could not load invoices.'}}}load()}
+  initInvoiceList();document.addEventListener('astro:page-load',initInvoiceList);
 </script>
-
 <style>
-.il-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.il-table{width:100%;border-collapse:collapse;font-size:var(--step--1)}.il-table th{text-align:left;padding:.55rem;border-bottom:1px solid var(--ink);font-size:var(--step--2);text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}:global(.il-table td){padding:.7rem .55rem;border-bottom:1px solid var(--line);vertical-align:middle}:global(.il-table td:first-child){display:grid;gap:.15rem}:global(.il-table small){display:block;color:var(--ink-faint);font-size:var(--step--2)}:global(.il-status){display:inline-block;padding:.18rem .5rem;border-radius:999px;font-size:var(--step--2);font-weight:600}:global(.il-status-draft){background:color-mix(in srgb,var(--ink) 9%,transparent);color:var(--ink-soft)}:global(.il-status-open){background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink)}:global(.il-status-sent){background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink)}:global(.il-status-paid){background:color-mix(in srgb,var(--accent-ink) 14%,transparent);color:var(--accent-ink)}:global(.il-status-void){background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}.il-error{color:var(--danger)}:global(.il-open){padding:.35rem .55rem;font-size:var(--step--2)}@media(max-width:720px){.il-head{align-items:flex-start;flex-direction:column}.il-table{display:block;overflow-x:auto;white-space:nowrap}}
+  .il-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}.invoice-command{display:flex;justify-content:space-between;align-items:center;gap:var(--space-m);padding:1.05rem 1.15rem;margin-bottom:var(--space-s);border-radius:var(--radius-lg);background:var(--ink);color:var(--on-dark);box-shadow:var(--shadow-md)}.invoice-command>div{display:grid;gap:.18rem}.invoice-command span{font-size:.65rem;letter-spacing:.16em;font-weight:800;color:var(--accent-bright)}.invoice-command strong{font-size:var(--step-1)}.invoice-command p{margin:0;color:var(--on-dark-soft);font-size:var(--step--2)}.invoice-command>a{color:var(--on-dark);font-size:var(--step--2);font-weight:750;white-space:nowrap}.invoice-list{display:grid;gap:.65rem}.invoice-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;padding:1rem 1.05rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);box-shadow:var(--shadow-sm)}.invoice-top{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.7rem;color:var(--ink-faint)}.invoice-status{font-weight:850;text-transform:uppercase;letter-spacing:.07em}.invoice-status-open{color:var(--accent-ink)}.invoice-status-sent{color:var(--accent-ink)}.invoice-status-paid{color:var(--accent-ink)}.invoice-status-draft{color:var(--ink-soft)}.invoice-status-void{color:var(--danger)}.invoice-main h2{margin:.35rem 0 .08rem;font-size:var(--step-1)}.invoice-main p{margin:0;color:var(--ink-soft);font-size:var(--step--1)}.invoice-value{display:grid;justify-items:end;align-content:start;gap:.15rem}.invoice-value strong{font-size:1.65rem;line-height:1}.invoice-value span{font-size:.7rem;color:var(--ink-soft)}.invoice-actions{grid-column:1/-1;display:flex;gap:.45rem;flex-wrap:wrap;padding-top:.65rem;border-top:1px solid var(--line)}.btn-small{padding:.45rem .68rem;font-size:var(--step--2)}.il-error{color:var(--danger)}@media(max-width:700px){.il-head,.invoice-command{align-items:flex-start;flex-direction:column}.invoice-card{grid-template-columns:1fr}.invoice-value{justify-items:start}.invoice-actions{grid-column:auto}}@media(max-width:460px){.invoice-actions .btn{flex:1;justify-content:center}}
 </style>
