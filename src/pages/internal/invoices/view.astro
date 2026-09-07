@@ -1,0 +1,165 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+import { site } from '../../../data/site';
+---
+<InternalLayout title="Invoice">
+  <div class="invoice-toolbar" data-toolbar hidden>
+    <div>
+      <p class="kicker">Accounts</p>
+      <h1>Invoice</h1>
+      <p class="lede" data-subtitle>—</p>
+    </div>
+    <div class="invoice-actions">
+      <a class="btn btn-ghost" href="/internal/quotes">All quotes</a>
+      <a class="btn btn-ghost" data-quote-link href="#">View quote</a>
+      <button class="btn btn-ghost" type="button" data-print>Print</button>
+      <button class="btn btn-primary" type="button" data-email disabled>Email invoice</button>
+    </div>
+  </div>
+
+  <p class="invoice-status" data-status hidden></p>
+  <p class="invoice-error" data-error hidden role="alert"></p>
+  <p data-loading>Loading invoice…</p>
+
+  <article class="invoice-sheet" data-sheet hidden>
+    <header class="invoice-head">
+      <div>
+        <p class="invoice-kicker">INVOICE</p>
+        <h2 data-number>—</h2>
+        <p class="invoice-muted" data-issued>—</p>
+      </div>
+      <div class="invoice-company">
+        <strong>Clearview Windows</strong>
+        <span>{site.legalName}</span>
+        <span>{site.phoneDisplay}</span>
+        <span>{site.email}</span>
+      </div>
+    </header>
+
+    <section class="bill-grid">
+      <div><p class="label">Bill to</p><strong data-customer>—</strong><span data-address>—</span><span data-email-address>—</span></div>
+      <div><p class="label">Source quote</p><a data-source-link href="#">—</a><span>Invoice generated from finalized quote.</span></div>
+    </section>
+
+    <section class="invoice-lines">
+      <div class="line-head"><span>Description</span><span>Qty</span><span>Unit</span><span>Amount</span></div>
+      <div data-lines></div>
+    </section>
+
+    <section class="invoice-total">
+      <div class="summary"><span>Subtotal</span><strong data-subtotal>—</strong></div>
+      <div class="summary" data-discount-row hidden><span data-discount-label>Discount</span><strong data-discount>—</strong></div>
+      <div class="summary grand"><span>Amount due</span><strong data-total>—</strong></div>
+    </section>
+
+    <section class="invoice-note">
+      <strong>Payment</strong>
+      <p>Payment terms are governed by the signed Clearview agreement. Questions about this invoice can be handled by replying to the invoice email or calling {site.phoneDisplay}.</p>
+    </section>
+
+    <footer class="invoice-footer">{site.legalName} · {site.phoneDisplay} · {site.email}</footer>
+  </article>
+</InternalLayout>
+
+<script>
+  function initInvoiceView() {
+    const sheet = document.querySelector('[data-sheet]');
+    if (!(sheet instanceof HTMLElement) || sheet.dataset.bound === 'true') return;
+    sheet.dataset.bound = 'true';
+
+    const id = new URLSearchParams(location.search).get('id');
+    const loading = document.querySelector('[data-loading]');
+    const toolbar = document.querySelector('[data-toolbar]');
+    const errorEl = document.querySelector('[data-error]');
+    const statusEl = document.querySelector('[data-status]');
+    const emailBtn = document.querySelector('[data-email]');
+    const money = (cents) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const esc = (value) => { const d = document.createElement('div'); d.textContent = String(value ?? ''); return d.innerHTML; };
+
+    function fail(message) {
+      if (loading instanceof HTMLElement) loading.hidden = true;
+      if (errorEl instanceof HTMLElement) { errorEl.hidden = false; errorEl.textContent = message; }
+    }
+
+    if (!id) { fail('No invoice id in the URL.'); return; }
+
+    async function load() {
+      try {
+        const response = await fetch(`/internal/api/invoices/${encodeURIComponent(id)}`, { headers: { 'cache-control': 'no-cache' } });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Could not load this invoice.');
+        render(data.invoice, data.items || []);
+      } catch (e) { fail(e instanceof Error ? e.message : 'Could not load this invoice.'); }
+    }
+
+    function render(invoice, items) {
+      if (loading instanceof HTMLElement) loading.hidden = true;
+      if (toolbar instanceof HTMLElement) toolbar.hidden = false;
+      if (sheet instanceof HTMLElement) sheet.hidden = false;
+      const set = (s, v) => { const el = sheet.querySelector(s); if (el) el.textContent = v; };
+      set('[data-number]', invoice.invoice_number);
+      set('[data-subtitle]', `${invoice.invoice_number} · ${invoice.customer_name}`);
+      set('[data-issued]', `Issued ${new Date(invoice.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`);
+      set('[data-customer]', invoice.customer_name || '—');
+      set('[data-address]', [invoice.customer_address, invoice.customer_city].filter(Boolean).join(', ') || 'Address on file');
+      set('[data-email-address]', invoice.customer_email || 'No customer email');
+      set('[data-subtotal]', money(invoice.subtotal_cents));
+      set('[data-total]', money(invoice.total_cents));
+      const discountRow = sheet.querySelector('[data-discount-row]');
+      if (Number(invoice.discount_cents || 0) > 0) {
+        if (discountRow instanceof HTMLElement) discountRow.hidden = false;
+        set('[data-discount-label]', invoice.discount_reason ? `Discount · ${invoice.discount_reason}` : 'Discount');
+        set('[data-discount]', `-${money(invoice.discount_cents)}`);
+      } else if (discountRow instanceof HTMLElement) discountRow.hidden = true;
+
+      const source = document.querySelector('[data-source-link]');
+      if (source instanceof HTMLAnchorElement) { source.textContent = invoice.quote_id; source.href = `/internal/quotes/view?id=${encodeURIComponent(invoice.quote_id)}`; }
+      const quoteLink = document.querySelector('[data-quote-link]');
+      if (quoteLink instanceof HTMLAnchorElement) quoteLink.href = `/internal/quotes/view?id=${encodeURIComponent(invoice.quote_id)}`;
+
+      const lines = sheet.querySelector('[data-lines]');
+      if (lines instanceof HTMLElement) lines.innerHTML = items.length ? items.map((item) => `<div class="line-row"><span><strong>${esc(item.label)}</strong>${item.description ? `<small>${esc(item.description)}</small>` : ''}</span><span>${Number(item.quantity) || 0}</span><span>${money(item.unit_price_cents)}</span><strong>${money(item.line_total_cents)}</strong></div>`).join('') : '<p class="invoice-muted">No line items on this invoice.</p>';
+
+      const sent = invoice.status === 'sent';
+      if (statusEl instanceof HTMLElement) { statusEl.hidden = false; statusEl.textContent = sent ? `Sent ${invoice.sent_at ? new Date(invoice.sent_at).toLocaleString('en-US') : ''}`.trim() : invoice.status === 'draft' ? 'Draft invoice · finalize the quote before emailing' : 'Open invoice'; }
+      if (emailBtn instanceof HTMLButtonElement) { emailBtn.disabled = invoice.status === 'draft' || !invoice.customer_email; emailBtn.textContent = sent ? 'Email invoice again' : 'Email invoice'; emailBtn.dataset.ready = 'true'; emailBtn.dataset.email = invoice.customer_email || ''; }
+      setupEmail(invoice);
+    }
+
+    function setupEmail(invoice) {
+      const button = document.querySelector('[data-email]');
+      if (!(button instanceof HTMLButtonElement) || button.dataset.bound === 'true') return;
+      button.dataset.bound = 'true';
+      button.addEventListener('click', async () => {
+        if (!invoice.customer_email) return;
+        if (!window.confirm(`Email ${invoice.invoice_number} to ${invoice.customer_email}?`)) return;
+        button.disabled = true; button.textContent = 'Sending…';
+        if (errorEl instanceof HTMLElement) errorEl.hidden = true;
+        try {
+          const response = await fetch(`/internal/api/invoices/${encodeURIComponent(invoice.id)}`, { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ action:'email' }) });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not send the invoice.');
+          if (statusEl instanceof HTMLElement) { statusEl.hidden = false; statusEl.textContent = `Sent ${new Date(result.sentAt || Date.now()).toLocaleString('en-US')}`; }
+          button.textContent = 'Email invoice again';
+          button.disabled = false;
+        } catch (e) {
+          if (errorEl instanceof HTMLElement) { errorEl.hidden = false; errorEl.textContent = e instanceof Error ? e.message : 'Could not send the invoice.'; }
+          button.textContent = 'Email invoice'; button.disabled = false;
+        }
+      });
+    }
+
+    const print = document.querySelector('[data-print]');
+    if (print instanceof HTMLButtonElement) print.addEventListener('click', () => window.print());
+    load();
+  }
+
+  initInvoiceView();
+  document.addEventListener('astro:page-load', initInvoiceView);
+</script>
+
+<style>
+.invoice-toolbar{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-s)}.invoice-actions{display:flex;flex-wrap:wrap;gap:var(--space-xs)}.invoice-status{padding:.65rem .8rem;border-left:3px solid var(--accent);background:var(--accent-wash);color:var(--ink-soft)}.invoice-error{padding:.7rem .8rem;border-left:3px solid var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent);color:var(--ink-soft)}.invoice-sheet{max-width:52rem;margin:var(--space-l) auto 0;padding:clamp(1.4rem,4vw,2.8rem);background:var(--paper-raised);border:1px solid var(--line);box-shadow:var(--shadow-soft)}.invoice-head{display:flex;justify-content:space-between;gap:var(--space-l);padding-bottom:var(--space-l);border-bottom:2px solid var(--ink)}.invoice-kicker,.label{margin:0;text-transform:uppercase;letter-spacing:var(--tracking-label);font-size:var(--step--2);font-weight:700;color:var(--ink-faint)}.invoice-head h2{margin:.3rem 0 0;font-size:var(--step-3)}.invoice-muted{margin:.25rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.invoice-company{display:grid;justify-items:end;align-content:start;gap:.2rem;text-align:right}.invoice-company strong{font-size:var(--step-0)}.invoice-company span{font-size:var(--step--2);color:var(--ink-soft)}.bill-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-l);padding:var(--space-l) 0}.bill-grid>div{display:grid;gap:.3rem}.bill-grid strong{font-size:var(--step-0)}.bill-grid span{color:var(--ink-soft);font-size:var(--step--1)}.bill-grid a{font-weight:650}.invoice-lines{border-top:1px solid var(--line)}.line-head,.line-row{display:grid;grid-template-columns:minmax(0,1fr) 3rem 6rem 7rem;gap:var(--space-s);align-items:start}.line-head{padding:.65rem 0;border-bottom:1px solid var(--line);font-size:var(--step--2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}.line-head span:nth-child(n+2){text-align:right}.line-row{padding:.9rem 0;border-bottom:1px solid var(--line);font-size:var(--step--1)}.line-row>span:not(:first-child),.line-row>strong{text-align:right}.line-row span:first-child{display:grid;gap:.2rem}.line-row small{color:var(--ink-soft)}.invoice-total{display:grid;justify-items:end;padding:var(--space-l) 0}.summary{display:grid;grid-template-columns:12rem 8rem;gap:var(--space-m);width:min(100%,26rem);padding:.35rem 0;font-size:var(--step--1)}.summary span{text-align:right;color:var(--ink-soft)}.summary strong{text-align:right}.summary.grand{margin-top:.35rem;padding-top:.8rem;border-top:2px solid var(--ink);font-size:var(--step-1)}.summary.grand span,.summary.grand strong{color:var(--ink)}.invoice-note{padding:var(--space-m);border-left:3px solid var(--accent);background:var(--accent-wash)}.invoice-note p{margin:.35rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}.invoice-footer{margin-top:var(--space-l);padding-top:var(--space-s);border-top:1px solid var(--line);font-size:var(--step--2);color:var(--ink-faint)}
+@media(max-width:700px){.invoice-toolbar{align-items:flex-start;flex-direction:column}.invoice-head{flex-direction:column}.invoice-company{justify-items:start;text-align:left}.bill-grid{grid-template-columns:1fr}.line-head,.line-row{grid-template-columns:minmax(0,1fr) 2.5rem 5rem 5.5rem;gap:.35rem}.summary{grid-template-columns:1fr auto;width:100%}}
+@media print{.invoice-toolbar,.invoice-status,.invoice-error,.internal-header{display:none}.invoice-sheet{max-width:none;margin:0;border:0;box-shadow:none;padding:0}.invoice-head{padding-top:0}}
+</style>
