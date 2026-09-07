@@ -137,7 +137,9 @@ const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/lea
               const quote = data.quote; const invoice = data.invoice;
               if (!quote || quote.status !== 'finalized' || !invoice) return;
               const view = document.createElement('a'); view.className = 'btn btn-ghost'; view.href = `/internal/invoices/view?id=${encodeURIComponent(invoice.id)}`; view.textContent = 'View invoice'; actions.insertBefore(view, actions.firstChild);
-              const email = document.createElement('button'); email.type = 'button'; email.className = 'btn btn-primary'; email.textContent = invoice.status === 'sent' ? 'Email invoice again' : 'Email invoice'; email.disabled = !invoice.customer_email; email.title = invoice.customer_email ? `Send to ${invoice.customer_email}` : 'Customer email is missing'; actions.insertBefore(email, view.nextSibling);
+              if (invoice.status === 'paid') { status.hidden = false; status.textContent = `Paid ${invoice.paid_at ? new Date(invoice.paid_at).toLocaleDateString('en-US') : ''}`.trim(); }
+              else if (invoice.status === 'sent') { status.hidden = false; status.textContent = `Sent ${invoice.sent_at ? new Date(invoice.sent_at).toLocaleDateString('en-US') : ''}`.trim(); }
+              const email = document.createElement('button'); email.type = 'button'; email.className = 'btn btn-primary'; email.textContent = invoice.status === 'sent' || invoice.status === 'paid' ? 'Email invoice again' : 'Email invoice'; email.disabled = !invoice.customer_email; email.title = invoice.customer_email ? `Send to ${invoice.customer_email}` : 'Customer email is missing'; actions.insertBefore(email, view.nextSibling);
               email.addEventListener('click', async () => {
                 if (!invoice.customer_email) return;
                 if (!window.confirm(`Email ${invoice.invoice_number} to ${invoice.customer_email}?`)) return;

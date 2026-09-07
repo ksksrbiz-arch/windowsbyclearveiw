@@ -1,8 +1,36 @@
+import { ensureInvoiceSchema } from '../_lib/invoices.mjs';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' },
   });
+}
+
+/**
+ * The invoice for a job's quote is the accounting record of what's owed;
+ * job_payments is where Mark actually records what came in. Nothing else
+ * connects them, so an invoice could sit at 'open'/'sent' forever even after
+ * the balance was paid in full. Mirror the payment total onto the invoice
+ * here — the one place a payment amount changes — rather than making every
+ * invoice reader recompute it from job_payments.
+ */
+async function syncInvoiceStatus(db, quoteId, amountPaidCents, now) {
+  if (!quoteId) return;
+  const invoice = await db.prepare('SELECT id, status, total_cents, sent_at FROM invoices WHERE quote_id = ?').bind(quoteId).first();
+  if (!invoice || invoice.status === 'void' || invoice.status === 'draft') return;
+
+  const total = Math.max(0, Number(invoice.total_cents) || 0);
+  const fullyPaid = total > 0 && amountPaidCents >= total;
+
+  if (fullyPaid && invoice.status !== 'paid') {
+    await db.prepare(`UPDATE invoices SET status = 'paid', paid_at = ?, updated_at = ? WHERE id = ?`).bind(now, now, invoice.id).run();
+  } else if (!fullyPaid && invoice.status === 'paid') {
+    // A correction dropped the recorded payment back below the total —
+    // revert to wherever the invoice was before it was marked paid.
+    const revertStatus = invoice.sent_at ? 'sent' : 'open';
+    await db.prepare(`UPDATE invoices SET status = ?, paid_at = NULL, updated_at = ? WHERE id = ?`).bind(revertStatus, now, invoice.id).run();
+  }
 }
 
 async function ensureSchema(db) {
@@ -69,6 +97,7 @@ export async function onRequestGet(context) {
 export async function onRequestPatch(context) {
   const { env, request } = context;
   await ensureSchema(env.QUOTES_DB);
+  await ensureInvoiceSchema(env.QUOTES_DB);
   const jobId = new URL(context.request.url).searchParams.get('jobId');
   if (!jobId) return json({ error: 'jobId is required.' }, 400);
 
@@ -95,6 +124,8 @@ export async function onRequestPatch(context) {
 
   await env.QUOTES_DB.prepare(`UPDATE job_payments SET updated_at = ?, amount_paid_cents = ?, payment_method = ?, notes = ? WHERE job_id = ?`)
     .bind(now, amountPaid, method, notes, jobId).run();
+
+  if (job.quote_id) await syncInvoiceStatus(env.QUOTES_DB, job.quote_id, amountPaid, now);
 
   const payment = await env.QUOTES_DB.prepare(`SELECT * FROM job_payments WHERE job_id = ?`).bind(jobId).first();
   return json({ ok: true, payment: buildRecord(job, payment) });
