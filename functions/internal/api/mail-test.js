@@ -3,6 +3,25 @@ import { json } from '../_lib/quotes.mjs';
 const DEFAULT_FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const DEFAULT_TO = 'owner@windowsbyclearveiw.com';
 
+async function resendRequest(key, path, options = {}) {
+  const response = await fetch(`https://api.resend.com${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${key}`,
+      ...(options.headers || {}),
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  return { response, body };
+}
+
+function redactEmail(value) {
+  const raw = String(value || '');
+  const at = raw.indexOf('@');
+  if (at <= 1) return raw ? 'configured' : '';
+  return `${raw.slice(0, 1)}***${raw.slice(at)}`;
+}
+
 export async function onRequestPost(context) {
   const { env } = context;
   const key = env?.RESEND_API_KEY;
@@ -16,12 +35,9 @@ export async function onRequestPost(context) {
     timeStyle: 'short',
   });
 
-  const response = await fetch('https://api.resend.com/emails', {
+  const { response, body } = await resendRequest(key, '/emails', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'content-type': 'application/json',
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       from,
       to: [to],
@@ -31,21 +47,69 @@ export async function onRequestPost(context) {
     }),
   });
 
-  const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     console.error('mail-test-resend-failed', response.status, body?.name || body?.message || '');
-    return json({ error: body?.message || 'Resend rejected the production mail test.' }, 502);
+    return json({
+      ok: false,
+      provider: 'resend',
+      resendStatus: response.status,
+      error: body?.message || 'Resend rejected the production mail test.',
+      from: redactEmail(from),
+      to: redactEmail(to),
+    }, 502);
   }
 
   return json({
     ok: true,
     provider: 'resend',
+    resendStatus: response.status,
     messageId: body?.id || null,
-    recipientConfigured: true,
+    recipient: redactEmail(to),
     sentAt: now,
   });
 }
 
-export async function onRequestGet() {
-  return json({ error: 'POST to run the production mail test.' }, 405);
+export async function onRequestGet(context) {
+  const key = context.env?.RESEND_API_KEY;
+  if (!key) return json({ error: 'RESEND_API_KEY is not configured in this environment.' }, 503);
+
+  const emails = await resendRequest(key, '/emails?limit=10');
+  const domains = await resendRequest(key, '/domains?limit=20');
+
+  if (!emails.response.ok) {
+    return json({
+      ok: false,
+      provider: 'resend',
+      emailsStatus: emails.response.status,
+      domainsStatus: domains.response.status,
+      error: emails.body?.message || 'Resend did not return recent email activity.',
+      domains: Array.isArray(domains.body?.data) ? domains.body.data.map((domain) => ({
+        id: domain.id || null,
+        name: domain.name || null,
+        status: domain.status || null,
+        region: domain.region || null,
+      })) : [],
+    }, 502);
+  }
+
+  return json({
+    ok: true,
+    provider: 'resend',
+    emailsStatus: emails.response.status,
+    domainsStatus: domains.response.status,
+    emails: Array.isArray(emails.body?.data) ? emails.body.data.map((email) => ({
+      id: email.id || null,
+      to: Array.isArray(email.to) ? email.to.map(redactEmail) : [],
+      from: redactEmail(email.from),
+      subject: email.subject || '',
+      created_at: email.created_at || null,
+      last_event: email.last_event || null,
+    })) : [],
+    domains: Array.isArray(domains.body?.data) ? domains.body.data.map((domain) => ({
+      id: domain.id || null,
+      name: domain.name || null,
+      status: domain.status || null,
+      region: domain.region || null,
+    })) : [],
+  });
 }
