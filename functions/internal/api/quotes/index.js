@@ -1,5 +1,5 @@
 import { TERMS_VERSION, json, parseQuoteBody } from '../../_lib/quotes.mjs';
-import { ensureInvoiceForQuote } from '../../_lib/invoices.mjs';
+import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
 
 function newQuoteId() {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -10,6 +10,7 @@ function newQuoteId() {
 
 export async function onRequestGet(context) {
   const { env } = context;
+  await ensureInvoiceSchema(env.QUOTES_DB);
   const { results } = await env.QUOTES_DB.prepare(
     `SELECT q.id, q.created_at, q.status, q.customer_name, q.customer_city, q.total_cents, q.signature_method,
             i.id AS invoice_id, i.invoice_number, i.status AS invoice_status, i.sent_at AS invoice_sent_at
@@ -24,7 +25,6 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   let body;
   try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
-
   const parsed = parseQuoteBody(body);
   if (parsed.error) return json({ error: parsed.error }, 400);
   const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
@@ -41,19 +41,11 @@ export async function onRequestPost(context) {
         subtotal_cents, discount_cents, discount_reason, total_cents,
         terms_version, signature_method, created_by
       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-    ).bind(
-      id, now, now, status,
-      name, phone, email, address, city,
-      role, notes,
-      subtotalCents, discountCents, discountReason, totalCents,
-      TERMS_VERSION, signatureMethod, 'mark',
-    ),
-    ...cleanItems.map((item, index) =>
-      env.QUOTES_DB.prepare(
-        `INSERT INTO quote_items (quote_id, sort_order, label, description, quantity, unit_price_cents, line_total_cents)
-         VALUES (?,?,?,?,?,?,?)`,
-      ).bind(id, index, item.label, item.description, item.quantity, item.unitPriceCents, item.lineTotalCents),
-    ),
+    ).bind(id, now, now, status, name, phone, email, address, city, role, notes, subtotalCents, discountCents, discountReason, totalCents, TERMS_VERSION, signatureMethod, 'mark'),
+    ...cleanItems.map((item, index) => env.QUOTES_DB.prepare(
+      `INSERT INTO quote_items (quote_id, sort_order, label, description, quantity, unit_price_cents, line_total_cents)
+       VALUES (?,?,?,?,?,?,?)`,
+    ).bind(id, index, item.label, item.description, item.quantity, item.unitPriceCents, item.lineTotalCents)),
   ]);
 
   const record = await ensureInvoiceForQuote(env.QUOTES_DB, id);
