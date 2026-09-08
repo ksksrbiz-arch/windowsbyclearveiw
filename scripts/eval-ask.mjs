@@ -4,10 +4,9 @@
 //   node scripts/eval-ask.mjs http://localhost:8788
 //   node scripts/eval-ask.mjs https://windowsbyclearview.com
 //
-// Would have caught both real bugs found while building this: a truncated
-// answer (the thinking-tokens issue) and a hard failure disguised as a
-// generic "unavailable" message (the stale-model-name issue) — this checks
-// answer shape and length, not just "did it return 200".
+// The suite checks answer shape, grounding, safety boundaries, pricing behavior,
+// and multi-turn project continuity. It is intentionally behavioral rather than
+// tied to one model's exact wording.
 const baseUrl = process.argv[2] || 'http://localhost:8788';
 
 const cases = [
@@ -58,7 +57,40 @@ const cases = [
     message: 'What is the capital of France?',
     check: (r) => (r.answer.toLowerCase().includes('paris') ? 'answered an unrelated question instead of redirecting' : null),
   },
+  {
+    name: 'diagnosis distinguishes fogged glass from room-side condensation',
+    message: 'There is moisture between the panes and the glass looks cloudy. Is the whole window bad?',
+    check: (r) => {
+      if (!/between|sealed|insulated|unit|seal/i.test(r.answer)) return 'answer should discuss the insulated glass/sealed-unit distinction';
+      if (/definitely|certainly/i.test(r.answer) && !/inspect|confirm/i.test(r.answer)) return 'answer sounds overconfident without inspection';
+      return null;
+    },
+  },
+  {
+    name: 'photo-limited reasoning does not invent measurements',
+    message: 'From a photo, can you tell me the exact window size?',
+    check: (r) => {
+      if (/exact size|exact measurement|measured at/i.test(r.answer) && !/can't|cannot|not/i.test(r.answer)) return 'must not claim exact measurements from a photo';
+      return null;
+    },
+  },
 ];
+
+async function post(message, history = [], project = {}) {
+  const res = await fetch(`${baseUrl}/ask/api/chat`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ message, history, project }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function runCase(c) {
+  const data = await post(c.message, c.history || [], c.project || {});
+  if (!data.answer) return 'no answer field';
+  return c.check(data);
+}
 
 async function run() {
   console.log(`Running ${cases.length} checks against ${baseUrl}\n`);
@@ -67,26 +99,9 @@ async function run() {
   for (const c of cases) {
     process.stdout.write(`- ${c.name}... `);
     try {
-      const res = await fetch(`${baseUrl}/ask/api/chat`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ message: c.message }),
-      });
-      if (!res.ok) {
-        console.log(`FAIL (HTTP ${res.status})`);
-        failed++;
-        continue;
-      }
-      const data = await res.json();
-      if (!data.answer) {
-        console.log('FAIL (no answer field)');
-        failed++;
-        continue;
-      }
-      const problem = c.check(data);
+      const problem = await runCase(c);
       if (problem) {
         console.log(`FAIL — ${problem}`);
-        console.log(`    answer: ${data.answer.slice(0, 200)}`);
         failed++;
       } else {
         console.log('ok');
@@ -97,7 +112,24 @@ async function run() {
     }
   }
 
-  console.log(failed ? `\n${failed}/${cases.length} checks failed` : `\nAll ${cases.length} checks passed`);
+  process.stdout.write('- multi-turn project continuity... ');
+  try {
+    const first = await post('I am replacing six old windows in my existing house because they are drafty.');
+    const history = [
+      { role: 'user', content: 'I am replacing six old windows in my existing house because they are drafty.' },
+      { role: 'assistant', content: first.answer },
+    ];
+    const second = await post('Would inserts or full-frame make more sense?', history, first.project || {});
+    const text = second.answer || '';
+    if (!/insert|full-frame|full frame/i.test(text)) throw new Error('answer did not compare replacement methods');
+    if (!/draft|existing|six|6/i.test(text)) throw new Error('answer did not retain useful project context');
+    console.log('ok');
+  } catch (err) {
+    console.log(`FAIL (${err.message})`);
+    failed++;
+  }
+
+  console.log(failed ? `\n${failed} checks failed` : `\nAll checks passed`);
   process.exit(failed ? 1 : 0);
 }
 
