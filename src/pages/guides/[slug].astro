@@ -90,6 +90,19 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
 
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
+
+const slugifyHeading = (value) => value
+  .toLowerCase()
+  .trim()
+  .replace(/[`*_~]/g, '')
+  .replace(/[^a-z0-9\s-]/g, '')
+  .replace(/\s+/g, '-')
+  .replace(/-+/g, '-');
+
+const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
+  .map((match) => ({ text: match[1].replace(/[`*_~]/g, '').trim(), id: slugifyHeading(match[1]) }))
+  .filter((heading) => heading.text)
+  .slice(0, 8);
 ---
 <BaseLayout
   title={guide.data.title}
@@ -172,6 +185,24 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
   )}
 
   <article class="section">
+    <div class="wrap is-narrow">
+      {pageHeadings.length >= 3 && (
+        <nav class="guide-outline" aria-label="On this page">
+          <div class="guide-outline-label">On this page</div>
+          <ol>
+            {pageHeadings.map((heading, index) => (
+              <li>
+                <a href={`#${heading.id}`}>
+                  <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                  <span>{heading.text}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+    </div>
+
     <div class="wrap is-narrow prose" data-reveal>
       <Content />
     </div>
@@ -223,9 +254,7 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
 </BaseLayout>
 
 <style>
-  .article-hero h1 {
-    max-width: 20ch;
-  }
+  .article-hero h1 { max-width: 20ch; }
 
   .article-tools {
     display: flex;
@@ -268,23 +297,9 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     color: var(--on-dark-faint);
   }
 
-  .article-meta span + span::before {
-    content: '·';
-    margin-right: var(--space-s);
-  }
-
-  .article-meta a {
-    color: var(--on-dark-soft);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    text-decoration-color: var(--dark-line-strong);
-  }
-
-  .article-meta a:hover,
-  .article-meta a:focus-visible {
-    color: var(--on-dark);
-    text-decoration-color: currentColor;
-  }
+  .article-meta span + span::before { content: '·'; margin-right: var(--space-s); }
+  .article-meta a { color: var(--on-dark-soft); text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--dark-line-strong); }
+  .article-meta a:hover, .article-meta a:focus-visible { color: var(--on-dark); text-decoration-color: currentColor; }
 
   .answer-strip {
     display: grid;
@@ -299,24 +314,9 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     box-shadow: var(--shadow-soft);
   }
 
-  .answer-mark {
-    padding: .28rem .45rem;
-    background: var(--ink);
-    color: var(--paper);
-    font-size: 10px;
-    font-weight: 750;
-    letter-spacing: .11em;
-  }
-
-  .answer-strip strong {
-    max-width: 72ch;
-    font-size: var(--step-0);
-    line-height: 1.3;
-  }
-
-  .visual-section .wrap {
-    max-width: 92rem;
-  }
+  .answer-mark { padding: .28rem .45rem; background: var(--ink); color: var(--paper); font-size: 10px; font-weight: 750; letter-spacing: .11em; }
+  .answer-strip strong { max-width: 72ch; font-size: var(--step-0); line-height: 1.3; }
+  .visual-section .wrap { max-width: 92rem; }
 
   .visual-intro {
     display: grid;
@@ -326,15 +326,8 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     margin-bottom: var(--space-m);
   }
 
-  .visual-intro h2 {
-    max-width: 23ch;
-    margin: 0.35rem 0 0;
-  }
-
-  .visual-intro > p {
-    margin: 0;
-    color: var(--ink-soft);
-  }
+  .visual-intro h2 { max-width: 23ch; margin: 0.35rem 0 0; }
+  .visual-intro > p { margin: 0; color: var(--ink-soft); }
 
   .visual-frame {
     padding: clamp(var(--space-s), 2.5vw, var(--space-m));
@@ -344,141 +337,86 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
     box-shadow: var(--shadow-soft);
   }
 
-  .guide-photo {
-    margin: 0;
-  }
+  .guide-photo { margin: 0; }
+  .guide-photo img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius); box-shadow: var(--shadow-sm); background: var(--paper-raised); }
+  .guide-photo figcaption { margin-top: var(--space-2xs); font-size: var(--step--2); color: var(--ink-faint); }
 
-  .guide-photo img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: var(--radius);
+  .guide-outline {
+    position: sticky;
+    top: 76px;
+    z-index: 4;
+    margin: 0 0 var(--space-l);
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    background: color-mix(in srgb, var(--paper-raised) 94%, transparent);
+    backdrop-filter: blur(8px);
     box-shadow: var(--shadow-sm);
-    background: var(--paper-raised);
   }
 
-  .guide-photo figcaption {
-    margin-top: var(--space-2xs);
-    font-size: var(--step--2);
-    color: var(--ink-faint);
-  }
-
-  .secondary-diagram {
-    margin-top: var(--space-2xl);
-    padding-top: var(--space-xl);
-    border-top: 1px solid var(--line);
-  }
-
-  .secondary-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--space-s);
-    color: var(--ink-faint);
+  .guide-outline-label {
+    margin-bottom: var(--space-2xs);
     font-size: var(--step--2);
     font-weight: 600;
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
+    color: var(--ink-faint);
   }
 
-  .faq-ask {
-    margin-top: var(--space-m);
-    font-size: var(--step--1);
-  }
-
-  .faq-ask a {
-    font-weight: 500;
-  }
-
-  .related {
-    margin-top: var(--space-2xl);
-  }
-
-  .related-head {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-l);
-    align-items: end;
-    margin-bottom: var(--space-s);
-  }
-
-  .related-head h2 {
-    margin-bottom: 0;
-  }
-
-  .related-head p {
-    margin: 0.35rem 0 0;
-    color: var(--ink-soft);
-  }
-
-  .related-head > a {
-    flex: 0 0 auto;
-    font-size: var(--step--1);
-    font-weight: 600;
-  }
-
-  .related-list {
+  .guide-outline ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .25rem var(--space-s);
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--line);
   }
 
-  .related-list li {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .related-list a {
+  .guide-outline a {
     display: grid;
-    gap: 0.2rem;
-    padding: var(--space-s) 0;
-    text-decoration: none;
-    color: inherit;
-    transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease);
-  }
-
-  .related-list a:hover,
-  .related-list a:focus-visible {
-    padding-left: var(--space-2xs);
-    background: var(--accent-wash);
-  }
-
-  .related-topic {
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-label);
-    font-size: var(--step--2);
-    font-weight: 500;
-    color: var(--ink-faint);
-  }
-
-  .related-list strong {
-    font-size: var(--step-1);
-    font-weight: 600;
-    letter-spacing: -0.015em;
-  }
-
-  .related-blurb {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    gap: .35rem;
+    align-items: baseline;
+    padding: .28rem 0;
     color: var(--ink-soft);
+    text-decoration: none;
     font-size: var(--step--1);
+    line-height: 1.35;
   }
+
+  .guide-outline a:hover,
+  .guide-outline a:focus-visible { color: var(--accent-ink); }
+
+  .guide-outline a span:first-child {
+    color: var(--accent);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .06em;
+  }
+
+  .secondary-diagram { margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--line); }
+  .secondary-label { display: flex; justify-content: space-between; margin-bottom: var(--space-s); color: var(--ink-faint); font-size: var(--step--2); font-weight: 600; letter-spacing: var(--tracking-label); text-transform: uppercase; }
+  .faq-ask { margin-top: var(--space-m); font-size: var(--step--1); }
+  .faq-ask a { font-weight: 500; }
+  .related { margin-top: var(--space-2xl); }
+
+  .related-head { display: flex; justify-content: space-between; gap: var(--space-l); align-items: end; margin-bottom: var(--space-s); }
+  .related-head h2 { margin-bottom: 0; }
+  .related-head p { margin: 0.35rem 0 0; color: var(--ink-soft); }
+  .related-head > a { flex: 0 0 auto; font-size: var(--step--1); font-weight: 600; }
+  .related-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .related-list li { border-bottom: 1px solid var(--line); }
+  .related-list a { display: grid; gap: 0.2rem; padding: var(--space-s) 0; text-decoration: none; color: inherit; transition: padding-left var(--dur) var(--ease-out), background var(--dur-fast) var(--ease); }
+  .related-list a:hover, .related-list a:focus-visible { padding-left: var(--space-2xs); background: var(--accent-wash); }
+  .related-topic { text-transform: uppercase; letter-spacing: var(--tracking-label); font-size: var(--step--2); font-weight: 500; color: var(--ink-faint); }
+  .related-list strong { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.015em; }
+  .related-blurb { color: var(--ink-soft); font-size: var(--step--1); }
 
   @media (max-width: 800px) {
-    .visual-intro {
-      grid-template-columns: 1fr;
-      gap: var(--space-s);
-    }
-
-    .related-head {
-      align-items: start;
-      flex-direction: column;
-      gap: var(--space-2xs);
-    }
-
-    .answer-strip {
-      grid-template-columns: 1fr;
-      gap: .4rem;
-      align-items: start;
-    }
+    .visual-intro { grid-template-columns: 1fr; gap: var(--space-s); }
+    .related-head { align-items: start; flex-direction: column; gap: var(--space-2xs); }
+    .answer-strip { grid-template-columns: 1fr; gap: .4rem; align-items: start; }
+    .guide-outline { position: static; }
+    .guide-outline ol { grid-template-columns: 1fr; }
   }
 </style>
