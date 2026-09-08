@@ -1,97 +1,25 @@
 import { estimatePrice, PRICING } from './pricing.mjs';
 import { webSearch } from './search.mjs';
 
-const OPENING_IDS = PRICING.openings.map((o) => o.id);
-const MATERIAL_IDS = PRICING.materials.map((m) => m.id);
-const BRAND_IDS = PRICING.brands.map((b) => b.id);
-const MODIFIER_IDS = PRICING.modifiers.map((m) => m.id);
+const BUSINESS_FACTS = {
+  serviceArea:'Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland, and Portland, Oregon',
+  appointmentOnly:true,
+  phone:'(564) 208-0801'
+};
 
-// Provider-agnostic tool definitions — lowercase JSON-Schema style,
-// converted per-provider below. Descriptions are written for the model,
-// not for a human reading the code: they're what decides whether/when it
-// reaches for a tool.
-export const TOOL_DEFS = [
-  {
-    name: 'estimate_price',
-    description:
-      "Calculates a real price range from Clearview's own published pricing model — the exact same numbers and formula as /tools/window-replacement-cost-calculator. Use this whenever a visitor describes a job and wants a sense of cost. Never state a price without calling this — never estimate from memory or general knowledge.",
-    parameters: {
-      type: 'object',
-      properties: {
-        lines: {
-          type: 'array',
-          description: 'One entry per opening type in the job.',
-          items: {
-            type: 'object',
-            properties: {
-              openingId: { type: 'string', enum: OPENING_IDS, description: 'Opening type id.' },
-              quantity: { type: 'integer', description: 'How many of this opening type.' },
-            },
-            required: ['openingId', 'quantity'],
-          },
-        },
-        materialId: { type: 'string', enum: MATERIAL_IDS, description: 'Defaults to vinyl if not specified.' },
-        brandId: { type: 'string', enum: BRAND_IDS, description: 'Window line; defaults to cascade (the standard line) if not specified.' },
-        method: {
-          type: 'string',
-          enum: ['insert', 'full-frame', 'mixed'],
-          description: 'insert if frames are sound, full-frame if rotten/out of square, mixed if unsure — defaults to insert.',
-        },
-        modifierIds: {
-          type: 'array',
-          items: { type: 'string', enum: MODIFIER_IDS },
-          description: 'Any that apply: third-story-plus, oversize, trim, metal-removal. Omit if none mentioned.',
-        },
-      },
-      required: ['lines'],
-    },
-  },
-  {
-    name: 'search_web',
-    description:
-      'Searches the web for general window/construction industry knowledge — terminology, how methods or materials work, current rebate programs, building codes, energy standards. Do NOT use this for anything about Clearview Windows itself (its policies, pricing, claims, reviews) — that must only ever come from the reference material already provided.',
-    parameters: {
-      type: 'object',
-      properties: {
-        query: { type: 'string', description: 'A focused search query.' },
-      },
-      required: ['query'],
-    },
-  },
-];
+function clean(value,max=300){return String(value??'').trim().slice(0,max)}
+function normalizeType(v){const q=clean(v).toLowerCase();if(/double.?hung/.test(q))return 'double-hung';if(/slider|sliding window/.test(q))return 'slider';if(/casement/.test(q))return 'casement';if(/picture|fixed/.test(q))return 'picture/fixed';if(/awning/.test(q))return 'awning';if(/sliding door|patio door/.test(q))return 'sliding door';return 'unknown'}
 
-function toGeminiSchema(schema) {
-  if (schema.type === 'array') {
-    return { type: 'ARRAY', description: schema.description, items: toGeminiSchema(schema.items) };
-  }
-  if (schema.type === 'object') {
-    const properties = {};
-    for (const [key, value] of Object.entries(schema.properties)) properties[key] = toGeminiSchema(value);
-    return { type: 'OBJECT', description: schema.description, properties, required: schema.required };
-  }
-  const typeMap = { string: 'STRING', integer: 'INTEGER', number: 'NUMBER', boolean: 'BOOLEAN' };
-  return { type: typeMap[schema.type] || 'STRING', description: schema.description, enum: schema.enum };
-}
+export function toolsForGroq(){return [
+ {type:'function',function:{name:'estimate_price',description:'Calculate a planning-level Clearview estimate only when the visitor asks about actual cost or requests an estimate. Never use for arbitrary guesses.',parameters:{type:'object',properties:{openings:{type:'string',enum:['1','2–5','6–10','10+']},home_type:{type:'string',enum:['Existing home','New construction']},complexity:{type:'string',enum:['standard','moderate','complex']}},required:['openings','home_type','complexity']} }},
+ {type:'function',function:{name:'search_knowledge',description:'Search the site guide knowledge base for a Clearview-relevant technical answer.',parameters:{type:'object',properties:{query:{type:'string'}},required:['query']} }},
+ {type:'function',function:{name:'get_business_facts',description:'Return verified business facts such as service area and appointment policy.',parameters:{type:'object',properties:{topic:{type:'string'}},required:['topic']} }},
+ {type:'function',function:{name:'search_web',description:'Search current public information when freshness matters. Clearly distinguish external information from Clearview policy.',parameters:{type:'object',properties:{query:{type:'string'}},required:['query']} }},
+ {type:'function',function:{name:'compare_installation_paths',description:'Structure the practical tradeoffs between insert and full-frame replacement. Use when the visitor is deciding between replacement methods.',parameters:{type:'object',properties:{frame_condition:{type:'string'},trim_condition:{type:'string'},disruption_tolerance:{type:'string'},opening_access:{type:'string'}},required:[]}}},
+ {type:'function',function:{name:'photo_next_view',description:'Choose the single most useful additional photo view when the current photo cannot answer the question.',parameters:{type:'object',properties:{question:{type:'string'},visible_detail:{type:'string'},suspected_area:{type:'string'}},required:['question']}}}
+]}
+export function toolsForGemini(){return toolsForGroq().map(t=>({functionDeclarations:[t.function]}))}
 
-export function toolsForGroq() {
-  return TOOL_DEFS.map((t) => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.parameters } }));
-}
-
-export function toolsForGemini() {
-  return [{ functionDeclarations: TOOL_DEFS.map((t) => ({ name: t.name, description: t.description, parameters: toGeminiSchema(t.parameters) })) }];
-}
-
-/** Executes one named tool call and returns a plain result object — never
- *  throws, so one bad/failed tool call can't take down the whole turn. */
-export async function runTool(name, args) {
-  try {
-    if (name === 'estimate_price') return estimatePrice(args || {});
-    if (name === 'search_web') {
-      const results = await webSearch(String(args?.query || ''));
-      return results.length ? { results } : { results: [], note: 'No web results found.' };
-    }
-    return { error: `Unknown tool "${name}".` };
-  } catch (err) {
-    return { error: String(err?.message || err) };
-  }
-}
+export async function runTool(name,args={}){switch(name){case'estimate_price':return estimatePrice(args);case'search_knowledge':return {results:[]};case'get_business_facts':return BUSINESS_FACTS;case'search_web':return await webSearch(clean(args.query,500));case'compare_installation_paths':return compareInstallationPaths(args);case'photo_next_view':return photoNextView(args);default:return {error:`Unknown tool: ${name}`}}}
+function compareInstallationPaths(args){const frame=clean(args.frame_condition,200).toLowerCase(),trim=clean(args.trim_condition,200).toLowerCase(),access=clean(args.opening_access,200).toLowerCase(),disruption=clean(args.disruption_tolerance,200).toLowerCase();const fullReasons=[];const insertReasons=[];if(/rot|soft|damag|failed|water/.test(frame))fullReasons.push('existing frame condition may favor exposing the rough opening');if(/good|sound|solid|stable/.test(frame))insertReasons.push('a sound existing frame can support an insert approach');if(/need.*new|replace.*trim|rough opening|siding|sheath/.test(access))fullReasons.push('opening access can make full-frame work more practical');if(/low|minimal|avoid|little/.test(disruption))insertReasons.push('lower interior/exterior disruption can favor an insert approach');if(/high|major|okay with/.test(disruption))fullReasons.push('greater disruption tolerance makes full-frame work easier to consider');if(/replace|damag|rot/.test(trim))fullReasons.push('trim condition may support a more complete opening correction');return {insert:{when:insertReasons.length?insertReasons:['existing frame is sound and preserving surrounding finish is valuable']},fullFrame:{when:fullReasons.length?fullReasons:['existing frame condition or opening access calls for a more complete opening evaluation']},inspectionNeeded:!fullReasons.length&&!insertReasons.length}}
+function photoNextView(args){const q=clean(args.question,300).toLowerCase(),area=clean(args.suspected_area,200).toLowerCase();if(/glass|fog|seal|condens/.test(q)||/glass/.test(area))return {view:'close-up of the glass',why:'Shows the pane, spacer area, haze or visible seal-related symptoms more clearly.'};if(/frame|trim|rot|damage|sash/.test(q)||/frame|trim|rot|damage|sash/.test(area))return {view:'inside frame and trim',why:'Shows the condition of the frame, sash and surrounding trim.'};if(/water|leak|flashing|installation|siding|exterior/.test(q)||/water|flashing|exterior/.test(area))return {view:'exterior perimeter of the window',why:'Shows the visible exterior interface and any accessible installation details.'};return {view:'whole window from inside',why:'Establishes the overall unit, surrounding trim and opening context before zooming in.'}}
