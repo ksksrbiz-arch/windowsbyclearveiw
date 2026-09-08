@@ -10,16 +10,7 @@ const cities = defineCollection({
     title: z.string(),
     description: z.string(),
     published: z.boolean().default(true),
-    /** Localized FAQ, same shape as the guides collection's. Optional — a
-     *  town with nothing distinct to ask about can leave it empty. */
-    faq: z
-      .array(
-        z.object({
-          question: z.string(),
-          answer: z.string(),
-        }),
-      )
-      .default([]),
+    faq: z.array(z.object({ question: z.string(), answer: z.string() })).default([]),
   }),
 });
 
@@ -30,59 +21,28 @@ const reviews = defineCollection({
     name: z.string(),
     city: z.string(),
     source: z.string().default('Customer'),
-    /**
-     * Off by default on purpose. Only real quotes Mark has permission to
-     * republish should ever reach the page — inventing testimonials is both
-     * a trust problem and an FTC one.
-     */
     published: z.boolean().default(false),
   }),
 });
 
 const guides = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      kicker: z.string().default('Guide'),
-      topic: z.string(),
-      published: z.boolean().default(true),
-      updated: z.coerce.date(),
-      order: z.number().default(99),
-      /**
-       * Optional diagram rendered above the body. Keyed rather than hardcoded in
-       * the template so a new guide can claim one from its own frontmatter.
-       */
-      diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist']).optional(),
-      /**
-       * A second, deeper diagram rendered after the article body, before the
-       * FAQ — for a guide that already uses the top slot for a heroImage
-       * (like the cost guide) or wants a second, more detailed diagram after
-       * the reader has the context to use it (like flashing order after the
-       * full-frame-vs-insert explanation).
-       */
-      secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
-      /**
-       * Optional topical hero image. These may be properly licensed stock
-       * photography or an actual Clearview job photo when the image genuinely
-       * represents the topic. heroImageCredit records which it is so the page
-       * never implies stock or company work incorrectly.
-       */
-      heroImage: image().optional(),
-      heroImageAlt: z.string().optional(),
-      heroImageCredit: z.string().optional(),
-      /** CSS object-position for the hero crop, e.g. "50% 68%". Defaults to center. */
-      heroImageFocus: z.string().optional(),
-      faq: z
-        .array(
-          z.object({
-            question: z.string(),
-            answer: z.string(),
-          }),
-        )
-        .default([]),
-    }),
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    description: z.string(),
+    kicker: z.string().default('Guide'),
+    topic: z.string(),
+    published: z.boolean().default(true),
+    updated: z.coerce.date(),
+    order: z.number().default(99),
+    diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist']).optional(),
+    secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
+    heroImage: image().optional(),
+    heroImageAlt: z.string().optional(),
+    heroImageCredit: z.string().optional(),
+    heroImageFocus: z.string().optional(),
+    faq: z.array(z.object({ question: z.string(), answer: z.string() })).default([]),
+  }),
 });
 
 const legal = defineCollection({
@@ -90,6 +50,9 @@ const legal = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
+    summary: z.string().optional(),
+    updated: z.coerce.date(),
+    order: z.number().default(99),
     published: z.boolean().default(true),
   }),
 });
