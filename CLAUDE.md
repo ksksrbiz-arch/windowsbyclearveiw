@@ -31,6 +31,18 @@ Build and maintain a trustworthy operating system for Clear View Windows & Trim 
 - Examples are executable documentation: maintain good/bad/edge cases when a workflow is safety- or quality-critical.
 - A fresh agent should be able to pass the ICM walk test: orient, locate the correct stage, understand what to do, identify the current state, and report what remains without relying on conversation memory.
 
+## Ask routing
+
+`functions/ask/_lib/icm-router.mjs` is the deterministic Layer-1 routing seam for `/ask`.
+It maps the visitor's explicit message/project context to one specialist contract:
+
+- `diagnostician` — symptoms, visible damage, moisture, drafts
+- `estimator` — price, budget, estimate/quote requests
+- `installation-reviewer` — installation, flashing, opening preparation, new construction
+- `customer-advisor` — comparisons, performance, appearance, planning
+
+The router must remain small and falsifiable. It does not answer questions, retrieve knowledge, or override runtime safety rules. Runtime integration must preserve the existing model/tool guardrails.
+
 ## Current ICM implementation
 
 The first production ICM workflow is Build Plan generation:
