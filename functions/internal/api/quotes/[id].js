@@ -7,8 +7,8 @@ async function requireApprovedBuildPlan(db, quoteId, quoteUpdatedAt) {
     `ALTER TABLE quote_build_plans ADD COLUMN state TEXT NOT NULL DEFAULT 'draft'`,
     `ALTER TABLE quote_build_plans ADD COLUMN approved_at TEXT`,
   ]) { try { await db.prepare(sql).run(); } catch {} }
-  const plan = await db.prepare('SELECT state, approved_at, updated_at FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
-  if (!plan?.plan_json && !plan?.state) return { error: 'Approve the Build Plan before finalizing this quote.', code: 'BUILD_PLAN_REQUIRED' };
+  const plan = await db.prepare('SELECT plan_json, state, approved_at, updated_at FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
+  if (!plan?.plan_json) return { error: 'Approve the Build Plan before finalizing this quote.', code: 'BUILD_PLAN_REQUIRED' };
   if (plan.state !== 'approved' || !plan.approved_at) return { error: 'The Build Plan must be explicitly approved before finalizing this quote.', code: 'BUILD_PLAN_NOT_APPROVED' };
   if (quoteUpdatedAt && plan.updated_at && new Date(quoteUpdatedAt).getTime() > new Date(plan.updated_at).getTime()) return { error: 'This quote changed after the Build Plan was approved. Reconcile and re-approve the Build Plan before finalizing.', code: 'BUILD_PLAN_STALE' };
   return null;
@@ -112,7 +112,7 @@ export async function onRequestPatch(context) {
 
   await env.QUOTES_DB.prepare(
     `UPDATE quotes SET signature_svg = ?, signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ?`,
-  ).bind(signatureSvg, signatureName, now, id).run();
+  ).bind(signatureSvg, signatureName, now, now, id).run();
   await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true });
   return json({ ok: true, signedAt: now });
 }
