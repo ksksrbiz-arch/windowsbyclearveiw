@@ -48,6 +48,14 @@ async function seed(db, jobId) {
   }
 }
 
+async function buildPlanSnapshot(db, jobId) {
+  const row = await db.prepare(`SELECT build_plan_json, build_plan_version, build_plan_knowledge_version FROM jobs WHERE id = ?`).bind(jobId).first();
+  if (!row?.build_plan_json) return null;
+  let plan;
+  try { plan = JSON.parse(row.build_plan_json); } catch { return null; }
+  return { version: row.build_plan_version || 1, knowledgeVersion: row.build_plan_knowledge_version || null, plan };
+}
+
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureSchema(env.QUOTES_DB);
@@ -57,7 +65,8 @@ export async function onRequestGet(context) {
   if (!job) return json({ error: 'Job not found.' }, 404);
   await seed(env.QUOTES_DB, jobId);
   const result = await env.QUOTES_DB.prepare(`SELECT id, section, label, checked, notes, position, updated_at FROM job_checklist_items WHERE job_id = ? ORDER BY section, position, id`).bind(jobId).all();
-  return json({ items: result.results || [] });
+  const snapshot = await buildPlanSnapshot(env.QUOTES_DB, jobId);
+  return json({ items: result.results || [], buildPlan: snapshot ? { version: snapshot.version, knowledgeVersion: snapshot.knowledgeVersion, openingCount: Array.isArray(snapshot.plan?.openings) ? snapshot.plan.openings.length : 0, buyCount: Array.isArray(snapshot.plan?.buy) ? snapshot.plan.buy.length : 0, verifyCount: Array.isArray(snapshot.plan?.verify) ? snapshot.plan.verify.length : 0 } : null });
 }
 
 export async function onRequestPatch(context) {
