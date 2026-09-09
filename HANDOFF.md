@@ -1,185 +1,148 @@
 # Project context — Clearview Windows
 
-Paste this into a new Claude session to pick up where the last one left off.
-Technical detail lives in [README.md](./README.md); this file is the *why*.
+This file is the durable handoff for future agents. Technical detail lives in `README.md`; architecture/state also lives in `.ai/`.
 
----
+## ICM implementation status — 2026-09-08
 
-## What this is
+Clearview is being built as a deterministic business system with an **ICM control plane** around it. The ICM layer is intentionally plain-text, inspectable, and editable. It is not a second database and does not replace D1, application validation, authorization, or state transitions.
 
-A marketing site for **Clearview Windows** — my friend Mark's window
-installation company in Vancouver, WA. He does replacement work for homeowners
-and new-construction installs for builders, across Clark County and across the
-river into Portland.
+### Architecture
 
-- **Live:** https://windowsbyclearview.com
-- **Repo:** `ksksrbiz-arch/windowsbyclearveiw` (public), deploys from `main`
-- **Stack:** Astro, static, no adapter. Cloudflare Pages. Estimate form is a
-  Pages Function. Resend for mail.
-- **Pricing worker:** https://clearview-pricing.skdev-371.workers.dev
-- **Legal entity:** Clear View Windows & Trim LLC (WA UBI 605 779 798),
-  doing business as "Clearview Windows". `site.legalName` in
-  `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold
-  the trade name.
-- **On the spelling:** the public website uses `windowsbyclearview.com`.
-  The working production mailbox for lead notifications is still on the
-  legacy typo domain `windowsbyclearveiw.com`. Do **not** change the default
-  notification address to `@windowsbyclearview.com` until a real mailbox has
-  been provisioned and tested on that domain. The old domain's HTTP redirect
-  does not affect SMTP/mail delivery.
+```text
+CLAUDE.md                 Layer 0: global operating contract
+  ↓
+.ai/CONTEXT.md            Layer 1: router
+  ↓
+workflow/specialist       Layer 2: stage/specialist contract
+  ↓
+references/authorities    Layer 3: stable knowledge
+  ↓
+records/artifacts         Layer 4: current work
+  ↓
+deterministic services   D1/API/code remain transactional truth
+```
 
-## Where it stands
+The operating rule is **navigate before reasoning**. A fresh agent should be able to orient itself from files alone, choose one workflow/specialist, read only the necessary context, act, and report the next state.
 
-Working and deployed:
+### ICM principles adopted here
 
-- Full site: home, replacement, new construction, process, gallery, guides,
-  8 service-area pages, reviews, estimate, 404
-- Real job photos through `astro:assets` (WebP + srcset)
-- Estimate form → Resend, with a no-JS fallback and a homeowner/builder split.
-  Both templates (lead-to-Mark and receipt-to-customer) are full HTML with
-  click-to-call / click-to-email buttons, and the lead email attaches a
-  vCard so Mark can save the customer's contact info in one tap.
-- **Estimate delivery verified live:** a real public production submission
-  was made through `/estimate`; it returned success, created a D1 lead record,
-  and Resend reported the Mark notification as delivered to the working
-  Google Workspace mailbox at `owner@windowsbyclearveiw.com`.
-- A protected Command Center production-mail test is available under
-  `/internal/tools`; it uses the exact production Resend configuration and
-  returns the provider message ID without creating a lead. This remains useful
-  for repeatable diagnostics after deployments.
-- Free cost estimator at `/tools/window-replacement-cost-calculator`
-- Pricing worker with KV, validation, monthly cron, and a GitHub Actions
-  health check
-- Domain migration (windowsbyclearveiw.com → windowsbyclearview.com) is
-  complete for the website: DNS, GTM/GA4, and Cloudflare Pages custom domains
-  are pointed at the canonical web domain. Mail remains on the legacy domain
-  until a real mailbox exists on the new one.
+1. One stage, one job.
+2. Plain text is the human-editable interface.
+3. Load context in layers rather than dumping the entire repository into a prompt.
+4. Every stage produces an inspectable handoff/edit surface.
+5. Configure the system/factory; do not bury policy inside one-off outputs.
+6. Deterministic code performs repeatable work; AI performs bounded judgment.
+7. Ambiguity affecting safety, price, ordering, installation, or commitments becomes `VERIFY`.
+8. Human review is a real state boundary, not a suggestion hidden in prose.
 
-## Rules that must not be broken
+## Build Plan — first canonical ICM pipeline
 
-These came out of real problems and are easy to undo by accident.
+The production Build Plan is now represented as six explicit stages:
 
-1. **No invented reviews.** `/reviews` is deliberately empty. It previously
-   shipped three fabricated testimonials attributed to named people in a city
-   Mark does not serve. Reviews default to `published: false`. Only real quotes
-   from real customers who agreed, ever.
+```text
+01-scope
+   ↓
+02-openings
+   ↓
+03-materials
+   ↓
+04-installation
+   ↓
+05-qc
+   ↓
+06-approval
+```
 
-2. **No invented credentials.** `site.lniNumber` is empty and the footer says
-   the number is pending. Washington requires a contractor registration number
-   in advertising (RCW 18.27.100) and separately **prohibits** advertising that
-   a contractor is "bonded and insured" — that phrase was removed and must stay
-   out.
+Each stage has its own `CONTEXT.md` describing **Inputs / Process / Outputs / Stop conditions**. The current deterministic implementation remains `functions/internal/api/build-plan.js`, with quality/evidence rules in `functions/_lib/build-plan-rules.mjs`.
 
-3. **Pricing must say whose numbers it is.** The estimator currently shows
-   published 2026 Washington / Portland-metro averages, labelled as exactly
-   that on the page, with a review date. When Mark supplies his own ranges, set
-   `basis.source` to `'clearview'` and the copy switches itself. Never present
-   somebody else's averages as ours.
+The API currently provides:
 
-4. **The pricing worker does not discover prices.** There is no authoritative
-   feed for Clark County window pricing. It validates, serves, and nags —
-   it does not scrape cost guides or ask a model to guess.
+- quote-derived source snapshots
+- plan versioning
+- stale-plan detection when quote items change
+- fresh baseline regeneration
+- manufacturer/authority metadata
+- material classification
+- installation sequence
+- opening-by-opening records
+- QC checks
+- lint blockers/warnings
+- draft-only editing
+- read-only behavior after quote finalization
+- Build Plan snapshotting into jobs
 
-5. **Honest copy generally.** Plain language, name the weather, admit when
-   condensation is just a humid bathroom. No "unparalleled solutions". The
-   federal 25C tax credit ended for installs after 2025-12-31 — do not sell it.
+### Evidence vocabulary
 
-6. **Client-side navigation (Astro View Transitions) stays cheap.**
-   `BaseLayout.astro`'s `astro:page-load` handlers (analytics pushes, the
-   scroll-reveal `IntersectionObserver` setup) run on *every* in-site
-   navigation, including the very first load. A version of this once did a
-   `getBoundingClientRect()` read immediately followed by a `classList.add`
-   write per element, in a loop — a forced-reflow thrash that showed up as
-   ~540ms of blocked main thread and was over half of the homepage's LCP.
-   Batch reads, then batch writes; never interleave them in a per-element
-   loop. Same goes for anything pushed to GTM's `dataLayer` on navigation —
-   defer it with `requestIdleCallback` rather than firing synchronously.
+Use these states consistently:
 
-## ICM architecture — implemented 2026-09-08
+- **KNOWN** — directly supplied by the quote, site record, product documentation, or other authoritative source.
+- **INFERRED** — reasonable classification derived from explicit evidence, but not sufficient for a commitment.
+- **VERIFY** — requires Mark/site inspection/order confirmation/manufacturer documentation before proceeding.
 
-Clearview now has an **ICM (Interpretable Context Methodology) control-plane
-layer** for AI-assisted operations. This is deliberately not a second database
-and not a replacement for application code. The filesystem supplies routing,
-stage contracts, stable reference context, and inspectable working artifacts;
-D1 and deterministic services remain the transactional/enforcement layer.
+Never turn a missing measurement into a dimension, a guessed product into a specification, or a generic installation practice into a product-specific instruction.
 
-### Root navigation contract
+## Ask — deterministic ICM routing seam
 
-Start with `CLAUDE.md`, then `.ai/CONTEXT.md`, `.ai/STATE.md`, and `.ai/RULES.md`.
-Route to one workflow or specialist before loading detailed references.
-The architecture is designed around the ICM context layers:
+`functions/ask/_lib/icm-router.mjs` now provides the first deterministic routing seam for the public `/ask` assistant.
 
-- Layer 0 — identity/global operating contract (`CLAUDE.md`)
-- Layer 1 — router (`.ai/CONTEXT.md`)
-- Layer 2 — stage contract (`workflows/*/CONTEXT.md`)
-- Layer 3 — stable references/authorities
-- Layer 4 — current work/state and application records
+It routes to exactly one specialist contract:
 
-### First canonical pipeline: Build Plan
+| Route | Use for |
+| --- | --- |
+| `diagnostician` | fog, drafts, condensation, damage, leaks, visible symptoms |
+| `estimator` | estimates, quotes, price, cost, budget |
+| `installation-reviewer` | installation, flashing, rough openings, fasteners, new construction |
+| `customer-advisor` | comparisons, performance, appearance, planning, general next actions |
 
-`01-scope → 02-openings → 03-materials → 04-installation → 05-qc → 06-approval`
+This router intentionally does **not** answer the visitor, retrieve sources, or replace runtime safety checks. It is a small, falsifiable routing function. The existing Ask tool loop, retrieval, vision constraints, and answer-quality gate remain authoritative until the router migration is complete.
 
-Each stage has one job, explicit inputs/process/outputs/stop conditions, and
-an inspectable handoff. The existing Build Plan service remains authoritative:
-`functions/internal/api/build-plan.js` handles persistence/versioning/staleness,
-while `functions/_lib/build-plan-rules.mjs` handles deterministic quality rules.
-The ICM layer documents the reasoning architecture around those guarantees.
+Regression coverage lives in `scripts/test-icm-router.mjs` and is exposed as `npm run test:icm`.
 
-### Evidence protocol
+## Specialist contracts
 
-Use `KNOWN`, `INFERRED`, and `VERIFY`. Never turn missing dimensions, product-
-specific installation requirements, concealed damage, or unsupported material
-quantities into invented certainty. Human approval is a hard boundary:
-`draft → review → approved → job snapshot`.
-
-### Specialists established
+Current contracts:
 
 - `.ai/specialists/diagnostician/`
 - `.ai/specialists/estimator/`
 - `.ai/specialists/installation-reviewer/`
 - `.ai/specialists/customer-advisor/`
 
-These are contracts for future routing of `/ask` and internal workflows. Do
-not duplicate the existing Ask guardrails in random prompts; route the relevant
-intent to a specialist and keep deterministic tools authoritative.
+These contracts are intentionally not copies of runtime prompts. They define scope, boundaries, evidence expectations, and workflow. Runtime prompts should consume the smallest relevant contract/context rather than creating a second policy universe.
 
-### Golden cases
+## Golden cases
 
-`.ai/workflows/build-plan/EXAMPLES.md` contains architecture fixtures for fogged
-IGUs, drafty windows, sill rot, unknown installation method, mixed openings, and
-quote changes. Add a paired good/bad case when a future bug exposes a reusable
-reasoning boundary.
+`.ai/workflows/build-plan/EXAMPLES.md` is the initial reasoning fixture set. When a bug exposes a reusable boundary, add a paired good/bad example plus the expected stop condition. High-value cases include:
 
-### What is intentionally *not* done yet
+- fogged IGU vs room-side condensation
+- draft/air leakage
+- sill or frame deterioration
+- unknown installation method
+- sliding-door replacement
+- full-frame vs insert
+- new construction
+- mixed-opening project
+- quote changes after plan generation
+- missing manufacturer instructions
 
-1. Stage artifacts are not yet first-class UI records; the current API's plan
-   JSON remains the operational artifact.
-2. Build Plan approval/reconciliation UX still needs a stronger explicit state
-   machine in the Command Center.
-3. `/ask` has not yet been fully migrated to the ICM specialist router.
-4. The broader Lead → Estimate → Quote → Build Plan → Job → Installation → QC →
-   Closeout lifecycle is mapped but not every stage has an ICM implementation.
-5. Golden-case execution should become automated regression coverage rather than
-   remaining documentation-only fixtures.
+The target is to make these executable regression fixtures, not permanent documentation-only examples.
 
-Do not describe those items as completed until code and validation prove them.
+## Current limitations — do not call these complete
 
-## Outstanding
+1. Build Plan stage artifacts are described by ICM but the UI still stores the operational plan as one D1 JSON artifact.
+2. Build Plan approval/reconciliation needs a stronger explicit state machine and audit trail.
+3. Ask routing exists as a deterministic seam but is not yet fully integrated into the chat prompt/context assembly.
+4. Specialist reference files need deeper authoritative source mapping as the knowledge library grows.
+5. Golden cases need automated end-to-end evaluation against the real Ask and Build Plan services.
+6. Lead → Estimate → Quote → Build Plan → Job → Installation → QC → Closeout has an architectural map but not every stage has an ICM implementation.
 
-| | |
-| --- | --- |
-| **L&I registration number** | The last real blocker on this being legitimate advertising in WA. Set `lniNumber` in `src/data/site.ts`. |
-| **Mark's real pricing** | Replaces the regional averages. Format and basis are documented under "Pricing" in the README. |
-| **Real mailbox on `windowsbyclearview.com`** | Provision and test before changing any production recipient/sender defaults away from the working `windowsbyclearveiw.com` mailbox domain. |
-| **Hero video** | Drop a 15–25s clip at `public/video/hero.mp4` and the homepage hero switches from photo to video automatically. |
-| **`ADMIN_TOKEN`** | Unset, so the worker's `PUT /` is closed and pricing changes go through the repo. Optional. |
-| **Google Business Profile** | Not set up. For a local installer this matters as much as the site. |
-| **Single-color logo glyph** | The icon is photorealistic and loses detail flattened to one color (embroidery, engraving, one-color stamp). Commission a simplified flat glyph from the icon's silhouette before using it for those — full-color files are fine for vinyl, screen printing, and anything on a screen. |
+Do not claim any of these are complete until code, tests, and live behavior establish it.
 
-## How I like to work
+## Working rules
 
-- Verify rather than assert — build it, run it, screenshot it, then say it works.
-- Say plainly when something cannot be done honestly, then build the nearest
-  thing that can.
-- Flag your own bugs when you find them rather than quietly patching.
-- Push to `main`. Cloudflare Pages deploys automatically.
+- Verify rather than assert.
+- Push changes to `main` for this project; Cloudflare Pages deploys automatically.
+- Do not invent reviews, credentials, L&I numbers, pricing, warranties, measurements, or product specifications.
+- Public website domain is `windowsbyclearview.com`; production mail currently remains on `windowsbyclearveiw.com` until a real canonical-domain mailbox is provisioned and tested.
+- Keep D1 as transactional truth.
+- Keep ICM context files free of secrets and customer PII.
+- Update this handoff and `.ai/WORKING.md` when architecture changes.
