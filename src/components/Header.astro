@@ -205,7 +205,12 @@ const links = [
     flex: 1 1 auto;
     min-width: 0;
     justify-content: center;
-    gap: 0.1rem .9rem;
+    /* .wrap caps this row at --max (1240px), so above the 1400px breakpoint
+       where .header-estimate reappears, the unwrapped 10-link nav is short
+       by a small, constant amount regardless of viewport width — it always
+       overlaps .header-social, never resolves no matter how wide the window
+       gets. Trimmed just enough to close that gap with a safety margin. */
+    gap: 0.1rem .65rem;
     white-space: nowrap;
   }
 
