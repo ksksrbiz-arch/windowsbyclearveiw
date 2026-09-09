@@ -7,7 +7,6 @@ const MAX_MESSAGE_LENGTH = 1000;
 const MAX_HISTORY_MESSAGES = 10;
 const MAX_HISTORY_MESSAGE_LENGTH = 1000;
 const MAX_OUTPUT_TOKENS = 900;
-const MAX_MODEL_CALLS = 1;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -128,15 +127,14 @@ export async function onRequestPost(context) {
     { role: 'user', content: message },
   ];
 
+  // One primary attempt plus one bounded fallback. Never fan out to multiple models.
   let answer = null;
   let provider = 'degraded';
-  if (MAX_MODEL_CALLS > 0) {
-    answer = await callGroq(env, messages).catch(() => null);
-    if (answer) provider = 'groq';
-    else {
-      answer = await callGemini(env, messages).catch(() => null);
-      if (answer) provider = 'gemini';
-    }
+  answer = await callGroq(env, messages).catch(() => null);
+  if (answer) provider = 'groq';
+  else {
+    answer = await callGemini(env, messages).catch(() => null);
+    if (answer) provider = 'gemini';
   }
 
   if (!answer) {
