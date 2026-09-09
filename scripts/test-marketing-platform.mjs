@@ -138,6 +138,17 @@ const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8')
 assert.match(astroConfig, /path\.startsWith\('\/internal\/'\)/);
 assert.match(astroConfig, /path !== '\/internal'/);
 
+// Washington contractor-advertising guard: this public marketing surface must
+// never accidentally reintroduce the unsupported "bonded and insured" claim.
+for (const file of pageFiles) {
+  const rel = path.relative(root, file).replaceAll(path.sep, '/');
+  if (rel.startsWith('src/pages/internal/') || rel.startsWith('src/pages/api/')) continue;
+  const source = fs.readFileSync(file, 'utf8');
+  if (/bonded\s+and\s+insured/i.test(source)) {
+    failures.push(`${rel}: unsupported "bonded and insured" marketing claim.`);
+  }
+}
+
 if (failures.length) {
   console.error('Marketing platform audit: FAIL');
   for (const failure of failures) console.error(`- ${failure}`);
