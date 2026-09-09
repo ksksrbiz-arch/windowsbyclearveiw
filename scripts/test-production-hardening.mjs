@@ -23,6 +23,13 @@ for (const token of [
   'indexedDB.open',
 ]) assert.match(field, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
+// Gate failures must surface the server-provided human-readable message.
+// Do not add client-side branches for PHOTO_EVIDENCE_REQUIRED / OPEN_EXCEPTION:
+// those codes remain machine-readable server contracts, while the server owns
+// the wording and can evolve it without creating a second source of truth.
+assert.match(field, /d\.error/);
+assert.doesNotMatch(field, /PHOTO_EVIDENCE_REQUIRED|OPEN_EXCEPTION/);
+
 // Photo capture must be tied to job/opening/stage and survive normal reloads on-device.
 for (const token of ['jobId', 'openingIndex', 'stage', 'before', 'during', 'after', 'issue', 'indexedDB']) {
   assert.match(photos, new RegExp(token));
