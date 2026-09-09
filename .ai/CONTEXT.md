@@ -7,7 +7,7 @@ It does not replace application code or D1.
 
 1. Read root `CLAUDE.md` for global constraints.
 2. Read `.ai/STATE.md` for current architecture and migration status.
-3. Read `.ai/RULES.md` for cross-cutting reasoning boundaries.
+3. Read `.ai/RULES.md` and `.ai/AI-OPERATING-CONTRACT.md` for cross-cutting reasoning and runtime boundaries.
 4. Identify the user's/request's business object: lead, estimate, quote, build plan, job, customer, installation, QC, or public question.
 5. Route to exactly one primary workflow or specialist before loading detailed references.
 6. Load only the references required by that stage.
@@ -23,6 +23,13 @@ It does not replace application code or D1.
 | Calculate or explain project pricing | `specialists/estimator/` |
 | Review installation logic | `specialists/installation-reviewer/` |
 | Help a homeowner decide what to do next | `specialists/customer-advisor/` |
+| Analyze an internal lead | `specialists/lead-analyzer/` |
+| Review internal project/field evidence | `specialists/evidence-reviewer/` |
+| Summarize internal operations | `specialists/operations-copilot/` |
+| Answer internal knowledge questions | `specialists/knowledge-assistant/` |
+| Support future visualization workflows | `specialists/visualizer/` |
+
+The internal routes are opt-in through the authenticated internal surface. Public `/ask` remains limited to its public specialist set.
 
 ## Business lifecycle
 
@@ -45,3 +52,5 @@ Embed the necessary result into the next stage's input/output artifact. Do not m
 ## Deterministic boundary
 
 The AI can propose scope, classify uncertainty, select references, explain tradeoffs, and draft artifacts. Code must perform calculations, validation, persistence, authorization, versioning, state transitions, and final safety/quality gates.
+
+Intent routing is deterministic-first. `functions/ask/_lib/icm-router.mjs` is the shared routing seam; internal routes are enabled with `surface: 'internal'`. Do not insert an AI intent-classification call ahead of this router.
