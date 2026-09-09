@@ -38,12 +38,13 @@ function inferPlanItem(item, index) {
 }
 
 function generatePlan(quote, items) {
+  let openingNumber = 0;
   const openings = items.flatMap((item) => {
-    const base = inferPlanItem(item, 0);
-    return Array.from({ length: Math.min(50, Math.max(1, Number(item.quantity) || 1)) }, (_, n) => ({
+    const base = inferPlanItem(item, openingNumber);
+    return Array.from({ length: Math.min(50, Math.max(1, Number(item.quantity) || 1)) }, () => ({
       ...base,
-      id: `opening-${n + 1}-${item.id || Math.random().toString(36).slice(2, 7)}`,
-      opening: n + 1,
+      id: `opening-${++openingNumber}`,
+      opening: openingNumber,
       quantity: 1,
     }));
   });
@@ -133,16 +134,4 @@ export async function onRequestPost(context) {
     VALUES (?, ?, ?, ?, ?, 'mark')
     ON CONFLICT(quote_id) DO UPDATE SET version = excluded.version, plan_json = excluded.plan_json, updated_at = excluded.updated_at, updated_by = excluded.updated_by`).bind(quoteId, version, safe, now, now).run();
   return json({ ok: true, version, updatedAt: now });
-}
-
-export async function onRequestPatch(context) {
-  const { env, request } = context;
-  await ensureSchema(env.QUOTES_DB);
-  let body; try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
-  const quoteId = clean(body.quoteId, 100);
-  if (!quoteId) return json({ error: 'Quote id is required.' }, 400);
-  const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(quoteId).first();
-  if (!quote) return json({ error: 'Quote not found.' }, 404);
-  if (quote.status !== 'draft') return json({ error: 'This quote is finalized. Its build plan is read-only.' }, 409);
-  return onRequestPost(context);
 }
