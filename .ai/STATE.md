@@ -2,7 +2,7 @@
 
 ## Status
 
-**Phase 1 implemented:** ICM foundation + Build Plan workflow contract. **Phase 1.1 implemented:** deterministic Build Plan approval state machine and review surface.
+**Phase 1 implemented and hardened:** ICM foundation + deterministic Build Plan lifecycle + quote/job approval gates.
 
 ## What exists
 
@@ -10,17 +10,16 @@
 - `.ai/CONTEXT.md` is the router.
 - `.ai/RULES.md` defines evidence, uncertainty, safety, synchronization, and approval rules.
 - `.ai/STATE.md` records architecture state rather than mixing state into identity.
-- `.ai/workflows/build-plan/` defines the first complete ICM pipeline.
-- `.ai/specialists/` defines the first specialist contracts for future Ask/Command Center routing.
-- Existing deterministic Build Plan implementation remains in `functions/internal/api/build-plan.js` and `functions/_lib/build-plan-rules.mjs`.
-- `functions/_lib/build-plan-state.mjs` now defines the allowed draft/review/approved/reopened transitions.
-- `functions/internal/api/build-plan-state.js` persists and exposes those transitions through D1.
-- `src/pages/internal/quotes/build-plan-approval.astro` provides the human approval gate.
-- `scripts/test-build-plan-state.mjs` covers the transition invariants.
+- `.ai/workflows/build-plan/` defines the complete Build Plan pipeline, including human approval.
+- `.ai/specialists/` defines the specialist contracts for future Ask/Command Center routing.
+- `functions/_lib/build-plan-rules.mjs` owns durable installation/material/QC rules and quality linting.
+- `functions/_lib/build-plan-state.mjs` owns the allowed Build Plan lifecycle transitions.
+- `functions/internal/api/build-plan-state.js` persists state, recalculates live quality, detects quote drift, records approval, and locks approved plans until explicitly reopened.
+- `src/pages/internal/quotes/build-plan-approval.astro` exposes the human approval gate.
 
-## Existing deterministic Build Plan system
+## Deterministic Build Plan system
 
-The application already:
+The application now:
 
 - derives a plan from quote/items;
 - versions and persists plans in D1;
@@ -28,20 +27,29 @@ The application already:
 - detects stale plans when quote data changes;
 - records authority/manufacturer source metadata;
 - lints for missing openings, unsupported hard quantities, invented fastener specs, missing water management, missing drainage/operation checks, and quote/opening mismatches;
-- blocks save on quality blockers;
-- snapshots the plan when a job is created;
-- displays the plan in the internal job view.
+- blocks approval on live quality blockers or stale quote data;
+- records reviewer/state history;
+- locks an approved plan at the database layer until explicitly reopened;
+- requires an approved current Build Plan before a quote can be finalized;
+- requires an approved current Build Plan before a finalized quote can become a Job;
+- rejects Job creation when the approved plan has changed after approval;
+- snapshots the approved Build Plan into the Job;
+- displays the plan in the internal Job view.
 
-The new approval layer adds an explicit human state boundary. Approval is rejected when quality blockers remain; the review page also rejects approval when the quote is stale. Job eligibility is exposed through `assertJobEligible` and still needs to be enforced at the existing job-creation write path.
+## CI coverage
 
-## Planned expansion
+The GitHub build workflow now runs:
 
-1. Enforce `assertJobEligible` inside the existing job-creation API before a job can be created.
-2. Add explicit plan regeneration/reconciliation UX when a quote becomes stale.
-3. Route Ask intents through ICM specialist contracts while retaining current tool guardrails.
-4. Add golden-case examples/evaluation corpus for Build Plan and Ask.
-5. Extend the ICM pattern to customer communications, job preparation, installation review, QC, and closeout.
-6. Add deterministic scripts where repeated transformations are currently prompt-driven.
+1. ICM router regression tests;
+2. Build Plan state-machine regression tests;
+3. Build Plan golden-rule evaluation;
+4. the Astro production build.
+
+GitHub currently reports no status checks/workflow runs for the latest connector-visible commit, so CI execution still needs to be confirmed from GitHub/Cloudflare after the next connected deployment.
+
+## Ask / ICM boundary
+
+The deterministic Ask router exists and is regression-tested, but the specialist contract is **not yet wired into `functions/ask/api/chat.js` at runtime**. Existing Ask model/tool guardrails remain authoritative. Do not describe the ICM specialist routing as production-integrated until that seam is implemented and tested.
 
 ## Known architectural boundary
 
