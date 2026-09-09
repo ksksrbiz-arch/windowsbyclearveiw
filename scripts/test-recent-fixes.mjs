@@ -9,6 +9,7 @@ const assert = (condition, message) => {
 const photos = read('src/pages/internal/tools/photos.astro');
 const login = read('functions/internal/api/login.js');
 const payments = read('functions/internal/api/payments.js');
+const invoices = read('functions/internal/_lib/invoices.mjs');
 const invoiceView = read('src/pages/internal/invoices/view.astro');
 const internalLayout = read('src/layouts/InternalLayout.astro');
 const sitemap = read('astro.config.mjs');
@@ -34,6 +35,8 @@ assert(!/length mismatch.*leak/i.test(login), 'login comment does not claim impo
 assert(/syncInvoiceStatus\(env\.QUOTES_DB, job\.quote_id, amountPaid, now\)/.test(payments), 'payments sync the matching invoice');
 assert(/status === 'paid'/.test(invoiceView), 'invoice view renders paid state');
 assert(/invoice\.status === 'paid'/.test(internalLayout), 'quote/job actions recognize paid invoices');
+assert(/status = CASE WHEN status = 'paid' THEN 'paid' ELSE 'sent' END/.test(invoices), 're-emailing a paid invoice preserves paid status');
+assert(!/UPDATE invoices SET status = 'sent', sent_at/.test(invoices), 'invoice email cannot unconditionally downgrade status to sent');
 
 // SEO privacy fixes must cover the exact /internal route as well as children.
 assert(/path !== '\/internal'/.test(sitemap) && /path\.startsWith\('\/internal\/'\)/.test(sitemap), 'sitemap excludes /internal and descendants');
