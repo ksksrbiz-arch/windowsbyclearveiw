@@ -21,19 +21,27 @@ Product-specific fasteners, clearances, sealants, flashing sequences, and warran
 
 ## Project-level gates
 
-The existing project checklist remains the closeout authority. Opening completion must not bypass project-level completion requirements. Current checklist defaults include schedule/site preparation, installation completion, operation/fit checks, before/during/after photos, punch-list resolution, customer walkthrough, warranty/care handoff, and final balance/payment status.
+The existing project checklist remains the closeout authority. Opening completion does not bypass project-level completion requirements. Current project checklist defaults include schedule/site preparation, installation completion, operation/fit checks, before/during/after photos, punch-list resolution, customer walkthrough, warranty/care handoff, and final balance/payment status.
+
+## Implemented field-mode behavior
+
+The job workspace exposes **Field mode** whenever an attached Build Plan snapshot exists. Field mode reads the immutable job snapshot and persists opening gates through the existing D1 checklist API.
+
+The UI prevents advancing to a later opening until the current opening's `Complete` gate is checked. Forward jumps in the opening strip are also blocked until the current opening is complete; backward navigation remains available.
+
+A missing job snapshot is a STOP condition. Field mode does not execute from the live quote/build-plan editor.
 
 ## Legacy snapshot reconciliation
 
-A job with no `build_plan_json` is a legacy or incomplete production handoff. It must be surfaced as a STOP condition rather than reconstructing a live plan silently.
+A job with no `build_plan_json` is a legacy or incomplete production handoff. It is surfaced as a STOP condition rather than reconstructing a live plan silently.
 
-Reconciliation should be an explicit user action. The server must verify:
+Reconciliation is an explicit user action from the job workspace. The server verifies:
 
 - the job has a quote;
 - the quote is finalized;
 - a saved Build Plan exists and is explicitly approved;
 - the approved plan is still current relative to the quote source snapshot;
 - the plan passes the same job-eligibility quality gates used by new job creation;
-- the action is auditable, including the source Build Plan version and time of attachment.
+- the attachment is auditable, including the source Build Plan version and attachment timestamp/user.
 
-Cancelled/history jobs should not be automatically backfilled.
+Cancelled/history jobs are intentionally not auto-backfilled and the API refuses reconciliation for cancelled jobs.
