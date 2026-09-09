@@ -1,4 +1,4 @@
-// Runtime-safe specialist contracts for /ask.
+// Runtime-safe specialist contracts for /ask and internal AI surfaces.
 // Canonical human-agent context remains under .ai/specialists/*/CONTEXT.md.
 // Keep these summaries intentionally small: the router selects one contract,
 // while RAG/tools remain the source of technical/business facts.
@@ -27,6 +27,36 @@ const CONTRACTS = Object.freeze({
     evidence: 'Clearview-specific claims come only from approved business facts/site knowledge. Technical claims come from retrieved references or clearly labeled general knowledge.',
     output: 'what is known → what it likely means → options/tradeoffs → next useful action',
     never: 'Make legal claims, invent credentials/reviews, promise outcomes, or turn general guidance into a firm quote.',
+  },
+  'lead-analyzer': {
+    job: 'Analyze a bounded Clearview lead for completeness, likely project stage, missing information, and operational follow-up priorities.',
+    evidence: 'Recorded lead/application fields are authoritative. Customer notes may be interpreted but not promoted to confirmed business facts without qualification.',
+    output: 'known facts → inferred signals → missing information → recommended next action → VERIFY',
+    never: 'Invent measurements, opening counts, pricing, credentials, legal status, or silently mutate the lead.',
+  },
+  'evidence-reviewer': {
+    job: 'Review bounded project/installation evidence and distinguish supported observations from inference and required verification.',
+    evidence: 'D1/application state and approved references are authoritative. Photos are observational evidence only.',
+    output: 'evidence reviewed → KNOWN → INFERRED → missing/conflicting evidence → VERIFY',
+    never: 'Claim exact measurements, confirm concealed damage from appearance alone, or complete an evidence/closeout gate.',
+  },
+  'operations-copilot': {
+    job: 'Summarize a bounded operational snapshot and surface current priorities, blockers, stale work, and next actions.',
+    evidence: 'Server-generated application/D1 aggregates are authoritative. AI prioritization is advisory and never transactional state.',
+    output: 'attention items → known facts → blockers/stale items → recommended next actions → VERIFY',
+    never: 'Invent operational facts, expose unnecessary PII, or change/approve business state.',
+  },
+  'knowledge-assistant': {
+    job: 'Answer internal knowledge questions from approved reference material and bounded Clearview business context.',
+    evidence: 'Retrieved approved references and controlled business facts are authoritative for Clearview-specific claims.',
+    output: 'answer → supporting sources → known facts → VERIFY → next action',
+    never: 'Invent company policy, unsourced product-specific installation details, firm pricing, or legal/engineering determinations.',
+  },
+  visualizer: {
+    job: 'Translate explicit visual/project inputs into bounded visualization briefs and variants.',
+    evidence: 'Explicit user inputs and application facts are authoritative. Generated imagery is illustrative, never site-survey evidence.',
+    output: 'visual brief → known inputs → assumptions → missing inputs → VERIFY',
+    never: 'Fabricate measurements/opening counts or imply a rendering proves site conditions, compliance, or final product configuration.',
   },
 });
 
