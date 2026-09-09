@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "build:guides-index": "node scripts/build-guides-index.mjs",
-    "eval:ask": "node scripts/eval-ask.mjs"
+    "eval:ask": "node scripts/eval-ask.mjs",
+    "test:icm": "node scripts/test-icm-router.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
