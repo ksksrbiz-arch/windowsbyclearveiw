@@ -40,11 +40,35 @@ const DEFAULTS = [
   ['Closeout', 'Final balance / payment status confirmed', 50],
 ];
 
+const OPENING_GATES = [
+  ['Verify', 10],
+  ['Remove', 20],
+  ['Prep', 30],
+  ['Install', 40],
+  ['Flash / Seal', 50],
+  ['Operate', 60],
+  ['Photograph', 70],
+  ['Complete', 80],
+];
+
 async function seed(db, jobId) {
   const now = new Date().toISOString();
   for (const [section, label, position] of DEFAULTS) {
     await db.prepare(`INSERT OR IGNORE INTO job_checklist_items (job_id, section, label, checked, position, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?)`)
       .bind(jobId, section, label, position, now, now).run();
+  }
+
+  const row = await db.prepare(`SELECT build_plan_json FROM jobs WHERE id = ?`).bind(jobId).first();
+  if (!row?.build_plan_json) return;
+  let plan;
+  try { plan = JSON.parse(row.build_plan_json); } catch { return; }
+  const openings = Array.isArray(plan?.openings) ? plan.openings : [];
+  for (let index = 0; index < openings.length; index += 1) {
+    const section = `Opening ${String(index + 1).padStart(2, '0')}`;
+    for (const [label, offset] of OPENING_GATES) {
+      await db.prepare(`INSERT OR IGNORE INTO job_checklist_items (job_id, section, label, checked, position, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?)`)
+        .bind(jobId, section, label, index * 100 + offset, now, now).run();
+    }
   }
 }
 
