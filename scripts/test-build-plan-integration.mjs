@@ -44,7 +44,7 @@ assert.match(approval, /data-refresh/);
 assert.match(approval, /data-gate-summary/);
 assert.match(prep, /Field-ready checklist/);
 assert.match(prep, /data-plan-facts/);
-assert.match(prep, /Field verification required/);
+assert.match(prep, /VERIFY before installation/);
 assert.match(jobView, /Verified build plan/);
 assert.match(jobView, /data-plan-openings/);
 

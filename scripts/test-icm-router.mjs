@@ -22,7 +22,7 @@ assert.equal(routeAsk({ project: { concern: 'Fogged glass' }, message: 'What sho
 assert.equal(routeAsk({ project: { projectStage: 'Ready for estimate' }, message: 'What information matters?' }).id, 'estimator');
 assert.equal(routeAsk({ message: 'Tell me about window colors.' }).id, 'customer-advisor');
 
-assert.deepEqual(ICM_SPECIALIST_IDS.sort(), ['customer-advisor', 'diagnostician', 'estimator', 'installation-reviewer']);
+assert.deepEqual([...ICM_SPECIALIST_IDS].sort(), ['customer-advisor', 'diagnostician', 'estimator', 'installation-reviewer']);
 for (const id of ICM_SPECIALIST_IDS) {
   const contract = specialistContract(id);
   const prompt = specialistPrompt(id);

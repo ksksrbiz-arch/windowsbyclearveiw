@@ -109,6 +109,18 @@ These are contracts, not fake personas. Keep identity short, rules falsifiable, 
 
 Do not describe those items as complete until code and validation prove them.
 
+## Recent-changes audit — 2026-09-09
+
+Ran the full regression suite (`test:icm`, `test:build-plan-state`, `test:build-plan-integration`, `eval:build-plan`) plus `astro build` against the latest `main` HEAD to verify the last batch of Build Plan / field-prep commits were actually working. Found and fixed real, currently-deployed bugs:
+
+- **Critical (production-breaking):** `functions/_lib/build-plan-rules.mjs` had five unescaped apostrophes inside single-quoted string literals (`manufacturer's`, `product's`), which is a JavaScript syntax error. This module is imported by the live Build Plan API (`functions/internal/api/build-plan.js`, `build-plan-state.js`), so every Build Plan read/write/approval request has been failing since commit `328c124` landed on `main`. Fixed by escaping the apostrophes.
+- The fastener/spacing-invention blocker regex in `lintPlan` (same file) was too narrow to catch realistic phrasing like "#8 x 3 inch screws at 8 inches O.C." — it required the digit pair to sit directly next to the word "screw"/"fastener" and "O.C." to follow "in" with no letters between. Widened the pattern so the deterministic VERIFY/no-invented-fastener guard actually fires.
+- `functions/ask/_lib/icm-router.mjs`: a structured `project.concern`/`project.projectStage` signal (e.g. a UI-selected "Fogged glass" concern) was being silently overridden by the generic customer-advisor catch-all whenever the message text also happened to contain a weak phrase like "what should I". Reordered routing so specific keyword routes win first, then project context, then the generic catch-all last.
+- `functions/internal/api/build-plan.js`: the freshly-generated-plan branch was missing the `|| plan.status` fallback the saved-plan branch has (harmless today since a fresh plan never carries a prior status, but now consistent), and the approved-plan lock error message had drifted to "Approved Build Plans are locked" while the DB trigger and tests use "Approved Build Plan is locked" (singular) — aligned the wording.
+- Two test-only bugs: `test-icm-router.mjs` called `.sort()` on the frozen `ICM_SPECIALIST_IDS` array (mutates a frozen array → throws); fixed to sort a copy. `test-build-plan-integration.mjs` still asserted the old field-prep copy ("Field verification required") that the "Polish field prep hierarchy" commit intentionally reworded to "VERIFY before installation" — updated the assertion to match the current, intentional copy.
+
+All four regression scripts and `npm run build` are green after the fixes. Public site (`/`, `/estimate`, `/tools/window-replacement-cost-calculator`, `/ask/api/chat`) returns 200 live. The internal Build Plan API could not be exercised live from this session (auth-gated); once this fix ships, re-run the Command Center production-mail-style manual check against `/internal/quotes/build-plan` to confirm the API responds instead of 500ing.
+
 ## Outstanding
 
 | | |
