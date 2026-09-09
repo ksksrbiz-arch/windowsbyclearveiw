@@ -8,41 +8,26 @@
 -- nothing here to expire or clean up for a single shared-password login.
 
 CREATE TABLE IF NOT EXISTS quotes (
-  id                 TEXT PRIMARY KEY,       -- short readable id, e.g. Q-20260828-4F2A
-  created_at         TEXT NOT NULL,          -- ISO 8601
+  id                 TEXT PRIMARY KEY,
+  created_at         TEXT NOT NULL,
   updated_at         TEXT NOT NULL,
-
-  -- 'draft' while Mark is still building it; 'finalized' once it is printed
-  -- or signed and should no longer change.
   status             TEXT NOT NULL DEFAULT 'draft',
-
   customer_name      TEXT NOT NULL,
   customer_phone     TEXT,
   customer_email     TEXT,
   customer_address   TEXT,
   customer_city      TEXT,
-  customer_role      TEXT,                   -- 'Homeowner' | 'Builder / GC'
+  customer_role      TEXT,
   notes              TEXT,
-
   subtotal_cents     INTEGER NOT NULL DEFAULT 0,
   discount_cents     INTEGER NOT NULL DEFAULT 0,
   discount_reason    TEXT,
   total_cents        INTEGER NOT NULL DEFAULT 0,
-
-  -- Which copy of the contract terms this quote actually showed the customer.
-  -- If the wording changes later, an old quote's printed record stays
-  -- honest about what was agreed to at the time.
   terms_version      TEXT,
-
-  -- 'digital' (drawn on screen) | 'pen' (printed blank, signed by hand) | NULL (not yet signed)
   signature_method   TEXT,
-  -- Captured as an inline SVG path, not a rasterized image: a signature is a
-  -- handful of strokes, and storing it as vector data keeps it a few hundred
-  -- bytes instead of tens of kilobytes, and prints at full sharpness at any size.
   signature_svg      TEXT,
-  signature_name     TEXT,                   -- printed name alongside the signature
+  signature_name     TEXT,
   signed_at          TEXT,
-
   created_by         TEXT NOT NULL DEFAULT 'mark'
 );
 
@@ -63,16 +48,13 @@ CREATE TABLE IF NOT EXISTS quote_items (
 
 CREATE INDEX IF NOT EXISTS idx_quote_items_quote_id ON quote_items(quote_id);
 
--- Invoices are snapshots of quotes, not live views of pricing data. A draft
--- invoice follows a draft quote; once the quote is finalized, the invoice is
--- frozen as the document that was created from that finalized scope.
 CREATE TABLE IF NOT EXISTS invoices (
   id                 TEXT PRIMARY KEY,
   invoice_number     TEXT NOT NULL UNIQUE,
   quote_id           TEXT NOT NULL UNIQUE REFERENCES quotes(id),
   created_at         TEXT NOT NULL,
   updated_at         TEXT NOT NULL,
-  status             TEXT NOT NULL DEFAULT 'draft', -- draft | open | sent | paid | void
+  status             TEXT NOT NULL DEFAULT 'draft',
   customer_name      TEXT NOT NULL,
   customer_phone     TEXT,
   customer_email     TEXT,
@@ -102,3 +84,25 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice_id ON invoice_items(invoice_id);
+
+-- Opening-level field evidence is intentionally separate from the checklist.
+-- The checklist answers "was the gate completed?"; this record answers
+-- "what did the crew actually observe, use, and document at that opening?".
+CREATE TABLE IF NOT EXISTS job_opening_evidence (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id               TEXT NOT NULL,
+  opening_index        INTEGER NOT NULL,
+  measurements_json    TEXT NOT NULL DEFAULT '{}',
+  notes                TEXT NOT NULL DEFAULT '',
+  exception_status     TEXT NOT NULL DEFAULT 'none',
+  exception_notes      TEXT NOT NULL DEFAULT '',
+  material_usage_json  TEXT NOT NULL DEFAULT '{}',
+  photo_summary_json   TEXT NOT NULL DEFAULT '{}',
+  created_at           TEXT NOT NULL,
+  updated_at           TEXT NOT NULL,
+  updated_by           TEXT NOT NULL DEFAULT 'mark',
+  UNIQUE(job_id, opening_index)
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_opening_evidence_job
+  ON job_opening_evidence(job_id, opening_index);
