@@ -22,5 +22,6 @@ jobs:
       - run: npm ci
       - run: npm run test:icm
       - run: npm run test:build-plan-state
+      - run: npm run test:build-plan-integration
       - run: npm run eval:build-plan
       - run: npm run build
