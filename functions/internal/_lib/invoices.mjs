@@ -122,6 +122,6 @@ export async function emailInvoice(context, invoiceId) {
     return { error: 'Resend could not deliver the invoice email.', status: 502 };
   }
   const now = new Date().toISOString();
-  await env.QUOTES_DB.prepare(`UPDATE invoices SET status = 'sent', sent_at = ?, updated_at = ? WHERE id = ?`).bind(now, now, invoiceId).run();
+  await env.QUOTES_DB.prepare(`UPDATE invoices SET status = CASE WHEN status = 'paid' THEN 'paid' ELSE 'sent' END, sent_at = ?, updated_at = ? WHERE id = ?`).bind(now, now, invoiceId).run();
   return { ok: true, sentAt: now };
 }
