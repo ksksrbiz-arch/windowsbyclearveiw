@@ -2,9 +2,7 @@
   "name": "windowsbyclearveiw",
   "type": "module",
   "version": "0.0.1",
-  "engines": {
-    "node": ">=22.19.0"
-  },
+  "engines": { "node": ">=22.19.0" },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -19,13 +17,9 @@
     "test:production-hardening": "node scripts/test-production-hardening.mjs",
     "test:marketing-platform": "node scripts/test-marketing-platform.mjs",
     "test:ask-security": "node scripts/test-ask-security.mjs",
-    "test:recent-fixes": "node scripts/test-recent-fixes.mjs"
+    "test:recent-fixes": "node scripts/test-recent-fixes.mjs",
+    "test:copilot": "node scripts/test-copilot.mjs"
   },
-  "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.2.10"
-  },
-  "devDependencies": {
-    "gray-matter": "^4.0.3"
-  }
+  "dependencies": { "@astrojs/sitemap": "^3.7.4", "astro": "^7.2.10" },
+  "devDependencies": { "gray-matter": "^4.0.3" }
 }
