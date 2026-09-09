@@ -1,6 +1,19 @@
 import { json, clean, parseQuoteBody } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
 
+async function requireApprovedBuildPlan(db, quoteId, quoteUpdatedAt) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS quote_build_plans (quote_id TEXT PRIMARY KEY REFERENCES quotes(id) ON DELETE CASCADE, version INTEGER NOT NULL DEFAULT 1, plan_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, updated_by TEXT NOT NULL DEFAULT 'mark')`).run();
+  for (const sql of [
+    `ALTER TABLE quote_build_plans ADD COLUMN state TEXT NOT NULL DEFAULT 'draft'`,
+    `ALTER TABLE quote_build_plans ADD COLUMN approved_at TEXT`,
+  ]) { try { await db.prepare(sql).run(); } catch {} }
+  const plan = await db.prepare('SELECT state, approved_at, updated_at FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
+  if (!plan?.plan_json && !plan?.state) return { error: 'Approve the Build Plan before finalizing this quote.', code: 'BUILD_PLAN_REQUIRED' };
+  if (plan.state !== 'approved' || !plan.approved_at) return { error: 'The Build Plan must be explicitly approved before finalizing this quote.', code: 'BUILD_PLAN_NOT_APPROVED' };
+  if (quoteUpdatedAt && plan.updated_at && new Date(quoteUpdatedAt).getTime() > new Date(plan.updated_at).getTime()) return { error: 'This quote changed after the Build Plan was approved. Reconcile and re-approve the Build Plan before finalizing.', code: 'BUILD_PLAN_STALE' };
+  return null;
+}
+
 export async function onRequestGet(context) {
   const { env, params } = context;
   const id = String(params.id || '');
@@ -81,6 +94,8 @@ export async function onRequestPatch(context) {
     if (quote.signature_method !== 'pen') return json({ error: 'This quote is not on the print-and-sign path.' }, 409);
     const signatureName = clean(body.signatureName, 200);
     if (!signatureName) return json({ error: 'Enter the name of the person who signed.' }, 400);
+    const gate = await requireApprovedBuildPlan(env.QUOTES_DB, id, quote.updated_at);
+    if (gate) return json({ error: gate.error, code: gate.code }, 409);
     await env.QUOTES_DB.prepare(
       `UPDATE quotes SET signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ?`,
     ).bind(signatureName, now, now, id).run();
@@ -92,10 +107,12 @@ export async function onRequestPatch(context) {
   const signatureSvg = clean(body.signatureSvg, 20000);
   const signatureName = clean(body.signatureName, 200);
   if (!signatureSvg || !signatureName) return json({ error: 'A drawn signature and a printed name are both required.' }, 400);
+  const gate = await requireApprovedBuildPlan(env.QUOTES_DB, id, quote.updated_at);
+  if (gate) return json({ error: gate.error, code: gate.code }, 409);
 
   await env.QUOTES_DB.prepare(
     `UPDATE quotes SET signature_svg = ?, signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ?`,
-  ).bind(signatureSvg, signatureName, now, now, id).run();
+  ).bind(signatureSvg, signatureName, now, id).run();
   await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true });
   return json({ ok: true, signedAt: now });
 }
