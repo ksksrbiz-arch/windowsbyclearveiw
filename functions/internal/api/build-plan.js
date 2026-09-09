@@ -1,3 +1,5 @@
+import { BUILD_PLAN_KNOWLEDGE_VERSION, INSTALL_RULES, QC_RULES, lintPlan, materialPlan, sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } });
 }
@@ -11,94 +13,85 @@ async function ensureSchema(db) {
     updated_at TEXT NOT NULL,
     updated_by TEXT NOT NULL DEFAULT 'mark'
   )`).run();
+  for (const sql of [
+    `ALTER TABLE quote_build_plans ADD COLUMN source_json TEXT`,
+    `ALTER TABLE quote_build_plans ADD COLUMN quality_json TEXT`,
+    `ALTER TABLE quote_build_plans ADD COLUMN knowledge_version TEXT`,
+    `ALTER TABLE quote_build_plans ADD COLUMN finalized_at TEXT`,
+  ]) { try { await db.prepare(sql).run(); } catch {} }
 }
 
 function clean(value, max = 1000) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
-function inferPlanItem(item, index) {
+function inferPlanItem(item, openingNumber) {
   const label = clean(item.label, 300);
   const lower = label.toLowerCase();
-  const method = /full[- ]?frame|full frame/.test(lower) ? 'full-frame' : 'insert';
-  const type = /slider|sliding/.test(lower) ? 'slider' : /casement/.test(lower) ? 'casement' : /picture|fixed/.test(lower) ? 'picture/fixed' : /awning/.test(lower) ? 'awning' : /door/.test(lower) ? 'sliding door' : 'double-hung';
+  const method = /full[- ]?frame|full frame/.test(lower) ? 'full-frame' : /new construction|new build|construction/.test(lower) ? 'new-construction' : 'verify';
+  const type = /slider|sliding/.test(lower) ? 'slider' : /casement/.test(lower) ? 'casement' : /picture|fixed/.test(lower) ? 'picture/fixed' : /awning/.test(lower) ? 'awning' : /door/.test(lower) ? 'sliding door' : /double[- ]?hung/.test(lower) ? 'double-hung' : 'unknown';
   return {
-    id: `opening-${index + 1}`,
-    opening: index + 1,
-    product: label || 'Quoted opening',
-    quantity: Math.max(1, Number(item.quantity) || 1),
+    id: `opening-${openingNumber}`,
+    opening: openingNumber,
+    sourceItemLabel: label || 'Quoted opening',
+    product: label || 'Quoted opening — VERIFY order confirmation',
+    quantity: 1,
     openingType: type,
     installationMethod: method,
     existingCondition: 'VERIFY at site',
     dimensions: 'VERIFY at site',
-    flashing: 'VERIFY sill and perimeter flashing sequence before installation',
+    flashing: 'VERIFY against selected product instructions and opening water-management conditions',
     notes: '',
-    qc: ['Plumb', 'Level', 'Square', 'Fasteners verified', 'Flashing complete', 'Insulation complete', 'Seal complete', 'Operation tested', 'Photos captured'],
+    qc: [...QC_RULES],
   };
 }
 
-function generatePlan(quote, items) {
+export function generatePlan(quote, items) {
   let openingNumber = 0;
-  const openings = items.flatMap((item) => {
-    const base = inferPlanItem(item, openingNumber);
-    return Array.from({ length: Math.min(50, Math.max(1, Number(item.quantity) || 1)) }, () => ({
-      ...base,
-      id: `opening-${++openingNumber}`,
-      opening: openingNumber,
-      quantity: 1,
-    }));
-  });
-  return {
-    schemaVersion: 1,
+  const openings = items.flatMap((item) => Array.from({ length: Math.min(50, Math.max(1, Number(item.quantity) || 1)) }, () => inferPlanItem(item, ++openingNumber)));
+  const projectType = /new construction|new build/i.test(`${quote.notes || ''} ${items.map(i => i.label).join(' ')}`) ? 'new-construction' : 'replacement-or-verify';
+  const materials = materialPlan({ projectType, openings });
+  const buy = materials.map(r => `${r.name} — ${r.category}: ${r.action}`);
+  const plan = {
+    schemaVersion: 2,
+    knowledgeVersion: BUILD_PLAN_KNOWLEDGE_VERSION,
     project: {
       customer: clean(quote.customer_name, 200),
       address: clean(quote.customer_address, 300),
       city: clean(quote.customer_city, 120),
-      projectType: 'VERIFY: replacement vs new construction',
+      projectType,
       totalQuotedCents: Number(quote.total_cents) || 0,
     },
-    buy: [
-      'Quoted windows / doors — verify every unit against order confirmation',
-      'Flashing / sill protection appropriate to the installation',
-      'Shims and approved fasteners',
-      'Low-expansion window/door insulation',
-      'Exterior-grade sealant and compatible backer rod as required',
-      'Interior/exterior trim and finish materials from quote/site conditions',
-    ],
+    sourceItems: sourceSnapshot(items),
+    materialRules: materials.map(r => ({ id:r.id, name:r.name, category:r.category, trigger:r.trigger })),
+    buy,
     load: [
-      'All quoted units and accessories',
-      'Flashing and sill protection',
-      'Shims, fasteners and installation tools',
-      'Insulation and sealants',
-      'Trim/finish materials',
-      'Protection, cleanup and photo equipment',
+      'All quoted units and verified accessories',
+      'Verified flashing / sill protection materials',
+      'Compatible shims and manufacturer-approved fasteners',
+      'Verified sealants and perimeter-gap materials',
+      'Approved trim/finish materials actually in scope',
+      'Protection, cleanup and required photo equipment',
     ],
-    install: [
-      'Confirm products, sizes and opening assignments before removal',
-      'Protect interior/exterior work areas',
-      'Remove existing unit where applicable',
-      'Inspect rough opening, sill, framing and water-management details',
-      'Correct deficiencies before setting the new unit',
-      'Install sill/perimeter flashing appropriate to the installation path',
-      'Set, shim, plumb, level and square the unit',
-      'Fasten according to the selected product installation requirements',
-      'Complete perimeter flashing and sealant transitions',
-      'Insulate perimeter gap appropriately',
-      'Install interior/exterior trim and finish',
-      'Operate/test the completed unit and inspect water-management details',
-    ],
+    install: INSTALL_RULES.map(r => `${r.phase}: ${r.text}`),
     verify: [
-      'Exact unit sizes and handing verified before installation',
-      'Existing opening condition verified before removal',
-      'Installation method confirmed for each opening',
-      'Manufacturer-specific fastening/flashing requirements verified',
-      'Any rot, framing repair or unexpected condition documented before proceeding',
+      'Exact unit sizes, configuration and opening assignments verified against the order confirmation',
+      'Installation path confirmed for every opening; do not infer insert/full-frame/new-construction solely from product type',
+      'Manufacturer-specific installation and flashing instructions available for the selected product',
+      'Fastener type, length, diameter, spacing and support requirements verified from product instructions',
+      'Flashing/sill/water-management sequence verified for the wall and opening conditions',
+      'Sealant compatibility and application requirements verified',
+      'Any rot, framing repair, substrate damage or unexpected concealed condition documented before proceeding',
+      'Any quantity that cannot be calculated from known measurements remains a VERIFY item',
     ],
-    qc: ['All units operate correctly', 'Units are plumb, level and square', 'Fasteners and shims checked', 'Flashing/seal transitions checked', 'Interior/exterior finish checked', 'Final photos captured', 'Customer walkthrough completed'],
+    qc: [...QC_RULES],
     openings,
     notes: clean(quote.notes, 4000),
   };
+  return plan;
 }
+
+function sameSource(a, b) { return JSON.stringify(a || []) === JSON.stringify(b || []); }
 
 export async function onRequestGet(context) {
   const { env } = context;
@@ -108,11 +101,18 @@ export async function onRequestGet(context) {
   const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(quoteId).first();
   if (!quote) return json({ error: 'Quote not found.' }, 404);
   const { results: items } = await env.QUOTES_DB.prepare('SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC, id ASC').bind(quoteId).all();
+  const currentSource = sourceSnapshot(items);
   const saved = await env.QUOTES_DB.prepare('SELECT * FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
-  if (!saved) return json({ quote, items, plan: generatePlan(quote, items), generated: true, version: 1 });
+  if (!saved) {
+    const plan = generatePlan(quote, items);
+    return json({ quote, items, plan, generated: true, version: 1, stale: false, quality: lintPlan(plan, items) });
+  }
   let plan;
   try { plan = JSON.parse(saved.plan_json); } catch { plan = generatePlan(quote, items); }
-  return json({ quote, items, plan, generated: false, version: Number(saved.version) || 1, updatedAt: saved.updated_at });
+  const savedSource = saved.source_json ? (() => { try { return JSON.parse(saved.source_json); } catch { return []; } })() : plan.sourceItems || [];
+  const stale = !sameSource(savedSource, currentSource);
+  const quality = saved.quality_json ? (() => { try { return JSON.parse(saved.quality_json); } catch { return lintPlan(plan, items); } })() : lintPlan(plan, items);
+  return json({ quote, items, plan, generated: false, version: Number(saved.version) || 1, updatedAt: saved.updated_at, stale, quality, knowledgeVersion: saved.knowledge_version || plan.knowledgeVersion || BUILD_PLAN_KNOWLEDGE_VERSION });
 }
 
 export async function onRequestPost(context) {
@@ -124,14 +124,22 @@ export async function onRequestPost(context) {
   const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(quoteId).first();
   if (!quote) return json({ error: 'Quote not found.' }, 404);
   if (quote.status !== 'draft') return json({ error: 'Only draft quotes can be changed through the build-plan editor.' }, 409);
+  const { results: items } = await env.QUOTES_DB.prepare('SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC, id ASC').bind(quoteId).all();
   const plan = body.plan && typeof body.plan === 'object' ? body.plan : null;
   if (!plan) return json({ error: 'A build plan is required.' }, 400);
+  plan.schemaVersion = 2;
+  plan.knowledgeVersion = BUILD_PLAN_KNOWLEDGE_VERSION;
+  const source = sourceSnapshot(items);
+  const quality = lintPlan(plan, items);
+  if (quality.blockers.length) return json({ error: 'Build plan needs correction before it can be saved.', blockers: quality.blockers, warnings: quality.warnings, quality }, 409);
+  plan.sourceItems = source;
   const safe = JSON.stringify(plan).slice(0, 100000);
+  if (safe.length >= 100000) return json({ error: 'Build plan is too large to save.' }, 413);
   const now = new Date().toISOString();
-  const existing = await env.QUOTES_DB.prepare('SELECT version FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
+  const existing = await env.QUOTES_DB.prepare('SELECT version, finalized_at FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
   const version = Number(existing?.version || 0) + 1;
-  await env.QUOTES_DB.prepare(`INSERT INTO quote_build_plans (quote_id, version, plan_json, created_at, updated_at, updated_by)
-    VALUES (?, ?, ?, ?, ?, 'mark')
-    ON CONFLICT(quote_id) DO UPDATE SET version = excluded.version, plan_json = excluded.plan_json, updated_at = excluded.updated_at, updated_by = excluded.updated_by`).bind(quoteId, version, safe, now, now).run();
-  return json({ ok: true, version, updatedAt: now });
+  await env.QUOTES_DB.prepare(`INSERT INTO quote_build_plans (quote_id, version, plan_json, source_json, quality_json, knowledge_version, created_at, updated_at, updated_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'mark')
+    ON CONFLICT(quote_id) DO UPDATE SET version = excluded.version, plan_json = excluded.plan_json, source_json = excluded.source_json, quality_json = excluded.quality_json, knowledge_version = excluded.knowledge_version, updated_at = excluded.updated_at, updated_by = excluded.updated_by`).bind(quoteId, version, safe, JSON.stringify(source), JSON.stringify(quality), BUILD_PLAN_KNOWLEDGE_VERSION, now, now).run();
+  return json({ ok: true, version, updatedAt: now, quality, stale: false });
 }
