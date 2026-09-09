@@ -17,7 +17,7 @@ Build and maintain a trustworthy operating system for Clear View Windows & Trim 
 6. **ICM is an architecture, not a chatbot feature.** Navigate context before reasoning; use the smallest sufficient context; make every stage output an inspectable edit surface.
 7. **Stop on ambiguity that affects safety, price, ordering, installation, or customer commitments.** Surface `VERIFY` rather than guessing.
 8. **Keep adjacent-stage handoffs explicit.** Stage N+1 consumes the documented output of stage N. Do not create hidden cross-stage dependencies.
-9. **Phone-first internal UX matters.** Field workflows must work comfortably on a phone and preserve the Today → Leads → Quotes/Invoices → Jobs → Payments operating flow. memcite
+9. **Phone-first internal UX matters.** Field workflows must work comfortably on a phone and preserve the Today → Leads → Quotes/Invoices → Jobs → Payments operating flow.
 10. **Protect production spelling/domain/mail distinctions.** Public web domain is `windowsbyclearview.com`; production mail currently uses the legacy typo domain `windowsbyclearveiw.com` until a real mailbox exists on the canonical domain.
 
 ## ICM rules
@@ -33,15 +33,18 @@ Build and maintain a trustworthy operating system for Clear View Windows & Trim 
 
 ## Ask routing
 
-`functions/ask/_lib/icm-router.mjs` is the deterministic Layer-1 routing seam for `/ask`.
-It maps the visitor's explicit message/project context to one specialist contract:
+`functions/ask/_lib/icm-router.mjs` is the deterministic Layer-1 routing seam for `/ask`. It runs before retrieval/model generation and selects exactly one specialist contract from the public Ask context.
 
 - `diagnostician` — symptoms, visible damage, moisture, drafts
 - `estimator` — price, budget, estimate/quote requests
 - `installation-reviewer` — installation, flashing, opening preparation, new construction
 - `customer-advisor` — comparisons, performance, appearance, planning
 
-The router must remain small and falsifiable. It does not answer questions, retrieve knowledge, or override runtime safety rules. Runtime integration must preserve the existing model/tool guardrails.
+`functions/ask/_lib/icm-specialists.mjs` supplies the small runtime contract selected by the router. The `.ai/specialists/*/CONTEXT.md` files remain the canonical human-agent context; the runtime module intentionally contains only bounded execution summaries, not a second technical knowledge base.
+
+The selected specialist contract is injected into the same system context used by Groq/Gemini. It does not bypass RAG, business facts, tools, photo limits, answer-quality gates, or pricing safeguards. The route id/reason is returned in the API response and recorded through normal Ask observability.
+
+The router must remain small and falsifiable. It does not answer questions, retrieve knowledge, or override runtime safety rules.
 
 ## Current ICM implementation
 
