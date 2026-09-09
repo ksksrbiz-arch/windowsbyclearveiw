@@ -6,6 +6,7 @@ const field = read('src/pages/internal/jobs/field.astro');
 const photos = read('src/pages/internal/tools/photos.astro');
 const checklist = read('functions/internal/api/job-checklist.js');
 const closeout = read('functions/internal/api/job-closeout.js');
+const jobs = read('functions/internal/api/jobs.js');
 const middleware = read('functions/internal/_middleware.js');
 const session = read('functions/internal/_lib/session.mjs');
 const layout = read('src/layouts/InternalLayout.astro');
@@ -27,9 +28,11 @@ for (const token of ['FIELD_GATE_SEQUENCE', 'PHOTO_EVIDENCE_REQUIRED', 'OPENING_
   assert.match(checklist, new RegExp(token));
 }
 
-// Finalized closeout must be immutable.
+// Finalized closeout must be immutable and required before the job becomes completed.
 assert.match(closeout, /finalized_at/);
 assert.match(closeout, /already finalized|finalized closeout|read-only/i);
+assert.match(jobs, /CLOSEOUT_FINALIZATION_REQUIRED/);
+assert.match(jobs, /SELECT finalized_at FROM job_closeouts/);
 
 // Internal routes must remain private and session cookies must be hardened.
 assert.match(middleware, /X-Robots-Tag/);
