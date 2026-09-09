@@ -26,5 +26,7 @@ jobs:
       - run: npm run test:marketing-platform
       - run: npm run test:ask-security
       - run: npm run test:recent-fixes
+      - run: npm run test:copilot
+      - run: npm run test:ai-surfaces
       - run: npm run eval:build-plan
       - run: npm run build
