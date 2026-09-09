@@ -18,7 +18,8 @@
     "test:marketing-platform": "node scripts/test-marketing-platform.mjs",
     "test:ask-security": "node scripts/test-ask-security.mjs",
     "test:recent-fixes": "node scripts/test-recent-fixes.mjs",
-    "test:copilot": "node scripts/test-copilot.mjs"
+    "test:copilot": "node scripts/test-copilot.mjs",
+    "test:ai-surfaces": "node scripts/test-ai-surfaces.mjs"
   },
   "dependencies": { "@astrojs/sitemap": "^3.7.4", "astro": "^7.2.10" },
   "devDependencies": { "gray-matter": "^4.0.3" }
