@@ -2,7 +2,7 @@
 
 ## Status
 
-**Phase 1 implemented:** ICM foundation + Build Plan workflow contract.
+**Phase 1 implemented:** ICM foundation + Build Plan workflow contract. **Phase 1.1 implemented:** deterministic Build Plan approval state machine and review surface.
 
 ## What exists
 
@@ -13,6 +13,10 @@
 - `.ai/workflows/build-plan/` defines the first complete ICM pipeline.
 - `.ai/specialists/` defines the first specialist contracts for future Ask/Command Center routing.
 - Existing deterministic Build Plan implementation remains in `functions/internal/api/build-plan.js` and `functions/_lib/build-plan-rules.mjs`.
+- `functions/_lib/build-plan-state.mjs` now defines the allowed draft/review/approved/reopened transitions.
+- `functions/internal/api/build-plan-state.js` persists and exposes those transitions through D1.
+- `src/pages/internal/quotes/build-plan-approval.astro` provides the human approval gate.
+- `scripts/test-build-plan-state.mjs` covers the transition invariants.
 
 ## Existing deterministic Build Plan system
 
@@ -28,11 +32,11 @@ The application already:
 - snapshots the plan when a job is created;
 - displays the plan in the internal job view.
 
-The ICM layer documents and structures the reasoning around this implementation. It does not duplicate these deterministic guarantees in Markdown.
+The new approval layer adds an explicit human state boundary. Approval is rejected when quality blockers remain; the review page also rejects approval when the quote is stale. Job eligibility is exposed through `assertJobEligible` and still needs to be enforced at the existing job-creation write path.
 
 ## Planned expansion
 
-1. Make Build Plan stage artifacts first-class inspectable records in the internal UI.
+1. Enforce `assertJobEligible` inside the existing job-creation API before a job can be created.
 2. Add explicit plan regeneration/reconciliation UX when a quote becomes stale.
 3. Route Ask intents through ICM specialist contracts while retaining current tool guardrails.
 4. Add golden-case examples/evaluation corpus for Build Plan and Ask.
