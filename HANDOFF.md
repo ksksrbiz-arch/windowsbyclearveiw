@@ -77,7 +77,7 @@ The plan deliberately distinguishes:
 - `installation-reviewer` — installation, flashing, rough openings, fasteners, new construction
 - `customer-advisor` — comparisons, performance, appearance, planning
 
-The router does not answer questions, retrieve knowledge, or bypass runtime guardrails. Regression cases live in `scripts/test-icm-router.mjs`; run `npm run test:icm`.
+The router does not answer questions, retrieve knowledge, or bypass runtime guardrails. Runtime contract assembly lives in `functions/ask/_lib/icm-specialists.mjs`; `.ai/specialists/*/CONTEXT.md` remains canonical. Regression cases live in `scripts/test-icm-router.mjs`; run `npm run test:icm`.
 
 ### Specialists
 
@@ -103,11 +103,9 @@ These are contracts, not fake personas. Keep identity short, rules falsifiable, 
 ## Current limitations — explicitly not complete
 
 1. Stage artifacts are documented but the operational Build Plan is still one D1 JSON artifact.
-2. Build Plan approval/reconciliation needs a stronger explicit state machine and audit trail.
-3. Ask has a deterministic routing seam but runtime prompt/context assembly has not yet fully consumed the specialist contracts.
-4. Specialist references need deeper source mapping as the knowledge library grows.
-5. Golden cases need end-to-end execution against the real Ask and Build Plan services.
-6. Lead → Estimate → Quote → Build Plan → Job → Installation → QC → Closeout is mapped but not every lifecycle stage has an ICM implementation.
+2. Specialist references need deeper source mapping as the knowledge library grows.
+3. Golden cases need end-to-end execution against the real Ask and Build Plan services.
+4. Lead → Estimate → Quote → Build Plan → Job → Installation → QC → Closeout is mapped but not every lifecycle stage has an ICM implementation.
 
 Do not describe those items as complete until code and validation prove them.
 
