@@ -52,7 +52,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   type Job={id:string;status:string;scheduled_date:string|null;scheduled_window:string|null;customer_name:string;customer_city:string|null;total_cents:number|null};
   function initToday(){
     const root=document.querySelector('main'); if(!(root instanceof HTMLElement)||root.dataset.bound==='true')return; root.dataset.bound='true';
-    const q=<T extends Element>(s:string)=>root.querySelector(s) as T|null;
+    function q<T extends Element>(s:string){return root.querySelector(s) as T|null};
     const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML};
     const date=(v:string|null)=>{if(!v)return 'No due date';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})};
     const jobDate=(v:string|null)=>{if(!v)return 'Not scheduled';const d=new Date(`${v}T12:00:00`);return Number.isNaN(d.getTime())?v:d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})};

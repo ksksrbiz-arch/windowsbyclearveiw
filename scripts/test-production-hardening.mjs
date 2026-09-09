@@ -12,10 +12,15 @@ const session = read('functions/internal/_lib/session.mjs');
 const layout = read('src/layouts/InternalLayout.astro');
 
 // Field execution must expose the safety-critical workflow and evidence model.
+// Only UI affordances belong here. The PHOTO_EVIDENCE_REQUIRED / OPEN_EXCEPTION
+// gate codes are a server contract, asserted against job-checklist.js below —
+// the field screen deliberately renders the server's own human-readable message
+// (`d.error`) rather than re-implementing the code list, so the gate text has
+// exactly one source of truth.
 for (const token of [
   'One opening at a time', 'data-measure="width"', 'data-exception',
   'data-add-material', 'data-save-evidence', 'Photograph', 'Complete',
-  'PHOTO_EVIDENCE_REQUIRED', 'OPEN_EXCEPTION', 'indexedDB.open',
+  'indexedDB.open',
 ]) assert.match(field, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
 // Photo capture must be tied to job/opening/stage and survive normal reloads on-device.
@@ -32,7 +37,9 @@ for (const token of ['FIELD_GATE_SEQUENCE', 'FIELD_MEASUREMENTS_REQUIRED', 'PHOT
 assert.match(closeout, /finalized_at/);
 assert.match(closeout, /already finalized|finalized closeout|read-only/i);
 assert.match(jobs, /CLOSEOUT_FINALIZATION_REQUIRED/);
-assert.match(jobs, /SELECT finalized_at FROM job_closeouts/);
+// c4e987d also reads signoff_notes here, to fall back to the finalized
+// closeout's sign-off text when closeout notes are otherwise empty.
+assert.match(jobs, /SELECT finalized_at(?:, signoff_notes)? FROM job_closeouts/);
 
 // Internal routes must remain private and session cookies must be hardened.
 assert.match(middleware, /X-Robots-Tag/);
