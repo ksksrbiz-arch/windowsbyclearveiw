@@ -12,7 +12,11 @@ const ROUTES = [
 
 export function routeAsk({ message = '', project = {} } = {}) {
   const text = String(message).trim();
-  for (const route of ROUTES) {
+  // Specific, high-signal routes win over both weak generic phrasing and
+  // project context. The catch-all customer-advisor route is checked last,
+  // after project context, so a generic phrase like "what should I check
+  // next?" doesn't override a structured signal like a selected concern.
+  for (const route of ROUTES.slice(0, -1)) {
     if (route.test.test(text)) {
       return { ...route, reason: 'explicit-message-match' };
     }
@@ -21,7 +25,11 @@ export function routeAsk({ message = '', project = {} } = {}) {
     return { ...ROUTES[0], reason: 'project-context' };
   }
   if (project?.projectStage === 'Ready for estimate') return { ...ROUTES[1], reason: 'project-stage' };
-  return { ...ROUTES[3], reason: 'default-advisor' };
+  const advisor = ROUTES[ROUTES.length - 1];
+  if (advisor.test.test(text)) {
+    return { ...advisor, reason: 'explicit-message-match' };
+  }
+  return { ...advisor, reason: 'default-advisor' };
 }
 
 export function routeSummary(route) {

@@ -5,7 +5,7 @@ export const BUILD_PLAN_KNOWLEDGE_VERSION = '2026-09-08.2';
 // be verified against the selected manufacturer's written instructions.
 export const AUTHORITIES = [
   { id:'WA-R703', title:'Washington 2021 IRC adoption / R703 exterior covering', status:'authoritative', note:'Washington adopts the 2021 IRC with state amendments; exterior window/door openings are subject to flashing and weather-resistive-envelope requirements.' },
-  { id:'FGIA-INSTALL', title:'FGIA InstallationMasters / manufacturer instructions', status:'industry-standard', note:'Installation practice should follow the specific fenestration manufacturer's written installation and flashing instructions.' },
+  { id:'FGIA-INSTALL', title:'FGIA InstallationMasters / manufacturer instructions', status:'industry-standard', note:'Installation practice should follow the specific fenestration manufacturer\'s written installation and flashing instructions.' },
   { id:'BSC-DRAIN', title:'Building Science Corporation drained-opening principles', status:'building-science', note:'Water reaching an opening should have a controlled path to the exterior; opening drainage should not depend on sealant alone.' },
 ];
 
@@ -22,9 +22,9 @@ export const MATERIAL_RULES = [
   { id:'M-UNIT', name:'Quoted window/door unit', category:'quote-derived', trigger:'always', action:'Buy exactly the quoted product, size, configuration, handing and quantity; verify against the order confirmation.' },
   { id:'M-SHIM', name:'Compatible shims', category:'baseline', trigger:'window-or-door', action:'Provide compatible shims; final placement/count depends on product instructions and opening conditions.' },
   { id:'M-FASTENER', name:'Manufacturer-approved fasteners', category:'verify', trigger:'window-or-door', action:'Do not invent size, type, length or spacing. Verify the selected product installation instructions before purchase.' },
-  { id:'M-FLASH', name:'Flashing / sill protection system', category:'conditional', trigger:'opening-and-installation-path', action:'Select a compatible flashing system appropriate to the opening, wall/drainage design and manufacturer's instructions.' },
-  { id:'M-SEAL', name:'Compatible sealant', category:'conditional', trigger:'perimeter-sealing', action:'Verify substrate/product compatibility and the manufacturer's approved sealant before purchase.' },
-  { id:'M-INSUL', name:'Low-expansion window/door insulation', category:'conditional', trigger:'perimeter-gap', action:'Use a product appropriate for window/door perimeter gaps and follow the unit manufacturer's instructions; do not obstruct drainage/weep paths.' },
+  { id:'M-FLASH', name:'Flashing / sill protection system', category:'conditional', trigger:'opening-and-installation-path', action:'Select a compatible flashing system appropriate to the opening, wall/drainage design and manufacturer\'s instructions.' },
+  { id:'M-SEAL', name:'Compatible sealant', category:'conditional', trigger:'perimeter-sealing', action:'Verify substrate/product compatibility and the manufacturer\'s approved sealant before purchase.' },
+  { id:'M-INSUL', name:'Low-expansion window/door insulation', category:'conditional', trigger:'perimeter-gap', action:'Use a product appropriate for window/door perimeter gaps and follow the unit manufacturer\'s instructions; do not obstruct drainage/weep paths.' },
   { id:'M-WRB', name:'WRB / flashing transition materials', category:'conditional', trigger:'new-construction-or-exposed-opening', action:'Verify the existing/new wall water-resistive barrier and required transition details before ordering quantities.' },
   { id:'M-TRIM', name:'Trim / finish materials', category:'site-derived', trigger:'finish-scope', action:'Do not assume trim quantity from window count alone. Measure existing conditions and use quoted scope.' },
   { id:'M-PROTECT', name:'Floor/wall/site protection and cleanup supplies', category:'baseline', trigger:'replacement', action:'Protect finished surfaces and remove debris without damaging finishes.' },
@@ -37,8 +37,8 @@ export const INSTALL_RULES = [
   { id:'I-04', phase:'OPENING', text:'After removal where applicable, inspect the opening, sill, framing and water-management layers for damage or incompatible conditions.' },
   { id:'I-05', phase:'OPENING', text:'Stop and document concealed damage, rot, framing problems, unexpected substrate conditions, or water-management defects before proceeding.' },
   { id:'I-06', phase:'WATER', text:'Install the sill/perimeter water-management system required by the selected product and the wall/opening conditions.' },
-  { id:'I-07', phase:'SET', text:'Set the unit according to the manufacturer's written installation instructions; establish proper support, alignment and required clearances.' },
-  { id:'I-08', phase:'FASTEN', text:'Fasten only with the selected product's approved method, fastener specification and spacing. These details are VERIFY items unless product data is attached.' },
+  { id:'I-07', phase:'SET', text:'Set the unit according to the manufacturer\'s written installation instructions; establish proper support, alignment and required clearances.' },
+  { id:'I-08', phase:'FASTEN', text:'Fasten only with the selected product\'s approved method, fastener specification and spacing. These details are VERIFY items unless product data is attached.' },
   { id:'I-09', phase:'WATER', text:'Complete perimeter flashing, sealant and WRB transitions according to the applicable system. Preserve intended drainage paths.' },
   { id:'I-10', phase:'AIR', text:'Air-seal the interior perimeter gap where required by the installation system, without blocking designed drainage/weep paths.' },
   { id:'I-11', phase:'FINISH', text:'Complete insulation, trim and finish work only to the scope actually quoted or approved after site verification.' },
@@ -59,7 +59,7 @@ export function lintPlan(plan,items=[]) {
   if(openings.some(o=>!o.dimensions||normalize(o.dimensions).includes('verify')))warnings.push('One or more opening dimensions are still VERIFY items.');
   if(openings.some(o=>o.openingType==='unknown'))warnings.push('One or more opening types are unknown; confirm before finalizing the field plan.');
   if(!/manufacturer|product.*instruction|installation.*instruction/.test(verifyText+installText))blockers.push('Manufacturer/product installation instructions are not explicitly represented in the verification plan.');
-  if(/(#?\s*\d+\s*x\s*\d+\s*(screw|fastener)|\d+\s*in\.?\s*o\.c\.|on center)/.test(buyText+installText))blockers.push('The plan contains a specific fastener or spacing specification without a product-data source. Remove it or attach the manufacturer requirement.');
+  if(/(#?\s*\d+\s*x\s*\d+[^.]{0,20}(screw|fastener)|\d+\s*(in\.?|inch(es)?)\s*o\.c\.|on[- ]center)/.test(buyText+installText))blockers.push('The plan contains a specific fastener or spacing specification without a product-data source. Remove it or attach the manufacturer requirement.');
   if(/(exactly|must buy)\s+\d+\s+(roll|tube|box|can)/.test(buyText))warnings.push('A hard purchase quantity appears in BUY; confirm the quantity from measurements, product instructions and actual opening conditions.');
   if(!/flash|sill|water/.test(verifyText+installText))blockers.push('The plan does not contain an explicit water-management verification step.');
   if(!/weep|drain/.test(verifyText+installText))warnings.push('Confirm that designed drainage/weep paths remain clear after installation.');
