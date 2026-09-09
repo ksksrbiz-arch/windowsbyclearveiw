@@ -24,6 +24,9 @@ async function ensureSchema(db) {
     `ALTER TABLE quote_build_plans ADD COLUMN approved_at TEXT`,
     `ALTER TABLE quote_build_plans ADD COLUMN approved_by TEXT`,
   ]) { try { await db.prepare(sql).run(); } catch {} }
+  try {
+    await db.prepare(`CREATE TRIGGER IF NOT EXISTS quote_build_plan_approved_lock BEFORE UPDATE OF plan_json ON quote_build_plans WHEN OLD.state = 'approved' AND NEW.state = 'approved' AND NEW.plan_json != OLD.plan_json BEGIN SELECT RAISE(ABORT, 'Approved Build Plan is locked; reopen it before editing.'); END`).run();
+  } catch {}
 }
 
 async function loadPlan(db, quoteId) {
@@ -65,7 +68,7 @@ export async function onRequestPost({ env, request }) {
   try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
   const quoteId = clean(body.quoteId);
   const action = clean(body.action);
-  const actor = clean(body.actor || 'mark', 120) || 'mark';
+  const actor = 'mark';
   if (!quoteId || !action) return json({ error: 'quoteId and action are required.' }, 400);
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
