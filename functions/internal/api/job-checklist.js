@@ -40,11 +40,35 @@ const DEFAULTS = [
   ['Closeout', 'Final balance / payment status confirmed', 50],
 ];
 
+const OPENING_GATES = [
+  ['Verify', 10],
+  ['Remove', 20],
+  ['Prep', 30],
+  ['Install', 40],
+  ['Flash / Seal', 50],
+  ['Operate', 60],
+  ['Photograph', 70],
+  ['Complete', 80],
+];
+
 async function seed(db, jobId) {
   const now = new Date().toISOString();
   for (const [section, label, position] of DEFAULTS) {
     await db.prepare(`INSERT OR IGNORE INTO job_checklist_items (job_id, section, label, checked, position, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?)`)
       .bind(jobId, section, label, position, now, now).run();
+  }
+
+  const row = await db.prepare(`SELECT build_plan_json FROM jobs WHERE id = ?`).bind(jobId).first();
+  if (!row?.build_plan_json) return;
+  let plan;
+  try { plan = JSON.parse(row.build_plan_json); } catch { return; }
+  const openings = Array.isArray(plan?.openings) ? plan.openings : [];
+  for (let index = 0; index < openings.length; index += 1) {
+    const section = `Opening ${String(index + 1).padStart(2, '0')}`;
+    for (const [label, offset] of OPENING_GATES) {
+      await db.prepare(`INSERT OR IGNORE INTO job_checklist_items (job_id, section, label, checked, position, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?)`)
+        .bind(jobId, section, label, index * 100 + offset, now, now).run();
+    }
   }
 }
 
@@ -64,7 +88,7 @@ export async function onRequestGet(context) {
   const job = await env.QUOTES_DB.prepare(`SELECT id FROM jobs WHERE id = ?`).bind(jobId).first();
   if (!job) return json({ error: 'Job not found.' }, 404);
   await seed(env.QUOTES_DB, jobId);
-  const result = await env.QUOTES_DB.prepare(`SELECT id, section, label, checked, notes, position, updated_at FROM job_checklist_items WHERE job_id = ? ORDER BY section, position, id`).bind(jobId).all();
+  const result = await env.QUOTES_DB.prepare(`SELECT id, section, label, checked, notes, position, updated_at FROM job_checklist_items WHERE job_id = ? ORDER BY position, id`).bind(jobId).all();
   const snapshot = await buildPlanSnapshot(env.QUOTES_DB, jobId);
   return json({ items: result.results || [], buildPlan: snapshot ? { version: snapshot.version, knowledgeVersion: snapshot.knowledgeVersion, openingCount: Array.isArray(snapshot.plan?.openings) ? snapshot.plan.openings.length : 0, buyCount: Array.isArray(snapshot.plan?.buy) ? snapshot.plan.buy.length : 0, verifyCount: Array.isArray(snapshot.plan?.verify) ? snapshot.plan.verify.length : 0 } : null });
 }
@@ -79,7 +103,27 @@ export async function onRequestPatch(context) {
   const current = await env.QUOTES_DB.prepare(`SELECT * FROM job_checklist_items WHERE id = ?`).bind(id).first();
   if (!current) return json({ error: 'Checklist item not found.' }, 404);
   const checked = body.checked === true || body.checked === 1 ? 1 : 0;
-  const notes = typeof body.notes === 'string' ? body.notes.slice(0, 2000) : current.notes;
-  await env.QUOTES_DB.prepare(`UPDATE job_checklist_items SET checked = ?, notes = ?, updated_at = ? WHERE id = ?`).bind(checked, notes, new Date().toISOString(), id).run();
-  return json({ ok: true });
+  const notes = typeof body.notes === 'string' ? body.notes.slice(0, 3000) : current.notes;
+
+  if (checked && String(current.section).startsWith('Opening ')) {
+    const gates = await env.QUOTES_DB.prepare(`SELECT label, checked, position FROM job_checklist_items WHERE job_id = ? AND section = ? ORDER BY position ASC`).bind(current.job_id, current.section).all();
+    const rows = gates.results || [];
+    const currentIndex = rows.findIndex((row) => Number(row.position) === Number(current.position) && row.label === current.label);
+    if (current.label !== 'Verify' && current.label !== 'Complete') {
+      const previous = rows[currentIndex - 1];
+      if (!previous || Number(previous.checked) !== 1) {
+        return json({ error: `Complete the previous field gate before marking ${current.label} complete.`, code: 'FIELD_GATE_SEQUENCE' }, 409);
+      }
+    }
+    if (current.label === 'Complete') {
+      const pending = rows.filter((row) => row.label !== 'Complete' && Number(row.checked) !== 1);
+      if (pending.length) {
+        return json({ error: 'Complete every prior field gate before closing this opening.', code: 'OPENING_INCOMPLETE', remaining: pending.length }, 409);
+      }
+    }
+  }
+
+  const now = new Date().toISOString();
+  await env.QUOTES_DB.prepare(`UPDATE job_checklist_items SET checked = ?, notes = ?, updated_at = ? WHERE id = ?`).bind(checked, notes, now, id).run();
+  return json({ ok: true, item: { ...current, checked, notes, updated_at: now } });
 }
