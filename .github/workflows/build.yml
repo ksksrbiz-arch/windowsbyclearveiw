@@ -25,5 +25,6 @@ jobs:
       - run: npm run test:build-plan-integration
       - run: npm run test:production-hardening
       - run: npm run test:marketing-platform
+      - run: npm run test:ask-security
       - run: npm run eval:build-plan
       - run: npm run build
