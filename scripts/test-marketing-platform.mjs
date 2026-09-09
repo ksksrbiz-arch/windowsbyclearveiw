@@ -60,14 +60,10 @@ for (const file of pageFiles) {
   const source = fs.readFileSync(file, 'utf8');
   const rel = path.relative(root, file).replaceAll(path.sep, '/');
 
-  // Catch the class of malformed TypeScript generic-arrow expressions that
-  // previously caused Astro parser failures in the internal app.
   if (/\b(?:const|let)\s+\w+\s*=\s*<T\s+extends\s+Element>/.test(source)) {
     failures.push(`${rel}: generic arrow helper can be parsed as Astro markup; use a named function instead.`);
   }
 
-  // Public pages should use BaseLayout for canonical, social, accessibility,
-  // analytics, and shared navigation infrastructure.
   if (!rel.startsWith('src/pages/internal/') && !rel.startsWith('src/pages/api/') && !rel.endsWith('/404.astro')) {
     if (!source.includes('BaseLayout')) warnings.push(`${rel}: no BaseLayout reference found; verify metadata manually.`);
   }
@@ -90,8 +86,6 @@ for (const [route, sources] of literalHrefs) {
   failures.push(`Broken internal route ${route} referenced by ${sources.slice(0, 3).join(', ')}`);
 }
 
-// Marketing forms need a real fallback action/method so a temporary client
-// script failure does not turn the lead funnel into a dead end.
 for (const file of pageFiles) {
   const rel = path.relative(root, file).replaceAll(path.sep, '/');
   if (rel.startsWith('src/pages/internal/') || rel.startsWith('src/pages/api/')) continue;
@@ -102,7 +96,6 @@ for (const file of pageFiles) {
   }
 }
 
-// New-tab links must not grant the destination a reference to the opener.
 for (const file of pageFiles) {
   const source = fs.readFileSync(file, 'utf8');
   for (const match of source.matchAll(/<a\b[^>]*target=["']_blank["'][^>]*>/g)) {
@@ -111,6 +104,26 @@ for (const file of pageFiles) {
     }
   }
 }
+
+// Public lead endpoint hardening: the browser submits multipart form data,
+// cross-origin browser POSTs are rejected, bodies are capped, and GET must
+// not disclose provider/template implementation details.
+const estimate = fs.readFileSync(path.join(root, 'functions', 'api', 'estimate.js'), 'utf8');
+assert.match(estimate, /MAX_BODY_BYTES\s*=\s*64\s*\*\s*1024/);
+assert.match(estimate, /request\.headers\.get\('origin'\)/);
+assert.match(estimate, /contentType\.toLowerCase\(\)\.startsWith\('multipart\/form-data'\)/);
+assert.match(estimate, /const emailLooksReal\s*=\s*\//);
+assert.match(estimate, /function escapeHtmlAttr\(/);
+assert.match(estimate, /onRequestGet\(\)\s*\{\s*return json\(\{ error: 'POST a request from the estimate form\.' \}, 405\);/s);
+
+const headers = fs.readFileSync(path.join(publicRoot, '_headers'), 'utf8');
+assert.match(headers, /Strict-Transport-Security:\s*max-age=31536000;\s*includeSubDomains/);
+assert.match(headers, /X-Frame-Options:\s*DENY/);
+assert.match(headers, /X-Content-Type-Options:\s*nosniff/);
+assert.match(headers, /Referrer-Policy:\s*strict-origin-when-cross-origin/);
+
+const estimateForm = fs.readFileSync(path.join(root, 'src', 'components', 'EstimateForm.astro'), 'utf8');
+assert.match(estimateForm, /<form[^>]+enctype=["']multipart\/form-data["']/);
 
 const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8');
 assert.match(astroConfig, /path\.startsWith\('\/internal\/'\)/);
