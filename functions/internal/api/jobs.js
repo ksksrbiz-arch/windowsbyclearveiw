@@ -1,4 +1,6 @@
 import { generatePlan } from './build-plan.js';
+import { assertJobEligible } from '../../_lib/build-plan-state.mjs';
+import { lintPlan, sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -50,6 +52,8 @@ function parsePlan(row) {
   if (!row?.build_plan_json) return null;
   try { return JSON.parse(row.build_plan_json); } catch { return null; }
 }
+
+function sameSource(a, b) { return JSON.stringify(a || []) === JSON.stringify(b || []); }
 
 export async function onRequestGet(context) {
   const { env } = context;
@@ -108,21 +112,23 @@ export async function onRequestPost(context) {
   if (existing) return json({ id: existing.id, existing: true }, 200);
 
   const { results: items } = await env.QUOTES_DB.prepare(`SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC, id ASC`).bind(quoteId).all();
+  const currentSource = sourceSnapshot(items);
   const savedPlanRow = await env.QUOTES_DB.prepare(`SELECT * FROM quote_build_plans WHERE quote_id = ?`).bind(quoteId).first();
+  if (!savedPlanRow?.plan_json) return json({ error: 'An approved Build Plan is required before this quote can become a job.', code: 'BUILD_PLAN_REQUIRED' }, 409);
+  if (savedPlanRow.state !== 'approved') return json({ error: 'The Build Plan must be explicitly approved before this quote can become a job.', code: 'BUILD_PLAN_NOT_APPROVED', status: savedPlanRow.state || 'draft' }, 409);
+
   let plan = null;
-  let planVersion = 0;
-  let knowledgeVersion = null;
-  if (savedPlanRow?.plan_json) {
-    try { plan = JSON.parse(savedPlanRow.plan_json); } catch { plan = null; }
-    planVersion = Number(savedPlanRow.version || 0);
-    knowledgeVersion = savedPlanRow.knowledge_version || plan?.knowledgeVersion || null;
-  }
-  if (!plan) {
-    plan = generatePlan(quote, items);
-    planVersion = 1;
-    knowledgeVersion = plan.knowledgeVersion || null;
-  }
-  plan = { ...plan, finalizedSnapshot: true, finalizedAt: new Date().toISOString() };
+  try { plan = JSON.parse(savedPlanRow.plan_json); } catch { plan = null; }
+  if (!plan) return json({ error: 'The saved Build Plan is invalid. Regenerate and review it before creating the job.' }, 409);
+  if (!sameSource(plan.sourceItems, currentSource)) return json({ error: 'The quote changed after Build Plan approval. Regenerate, review and approve the plan again before creating the job.', code: 'BUILD_PLAN_STALE' }, 409);
+  const quality = lintPlan(plan, items);
+  plan.quality = quality;
+  try { assertJobEligible({ ...plan, status: savedPlanRow.state, quality }); }
+  catch (error) { return json({ error: error.message, code: 'BUILD_PLAN_BLOCKED', blockers: quality.blockers, warnings: quality.warnings }, 409); }
+
+  const planVersion = Number(savedPlanRow.version || 1);
+  const knowledgeVersion = savedPlanRow.knowledge_version || plan?.knowledgeVersion || null;
+  plan = { ...plan, finalizedSnapshot: true, finalizedAt: new Date().toISOString(), approvedAt: savedPlanRow.approved_at || plan.approvedAt || null, approvedBy: savedPlanRow.approved_by || plan.approvedBy || null };
 
   const now = new Date().toISOString();
   const id = makeId();
