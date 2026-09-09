@@ -1,10 +1,17 @@
 import { createSessionToken, sessionCookie } from '../_lib/session.mjs';
 
-/** Constant-time compare so the password cannot be probed byte by byte. */
+/**
+ * Constant-time compare so the password cannot be probed byte by byte.
+ * Always walks the longer string's full length — an early return on a
+ * length mismatch would itself leak the real password's length to a
+ * timing attacker before the per-character comparison ever runs.
+ */
 function timingSafeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  const len = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
   return diff === 0;
 }
 
