@@ -43,7 +43,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   type Gate={id:number;section:string;label:string;checked:number;notes:string|null};
   type Evidence={id?:number;opening_index:number;measurements:any;notes:string;exception_status:string;exception_notes:string;materialUsage:any;photoSummary:any};
   let job:any=null,plan:any=null,gates:Gate[]=[],evidence:Evidence[]=[],openings:any[]=[],index=0,currentSection='';
-  const qs=<T extends Element>(s:string)=>document.querySelector(s) as T|null;
+  function qs<T extends Element>(s:string){return document.querySelector(s) as T|null};
   const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;};
   const sectionFor=(i:number)=>`Opening ${String(i+1).padStart(2,'0')}`;
   const openingGates=()=>gates.filter(g=>g.section===sectionFor(index)).sort((a,b)=>a.id-b.id);
