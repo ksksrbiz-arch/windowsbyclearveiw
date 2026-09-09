@@ -1,0 +1,36 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Lead Analyzer">
+  <div class="la-head">
+    <div><p class="kicker">AI-assisted qualification</p><h1>Lead Analyzer</h1><p class="lede">Review recent inbound leads without changing the underlying CRM record. AI recommendations are advisory and must be verified against the source record.</p></div>
+    <a class="btn btn-ghost" href="/internal/leads">Back to leads</a>
+  </div>
+  <section class="la-panel">
+    <div class="la-toolbar"><label><input type="checkbox" data-select-all /> Select all</label><button class="btn btn-primary" type="button" data-analyze disabled>Analyze selected</button></div>
+    <p class="la-status" data-status role="status">Loading leads…</p>
+    <div class="la-list" data-list></div>
+  </section>
+  <section class="la-result" data-result hidden>
+    <div class="la-result-head"><div><p class="kicker">Advisory analysis</p><h2>Lead Analyzer result</h2></div><span class="verify-badge">VERIFY</span></div>
+    <pre data-answer></pre>
+  </section>
+</InternalLayout>
+<script>
+  function initLeadAnalyzer(){
+    const list=document.querySelector('[data-list]');const analyze=document.querySelector('[data-analyze]');const status=document.querySelector('[data-status]');const result=document.querySelector('[data-result]');const answer=document.querySelector('[data-answer]');const all=document.querySelector('[data-select-all]');
+    if(!(list instanceof HTMLElement)||!(analyze instanceof HTMLButtonElement)||!(status instanceof HTMLElement)||!(result instanceof HTMLElement)||!(answer instanceof HTMLElement)||!(all instanceof HTMLInputElement)||list.dataset.bound==='true')return;list.dataset.bound='true';
+    const esc=(v)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML};
+    let leads=[];
+    const update=()=>{const selected=list.querySelectorAll('input[data-lead]:checked').length;analyze.disabled=!selected;all.checked=leads.length>0&&selected===leads.length};
+    const render=()=>{list.innerHTML=leads.map(l=>`<label class="la-card"><input type="checkbox" data-lead value="${esc(l.id)}"/><span><strong>${esc(l.name||'Unnamed lead')}</strong><small>${esc([l.city,l.role].filter(Boolean).join(' · ')||'Estimate request')} · ${esc(new Date(l.created_at).toLocaleDateString())}</small>${l.notes?`<em>${esc(l.notes)}</em>`:''}</span></label>`).join('')||'<p>No leads available.</p>';list.querySelectorAll('input[data-lead]').forEach(x=>x.addEventListener('change',update));update()};
+    async function load(){try{const r=await fetch('/internal/api/leads',{headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error();const data=await r.json();leads=Array.isArray(data.leads)?data.leads.slice(0,25):[];render();status.textContent=`${leads.length} recent leads available.`}catch{status.textContent='Could not load leads.'}}
+    all.addEventListener('change',()=>{list.querySelectorAll('input[data-lead]').forEach(x=>x.checked=all.checked);update()});
+    analyze.addEventListener('click',async()=>{const ids=[...list.querySelectorAll('input[data-lead]:checked')].map(x=>Number(x.value)).filter(Number.isInteger);if(!ids.length)return;analyze.disabled=true;status.textContent='Analyzing…';result.hidden=false;answer.textContent='';try{const r=await fetch('/internal/api/lead-analyzer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({leadIds:ids,message:'Analyze the selected leads. Prioritize completeness, likely follow-up need, missing information, and the next human action. Separate KNOWN, INFERRED, and VERIFY.'})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Analysis failed.');answer.textContent=String(data.answer||'No analysis returned.');status.textContent=`${data.provider||'degraded'} · ${data.degraded?'AI unavailable; verify directly.':'Advisory only — source records remain authoritative.'}`;result.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){status.textContent=e instanceof Error?e.message:'Analysis failed.'}finally{analyze.disabled=false;update()}});
+    load();
+  }
+  initLeadAnalyzer();document.addEventListener('astro:page-load',initLeadAnalyzer);
+</script>
+<style>
+.la-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-l)}.la-panel,.la-result{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);padding:var(--space-m);box-shadow:var(--shadow-sm)}.la-toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:var(--space-s);margin-bottom:var(--space-s)}.la-toolbar label{font-weight:600}.la-list{display:grid;gap:.55rem}.la-card{display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:start;border:1px solid var(--line);border-radius:var(--radius);padding:.85rem;cursor:pointer}.la-card:hover{border-color:var(--line-strong)}.la-card span{display:grid;gap:.2rem}.la-card small{color:var(--ink-soft)}.la-card em{font-size:var(--step--1);font-style:normal;color:var(--ink-faint);margin-top:.2rem}.la-status{color:var(--ink-soft);font-size:var(--step--1)}.la-result{margin-top:var(--space-m)}.la-result-head{display:flex;justify-content:space-between;align-items:center;gap:1rem}.la-result h2{margin:.1rem 0}.verify-badge{border:1px solid var(--line-strong);border-radius:999px;padding:.3rem .55rem;font-size:.7rem;font-weight:800;letter-spacing:.08em}.la-result pre{white-space:pre-wrap;font:inherit;line-height:1.55;margin:var(--space-s) 0 0}.btn:disabled{opacity:.5;cursor:not-allowed}@media(max-width:700px){.la-head{align-items:start;flex-direction:column}.la-toolbar{align-items:stretch;flex-direction:column}.la-toolbar .btn{min-height:48px}}
+</style>
