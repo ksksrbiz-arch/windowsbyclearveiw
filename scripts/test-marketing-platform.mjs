@@ -77,6 +77,17 @@ for (const file of pageFiles) {
     }
   }
 
+  // Astro's <Image> component renders a real <img>, so it needs the same
+  // accessibility contract. Keep this static check intentionally simple: an
+  // opening component tag must contain an explicit alt prop, including
+  // decorative alt="". This catches regressions that the literal-img scan
+  // cannot see because Astro transforms the component at build time.
+  for (const match of source.matchAll(/<Image\b[\s\S]*?>/g)) {
+    if (!/\balt\s*=/.test(match[0])) {
+      failures.push(`${rel}: <Image> is missing an alt attribute.`);
+    }
+  }
+
   for (const match of source.matchAll(/(?:href|action)\s*=\s*["']([^"']+)["']/g)) {
     const href = match[1];
     const route = normalizeRoute(href);
@@ -106,13 +117,20 @@ for (const file of pageFiles) {
 }
 
 for (const file of pageFiles) {
+  const rel = path.relative(root, file).replaceAll(path.sep, '/');
   const source = fs.readFileSync(file, 'utf8');
   for (const match of source.matchAll(/<a\b[^>]*target=["']_blank["'][^>]*>/g)) {
     if (!/\brel=["'][^"']*(?:noopener|noreferrer)/.test(match[0])) {
-      failures.push(`${path.relative(root, file)}: target="_blank" link missing noopener/noreferrer.`);
+      failures.push(`${rel}: target="_blank" link missing noopener/noreferrer.`);
     }
   }
 }
+
+const baseLayout = fs.readFileSync(path.join(root, 'src', 'layouts', 'BaseLayout.astro'), 'utf8');
+assert.match(baseLayout, /import\s+\{\s*ClientRouter\s*\}\s+from\s+['"]astro:transitions['"]/);
+assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]\s*,\s*initReveal\)/);
+assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]/);
+assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]\s*,\s*\(\)\s*=>\s*whenIdle\(trackVisitJourney\)\)/);
 
 // Public lead endpoint hardening: the browser submits multipart form data,
 // cross-origin browser POSTs are rejected, bodies are capped, and GET must
@@ -124,17 +142,27 @@ assert.match(estimate, /contentType\.toLowerCase\(\)\.startsWith\('multipart\/fo
 assert.match(estimate, /const emailLooksReal\s*=\s*\//);
 assert.match(estimate, /function escapeHtmlAttr\(/);
 assert.match(estimate, /onRequestGet\(\)\s*\{\s*return json\(\{ error: 'POST a request from the estimate form\.' \}, 405\);/s);
+assert.match(estimate, /function parseJourney\(/);
+assert.match(estimate, /slice\(-25\)/);
+assert.match(estimate, /const visitorId = clean\(form\.get\('visitor_id'\), 100\)/);
 
 const headers = fs.readFileSync(path.join(publicRoot, '_headers'), 'utf8');
 assert.match(headers, /Strict-Transport-Security:\s*max-age=31536000;\s*includeSubDomains/);
 assert.match(headers, /X-Frame-Options:\s*DENY/);
 assert.match(headers, /X-Content-Type-Options:\s*nosniff/);
 assert.match(headers, /Referrer-Policy:\s*strict-origin-when-cross-origin/);
+assert.match(headers, /Permissions-Policy:/);
+assert.match(headers, /\/api\/estimate/);
+assert.match(headers, /no-store/);
 
 const estimateForm = fs.readFileSync(path.join(root, 'src', 'components', 'EstimateForm.astro'), 'utf8');
 assert.match(estimateForm, /<form[^>]+action=["']\/api\/estimate["']/);
 assert.match(estimateForm, /<form[^>]+method=["']post["']/);
 assert.match(estimateForm, /<form[^>]+enctype=["']multipart\/form-data["']/);
+assert.match(estimateForm, /form\.dataset\.bound==='true'/);
+assert.match(estimateForm, /button\.disabled=true/);
+assert.match(estimateForm, /new FormData\(form\)/);
+assert.match(estimateForm, /astro:page-load/);
 
 const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8');
 assert.match(astroConfig, /path\.startsWith\('\/internal\/'\)/);
