@@ -443,6 +443,16 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
   max-width: 44rem;
 }
 
+/* Inline links in hero copy otherwise fall back to the global `a` color
+   (--ink, meant for the light paper surfaces), which is nearly the same
+   near-black as --page-hero's background — the link renders essentially
+   invisible against the dark hero. --accent-bright is the token already
+   used everywhere else on this dark surface (kicker dot, foot rule) and
+   is checked to clear 4.73:1 on --black. */
+.page-hero .lede a {
+  color: var(--accent-bright);
+}
+
 .split {
   gap: var(--space-xl);
   align-items: start;
@@ -586,7 +596,14 @@ input:focus, textarea:focus, select:focus {
   color: var(--on-dark);
 }
 
-.video-copy .kicker { color: var(--on-dark-faint); }
+/* Sits over the video's own darkening wash, which is only ~20% opaque at
+   the very top of the frame where this line renders — on a bright or foggy
+   frame, --on-dark-faint reads as low-contrast gray-on-gray. --on-dark-soft
+   plus a bolder weight keeps it legible without matching the brighter H1. */
+.video-copy .kicker {
+  color: var(--on-dark-soft);
+  font-weight: 600;
+}
 
 @media (max-width: 640px) {
   .video-hero {
