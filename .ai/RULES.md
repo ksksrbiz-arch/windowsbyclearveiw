@@ -6,6 +6,7 @@
 - Application code is the enforcement surface.
 - D1 is transactional truth.
 - External manufacturer/code authorities are reference inputs, not business state.
+- New AI features must follow `.ai/AI-OPERATING-CONTRACT.md` for provider, budget, caching, failure, context, tool, output, and human-authority boundaries.
 
 ## AI judgment
 
@@ -30,6 +31,20 @@ AI must not silently:
 - claim credentials or legal status;
 - override a deterministic validation failure;
 - mark a human approval gate complete.
+
+## Deterministic-first routing
+
+Intent routing should use deterministic application logic when the intent can be reliably identified from explicit message/project signals. The existing ICM router is the default routing boundary.
+
+Do not add an AI classification call ahead of deterministic ICM routing merely to classify a request. AI judgment belongs after the selected specialist/context boundary unless a documented requirement demonstrates otherwise.
+
+## AI operating controls
+
+New AI operations must define bounded input/context/output sizes, model-call limits, tool rounds, optional vision-call limits, timeout behavior, and safe degradation before production use. Reuse existing Groq/Gemini/Workers AI infrastructure rather than creating duplicate provider paths without a measured reason.
+
+Provider, retrieval, vision, or tool failure must fail down to a safe deterministic result or `VERIFY` state. Failure must never cause fabricated facts or bypassed validation/gates.
+
+Caching is allowed only for outputs with explicit isolation and invalidation/expiry rules. Cache data is never transactional truth.
 
 ## Uncertainty protocol
 
