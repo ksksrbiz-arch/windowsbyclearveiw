@@ -799,14 +799,15 @@ const model = {
       order: 2;
     }
 
-    /* On a phone the natural order is count first, then read the total — but
-       keep the panel pinned so the running summary stays in view while
-       tapping. */
+    /* Not sticky here: this card carries the full breakdown (line items,
+       price range, driver bullets, CTA, fine print) — tall enough that
+       pinning it covers most of a phone viewport as the user scrolls the
+       form underneath, blocking exactly the inputs that change its own
+       number. Same tradeoff already made for .guide-outline on the guide
+       pages: static on mobile, sticky only where the site has room for it. */
     .estimator-result {
-      position: sticky;
-      top: 76px;
+      position: static;
       order: 1;
-      z-index: 2;
     }
 
     .est-number {
