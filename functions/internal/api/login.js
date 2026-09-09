@@ -3,16 +3,13 @@ import { createSessionToken, sessionCookie } from '../_lib/session.mjs';
 const encoder = new TextEncoder();
 
 /**
- * Constant-time password check, so the password cannot be probed by timing.
+ * Compare password material without a direct length-mismatch branch.
  *
- * Both sides are reduced to a SHA-256 digest first, so the comparison always
- * walks exactly 32 bytes. That keeps the work independent of the real
- * password's length: an early return on a length mismatch would leak it
- * outright, and bounding the loop by the longer input (Math.max) still leaks
- * it, because the runtime would stop growing once the submitted value passed
- * the secret's length — an attacker can binary-search that inflection point.
- * Digest time varies only with the submitted value's own length, which the
- * attacker already knows.
+ * Hashing both values to fixed-size SHA-256 digests means the comparison
+ * always walks the same 32-byte digest length. The submitted password's
+ * hashing cost naturally depends on its own length, which is already known
+ * to the caller; the comparison itself does not stop early based on the
+ * secret's length or expose a length mismatch before comparing the digest.
  */
 async function timingSafeEqual(a, b) {
   const [digestA, digestB] = await Promise.all([
