@@ -95,6 +95,75 @@ These came out of real problems and are easy to undo by accident.
    loop. Same goes for anything pushed to GTM's `dataLayer` on navigation —
    defer it with `requestIdleCallback` rather than firing synchronously.
 
+## ICM architecture — implemented 2026-09-08
+
+Clearview now has an **ICM (Interpretable Context Methodology) control-plane
+layer** for AI-assisted operations. This is deliberately not a second database
+and not a replacement for application code. The filesystem supplies routing,
+stage contracts, stable reference context, and inspectable working artifacts;
+D1 and deterministic services remain the transactional/enforcement layer.
+
+### Root navigation contract
+
+Start with `CLAUDE.md`, then `.ai/CONTEXT.md`, `.ai/STATE.md`, and `.ai/RULES.md`.
+Route to one workflow or specialist before loading detailed references.
+The architecture is designed around the ICM context layers:
+
+- Layer 0 — identity/global operating contract (`CLAUDE.md`)
+- Layer 1 — router (`.ai/CONTEXT.md`)
+- Layer 2 — stage contract (`workflows/*/CONTEXT.md`)
+- Layer 3 — stable references/authorities
+- Layer 4 — current work/state and application records
+
+### First canonical pipeline: Build Plan
+
+`01-scope → 02-openings → 03-materials → 04-installation → 05-qc → 06-approval`
+
+Each stage has one job, explicit inputs/process/outputs/stop conditions, and
+an inspectable handoff. The existing Build Plan service remains authoritative:
+`functions/internal/api/build-plan.js` handles persistence/versioning/staleness,
+while `functions/_lib/build-plan-rules.mjs` handles deterministic quality rules.
+The ICM layer documents the reasoning architecture around those guarantees.
+
+### Evidence protocol
+
+Use `KNOWN`, `INFERRED`, and `VERIFY`. Never turn missing dimensions, product-
+specific installation requirements, concealed damage, or unsupported material
+quantities into invented certainty. Human approval is a hard boundary:
+`draft → review → approved → job snapshot`.
+
+### Specialists established
+
+- `.ai/specialists/diagnostician/`
+- `.ai/specialists/estimator/`
+- `.ai/specialists/installation-reviewer/`
+- `.ai/specialists/customer-advisor/`
+
+These are contracts for future routing of `/ask` and internal workflows. Do
+not duplicate the existing Ask guardrails in random prompts; route the relevant
+intent to a specialist and keep deterministic tools authoritative.
+
+### Golden cases
+
+`.ai/workflows/build-plan/EXAMPLES.md` contains architecture fixtures for fogged
+IGUs, drafty windows, sill rot, unknown installation method, mixed openings, and
+quote changes. Add a paired good/bad case when a future bug exposes a reusable
+reasoning boundary.
+
+### What is intentionally *not* done yet
+
+1. Stage artifacts are not yet first-class UI records; the current API's plan
+   JSON remains the operational artifact.
+2. Build Plan approval/reconciliation UX still needs a stronger explicit state
+   machine in the Command Center.
+3. `/ask` has not yet been fully migrated to the ICM specialist router.
+4. The broader Lead → Estimate → Quote → Build Plan → Job → Installation → QC →
+   Closeout lifecycle is mapped but not every stage has an ICM implementation.
+5. Golden-case execution should become automated regression coverage rather than
+   remaining documentation-only fixtures.
+
+Do not describe those items as completed until code and validation prove them.
+
 ## Outstanding
 
 | | |
