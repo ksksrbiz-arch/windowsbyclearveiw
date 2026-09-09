@@ -47,7 +47,7 @@ function normalizeRoute(href) {
 
 function matchesDynamic(route) {
   return dynamicRoutes.some((pattern) => {
-    const regex = new RegExp(`^${pattern.split('/').map((part) => part === ':dynamic' ? '[^/]+' : part.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')).join('/')}\/?$`);
+    const regex = new RegExp(`^${pattern.split('/').map((part) => part === ':dynamic' ? '[^/]+' : part.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')).join('/')}\\/?$`);
     return regex.test(route);
   });
 }
@@ -66,6 +66,15 @@ for (const file of pageFiles) {
 
   if (!rel.startsWith('src/pages/internal/') && !rel.startsWith('src/pages/api/') && !rel.endsWith('/404.astro')) {
     if (!source.includes('BaseLayout')) warnings.push(`${rel}: no BaseLayout reference found; verify metadata manually.`);
+  }
+
+  // Every literal <img> must declare alt, including decorative images (which
+  // should use alt=""). This catches regressions that otherwise silently
+  // remove image semantics from the public marketing surface.
+  for (const match of source.matchAll(/<img\b[^>]*>/g)) {
+    if (!/\balt\s*=/.test(match[0])) {
+      failures.push(`${rel}: <img> is missing an alt attribute.`);
+    }
   }
 
   for (const match of source.matchAll(/(?:href|action)\s*=\s*["']([^"']+)["']/g)) {
