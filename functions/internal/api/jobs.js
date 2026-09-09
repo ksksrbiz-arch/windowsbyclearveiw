@@ -116,6 +116,7 @@ export async function onRequestPost(context) {
   const savedPlanRow = await env.QUOTES_DB.prepare(`SELECT * FROM quote_build_plans WHERE quote_id = ?`).bind(quoteId).first();
   if (!savedPlanRow?.plan_json) return json({ error: 'An approved Build Plan is required before this quote can become a job.', code: 'BUILD_PLAN_REQUIRED' }, 409);
   if (savedPlanRow.state !== 'approved') return json({ error: 'The Build Plan must be explicitly approved before this quote can become a job.', code: 'BUILD_PLAN_NOT_APPROVED', status: savedPlanRow.state || 'draft' }, 409);
+  if (!savedPlanRow.approved_at || !savedPlanRow.updated_at || new Date(savedPlanRow.updated_at).getTime() > new Date(savedPlanRow.approved_at).getTime()) return json({ error: 'The Build Plan was changed after approval. Re-review and approve the current version before creating the job.', code: 'BUILD_PLAN_CHANGED_AFTER_APPROVAL' }, 409);
 
   let plan = null;
   try { plan = JSON.parse(savedPlanRow.plan_json); } catch { plan = null; }
