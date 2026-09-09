@@ -24,9 +24,7 @@ async function ensureSchema(db) {
     `ALTER TABLE quote_build_plans ADD COLUMN approved_at TEXT`,
     `ALTER TABLE quote_build_plans ADD COLUMN approved_by TEXT`,
   ]) { try { await db.prepare(sql).run(); } catch {} }
-  try {
-    await db.prepare(`CREATE TRIGGER IF NOT EXISTS quote_build_plan_approved_lock BEFORE UPDATE OF plan_json ON quote_build_plans WHEN OLD.state = 'approved' AND NEW.state = 'approved' AND NEW.plan_json != OLD.plan_json BEGIN SELECT RAISE(ABORT, 'Approved Build Plan is locked; reopen it before editing.'); END`).run();
-  } catch {}
+  await db.prepare(`CREATE TRIGGER IF NOT EXISTS quote_build_plan_approved_lock BEFORE UPDATE OF plan_json ON quote_build_plans WHEN OLD.state = 'approved' AND NEW.state = 'approved' AND NEW.plan_json != OLD.plan_json BEGIN SELECT RAISE(ABORT, 'Approved Build Plan is locked; reopen it before editing.'); END`).run();
 }
 
 async function loadPlan(db, quoteId) {
