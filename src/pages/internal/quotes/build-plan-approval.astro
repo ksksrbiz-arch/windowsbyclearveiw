@@ -1,0 +1,36 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Build Plan approval">
+  <main class="approval-shell">
+    <header class="approval-head">
+      <div><p class="kicker">Production control · human gate</p><h1>Build Plan approval</h1><p data-subtitle>Loading…</p></div>
+      <a class="btn btn-ghost" data-plan-link href="#">Back to Build Plan</a>
+    </header>
+    <section class="state-card" data-state-card>
+      <span class="state-badge" data-state>—</span>
+      <div><strong data-state-title>Checking plan state…</strong><p data-state-copy>Approval is a human decision. Automated generation never approves a plan.</p></div>
+    </section>
+    <section class="review-card">
+      <h2>Approval gate</h2>
+      <ul data-checks><li>Loading quality checks…</li></ul>
+      <p class="warning" data-warning hidden></p>
+      <div class="actions">
+        <button class="btn btn-primary" data-action="approve" disabled>Approve for Job</button>
+        <button class="btn btn-ghost" data-action="submit-review">Move to review</button>
+        <button class="btn btn-ghost" data-action="reopen" hidden>Reopen</button>
+        <button class="btn btn-ghost" data-action="return-to-draft" hidden>Return to draft</button>
+      </div>
+    </section>
+    <section class="history-card"><h2>State history</h2><ol data-history><li>No history yet.</li></ol></section>
+  </main>
+</InternalLayout>
+<script>
+  const init=()=>{const params=new URLSearchParams(location.search),quoteId=params.get('quoteId');const q=(s)=>document.querySelector(s);if(!quoteId){q('[data-subtitle]').textContent='No quote id supplied.';return;}q('[data-plan-link]').href=`/internal/quotes/build-plan?quoteId=${encodeURIComponent(quoteId)}`;const state=q('[data-state]'),title=q('[data-state-title]'),copy=q('[data-state-copy]'),checks=q('[data-checks]'),history=q('[data-history]'),warning=q('[data-warning]');const buttons=[...document.querySelectorAll('[data-action]')];
+    const load=async()=>{try{const [s,p]=await Promise.all([fetch(`/internal/api/build-plan-state?quoteId=${encodeURIComponent(quoteId)}`),fetch(`/internal/api/build-plan?quoteId=${encodeURIComponent(quoteId)}`)]);const sd=await s.json(),pd=await p.json();if(!s.ok)throw new Error(sd.error||'Build Plan state unavailable.');q('[data-subtitle]').textContent=`Quote ${quoteId} · ${pd.quote?.customer_name||'Customer'}`;state.textContent=sd.status.replace('-', ' ');state.dataset.status=sd.status;title.textContent=sd.status==='approved'?'Approved for Job':sd.status==='review'?'Awaiting human approval':sd.status==='reopened'?'Reopened for correction':'Draft';copy.textContent=sd.status==='approved'?'This version is the approved operational plan.':'Review quality, quote freshness and VERIFY items before approval.';const quality=pd.quality||{};const items=[...(quality.blockers||[]).map(x=>`BLOCKER: ${x}`),...(quality.warnings||[]).map(x=>`VERIFY: ${x}`)];checks.innerHTML=items.length?items.map(x=>`<li>${x}</li>`).join(''):'<li>No automated quality warnings returned.</li>';const stale=Boolean(pd.stale);if(stale){warning.hidden=false;warning.textContent='The quote changed after this plan was saved. Do not approve until the plan is regenerated/reviewed.';}else warning.hidden=true;buttons.forEach(b=>b.disabled=false);q('[data-action="approve"]').disabled=sd.status!=='review'||Boolean(quality.blockers?.length)||stale;q('[data-action="submit-review"]').hidden=sd.status!=='draft';q('[data-action="return-to-draft"]').hidden=!['review','reopened'].includes(sd.status);q('[data-action="reopen"]').hidden=sd.status!=='approved';history.innerHTML=(sd.stateHistory?.length?sd.stateHistory:[{from:'',to:sd.status,actor:'system',at:''}]).map(x=>`<li><strong>${x.to}</strong> · ${x.actor||'unknown'} ${x.at?`· ${new Date(x.at).toLocaleString()}`:''}</li>`).join('');}catch(e){warning.hidden=false;warning.textContent=e instanceof Error?e.message:'Could not load approval state.';}};
+    buttons.forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{const r=await fetch('/internal/api/build-plan-state',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({quoteId,action:b.dataset.action,actor:'mark'})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Action failed.');await load();}catch(e){warning.hidden=false;warning.textContent=e instanceof Error?e.message:'Action failed.';b.disabled=false;}}));load();};
+  init();document.addEventListener('astro:page-load',init);
+</script>
+<style>
+.approval-shell{max-width:900px;margin:0 auto}.approval-head{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1.5rem}.approval-head p{margin:.25rem 0 0;color:var(--muted)}.state-card,.review-card,.history-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);padding:1.1rem;margin-bottom:1rem}.state-card{display:flex;gap:.9rem;align-items:flex-start}.state-badge{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding:.35rem .55rem;border:1px solid var(--line);border-radius:999px}.state-card[data-status="approved"]{}.review-card h2,.history-card h2{margin-top:0}.review-card li,.history-card li{margin:.45rem 0}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.warning{padding:.8rem;border:1px solid var(--danger);border-radius:var(--radius);color:var(--danger);margin-bottom:0}@media(max-width:640px){.approval-head{align-items:flex-start;flex-direction:column}.actions{display:grid}.actions .btn{width:100%}}
+</style>
