@@ -18,17 +18,24 @@ function walk(dir) {
 }
 
 const pageFiles = walk(pagesRoot).filter((file) => /\.(astro|md|mdx)$/.test(file));
-const publicFiles = walk(publicRoot);
 const routeFiles = new Set(['/']);
+const dynamicRoutes = [];
 
 for (const file of pageFiles) {
   const rel = path.relative(pagesRoot, file).replaceAll(path.sep, '/');
   if (rel === '404.astro') continue;
-  if (/^\[.+\]\.(astro|md|mdx)$/.test(rel) || rel.includes('/[')) continue;
-  const noExt = rel.replace(/\.(astro|md|mdx)$/, '');
-  if (noExt === 'index') routeFiles.add('/');
-  else if (noExt.endsWith('/index')) routeFiles.add(`/${noExt.slice(0, -'/index'.length)}`);
-  else routeFiles.add(`/${noExt}`);
+  const ext = /\.(astro|md|mdx)$/.exec(rel)?.[0] || '';
+  const noExt = rel.slice(0, -ext.length);
+  const parts = noExt.split('/');
+  const dynamic = parts.some((part) => /^\[.+\]$/.test(part));
+  const routeParts = parts.map((part) => {
+    if (part === 'index') return '';
+    if (/^\[.+\]$/.test(part)) return ':dynamic';
+    return part;
+  }).filter(Boolean);
+  const route = `/${routeParts.join('/')}` || '/';
+  if (dynamic) dynamicRoutes.push(route);
+  else routeFiles.add(route);
 }
 
 function normalizeRoute(href) {
@@ -38,9 +45,15 @@ function normalizeRoute(href) {
   return raw === '/' ? '/' : raw.replace(/\/$/, '');
 }
 
+function matchesDynamic(route) {
+  return dynamicRoutes.some((pattern) => {
+    const regex = new RegExp(`^${pattern.split('/').map((part) => part === ':dynamic' ? '[^/]+' : part.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')).join('/')}\/?$`);
+    return regex.test(route);
+  });
+}
+
 const failures = [];
 const warnings = [];
-const externalLinks = [];
 const literalHrefs = new Map();
 
 for (const file of pageFiles) {
@@ -53,11 +66,10 @@ for (const file of pageFiles) {
     failures.push(`${rel}: generic arrow helper can be parsed as Astro markup; use a named function instead.`);
   }
 
-  // Every public page should have a BaseLayout unless it is an intentionally
-  // special Astro endpoint/page such as 404. The marketing pages all rely on
-  // BaseLayout for canonical/OG/meta/accessibility infrastructure.
-  if (file.startsWith(pagesRoot) && !rel.startsWith('src/pages/internal/') && !rel.startsWith('src/pages/api/') && !rel.endsWith('/404.astro')) {
-    if (!source.includes('BaseLayout')) warnings.push(`${rel}: no BaseLayout reference found; verify SEO/social metadata manually.`);
+  // Public pages should use BaseLayout for canonical, social, accessibility,
+  // analytics, and shared navigation infrastructure.
+  if (!rel.startsWith('src/pages/internal/') && !rel.startsWith('src/pages/api/') && !rel.endsWith('/404.astro')) {
+    if (!source.includes('BaseLayout')) warnings.push(`${rel}: no BaseLayout reference found; verify metadata manually.`);
   }
 
   for (const match of source.matchAll(/(?:href|action)\s*=\s*["']([^"']+)["']/g)) {
@@ -67,34 +79,30 @@ for (const file of pageFiles) {
       if (!literalHrefs.has(route)) literalHrefs.set(route, []);
       literalHrefs.get(route).push(rel);
     }
-    if (/^https?:\/\//.test(href)) externalLinks.push({ rel, href });
   }
 }
 
 for (const [route, sources] of literalHrefs) {
-  // Query/hash variants are normalized above. Dynamic Astro expressions are
-  // intentionally excluded because they cannot be resolved statically here.
   if (route.startsWith('/internal')) continue;
-  if (routeFiles.has(route)) continue;
-  // Public assets are valid destinations too.
+  if (routeFiles.has(route) || matchesDynamic(route)) continue;
   const asset = path.join(publicRoot, route.replace(/^\//, ''));
   if (fs.existsSync(asset)) continue;
   failures.push(`Broken internal route ${route} referenced by ${sources.slice(0, 3).join(', ')}`);
 }
 
-// Marketing forms should have an explicit action and method so they work even
-// if client-side JavaScript is unavailable.
+// Marketing forms need a real fallback action/method so a temporary client
+// script failure does not turn the lead funnel into a dead end.
 for (const file of pageFiles) {
-  if (file.startsWith(pagesRoot) && !file.includes(`${path.sep}internal${path.sep}`)) {
-    const source = fs.readFileSync(file, 'utf8');
-    for (const form of source.matchAll(/<form\b[^>]*>/g)) {
-      if (!/\baction\s*=/.test(form[0])) warnings.push(`${path.relative(root, file)}: form has no explicit action.`);
-      if (!/\bmethod\s*=/.test(form[0])) warnings.push(`${path.relative(root, file)}: form has no explicit method.`);
-    }
+  const rel = path.relative(root, file).replaceAll(path.sep, '/');
+  if (rel.startsWith('src/pages/internal/') || rel.startsWith('src/pages/api/')) continue;
+  const source = fs.readFileSync(file, 'utf8');
+  for (const form of source.matchAll(/<form\b[^>]*>/g)) {
+    if (!/\baction\s*=/.test(form[0])) warnings.push(`${rel}: form has no explicit action.`);
+    if (!/\bmethod\s*=/.test(form[0])) warnings.push(`${rel}: form has no explicit method.`);
   }
 }
 
-// External links opened in a new tab must carry noopener/noreferrer.
+// New-tab links must not grant the destination a reference to the opener.
 for (const file of pageFiles) {
   const source = fs.readFileSync(file, 'utf8');
   for (const match of source.matchAll(/<a\b[^>]*target=["']_blank["'][^>]*>/g)) {
@@ -104,8 +112,6 @@ for (const file of pageFiles) {
   }
 }
 
-// The public marketing platform must not accidentally expose internal app
-// navigation through the sitemap or robots metadata.
 const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8');
 assert.match(astroConfig, /path\.startsWith\('\/internal\/'\)/);
 assert.match(astroConfig, /path !== '\/internal'/);
