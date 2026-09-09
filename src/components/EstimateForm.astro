@@ -2,7 +2,7 @@
 import { site, telHref } from '../data/site';
 import '../styles/estimate-form.css';
 ---
-<form class="estimate-form" method="post" action="/api/estimate" id="estimate-form">
+<form class="estimate-form" method="post" action="/api/estimate" id="estimate-form" enctype="multipart/form-data">
   <div class="hp" aria-hidden="true"><label>Company<input name="company" type="text" tabindex="-1" autocomplete="off" /></label></div>
   <input type="hidden" name="visitor_id" data-visitor-id /><input type="hidden" name="visit_journey" data-visit-journey />
   <fieldset class="field-group"><legend>Who is asking?</legend><label class="choice"><input type="radio" name="role" value="Homeowner" checked /><span>Homeowner — replacing what is there</span></label><label class="choice"><input type="radio" name="role" value="Builder / GC" /><span>Builder or GC — setting them in a new build</span></label></fieldset>
