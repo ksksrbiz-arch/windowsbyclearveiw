@@ -1,0 +1,351 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Job">
+  <div class="job-head">
+    <div>
+      <p class="kicker">Project workspace</p>
+      <h1 data-title>Job</h1>
+      <p class="lede" data-subtitle>Loading project details…</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" href="/internal/jobs">All jobs</a>
+      <a class="btn btn-primary" data-field-link href="#" hidden>Field mode</a>
+      <a class="btn btn-ghost" data-closeout-link href="#" hidden>Closeout</a>
+      <a class="btn btn-ghost" data-photos-link href="#" hidden>Job photos</a>
+      <a class="btn btn-ghost" data-payment-link href="#" hidden>Payments</a>
+      <a class="btn btn-ghost" data-quote-link href="#" hidden>View quote</a>
+    </div>
+  </div>
+
+  <p class="error" data-error hidden role="alert"></p>
+
+  <div class="workspace" data-workspace hidden>
+    <section class="status-card panel">
+      <div>
+        <p class="kicker">Status</p>
+        <strong data-status-label>—</strong>
+        <small data-status-help>—</small>
+      </div>
+      <label>Status
+        <select data-status>
+          <option value="ready">Ready</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="in-progress">In progress</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="detail-grid">
+      <section class="panel">
+        <div class="panel-head"><div><p class="kicker">Customer</p><h2 data-customer>—</h2></div></div>
+        <dl class="details">
+          <div><dt>Phone</dt><dd><a data-phone-link href="#">—</a></dd></div>
+          <div><dt>Email</dt><dd><a data-email-link href="#">—</a></dd></div>
+          <div><dt>Address</dt><dd data-address>—</dd></div>
+        </dl>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><p class="kicker">Schedule</p><h2>Installation date</h2></div></div>
+        <div class="schedule-form">
+          <label>Date<input type="date" data-date /></label>
+          <label>Window / crew note<input type="text" data-window maxlength="120" placeholder="e.g. 8–10 AM / crew A" /></label>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><p class="kicker">Scope</p><h2>Quoted work</h2></div><strong data-total>—</strong></div>
+      <div class="scope-list" data-items></div>
+    </section>
+
+    <section class="build-panel panel">
+      <div class="panel-head">
+        <div><p class="kicker">Production</p><h2>Verified build plan</h2><p class="muted" data-plan-meta>Snapshot from the finalized quote.</p></div>
+        <div class="build-actions">
+          <a class="btn btn-primary" data-build-field-link href="#" hidden>Launch Field Mode</a>
+          <a class="btn btn-ghost" data-build-link href="#" hidden>Open plan</a>
+          <button class="btn btn-ghost" data-reconcile type="button" hidden>Attach approved snapshot</button>
+        </div>
+      </div>
+      <div class="plan-health" data-plan-health>Loading plan…</div>
+      <div class="plan-grid" data-plan-grid hidden>
+        <section><h3>Buy</h3><ul data-plan-buy></ul></section>
+        <section><h3>Verify before install</h3><ul data-plan-verify></ul></section>
+        <section class="plan-wide"><h3>Opening schedule</h3><div data-plan-openings></div></section>
+        <section class="plan-wide"><h3>Install sequence</h3><ol data-plan-install></ol></section>
+        <section class="plan-wide"><h3>QC</h3><ul data-plan-qc></ul></section>
+      </div>
+    </section>
+
+    <section class="notes-grid">
+      <section class="panel note-panel">
+        <div class="panel-head"><div><p class="kicker">Project notes</p><h2>Customer / site</h2></div></div>
+        <textarea data-notes rows="7" maxlength="8000" placeholder="Access, trim, rot, special instructions, customer requests…"></textarea>
+      </section>
+      <section class="panel note-panel">
+        <div class="panel-head"><div><p class="kicker">Installation</p><h2>Crew notes</h2></div></div>
+        <textarea data-install-notes rows="7" maxlength="8000" placeholder="Arrival, removal, install conditions, materials used, issues…"></textarea>
+      </section>
+    </section>
+
+    <section class="closeout panel">
+      <div class="panel-head">
+        <div><p class="kicker">Closeout</p><h2>Project completion</h2><p class="muted" data-closeout-help>Use the dedicated closeout flow for final release.</p></div>
+        <a class="btn btn-primary" data-closeout-panel-link href="#" hidden>Open dedicated closeout</a>
+      </div>
+      <textarea data-closeout-notes rows="5" maxlength="8000" placeholder="Final walkthrough, punch-list items, customer sign-off notes, warranty handoff…"></textarea>
+      <div class="save-row"><span class="save-state" data-save-state>Ready</span><button class="btn btn-primary" type="button" data-save>Save changes</button></div>
+    </section>
+  </div>
+</InternalLayout>
+
+<script>
+  type Job = {
+    id: string;
+    quote_id: string | null;
+    status: string;
+    scheduled_date: string | null;
+    scheduled_window: string | null;
+    customer_name: string;
+    customer_phone: string | null;
+    customer_email: string | null;
+    customer_address: string | null;
+    customer_city: string | null;
+    notes: string | null;
+    install_notes: string | null;
+    closeout_notes: string | null;
+    completed_at: string | null;
+  };
+  type Item = { label: string; quantity: number; line_total_cents: number };
+
+  function initJobView() {
+    const workspace = document.querySelector('[data-workspace]');
+    if (!(workspace instanceof HTMLElement) || workspace.dataset.bound === 'true') return;
+    workspace.dataset.bound = 'true';
+
+    const id = new URLSearchParams(location.search).get('id');
+    const error = document.querySelector('[data-error]');
+    const q = (selector: string) => document.querySelector(selector) as any;
+    let job: Job | null = null;
+
+    function showError(message: string) {
+      if (error instanceof HTMLElement) {
+        error.hidden = false;
+        error.textContent = message;
+      }
+    }
+
+    if (!id) {
+      showError('No job id in the URL.');
+      return;
+    }
+
+    const money = (cents: number) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const esc = (value: unknown) => {
+      const element = document.createElement('div');
+      element.textContent = String(value ?? '');
+      return element.innerHTML;
+    };
+    const statusLabel = (status: string) => status === 'in-progress' ? 'In progress' : status.charAt(0).toUpperCase() + status.slice(1);
+
+    function renderPlan(plan: any, version: number, knowledge: string | null, attachedAt: string | null) {
+      const grid = q('[data-plan-grid]');
+      const health = q('[data-plan-health]');
+      const meta = q('[data-plan-meta]');
+      const link = q('[data-build-link]');
+      const field = q('[data-build-field-link]');
+      const reconcile = q('[data-reconcile]');
+
+      if (!plan) {
+        health.textContent = 'No saved Build Plan snapshot exists. Generate/review one before installation.';
+        reconcile.hidden = job?.status === 'cancelled' || !job?.quote_id;
+        return;
+      }
+
+      grid.hidden = false;
+      health.textContent = 'Verified plan snapshot attached to this job. Product-specific requirements remain VERIFY until the field team confirms them.';
+      meta.textContent = `Snapshot v${version || 1}${knowledge ? ` · rules ${knowledge}` : ''}${attachedAt ? ` · attached ${new Date(attachedAt).toLocaleString('en-US')}` : ''}`;
+
+      if (job?.quote_id) {
+        link.hidden = false;
+        link.href = `/internal/quotes/build-plan?quoteId=${encodeURIComponent(job.quote_id)}`;
+      }
+      if (job) {
+        field.hidden = false;
+        field.href = `/internal/jobs/field?id=${encodeURIComponent(job.id)}`;
+      }
+      reconcile.hidden = true;
+
+      const list = (selector: string, values: any[]) => {
+        const element = q(selector);
+        if (element) element.innerHTML = (values || []).map((value) => `<li>${esc(value)}</li>`).join('') || '<li>None recorded.</li>';
+      };
+      list('[data-plan-buy]', plan.buy);
+      list('[data-plan-verify]', plan.verify);
+      list('[data-plan-install]', plan.install);
+      list('[data-plan-qc]', plan.qc);
+
+      const openings = q('[data-plan-openings]');
+      if (openings) {
+        openings.innerHTML = (plan.openings || []).map((opening: any, index: number) => `
+          <article class="job-opening">
+            <strong>#${index + 1} · ${esc(opening.openingType || 'unknown')}</strong>
+            <span>${esc(opening.product || 'Quoted opening')}</span>
+            <small>${esc(opening.installationMethod || 'verify')} · ${esc(opening.dimensions || 'VERIFY dimensions')}</small>
+          </article>`).join('') || '<p class="muted">No openings in snapshot.</p>';
+      }
+    }
+
+    function render(items: Item[], plan: any, version: number, knowledge: string | null, attachedAt: string | null) {
+      if (!job) return;
+      const setText = (selector: string, value: string) => { const element = q(selector); if (element) element.textContent = value; };
+
+      setText('[data-title]', job.customer_name || job.id);
+      setText('[data-subtitle]', `${job.id}${job.customer_city ? ` · ${job.customer_city}` : ''}`);
+      setText('[data-status-label]', statusLabel(job.status));
+      setText('[data-status-help]', job.status === 'completed' ? 'Project closed' : job.status === 'scheduled' ? 'Installation is on the calendar' : 'Move this job as work progresses');
+
+      q('[data-status]').value = job.status;
+      setText('[data-customer]', job.customer_name || '—');
+      setText('[data-address]', [job.customer_address, job.customer_city].filter(Boolean).join(', ') || '—');
+
+      const phone = q('[data-phone-link]');
+      phone.textContent = job.customer_phone || '—';
+      phone.href = job.customer_phone ? `tel:${job.customer_phone.replace(/\D/g, '')}` : '#';
+
+      const email = q('[data-email-link]');
+      email.textContent = job.customer_email || '—';
+      email.href = job.customer_email ? `mailto:${job.customer_email}` : '#';
+
+      q('[data-date]').value = job.scheduled_date || '';
+      q('[data-window]').value = job.scheduled_window || '';
+      q('[data-notes]').value = job.notes || '';
+      q('[data-install-notes]').value = job.install_notes || '';
+      q('[data-closeout-notes]').value = job.closeout_notes || '';
+
+      if (job.quote_id) {
+        q('[data-quote-link]').hidden = false;
+        q('[data-quote-link]').href = `/internal/quotes/view?id=${encodeURIComponent(job.quote_id)}`;
+      }
+
+      q('[data-closeout-link]').hidden = false;
+      q('[data-closeout-link]').href = `/internal/jobs/closeout?id=${encodeURIComponent(job.id)}`;
+      q('[data-closeout-panel-link]').hidden = false;
+      q('[data-closeout-panel-link]').href = `/internal/jobs/closeout?id=${encodeURIComponent(job.id)}`;
+      q('[data-photos-link]').hidden = false;
+      q('[data-photos-link]').href = `/internal/tools/photos?jobId=${encodeURIComponent(job.id)}`;
+      q('[data-payment-link]').hidden = false;
+      q('[data-payment-link]').href = `/internal/payments?jobId=${encodeURIComponent(job.id)}`;
+      q('[data-field-link]').hidden = !plan;
+      if (plan) q('[data-field-link]').href = `/internal/jobs/field?id=${encodeURIComponent(job.id)}`;
+
+      const total = (items || []).reduce((sum, item) => sum + (Number(item.line_total_cents) || 0), 0);
+      setText('[data-total]', money(total));
+      const host = q('[data-items]');
+      host.innerHTML = items.length ? items.map((item) => `
+        <div class="scope-row"><span><strong>${esc(item.label)}</strong><small>Qty ${Number(item.quantity) || 0}</small></span><strong>${money(Number(item.line_total_cents) || 0)}</strong></div>`).join('') : '<p class="muted">No line items were attached to the quote.</p>';
+
+      renderPlan(plan, version, knowledge, attachedAt);
+      workspace.hidden = false;
+    }
+
+    async function load() {
+      try {
+        const response = await fetch(`/internal/api/jobs?id=${encodeURIComponent(id)}`, { headers: { 'cache-control': 'no-cache' } });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Could not load this job.');
+        job = data.job;
+        render(data.items || [], data.buildPlan, data.buildPlanVersion, data.buildPlanKnowledgeVersion, data.buildPlanAttachedAt);
+      } catch (cause) {
+        showError(cause instanceof Error ? cause.message : 'Could not load this job.');
+      }
+    }
+
+    async function reconcile() {
+      const button = q('[data-reconcile]');
+      if (!button || !job) return;
+      if (!window.confirm('Attach the current explicitly approved Build Plan to this job? This creates an audit event and does not modify the quote.')) return;
+      button.disabled = true;
+      button.textContent = 'Attaching…';
+      try {
+        const response = await fetch(`/internal/api/jobs?id=${encodeURIComponent(job.id)}`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'reconcileBuildPlan' })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Could not attach the Build Plan.');
+        await load();
+      } catch (cause) {
+        showError(cause instanceof Error ? cause.message : 'Could not attach the Build Plan.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Attach approved snapshot';
+      }
+    }
+
+    async function save() {
+      const saveButton = q('[data-save]');
+      const state = q('[data-save-state]');
+      if (!job || !saveButton) return;
+      saveButton.disabled = true;
+      saveButton.textContent = 'Saving…';
+      try {
+        const response = await fetch(`/internal/api/jobs?id=${encodeURIComponent(job.id)}`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            status: q('[data-status]').value,
+            scheduledDate: q('[data-date]').value,
+            scheduledWindow: q('[data-window]').value,
+            notes: q('[data-notes]').value,
+            installNotes: q('[data-install-notes]').value,
+            closeoutNotes: q('[data-closeout-notes]').value
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Could not save changes.');
+        state.textContent = `Saved ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        await load();
+      } catch (cause) {
+        showError(cause instanceof Error ? cause.message : 'Could not save changes.');
+        state.textContent = 'Save failed';
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save changes';
+      }
+    }
+
+    q('[data-save]').addEventListener('click', save);
+    q('[data-reconcile]').addEventListener('click', reconcile);
+    load();
+  }
+
+  initJobView();
+  document.addEventListener('astro:page-load', initJobView);
+</script>
+
+<style>
+  .job-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}
+  .head-actions,.build-actions{display:flex;gap:var(--space-xs);flex-wrap:wrap}
+  .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}
+  .status-card{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);padding:var(--space-m);margin-bottom:var(--space-m)}
+  .status-card>div{display:grid;gap:.2rem}.status-card>div>strong{font-size:var(--step-1)}.status-card small{color:var(--ink-soft)}
+  .status-card label,.schedule-form label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:650}
+  .status-card select,.schedule-form input,textarea{border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);padding:.6rem;font:inherit;min-height:44px}
+  .detail-grid,.notes-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-m);margin-bottom:var(--space-m)}
+  .panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}
+  .panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}
+  .details{padding:var(--space-m);display:grid;gap:var(--space-s);margin:0}.details div{display:grid;gap:.16rem}.details dt{font-size:var(--step--2);color:var(--ink-faint)}.details dd{margin:0}.details a{color:inherit}
+  .schedule-form{padding:var(--space-m);display:grid;grid-template-columns:.7fr 1.3fr;gap:var(--space-s)}
+  .scope-list{padding:0 var(--space-m)}.scope-row{display:flex;justify-content:space-between;gap:var(--space-m);align-items:center;padding:.9rem 0;border-bottom:1px solid var(--line)}.scope-row:last-child{border-bottom:0}.scope-row span{display:grid;gap:.16rem}.scope-row small{color:var(--ink-soft)}
+  .build-panel{margin:var(--space-m) 0}.plan-health{padding:var(--space-s) var(--space-m);border-bottom:1px solid var(--line);color:var(--ink-soft)}
+  .plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}.plan-grid section{padding:var(--space-m);border-bottom:1px solid var(--line)}.plan-grid section:nth-child(odd){border-right:1px solid var(--line)}.plan-grid h3{font-size:var(--step-0);margin:0 0 .5rem}.plan-grid ul,.plan-grid ol{margin:.3rem 0;padding-left:1.2rem}.plan-grid li{margin:.35rem 0}.plan-wide{grid-column:1/-1}
+  .job-opening{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:.7rem;align-items:center;border-top:1px solid var(--line);padding:.65rem 0}.job-opening:first-child{border-top:0}.job-opening small{color:var(--ink-faint)}
+  .note-panel textarea,.closeout textarea{display:block;width:100%;min-height:12rem;border:0;border-radius:0;padding:var(--space-m);resize:vertical}.closeout{margin-bottom:var(--space-m)}.closeout textarea{border-bottom:1px solid var(--line);min-height:9rem}
+  .save-row{padding:var(--space-s) var(--space-m);display:flex;justify-content:space-between;align-items:center;gap:var(--space-s)}.save-state{color:var(--ink-faint);font-size:var(--step--2)}.error{padding:var(--space-s);border-left:2px solid var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent);margin-bottom:var(--space-m)}.muted{color:var(--ink-soft)}
+  @media(max-width:720px){.job-head{align-items:flex-start;flex-direction:column}.detail-grid,.notes-grid{grid-template-columns:1fr}.status-card{align-items:flex-start;flex-direction:column}.schedule-form{grid-template-columns:1fr}.plan-grid{grid-template-columns:1fr}.plan-grid section:nth-child(odd){border-right:0}.build-actions,.head-actions{width:100%}.build-actions .btn,.head-actions .btn{flex:1;min-width:0}.job-opening{grid-template-columns:1fr;gap:.2rem}.panel-head{align-items:flex-start;flex-direction:column}.panel-head .btn{width:100%}.save-row{position:sticky;bottom:0;background:var(--paper-raised);z-index:3;padding-bottom:calc(var(--space-s) + env(safe-area-inset-bottom))}.save-row .btn{min-height:48px}.note-panel textarea,.closeout textarea{font-size:16px}}
+</style>
