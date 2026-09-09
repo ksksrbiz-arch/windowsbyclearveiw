@@ -132,6 +132,8 @@ assert.match(headers, /X-Content-Type-Options:\s*nosniff/);
 assert.match(headers, /Referrer-Policy:\s*strict-origin-when-cross-origin/);
 
 const estimateForm = fs.readFileSync(path.join(root, 'src', 'components', 'EstimateForm.astro'), 'utf8');
+assert.match(estimateForm, /<form[^>]+action=["']\/api\/estimate["']/);
+assert.match(estimateForm, /<form[^>]+method=["']post["']/);
 assert.match(estimateForm, /<form[^>]+enctype=["']multipart\/form-data["']/);
 
 const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8');
