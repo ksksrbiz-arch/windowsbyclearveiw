@@ -1,4 +1,5 @@
 import { BUILD_PLAN_STATES, transitionPlanState, assertJobEligible } from '../../_lib/build-plan-state.mjs';
+import { lintPlan, sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -9,6 +10,10 @@ function json(data, status = 200) {
 
 function clean(value, max = 100) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function sameSource(a, b) {
+  return JSON.stringify(a || []) === JSON.stringify(b || []);
 }
 
 async function ensureSchema(db) {
@@ -34,13 +39,24 @@ async function loadPlan(db, quoteId) {
   return { row, plan };
 }
 
+async function refreshQuality(db, quoteId, loaded) {
+  const itemsResult = await db.prepare('SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC, id ASC').bind(quoteId).all();
+  const items = itemsResult.results || [];
+  const quality = lintPlan(loaded.plan, items);
+  loaded.plan.quality = quality;
+  const savedSource = loaded.row.source_json ? (() => { try { return JSON.parse(loaded.row.source_json); } catch { return []; } })() : (loaded.plan.sourceItems || []);
+  const stale = !sameSource(savedSource, sourceSnapshot(items));
+  return { items, quality, stale };
+}
+
 export async function onRequestGet({ env, request }) {
   await ensureSchema(env.QUOTES_DB);
   const quoteId = clean(new URL(request.url).searchParams.get('quoteId'));
   if (!quoteId) return json({ error: 'Quote id is required.' }, 400);
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
-  return json({ quoteId, status: loaded.plan.status, version: loaded.plan.version, approvedAt: loaded.plan.approvedAt, approvedBy: loaded.plan.approvedBy, stateHistory: loaded.plan.stateHistory });
+  const checked = await refreshQuality(env.QUOTES_DB, quoteId, loaded);
+  return json({ quoteId, status: loaded.plan.status, version: loaded.plan.version, approvedAt: loaded.plan.approvedAt, approvedBy: loaded.plan.approvedBy, stateHistory: loaded.plan.stateHistory, quality: checked.quality, stale: checked.stale });
 }
 
 export async function onRequestPost({ env, request }) {
@@ -67,14 +83,19 @@ export async function onRequestPost({ env, request }) {
   if (!quote) return json({ error: 'Quote not found.' }, 404);
   if (action === 'approve' && quote.status !== 'draft') return json({ error: 'Only a draft quote can receive a new Build Plan approval.' }, 409);
 
+  const checked = await refreshQuality(env.QUOTES_DB, quoteId, loaded);
+  if (action === 'approve' && checked.stale) return json({ error: 'The quote changed after this Build Plan was saved. Refresh and reconcile the plan before approval.', code: 'BUILD_PLAN_STALE', quality: checked.quality }, 409);
+  if (action === 'approve' && checked.quality.blockers.length) return json({ error: 'Build Plan cannot be approved while quality blockers remain.', code: 'BUILD_PLAN_BLOCKED', blockers: checked.quality.blockers, warnings: checked.quality.warnings }, 409);
+
   let next;
   try { next = transitionPlanState(loaded.plan, target, actor); }
   catch (error) { return json({ error: error.message }, 409); }
 
   const now = new Date().toISOString();
-  await env.QUOTES_DB.prepare(`UPDATE quote_build_plans SET state = ?, state_history_json = ?, approved_at = ?, approved_by = ?, updated_at = ?, updated_by = ? WHERE quote_id = ?`)
-    .bind(next.status, JSON.stringify(next.stateHistory), next.approvedAt, next.approvedBy, now, actor, quoteId).run();
-  return json({ ok: true, quoteId, status: next.status, version: loaded.plan.version, approvedAt: next.approvedAt, approvedBy: next.approvedBy, stateHistory: next.stateHistory });
+  next.quality = checked.quality;
+  await env.QUOTES_DB.prepare(`UPDATE quote_build_plans SET state = ?, state_history_json = ?, plan_json = ?, approved_at = ?, approved_by = ?, updated_at = ?, updated_by = ? WHERE quote_id = ?`)
+    .bind(next.status, JSON.stringify(next.stateHistory), JSON.stringify(next), next.approvedAt, next.approvedBy, now, actor, quoteId).run();
+  return json({ ok: true, quoteId, status: next.status, version: loaded.plan.version, approvedAt: next.approvedAt, approvedBy: next.approvedBy, stateHistory: next.stateHistory, quality: checked.quality, stale: checked.stale });
 }
 
 export async function onRequestPut({ env, request }) {
