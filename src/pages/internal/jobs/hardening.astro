@@ -1,0 +1,39 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Production Health">
+  <div class="head">
+    <div><p class="kicker">Command Center · Release control</p><h1>Production health</h1><p class="lede">A fast operational check for the field and closeout pipeline.</p></div>
+    <a class="btn btn-ghost" href="/internal/jobs">Back to jobs</a>
+  </div>
+  <section class="grid">
+    <article class="panel"><span>Browser</span><strong data-browser>Checking…</strong><small>storage and connectivity</small></article>
+    <article class="panel"><span>Session</span><strong>Protected</strong><small>internal route middleware</small></article>
+    <article class="panel"><span>Field evidence</span><strong>Server enforced</strong><small>opening gates + exception rules</small></article>
+    <article class="panel"><span>Closeout</span><strong>Release gated</strong><small>finalization requires reconciliation</small></article>
+  </section>
+  <section class="panel checklist">
+    <div class="panel-head"><div><p class="kicker">Hardening status</p><h2>Release blockers</h2></div><span data-count>0 / 0</span></div>
+    <div data-list></div>
+  </section>
+  <p class="note">This screen is an operational diagnostic, not a substitute for browser QA or a successful production deployment.</p>
+</InternalLayout>
+<script>
+  const items=[
+    ['Field drafts',false,'Temporary network loss must not discard measurements, notes, materials, or exceptions.'],
+    ['Durable photos',false,'Original field photos need storage outside device-only browser storage.'],
+    ['Mobile smoke test',false,'Verify current iOS Safari and desktop Chrome behavior.'],
+    ['First-click navigation',false,'Reproduce and close issue #77 before release.'],
+    ['Successful deployment',false,'Confirm GitHub/Cloudflare reports a successful production build.'],
+  ];
+  const list=document.querySelector('[data-list]');const count=document.querySelector('[data-count]');const browser=document.querySelector('[data-browser]');
+  if(browser)browser.textContent=navigator.onLine?'Online':'Offline';
+  if(count)count.textContent=`0 / ${items.length}`;
+  if(list)list.innerHTML=items.map(([name,done,copy])=>`<div class="row"><span class="dot ${done?'pass':'block'}"></span><div><strong>${name}</strong><small>${copy}</small></div><b>${done?'PASS':'BLOCKED'}</b></div>`).join('');
+  window.addEventListener('online',()=>{if(browser)browser.textContent='Online';});
+  window.addEventListener('offline',()=>{if(browser)browser.textContent='Offline';});
+</script>
+<style>
+.head{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1rem}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}.panel{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);box-shadow:var(--shadow-sm);overflow:hidden}.grid .panel{padding:1rem}.grid span,.grid small{display:block;font-size:.7rem;color:var(--ink-faint)}.grid strong{display:block;margin:.3rem 0;font-size:1rem}.panel-head{padding:1rem 1.1rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head h2{margin:.1rem 0}.panel-head>span{font-weight:800;font-size:.75rem}.row{display:grid;grid-template-columns:12px 1fr auto;gap:.75rem;align-items:center;padding:.85rem 1.1rem;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.row strong{display:block;font-size:.8rem}.row small{display:block;color:var(--ink-soft);font-size:.7rem;margin-top:.15rem}.row b{font-size:.65rem;letter-spacing:.06em}.dot{width:10px;height:10px;border-radius:50%;background:var(--danger)}.dot.pass{background:var(--accent)}.note{font-size:.72rem;color:var(--ink-faint);margin-top:.7rem}
+@media(max-width:760px){.head{align-items:flex-start;flex-direction:column}.head .btn{width:100%;text-align:center}.grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.grid{grid-template-columns:1fr}.row{grid-template-columns:12px 1fr}.row b{grid-column:2;justify-self:start}}
+</style>
