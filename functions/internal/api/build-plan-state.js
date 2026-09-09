@@ -12,6 +12,10 @@ function clean(value, max = 100) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+function parseJson(value, fallback) {
+  try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
+}
+
 function sameSource(a, b) {
   return JSON.stringify(a || []) === JSON.stringify(b || []);
 }
@@ -23,6 +27,8 @@ async function ensureSchema(db) {
     `ALTER TABLE quote_build_plans ADD COLUMN state_history_json TEXT`,
     `ALTER TABLE quote_build_plans ADD COLUMN approved_at TEXT`,
     `ALTER TABLE quote_build_plans ADD COLUMN approved_by TEXT`,
+    `ALTER TABLE quote_build_plans ADD COLUMN source_json TEXT`,
+    `ALTER TABLE quote_build_plans ADD COLUMN quality_json TEXT`,
   ]) { try { await db.prepare(sql).run(); } catch {} }
   await db.prepare(`CREATE TRIGGER IF NOT EXISTS quote_build_plan_approved_lock BEFORE UPDATE OF plan_json ON quote_build_plans WHEN OLD.state = 'approved' AND NEW.state = 'approved' AND NEW.plan_json != OLD.plan_json BEGIN SELECT RAISE(ABORT, 'Approved Build Plan is locked; reopen it before editing.'); END`).run();
 }
@@ -30,10 +36,9 @@ async function ensureSchema(db) {
 async function loadPlan(db, quoteId) {
   const row = await db.prepare('SELECT * FROM quote_build_plans WHERE quote_id = ?').bind(quoteId).first();
   if (!row) return null;
-  let plan;
-  try { plan = JSON.parse(row.plan_json); } catch { plan = {}; }
+  const plan = parseJson(row.plan_json, {});
   plan.status = row.state || plan.status || BUILD_PLAN_STATES.DRAFT;
-  try { plan.stateHistory = row.state_history_json ? JSON.parse(row.state_history_json) : (plan.stateHistory || []); } catch { plan.stateHistory = plan.stateHistory || []; }
+  plan.stateHistory = parseJson(row.state_history_json, plan.stateHistory || []);
   plan.approvedAt = row.approved_at || plan.approvedAt || null;
   plan.approvedBy = row.approved_by || plan.approvedBy || null;
   plan.version = Number(row.version || plan.version || 1);
@@ -45,9 +50,10 @@ async function refreshQuality(db, quoteId, loaded) {
   const items = itemsResult.results || [];
   const quality = lintPlan(loaded.plan, items);
   loaded.plan.quality = quality;
-  const savedSource = loaded.row.source_json ? (() => { try { return JSON.parse(loaded.row.source_json); } catch { return []; } })() : (loaded.plan.sourceItems || []);
-  const stale = !sameSource(savedSource, sourceSnapshot(items));
-  return { items, quality, stale };
+  const savedSource = loaded.row.source_json ? parseJson(loaded.row.source_json, []) : (loaded.plan.sourceItems || []);
+  const currentSource = sourceSnapshot(items);
+  const stale = !sameSource(savedSource, currentSource);
+  return { items, quality, stale, savedSource, currentSource };
 }
 
 export async function onRequestGet({ env, request }) {
@@ -57,7 +63,8 @@ export async function onRequestGet({ env, request }) {
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
   const checked = await refreshQuality(env.QUOTES_DB, quoteId, loaded);
-  return json({ quoteId, status: loaded.plan.status, version: loaded.plan.version, approvedAt: loaded.plan.approvedAt, approvedBy: loaded.plan.approvedBy, stateHistory: loaded.plan.stateHistory, quality: checked.quality, stale: checked.stale });
+  const persistedQuality = parseJson(loaded.row.quality_json, null);
+  return json({ quoteId, status: loaded.plan.status, version: loaded.plan.version, approvedAt: loaded.plan.approvedAt, approvedBy: loaded.plan.approvedBy, stateHistory: loaded.plan.stateHistory, quality: checked.quality, persistedQuality, stale: checked.stale, sourceSnapshot: checked.currentSource });
 }
 
 export async function onRequestPost({ env, request }) {
@@ -66,7 +73,7 @@ export async function onRequestPost({ env, request }) {
   try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
   const quoteId = clean(body.quoteId);
   const action = clean(body.action);
-  const actor = 'mark';
+  const actor = clean(body.actor, 80) || 'mark';
   if (!quoteId || !action) return json({ error: 'quoteId and action are required.' }, 400);
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
@@ -94,9 +101,9 @@ export async function onRequestPost({ env, request }) {
 
   const now = new Date().toISOString();
   next.quality = checked.quality;
-  const persistedUpdatedAt = next.status === BUILD_PLAN_STATES.APPROVED ? next.approvedAt : now;
-  await env.QUOTES_DB.prepare(`UPDATE quote_build_plans SET state = ?, state_history_json = ?, plan_json = ?, approved_at = ?, approved_by = ?, updated_at = ?, updated_by = ? WHERE quote_id = ?`)
-    .bind(next.status, JSON.stringify(next.stateHistory), JSON.stringify(next), next.approvedAt, next.approvedBy, persistedUpdatedAt, actor, quoteId).run();
+  const persistedUpdatedAt = next.status === BUILD_PLAN_STATES.APPROVED ? (next.approvedAt || now) : now;
+  await env.QUOTES_DB.prepare(`UPDATE quote_build_plans SET state = ?, state_history_json = ?, plan_json = ?, quality_json = ?, source_json = ?, approved_at = ?, approved_by = ?, updated_at = ?, updated_by = ? WHERE quote_id = ?`)
+    .bind(next.status, JSON.stringify(next.stateHistory), JSON.stringify(next), JSON.stringify(checked.quality), JSON.stringify(checked.currentSource), next.approvedAt, next.approvedBy, persistedUpdatedAt, actor, quoteId).run();
   return json({ ok: true, quoteId, status: next.status, version: loaded.plan.version, approvedAt: next.approvedAt, approvedBy: next.approvedBy, stateHistory: next.stateHistory, quality: checked.quality, stale: checked.stale });
 }
 
