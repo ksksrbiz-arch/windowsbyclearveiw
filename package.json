@@ -15,7 +15,8 @@
     "eval:build-plan": "node scripts/eval-build-plan.mjs",
     "test:icm": "node scripts/test-icm-router.mjs",
     "test:build-plan-state": "node scripts/test-build-plan-state.mjs",
-    "test:build-plan-integration": "node scripts/test-build-plan-integration.mjs"
+    "test:build-plan-integration": "node scripts/test-build-plan-integration.mjs",
+    "test:production-hardening": "node scripts/test-production-hardening.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
