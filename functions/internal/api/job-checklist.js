@@ -20,6 +20,21 @@ async function ensureSchema(db) {
       UNIQUE(job_id, section, label)
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_job_checklist_job ON job_checklist_items(job_id, section, position)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS job_opening_evidence (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id TEXT NOT NULL,
+      opening_index INTEGER NOT NULL,
+      measurements_json TEXT NOT NULL DEFAULT '{}',
+      notes TEXT NOT NULL DEFAULT '',
+      exception_status TEXT NOT NULL DEFAULT 'none',
+      exception_notes TEXT NOT NULL DEFAULT '',
+      material_usage_json TEXT NOT NULL DEFAULT '{}',
+      photo_summary_json TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL DEFAULT 'mark',
+      UNIQUE(job_id, opening_index)
+    )`),
   ]);
 }
 
@@ -57,7 +72,6 @@ async function seed(db, jobId) {
     await db.prepare(`INSERT OR IGNORE INTO job_checklist_items (job_id, section, label, checked, position, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?)`)
       .bind(jobId, section, label, position, now, now).run();
   }
-
   const row = await db.prepare(`SELECT build_plan_json FROM jobs WHERE id = ?`).bind(jobId).first();
   if (!row?.build_plan_json) return;
   let plan;
@@ -78,6 +92,13 @@ async function buildPlanSnapshot(db, jobId) {
   let plan;
   try { plan = JSON.parse(row.build_plan_json); } catch { return null; }
   return { version: row.build_plan_version || 1, knowledgeVersion: row.build_plan_knowledge_version || null, plan };
+}
+
+function parsePhotoSummary(value) {
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return { before: Number(parsed?.before || 0), during: Number(parsed?.during || 0), after: Number(parsed?.after || 0), issue: Number(parsed?.issue || 0) };
+  } catch { return { before: 0, during: 0, after: 0, issue: 0 }; }
 }
 
 export async function onRequestGet(context) {
@@ -111,15 +132,22 @@ export async function onRequestPatch(context) {
     const currentIndex = rows.findIndex((row) => Number(row.position) === Number(current.position) && row.label === current.label);
     if (current.label !== 'Verify' && current.label !== 'Complete') {
       const previous = rows[currentIndex - 1];
-      if (!previous || Number(previous.checked) !== 1) {
-        return json({ error: `Complete the previous field gate before marking ${current.label} complete.`, code: 'FIELD_GATE_SEQUENCE' }, 409);
-      }
+      if (!previous || Number(previous.checked) !== 1) return json({ error: `Complete the previous field gate before marking ${current.label} complete.`, code: 'FIELD_GATE_SEQUENCE' }, 409);
+    }
+    if (current.label === 'Photograph') {
+      const openingIndex = Number(String(current.section).replace(/\D/g, '')) - 1;
+      const evidence = await env.QUOTES_DB.prepare(`SELECT photo_summary_json, exception_status, exception_notes FROM job_opening_evidence WHERE job_id = ? AND opening_index = ?`).bind(current.job_id, openingIndex).first();
+      const photos = parsePhotoSummary(evidence?.photo_summary_json);
+      const completeSet = photos.before > 0 && photos.during > 0 && photos.after > 0;
+      const documentedException = evidence && ['open', 'punchlist', 'resolved'].includes(String(evidence.exception_status)) && String(evidence.exception_notes || '').trim();
+      if (!completeSet && !documentedException) return json({ error: 'Capture before, during, and after evidence, or document an explicit field exception before completing Photograph.', code: 'PHOTO_EVIDENCE_REQUIRED', photos }, 409);
     }
     if (current.label === 'Complete') {
       const pending = rows.filter((row) => row.label !== 'Complete' && Number(row.checked) !== 1);
-      if (pending.length) {
-        return json({ error: 'Complete every prior field gate before closing this opening.', code: 'OPENING_INCOMPLETE', remaining: pending.length }, 409);
-      }
+      if (pending.length) return json({ error: 'Complete every prior field gate before closing this opening.', code: 'OPENING_INCOMPLETE', remaining: pending.length }, 409);
+      const openingIndex = Number(String(current.section).replace(/\D/g, '')) - 1;
+      const evidence = await env.QUOTES_DB.prepare(`SELECT exception_status FROM job_opening_evidence WHERE job_id = ? AND opening_index = ?`).bind(current.job_id, openingIndex).first();
+      if (String(evidence?.exception_status || 'none') === 'open') return json({ error: 'Resolve the open exception or explicitly move it to the punch list before closing this opening.', code: 'OPEN_EXCEPTION' }, 409);
     }
   }
 
