@@ -68,21 +68,16 @@ for (const file of pageFiles) {
     if (!source.includes('BaseLayout')) warnings.push(`${rel}: no BaseLayout reference found; verify metadata manually.`);
   }
 
-  // Every literal <img> must declare alt, including decorative images (which
-  // should use alt=""). This catches regressions that otherwise silently
-  // remove image semantics from the public marketing surface.
   for (const match of source.matchAll(/<img\b[^>]*>/g)) {
     if (!/\balt\s*=/.test(match[0])) {
       failures.push(`${rel}: <img> is missing an alt attribute.`);
     }
   }
 
-  // Astro's <Image> component renders a real <img>, so it needs the same
-  // accessibility contract. Keep this static check intentionally simple: an
-  // opening component tag must contain an explicit alt prop, including
-  // decorative alt="". This catches regressions that the literal-img scan
-  // cannot see because Astro transforms the component at build time.
-  for (const match of source.matchAll(/<Image\b[\s\S]*?>/g)) {
+  // Astro's <Image> component becomes a real <img> at build time. Require an
+  // explicit alt prop here too, including alt="" for decorative imagery.
+  // The negative character class avoids swallowing later component tags.
+  for (const match of source.matchAll(/<Image\b[^>]*>/g)) {
     if (!/\balt\s*=/.test(match[0])) {
       failures.push(`${rel}: <Image> is missing an alt attribute.`);
     }
@@ -132,9 +127,6 @@ assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]\s*
 assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]/);
 assert.match(baseLayout, /document\.addEventListener\(['"]astro:page-load['"]\s*,\s*\(\)\s*=>\s*whenIdle\(trackVisitJourney\)\)/);
 
-// Public lead endpoint hardening: the browser submits multipart form data,
-// cross-origin browser POSTs are rejected, bodies are capped, and GET must
-// not disclose provider/template implementation details.
 const estimate = fs.readFileSync(path.join(root, 'functions', 'api', 'estimate.js'), 'utf8');
 assert.match(estimate, /MAX_BODY_BYTES\s*=\s*64\s*\*\s*1024/);
 assert.match(estimate, /request\.headers\.get\('origin'\)/);
@@ -168,8 +160,6 @@ const astroConfig = fs.readFileSync(path.join(root, 'astro.config.mjs'), 'utf8')
 assert.match(astroConfig, /path\.startsWith\('\/internal\/'\)/);
 assert.match(astroConfig, /path !== '\/internal'/);
 
-// Washington contractor-advertising guard: this public marketing surface must
-// never accidentally reintroduce the unsupported "bonded and insured" claim.
 for (const file of pageFiles) {
   const rel = path.relative(root, file).replaceAll(path.sep, '/');
   if (rel.startsWith('src/pages/internal/') || rel.startsWith('src/pages/api/')) continue;
