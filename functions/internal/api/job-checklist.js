@@ -101,6 +101,13 @@ function parsePhotoSummary(value) {
   } catch { return { before: 0, during: 0, after: 0, issue: 0 }; }
 }
 
+function parseMeasurements(value) {
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch { return {}; }
+}
+
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureSchema(env.QUOTES_DB);
@@ -133,6 +140,16 @@ export async function onRequestPatch(context) {
     if (current.label !== 'Verify' && current.label !== 'Complete') {
       const previous = rows[currentIndex - 1];
       if (!previous || Number(previous.checked) !== 1) return json({ error: `Complete the previous field gate before marking ${current.label} complete.`, code: 'FIELD_GATE_SEQUENCE' }, 409);
+    }
+    if (current.label === 'Verify') {
+      const openingIndex = Number(String(current.section).replace(/\D/g, '')) - 1;
+      const evidence = await env.QUOTES_DB.prepare(`SELECT measurements_json FROM job_opening_evidence WHERE job_id = ? AND opening_index = ?`).bind(current.job_id, openingIndex).first();
+      const measurements = parseMeasurements(evidence?.measurements_json);
+      const width = Number(measurements.width);
+      const height = Number(measurements.height);
+      if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+        return json({ error: 'Record the actual opening width and height before completing Verify.', code: 'FIELD_MEASUREMENTS_REQUIRED' }, 409);
+      }
     }
     if (current.label === 'Photograph') {
       const openingIndex = Number(String(current.section).replace(/\D/g, '')) - 1;
