@@ -12,6 +12,7 @@
     "astro": "astro",
     "build:guides-index": "node scripts/build-guides-index.mjs",
     "eval:ask": "node scripts/eval-ask.mjs",
+    "eval:build-plan": "node scripts/eval-build-plan.mjs",
     "test:icm": "node scripts/test-icm-router.mjs",
     "test:build-plan-state": "node scripts/test-build-plan-state.mjs"
   },
