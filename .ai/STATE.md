@@ -2,7 +2,7 @@
 
 ## Status
 
-**Phase 1 implemented and hardened:** ICM foundation + deterministic Build Plan lifecycle + quote/job approval gates.
+**Phase 1 hardened:** ICM foundation + deterministic Build Plan lifecycle + quote/job approval gates + Ask specialist runtime seam.
 
 ## What exists
 
@@ -11,11 +11,14 @@
 - `.ai/RULES.md` defines evidence, uncertainty, safety, synchronization, and approval rules.
 - `.ai/STATE.md` records architecture state rather than mixing state into identity.
 - `.ai/workflows/build-plan/` defines the complete Build Plan pipeline, including human approval.
-- `.ai/specialists/` defines the specialist contracts for future Ask/Command Center routing.
+- `.ai/specialists/` defines the specialist contracts used by Ask routing.
 - `functions/_lib/build-plan-rules.mjs` owns durable installation/material/QC rules and quality linting.
-- `functions/_lib/build-plan-state.mjs` owns the allowed Build Plan lifecycle transitions.
+- `functions/_lib/build-plan-state.mjs` owns the allowed Build Plan lifecycle transitions and source-snapshot invariant.
 - `functions/internal/api/build-plan-state.js` persists state, recalculates live quality, detects quote drift, records approval, and locks approved plans until explicitly reopened.
-- `src/pages/internal/quotes/build-plan-approval.astro` exposes the human approval gate.
+- `src/pages/internal/quotes/build-plan-approval.astro` exposes the human approval gate with live quality/freshness checks.
+- `functions/ask/_lib/icm-router.mjs` deterministically routes Ask requests to one specialist.
+- `functions/ask/_lib/icm-specialists.mjs` provides bounded runtime specialist contracts while `.ai/specialists/*/CONTEXT.md` remains canonical.
+- `functions/ask/api/chat.js` injects the selected specialist contract before retrieval/model generation and returns route metadata.
 
 ## Deterministic Build Plan system
 
@@ -27,8 +30,10 @@ The application now:
 - detects stale plans when quote data changes;
 - records authority/manufacturer source metadata;
 - lints for missing openings, unsupported hard quantities, invented fastener specs, missing water management, missing drainage/operation checks, and quote/opening mismatches;
+- recalculates quality against the current quote at state-check time;
 - blocks approval on live quality blockers or stale quote data;
 - records reviewer/state history;
+- requires an explicit source snapshot for approval/job eligibility;
 - locks an approved plan at the database layer until explicitly reopened;
 - requires an approved current Build Plan before a quote can be finalized;
 - requires an approved current Build Plan before a finalized quote can become a Job;
@@ -38,18 +43,19 @@ The application now:
 
 ## CI coverage
 
-The GitHub build workflow now runs:
+The GitHub build workflow runs:
 
 1. ICM router regression tests;
 2. Build Plan state-machine regression tests;
-3. Build Plan golden-rule evaluation;
-4. the Astro production build.
+3. Build Plan integration wiring tests;
+4. Build Plan golden-rule evaluation;
+5. the Astro production build.
 
-GitHub currently reports no status checks/workflow runs for the latest connector-visible commit, so CI execution still needs to be confirmed from GitHub/Cloudflare after the next connected deployment.
+GitHub currently reports no workflow execution for the latest connector-visible commits, so CI execution still needs to be confirmed from GitHub/Cloudflare after connected deployment.
 
 ## Ask / ICM boundary
 
-The deterministic Ask router exists and is regression-tested, but the specialist contract is **not yet wired into `functions/ask/api/chat.js` at runtime**. Existing Ask model/tool guardrails remain authoritative. Do not describe the ICM specialist routing as production-integrated until that seam is implemented and tested.
+Ask specialist routing is now runtime-integrated. The deterministic router runs before retrieval/model generation, exactly one bounded specialist contract is injected into the model system context, and existing RAG, business facts, tools, photo analysis, pricing safeguards, and answer-quality gates remain authoritative. Runtime integration has regression coverage for the router/contracts; direct production endpoint execution still needs deployment verification.
 
 ## Known architectural boundary
 
