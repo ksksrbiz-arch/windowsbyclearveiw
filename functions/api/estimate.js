@@ -6,21 +6,13 @@ const MAX = {
   role: 40,
   notes: 2000,
 };
-
+const MAX_BODY_BYTES = 64 * 1024;
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
-// Where estimate requests land. Overridable by NOTIFY_EMAIL in the Pages
-// environment, which takes precedence over this default.
 const TO = 'owner@windowsbyclearveiw.com';
 
 const TEMPLATES = {
-  lead: {
-    id: 'estimate-request',
-    preview: 'https://resend.com/templates/f8b73ea1-867e-48b8-8ccf-926b1a825913',
-  },
-  receipt: {
-    id: 'estimate-received',
-    preview: 'https://resend.com/templates/68555c62-cbc3-4061-8dfe-ea1b02a59c75',
-  },
+  lead: { id: 'estimate-request' },
+  receipt: { id: 'estimate-received' },
 };
 
 function json(data, status = 200) {
@@ -29,11 +21,11 @@ function json(data, status = 200) {
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
     },
   });
 }
 
-/** Browsers without JS post the form directly; send them to a real page. */
 function redirect(request, path) {
   const target = new URL(path, request.url);
   return new Response(null, {
@@ -48,6 +40,7 @@ function wantsJson(request) {
 
 function clean(value, max) {
   return String(value || '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, max);
@@ -60,10 +53,19 @@ function telUri(phone) {
   return digits;
 }
 
+function escapeHtmlAttr(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function emailButtonHtml(name, email) {
   if (!email) return '';
-  const safeName = String(name || 'them').replace(/"/g, '&quot;');
-  const safeEmail = String(email).replace(/"/g, '&quot;');
+  const safeName = escapeHtmlAttr(name || 'them');
+  const safeEmail = escapeHtmlAttr(email);
   return `<tr>
                     <td style="padding-bottom:12px;">
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -114,15 +116,31 @@ function toBase64(str) {
   for (const b of bytes) binary += String.fromCharCode(b);
   return btoa(binary);
 }
+
 function parseJourney(raw) {
   const empty = { visits: [], firstTouch: null };
   if (!raw) return empty;
   try {
     const parsed = JSON.parse(raw);
-    return {
-      visits: Array.isArray(parsed?.visits) ? parsed.visits.slice(0, 25) : [],
-      firstTouch: parsed?.firstTouch && typeof parsed.firstTouch === 'object' ? parsed.firstTouch : null,
-    };
+    const visits = Array.isArray(parsed?.visits)
+      ? parsed.visits.slice(-25).map((visit) => ({
+          path: clean(visit?.path, 200),
+          title: clean(visit?.title, 160),
+          ts: Number.isFinite(Number(visit?.ts)) ? Number(visit.ts) : null,
+        })).filter((visit) => visit.path || visit.title)
+      : [];
+    const first = parsed?.firstTouch;
+    const firstTouch = first && typeof first === 'object'
+      ? {
+          path: clean(first.path, 200),
+          referrer: clean(first.referrer, 500),
+          utm_source: clean(first.utm_source, 80),
+          utm_medium: clean(first.utm_medium, 80),
+          utm_campaign: clean(first.utm_campaign, 120),
+          ts: Number.isFinite(Number(first.ts)) ? Number(first.ts) : null,
+        }
+      : null;
+    return { visits, firstTouch };
   } catch {
     return empty;
   }
@@ -217,9 +235,34 @@ async function sendTemplate(key, payload) {
   }
   return body;
 }
+
 export async function onRequestPost(context) {
   const { request } = context;
   const asJson = wantsJson(request);
+
+  const contentLength = Number(request.headers.get('content-length') || 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return asJson ? json({ error: 'Request is too large.' }, 413) : redirect(request, '/estimate/problem');
+  }
+
+  // The estimate form is intentionally same-origin. Reject cross-origin POSTs
+  // when the browser supplies Origin; requests without Origin remain allowed
+  // for normal no-JS form submissions and privacy-preserving clients.
+  const origin = request.headers.get('origin');
+  if (origin) {
+    try {
+      if (new URL(origin).origin !== new URL(request.url).origin) {
+        return asJson ? json({ error: 'Invalid request origin.' }, 403) : redirect(request, '/estimate/problem');
+      }
+    } catch {
+      return asJson ? json({ error: 'Invalid request origin.' }, 403) : redirect(request, '/estimate/problem');
+    }
+  }
+
+  const contentType = request.headers.get('content-type') || '';
+  if (!contentType.toLowerCase().startsWith('multipart/form-data')) {
+    return asJson ? json({ error: 'Send the form as multipart data.' }, 415) : redirect(request, '/estimate/problem');
+  }
 
   let form;
   try {
@@ -243,9 +286,6 @@ export async function onRequestPost(context) {
     notes: clean(form.get('notes'), MAX.notes),
   };
 
-  // Collected per-field rather than stopping at the first problem, so a
-  // visitor who left two fields blank finds out about both at once instead
-  // of fixing one, resubmitting, and hitting the next rejection.
   const fieldErrors = {};
   if (!lead.name) fieldErrors.name = 'Enter your name.';
   if (!lead.phone) fieldErrors.phone = 'Enter a phone number.';
@@ -257,7 +297,10 @@ export async function onRequestPost(context) {
     fieldErrors.phone = 'Enter a 10-digit phone number so Mark can call you back.';
   }
 
-  const emailLooksReal = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(lead.email);
+  // Keep email deliberately conservative because the address is used in both
+  // Resend reply_to and a generated mailto button. Reject quotes, controls,
+  // angle brackets, and whitespace rather than trying to encode them later.
+  const emailLooksReal = /^[A-Za-z0-9.!#$%&'*+\-/=?^_`{|}~]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/.test(lead.email);
   if (lead.email && !emailLooksReal) {
     fieldErrors.email = 'That email address looks incomplete.';
   }
@@ -282,7 +325,6 @@ export async function onRequestPost(context) {
 
   const from = context.env?.RESEND_FROM || FROM;
   const to = context.env?.NOTIFY_EMAIL || TO;
-
   const vcardFilename = `${(lead.name || 'lead').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'lead'}.vcf`;
 
   try {
@@ -341,11 +383,5 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestGet() {
-  return json(
-    {
-      error: 'POST a request from the estimate form.',
-      templates: TEMPLATES,
-    },
-    405,
-  );
+  return json({ error: 'POST a request from the estimate form.' }, 405);
 }
