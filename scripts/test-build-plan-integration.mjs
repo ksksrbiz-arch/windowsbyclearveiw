@@ -10,13 +10,15 @@ const jobsApi = read('functions/internal/api/jobs.js');
 const editor = read('src/pages/internal/quotes/build-plan.astro');
 const approval = read('src/pages/internal/quotes/build-plan-approval.astro');
 
-assert.match(buildPlanApi, /plan\.status=saved\?\.state\|\|plan\.status\|\|'draft'/);
+assert.match(buildPlanApi, /plan\.status\s*=\s*saved\?\.state\s*\|\|\s*plan\.status\s*\|\|\s*'draft'/);
 assert.match(buildPlanApi, /ALTER TABLE quote_build_plans ADD COLUMN state/);
-assert.match(buildPlanApi, /Approved Build Plans are locked/);
+assert.match(buildPlanApi, /Approved Build Plan is locked/);
 assert.match(buildPlanApi, /source_json/);
 assert.match(stateApi, /action === 'approve'/);
 assert.match(stateApi, /checked\.stale/);
 assert.match(stateApi, /checked\.quality\.blockers\.length/);
+assert.match(stateApi, /quality_json/);
+assert.match(stateApi, /sourceSnapshot/);
 assert.match(stateApi, /transitionPlanState/);
 assert.match(quoteApi, /BUILD_PLAN_REQUIRED/);
 assert.match(quoteApi, /BUILD_PLAN_NOT_APPROVED/);
@@ -29,5 +31,7 @@ assert.match(editor, /Review &amp; approve/);
 assert.match(editor, /plan\.status==='approved'/);
 assert.match(approval, /data-action="approve"/);
 assert.match(approval, /sd\.status!=='review'/);
+assert.match(approval, /data-refresh/);
+assert.match(approval, /data-gate-summary/);
 
 console.log('Build Plan integration wiring: PASS');
