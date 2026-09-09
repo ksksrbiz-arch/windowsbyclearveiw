@@ -24,7 +24,7 @@ for (const token of ['jobId', 'openingIndex', 'stage', 'before', 'during', 'afte
 }
 
 // Server gates remain authoritative; browser state cannot bypass them.
-for (const token of ['FIELD_GATE_SEQUENCE', 'PHOTO_EVIDENCE_REQUIRED', 'OPENING_INCOMPLETE', 'OPEN_EXCEPTION', 'job_opening_evidence']) {
+for (const token of ['FIELD_GATE_SEQUENCE', 'FIELD_MEASUREMENTS_REQUIRED', 'PHOTO_EVIDENCE_REQUIRED', 'OPENING_INCOMPLETE', 'OPEN_EXCEPTION', 'job_opening_evidence']) {
   assert.match(checklist, new RegExp(token));
 }
 
