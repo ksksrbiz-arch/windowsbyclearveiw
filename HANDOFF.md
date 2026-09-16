@@ -121,6 +121,20 @@ Ran the full regression suite (`test:icm`, `test:build-plan-state`, `test:build-
 
 All four regression scripts and `npm run build` are green after the fixes. Public site (`/`, `/estimate`, `/tools/window-replacement-cost-calculator`, `/ask/api/chat`) returns 200 live. The internal Build Plan API could not be exercised live from this session (auth-gated); once this fix ships, re-run the Command Center production-mail-style manual check against `/internal/quotes/build-plan` to confirm the API responds instead of 500ing.
 
+## Full-site audit — 2026-09-16
+
+Ran the complete local regression suite (`test:icm`, `test:build-plan-state`, `test:build-plan-integration`, `test:production-hardening`, `test:marketing-platform`, `test:ask-security`, `test:recent-fixes`, `test:copilot`, `test:ai-surfaces`) and `npm run build` against `main` HEAD, then checked live production behavior directly.
+
+**Code / build:** All suites passed except one false-negative: `test:copilot`'s "non-POST rejection" check did a literal string search for `"status: 405"` in `functions/internal/api/copilot.js`, but the live code correctly returns 405 via `json({ error: 'Method not allowed' }, 405)` (status passed positionally, not as a `status:` key). Live-verified — `curl -X GET /api/estimate` returns `405`, same pattern. Fixed the assertion in `scripts/test-copilot.mjs` to check the actual guard condition instead of exact source text. `npm run build` produced 63 pages cleanly.
+
+**Live site:** Homepage, `/estimate`, `/tools/window-replacement-cost-calculator`, `/reviews`, `/ask`, and the custom 404 all load correctly. `windowsbyclearveiw.com` (typo domain) and `www.windowsbyclearview.com` both 301-redirect to the canonical apex. `/internal/` correctly 302s to `/internal/login` for unauthenticated requests. Security headers (HSTS, `X-Frame-Options: DENY`, `nosniff`, restrictive `Permissions-Policy`) are present on the canonical domain. `robots.txt` and `sitemap-index.xml`/`sitemap-0.xml` are correct and exclude `/internal` and `/api`.
+
+**Stale doc found and fixed:** the "Hero video" outstanding item said to drop a clip at `public/video/hero.mp4`; that path was never adopted. `VideoHero.astro` actually gates on `public/video/logo-reveal-1.mp4` (present, ~1.9MB) with a static-photo fallback when absent — this has been live and working. Removed from Outstanding below.
+
+**Google indexing / traffic — verified 2026-09-16 once Search Console + GA4 were connected in OpenSEO:** Technical indexing is healthy — homepage `coverageState: "Submitted and indexed"`, `robotsTxtState: ALLOWED`, correct self-canonical, both sitemaps registered. The gap is visibility, not plumbing: over the trailing 28 days, GSC showed near-zero clicks site-wide (homepage 3 clicks / 41 impressions; every `/areas/*` page 0 clicks despite real impressions, e.g. `/areas/vancouver` 82 impressions at avg. position ~56, `/areas/portland` 55 impressions at avg. position ~36 — page 3-6, effectively invisible). GA4 organic channel showed only ~15 sessions / 9 users over the same 4 weeks, 0 key events. Notably, even branded queries (`clearview windows`, `clear view windows llc`, `clearview windows reviews`) average position 30-99 rather than the #1 a brand term should hold — consistent with no established/verified Google Business Profile entity, and likely some SERP confusion with similarly-named, unrelated businesses. Cloudflare-side spot check: production D1 (`clearveiw-quotes`, uuid `4700b6f7-c3d8-46c9-9b19-17cf34accb84`) has its full expected schema (leads/quotes/jobs/invoices/build-plan tables) and is live — current counts: 0 leads, 2 quotes, 1 job, 2 invoices, i.e. real work is being quoted directly rather than arriving through the web form yet, consistent with the low organic traffic above. `clearveiw-pricing` worker and its KV namespace are both deployed as documented.
+
+**Priority flag, not a bug:** Google Business Profile is still unset (see Outstanding). The data above makes the case concretely — for a local install business, GBP/map-pack presence is very likely a bigger lever on real traffic and branded-search position than more content pages, and it's a same-day setup, not new infrastructure. Worth doing ahead of further site-building per the Cathedral Principle.
+
 ## Outstanding
 
 | | |
@@ -128,7 +142,6 @@ All four regression scripts and `npm run build` are green after the fixes. Publi
 | **L&I registration number** | Set `lniNumber` in `src/data/site.ts` when the real registration exists. |
 | **Mark's real pricing** | Replace regional averages when actual ranges are supplied. |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
-| **Hero video** | Drop the production clip at `public/video/hero.mp4`. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
 | **Google Business Profile** | Still needs setup. |
 | **Single-color logo glyph** | Commission a simplified flat glyph for embroidery/engraving/one-color applications. |
