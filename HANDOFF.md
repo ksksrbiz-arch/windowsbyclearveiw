@@ -135,6 +135,8 @@ Ran the complete local regression suite (`test:icm`, `test:build-plan-state`, `t
 
 **Priority flag, not a bug:** Google Business Profile is still unset (see Outstanding). The data above makes the case concretely — for a local install business, GBP/map-pack presence is very likely a bigger lever on real traffic and branded-search position than more content pages, and it's a same-day setup, not new infrastructure. Worth doing ahead of further site-building per the Cathedral Principle.
 
+**Follow-up — 2026-09-16, root cause confirmed:** Queried Google's Business Profile and local-pack data directly (via OpenSEO, now connected with real Search Console/GA4/GBP access). Clear View Windows & Trim LLC has **no Google Business Profile at all** — it does not appear in the local map pack for "window replacement near me" searched from Vancouver, WA; the top 10 results are all real competitors (Zen Windows Vancouver, Best Value Glass, Lifetime Windows & Doors, Anderson Glass Co, Elite Glass & Mirror, MS Glass Outlet, PNW Glass & Mirror, and others), none of them this business. Worse, there is a **direct brand-name collision**: `clearviewpdx.com` ("ClearView Windows & Doors," Portland/Vancouver, claimed GBP, 5.0★/6 reviews, phone 971-417-6000) is a *different, unrelated company* operating the same trade in the same service area under nearly the same name — this is almost certainly why even branded searches ("clearview windows," "clear view windows llc") rank position 30-99 instead of #1: Google (and confused searchers) are matching the wrong, already-established business. A second unrelated same-named company (Massachusetts-based) also surfaces on a bare name search, though it's not a local threat. Recorded as competitors/context in the OpenSEO project (`cec8d5a2-61e3-4903-a079-ca6a131dcc57`) for continuity. **This changes the GBP task from "set one up" to "set one up correctly and consider whether the trade name needs to visibly differentiate from `clearviewpdx.com` in local listings/citations"** — claiming a GBP alone will not fix the collision if the profile fields (name, category, service area) don't clearly disambiguate from the Portland competitor.
+
 ## Outstanding
 
 | | |
@@ -143,7 +145,7 @@ Ran the complete local regression suite (`test:icm`, `test:build-plan-state`, `t
 | **Mark's real pricing** | Replace regional averages when actual ranges are supplied. |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
-| **Google Business Profile** | Still needs setup. |
+| **Google Business Profile** | Urgent — none exists. Must also disambiguate from `clearviewpdx.com`, an unrelated same-named competitor already claimed in the same service area (see 2026-09-16 audit follow-up above). |
 | **Single-color logo glyph** | Commission a simplified flat glyph for embroidery/engraving/one-color applications. |
 
 ## How I like to work
