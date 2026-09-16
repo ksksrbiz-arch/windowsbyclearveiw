@@ -18,7 +18,7 @@ const checks = [
   ['read-only response', api.includes('readOnly: true')],
   ['degraded state', api.includes("degraded: provider === 'degraded'")],
   ['no mutation claim', api.includes('Do not claim that you changed any business record.')],
-  ['non-POST rejection', api.includes("status: 405")],
+  ['non-POST rejection', api.includes("context.request.method !== 'POST'") && api.includes(', 405)')],
   ['UI uses API', page.includes("/internal/api/copilot")],
   ['UI lifecycle binding', page.includes("astro:page-load")],
 ];

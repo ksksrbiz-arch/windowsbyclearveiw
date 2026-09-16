@@ -121,6 +121,20 @@ Ran the full regression suite (`test:icm`, `test:build-plan-state`, `test:build-
 
 All four regression scripts and `npm run build` are green after the fixes. Public site (`/`, `/estimate`, `/tools/window-replacement-cost-calculator`, `/ask/api/chat`) returns 200 live. The internal Build Plan API could not be exercised live from this session (auth-gated); once this fix ships, re-run the Command Center production-mail-style manual check against `/internal/quotes/build-plan` to confirm the API responds instead of 500ing.
 
+## Full-site audit — 2026-09-16
+
+Ran the complete local regression suite (`test:icm`, `test:build-plan-state`, `test:build-plan-integration`, `test:production-hardening`, `test:marketing-platform`, `test:ask-security`, `test:recent-fixes`, `test:copilot`, `test:ai-surfaces`) and `npm run build` against `main` HEAD, then checked live production behavior directly.
+
+**Code / build:** All suites passed except one false-negative: `test:copilot`'s "non-POST rejection" check did a literal string search for `"status: 405"` in `functions/internal/api/copilot.js`, but the live code correctly returns 405 via `json({ error: 'Method not allowed' }, 405)` (status passed positionally, not as a `status:` key). Live-verified — `curl -X GET /api/estimate` returns `405`, same pattern. Fixed the assertion in `scripts/test-copilot.mjs` to check the actual guard condition instead of exact source text. `npm run build` produced 63 pages cleanly.
+
+**Live site:** Homepage, `/estimate`, `/tools/window-replacement-cost-calculator`, `/reviews`, `/ask`, and the custom 404 all load correctly. `windowsbyclearveiw.com` (typo domain) and `www.windowsbyclearview.com` both 301-redirect to the canonical apex. `/internal/` correctly 302s to `/internal/login` for unauthenticated requests. Security headers (HSTS, `X-Frame-Options: DENY`, `nosniff`, restrictive `Permissions-Policy`) are present on the canonical domain. `robots.txt` and `sitemap-index.xml`/`sitemap-0.xml` are correct and exclude `/internal` and `/api`.
+
+**Stale doc found and fixed:** the "Hero video" outstanding item said to drop a clip at `public/video/hero.mp4`; that path was never adopted. `VideoHero.astro` actually gates on `public/video/logo-reveal-1.mp4` (present, ~1.9MB) with a static-photo fallback when absent — this has been live and working. Removed from Outstanding below.
+
+**Google indexing / traffic:** Not independently verifiable this session. The OpenSEO integration account (`skagglegotu@gmail.com`) had 0 credits and no project connected to Search Console or GA4. Created an OpenSEO project scoped to `windowsbyclearview.com` (id `4ca0d69d-f0db-4f9a-a7c7-931796db30da`); its URL Inspection and Search Console/GA4 performance tools are free (no credits required) but need the actual Search Console and GA4 properties connected via Google OAuth at `https://app.openseo.so/p/4ca0d69d-f0db-4f9a-a7c7-931796db30da/settings/integrations` — only the account owner can complete that consent step. Once connected, re-run indexing/traffic checks through OpenSEO's `inspect_urls` / `get_search_console_performance` / GA4 tools.
+
+**Notable gap, not a bug:** HANDOFF's own Outstanding list still shows Google Business Profile as unset. For a local window-installation business, GBP/map-pack presence is typically a bigger traffic driver than organic content pages — worth prioritizing given the Cathedral Principle (revenue-adjacent, not new infrastructure).
+
 ## Outstanding
 
 | | |
@@ -128,7 +142,6 @@ All four regression scripts and `npm run build` are green after the fixes. Publi
 | **L&I registration number** | Set `lniNumber` in `src/data/site.ts` when the real registration exists. |
 | **Mark's real pricing** | Replace regional averages when actual ranges are supplied. |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
-| **Hero video** | Drop the production clip at `public/video/hero.mp4`. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
 | **Google Business Profile** | Still needs setup. |
 | **Single-color logo glyph** | Commission a simplified flat glyph for embroidery/engraving/one-color applications. |
