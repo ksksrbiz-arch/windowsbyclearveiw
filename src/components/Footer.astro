@@ -2,6 +2,7 @@
 import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 import FacebookIcon from './icons/FacebookIcon.astro';
+import LicenseTag from './LicenseTag.astro';
 
 const year = new Date().getFullYear();
 
@@ -105,11 +106,11 @@ const columns = [
       <a href="/legal/accessibility">Accessibility</a>
     </nav>
 
-    <p class="fine-print">
-      {site.lniNumber
-        ? `WA contractor registration ${site.lniNumber}`
-        : 'WA contractor registration number pending — ask Mark for it on the first call.'}
-    </p>
+    {site.lniNumber ? (
+      <LicenseTag />
+    ) : (
+      <p class="fine-print">WA contractor registration number pending — ask Mark for it on the first call.</p>
+    )}
   </div>
 </footer>
 
@@ -119,9 +120,11 @@ const columns = [
      rule. It is now a proper masthead: a brand block with real contact rows,
      three labelled navs, and a base line carrying the legal text.
 
-     The registration line stays a plain statement of fact. Washington's
-     RCW 18.27.100 governs what a registered contractor may claim in
-     advertising, so nothing here is dressed up into a badge.
+     The registration line stays a factual disclosure, not a trust seal.
+     Washington's RCW 18.27.100 governs what a registered contractor may
+     claim in advertising, so LicenseTag deliberately renders the bare
+     registration number rather than a checkmark/shield graphic that would
+     imply certification or inspection the registration doesn't provide.
      ─────────────────────────────────────────────────────────────────────── */
   .site-footer {
     border-top: 1px solid var(--line);
