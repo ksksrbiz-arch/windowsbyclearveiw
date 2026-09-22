@@ -90,7 +90,8 @@ The production build is pinned to Node `22.19.0` through `.node-version` and the
 | Reviews | `src/content/reviews/` |
 | Guides | `src/content/guides/` |
 | Contract terms | `src/data/contractTerms.ts` |
-| Homepage video | `public/video/hero.mp4` |
+| License/insurance/bond disclosure tags | `src/data/site.ts` (`lniNumber`, `insurance`, `bond`) + `src/components/LicenseTag.astro`, `InsuranceTag.astro`, `BondTag.astro` |
+| Homepage video | `public/video/logo-reveal-1.mp4` (see `VideoHero.astro` — falls back to a static photo hero when absent) |
 
 ### Adding a work photo
 
@@ -125,6 +126,10 @@ The public platform includes:
 - optimized hero imagery and metadata-only hero video preload.
 
 The marketing regression suite also checks for unsupported regulated-business claims such as advertising the contractor as “bonded and insured” or inventing an L&I number.
+
+### Credential disclosure tags
+
+`LicenseTag.astro`, `InsuranceTag.astro`, and `BondTag.astro` render small factual disclosure tags (not trust seals) for the WA L&I contractor registration, the general liability insurance policy, and the WA L&I surety bond, in the homepage hero and the site-wide footer. Each is gated on its own `site.ts` field (`lniNumber`, `insurance`, `bond`) and renders nothing when that field is unset — no invented credentials. Visible text is deliberately short ("Insured", "WA Bonded"); the real carrier/policy/bond numbers live in `title`/`aria-label` so a hover, long-press, or screen reader still gets the full disclosure. None of the three ever combine into the literal "bonded and insured" phrase — that phrase is specifically restricted in Washington contractor advertising, and `test:marketing-platform` guards against it.
 
 ## Pricing
 
@@ -347,6 +352,8 @@ npm run test:production-hardening
 npm run test:marketing-platform
 npm run test:ask-security
 npm run test:recent-fixes
+npm run test:copilot
+npm run test:ai-surfaces
 npm run eval:build-plan
 npm run build
 ```
@@ -362,6 +369,8 @@ Available npm scripts include:
 | `test:marketing-platform` | Public-site routing, SEO, accessibility, form, and security regressions |
 | `test:ask-security` | `/ask` endpoint security checks |
 | `test:recent-fixes` | Regression coverage for recent field-photo, login, invoice, sitemap, and estimate fixes |
+| `test:copilot` | Internal Command Center copilot contract checks |
+| `test:ai-surfaces` | Lead analyzer, evidence reviewer, and other internal AI surface checks |
 | `eval:build-plan` | End-to-end build-plan evaluation |
 | `eval:ask` | Live `/ask` behavioral evaluation |
 | `build:guides-index` | Regenerate the guide embedding index |
@@ -403,7 +412,7 @@ These are tracked deliberately rather than hidden behind optimistic documentatio
 3. **Field-photo durability** — original photos are browser-local; durable cloud photo storage is not currently part of the workflow.
 4. **Shared internal login** — appropriate for the current single-operator model, not a multi-user identity system.
 5. **Legal review** — contract language needs professional review before being treated as legally authoritative.
-6. **L&I registration data** — do not publish an invented or placeholder registration number.
+6. **Credential wording** — the license/insurance/bond disclosure tags (`LicenseTag`, `InsuranceTag`, `BondTag`) ship on real, verified numbers, but the exact wording has not had a formal L&I/attorney sign-off — see `HANDOFF.md`'s 2026-09-22 entries for the reasoning. Never invent a placeholder value for any of the three if one goes unset again.
 
 ## Important principle
 
