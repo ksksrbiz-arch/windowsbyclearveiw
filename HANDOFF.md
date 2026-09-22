@@ -148,6 +148,14 @@ What shipped: `src/components/LicenseTag.astro`, a small factual disclosure tag 
 
 What's needed before an insurance badge can ship, without inventing anything: (a) the actual carrier name, (b) coverage type — general liability is what's normally advertised, not auto or workers' comp — and ideally the coverage amount, (c) confirmation the policy is currently active, and (d) compliant wording confirmed with L&I/an attorney given point 1. Once that's in hand, add a `site.insurance` field mirroring how `lniNumber` is gated (empty/unset by default, a real value turns the badge on) and a second `LicenseTag`-style component using non-banned phrasing — never "bonded and insured" as a set phrase.
 
+**Follow-up — 2026-09-22, swept the whole site for stale "pending" L&I copy:** Setting `site.lniNumber` only fixed the surfaces that already read that field dynamically (Footer, JSON-LD, the internal contract in `view.astro`). A full-text search across the repo turned up three more surfaces that hardcoded the old "not published yet" story as static prose, independent of the field, exactly the kind of drift a template-only fix misses:
+
+- `src/pages/about.astro` — the "What we have not earned yet" honesty list had a "Contractor registration number pending" entry. Since that gap is closed, removed the entry outright rather than leave a now-false "not earned yet" claim sitting next to the two that are still true (no reviews, pricing basis).
+- `src/pages/new-construction.astro` — "The business behind it" paragraph said the number "is not published here yet — ask for it on the first call." Rewritten to state the real number and keep the "verify it yourself at the L&I lookup" advice, which is good practice regardless of whether the number is known.
+- `src/content/legal/terms.md` — the "Contractor registration" section told readers to "ask for the registration number on your first call," which is now inaccurate since it's published on the site itself. Updated to state the number directly (this file is static markdown with facts hardcoded as literal prose throughout — legalName, entity type, etc. — so this matches the existing pattern rather than trying to inject a template variable into content-collection markdown) and bumped `updated` to 2026-09-22.
+
+Verified `dist/` after build: no remaining occurrence of "not published here yet," "number pending," or "number is not published" anywhere in the built site. The internal contract (`view.astro`) and invoices were already checked — invoices never carried this disclosure by design, and the contract's conditional warning/number line already read `site.lniNumber` correctly with no separate fix needed.
+
 ## Outstanding
 
 | | |
