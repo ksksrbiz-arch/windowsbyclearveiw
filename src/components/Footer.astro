@@ -3,6 +3,8 @@ import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 import FacebookIcon from './icons/FacebookIcon.astro';
 import LicenseTag from './LicenseTag.astro';
+import InsuranceTag from './InsuranceTag.astro';
+import BondTag from './BondTag.astro';
 
 const year = new Date().getFullYear();
 
@@ -107,7 +109,11 @@ const columns = [
     </nav>
 
     {site.lniNumber ? (
-      <LicenseTag />
+      <div class="credential-tags">
+        <LicenseTag />
+        <InsuranceTag />
+        <BondTag />
+      </div>
     ) : (
       <p class="fine-print">WA contractor registration number pending — ask Mark for it on the first call.</p>
     )}
@@ -263,6 +269,12 @@ const columns = [
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-s);
+  }
+
+  .credential-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
   }
 
   .footer-legal a {
