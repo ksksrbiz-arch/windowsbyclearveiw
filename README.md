@@ -18,7 +18,8 @@ The platform has been through a substantial hardening pass covering the public m
 
 ### Production checklist
 
-- [ ] **Washington L&I contractor registration number** — set `lniNumber` in `src/data/site.ts` once the real registration number is available. The build warns while it is blank. Set `REQUIRE_LNI=1` in the production Pages environment afterward so future accidental removal fails the build.
+- [x] **Washington L&I contractor registration number** — `lniNumber` in `src/data/site.ts` is set to the real registration (`CLEARVW74601`) as of 2026-09-22.
+- [ ] Set `REQUIRE_LNI=1` in the production Pages environment now that the number is set, so a future accidental removal fails the build instead of just warning.
 - [ ] **`RESEND_API_KEY` on Pages** — required for live estimate delivery.
 - [ ] **Reviews** — `/reviews` intentionally remains empty until real customer quotes are approved for publication.
 - [ ] **Internal production bindings** — `QUOTES_DB`, `INTERNAL_PASSWORD`, and `INTERNAL_SESSION_SECRET` must be configured in Cloudflare Pages.

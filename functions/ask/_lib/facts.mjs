@@ -1,10 +1,13 @@
 // Kept in sync with src/data/site.ts by hand — Pages Functions in this repo
 // never import from src/ (see functions/api/estimate.js for why: the
 // bundler's handling of a cross-boundary TS import was untested and not
-// worth risking). Deliberately omits site.lniNumber (empty until Mark's
-// registration is set) and never states "bonded and insured" — the system
-// prompt in chat.js repeats both rules explicitly so the model can't
-// improvise past this list.
+// worth risking). Deliberately omits site.lniNumber even though it is now
+// set — chat.js's HARD_BANNED filter scrubs any L&I/license number from
+// conversational output on purpose, so the real number stays on the
+// deterministic site (footer, JSON-LD, contracts) rather than in freeform
+// AI text — and never states "bonded and insured". The system prompt in
+// chat.js repeats both rules explicitly so the model can't improvise past
+// this list.
 export const BUSINESS_FACTS = `
 Business: Clearview Windows, operated by Clear View Windows & Trim LLC — replacement and new-construction window installation.
 Phone: (564) 208-0801
