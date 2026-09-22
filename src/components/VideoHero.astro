@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { Image, getImage } from 'astro:assets';
 import { site, telHref } from '../data/site';
 import { heroPhoto, findWork } from '../data/work';
+import LicenseTag from './LicenseTag.astro';
 
 // The finished elevation says what you get. This says who does it — which is
 // the claim the trust strip makes one column to the left.
@@ -65,6 +66,7 @@ const poster = await getImage({
         <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
         <a class="btn btn-ghost btn-on-dark" href="/estimate">Request an estimate</a>
       </p>
+      <p class="hero-credentials"><LicenseTag onDark /></p>
       <p class="hero-note">
         Free in-home measure. Written estimate before anything comes out of the wall.
         <a href="/tools/window-replacement-cost-calculator">See typical costs first</a>.
@@ -96,6 +98,7 @@ const poster = await getImage({
           <a class="btn btn-light" href={telHref()}>Call {site.phoneDisplay}</a>
           <a class="btn btn-ghost btn-on-dark" href="/estimate">Request an estimate</a>
         </p>
+        <p class="hero-credentials"><LicenseTag onDark /></p>
         <p class="hero-note">
           Free in-home measure. A written estimate before anything comes out of the wall.
           <a href="/tools/window-replacement-cost-calculator">See typical costs first</a>.
@@ -322,6 +325,10 @@ const poster = await getImage({
     flex-wrap: wrap;
     gap: 0.7rem;
     margin: 0;
+  }
+
+  .hero-credentials {
+    margin: var(--space-xs) 0 0;
   }
 
   .hero-note {

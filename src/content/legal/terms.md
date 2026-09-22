@@ -1,7 +1,7 @@
 ---
 title: Terms of use
 description: The terms that apply to using windowsbyclearview.com, including what the cost calculator is and is not.
-updated: 2026-08-21
+updated: 2026-09-22
 order: 2
 summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
 ---
@@ -92,10 +92,10 @@ by our negligence, or for fraud.
 
 ## Contractor registration
 
-Clear View Windows & Trim LLC is a Washington contractor. Ask for the registration
-number on your first call and verify it yourself using the Washington State
-Department of Labor & Industries contractor lookup. You should do that with
-every contractor you let near your walls, including us.
+Clear View Windows & Trim LLC is a Washington contractor, registered with the
+Department of Labor & Industries under registration number CLEARVW74601.
+Verify it yourself using the Washington State L&I contractor lookup. You
+should do that with every contractor you let near your walls, including us.
 
 Washington law limits what a registered contractor may claim in advertising,
 and this site is written to stay inside those limits. If you see a claim here

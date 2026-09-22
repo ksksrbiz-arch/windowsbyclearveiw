@@ -4,7 +4,7 @@ export const site = {
   legalName: 'Clear View Windows & Trim LLC',
   /**
    * Washington Unified Business Identifier. Distinct from lniNumber (the WA
-   * L&I contractor registration, which is separate and still pending).
+   * L&I contractor registration).
    */
   ubiNumber: '605 779 798',
   domain: 'windowsbyclearview.com',
@@ -54,7 +54,7 @@ export const site = {
     { name: 'Woodland', region: 'WA', state: 'Washington' },
     { name: 'Portland', region: 'OR', state: 'Oregon' },
   ],
-  lniNumber: '',
+  lniNumber: 'CLEARVW74601',
   hours: 'By appointment',
   social: {
     facebook: 'https://www.facebook.com/share/18pyB4MHkS/',
