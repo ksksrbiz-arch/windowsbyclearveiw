@@ -55,6 +55,32 @@ export const site = {
     { name: 'Portland', region: 'OR', state: 'Oregon' },
   ],
   lniNumber: 'CLEARVW74601',
+  /**
+   * Commercial general liability insurance, from the ACORD 25 certificate on
+   * file (Certificate #992928302, issued 2026-09-16). Drives InsuranceTag
+   * the same way lniNumber drives LicenseTag — set to null and the tag
+   * renders nothing rather than guessing at coverage.
+   */
+  insurance: {
+    carrier: 'State National Insurance Company',
+    policyNumber: 'NXTCDKDFTC-00-GL',
+    perOccurrence: 300_000,
+    generalAggregate: 300_000,
+    effectiveDate: '2026-09-16',
+    expirationDate: '2027-09-16',
+  } as { carrier: string; policyNumber: string; perOccurrence: number; generalAggregate: number; effectiveDate: string; expirationDate: string } | null,
+  /**
+   * WA L&I continuous contractor's surety bond, required alongside
+   * lniNumber under RCW 18.27.040 — the statutory bond, distinct from and
+   * much smaller than the liability insurance above. Drives BondTag the
+   * same way. Bond #568672F, effective 2026-09-15.
+   */
+  bond: {
+    surety: 'Westfield Insurance Company',
+    bondNumber: '568672F',
+    amount: 30_000,
+    effectiveDate: '2026-09-15',
+  } as { surety: string; bondNumber: string; amount: number; effectiveDate: string } | null,
   hours: 'By appointment',
   social: {
     facebook: 'https://www.facebook.com/share/18pyB4MHkS/',

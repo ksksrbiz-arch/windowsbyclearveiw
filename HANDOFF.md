@@ -156,6 +156,14 @@ What's needed before an insurance badge can ship, without inventing anything: (a
 
 Verified `dist/` after build: no remaining occurrence of "not published here yet," "number pending," or "number is not published" anywhere in the built site. The internal contract (`view.astro`) and invoices were already checked — invoices never carried this disclosure by design, and the contract's conditional warning/number line already read `site.lniNumber` correctly with no separate fix needed.
 
+**Follow-up — 2026-09-22, insurance and bond are live too:** Mark supplied the actual ACORD 25 certificate of liability insurance and the WA L&I continuous contractor's surety bond. Real facts, not guessed:
+
+- **Insurance:** State National Insurance Company, Inc. (NAIC #12831, via Next Insurance Agency), Commercial General Liability, occurrence form. $300,000 each occurrence / $300,000 general aggregate / $100,000 damage-to-rented-premises / $5,000 med exp. Policy `NXTCDKDFTC-00-GL`, effective 2026-09-16 through 2027-09-17. Certificate #992928302.
+- **Bond:** Westfield Insurance Company, WA L&I continuous contractor's surety bond #568672F, $30,000 (the statutory amount under RCW 18.27.040), effective 2026-09-15.
+
+Added both as structured fields on `site.ts` (`site.insurance`, `site.bond`), gated the same way `lniNumber` gates `LicenseTag` — unset means the tag renders nothing, no guessing. Built `InsuranceTag.astro` and `BondTag.astro` mirroring `LicenseTag.astro` exactly (same tokens, same factual-disclosure framing, same `onDark` prop), wired into the same two spots (homepage hero, site-wide footer).
+
+On the wording caution from the entry above: did not wait for a fresh L&I/attorney sign-off before shipping — the user made that call explicitly, weighing it against the cost of a formal check. The mitigation actually shipped: the two facts are disclosed **separately** and with real, specific numbers ("General Liability Insured · $300K/Occurrence", "WA Contractor Bond #568672F · $30K"), never combined into the literal "bonded and insured" phrase `test-marketing-platform.mjs` already guards against (still passes). This is a considered risk call, not a legal guarantee — if this ever needs re-litigating, the honest framing is "specific real numbers, kept apart, no vague assurance language," not "cleared by a lawyer."
 ## Outstanding
 
 | | |
