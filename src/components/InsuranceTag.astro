@@ -1,7 +1,10 @@
 ---
 // A factual disclosure tag for general liability insurance, not a trust
-// seal — same reasoning as LicenseTag.astro. States the real carrier and
-// per-occurrence limit rather than the vague "insured" claim Washington
+// seal — same reasoning as LicenseTag.astro. The visible text is
+// deliberately short ("Insured"); the real carrier, policy number, and
+// per-occurrence limit live in title/aria-label so a hover or long-press
+// (and every screen reader) still gets the specific number that makes
+// this defensible, rather than the vague "insured" claim Washington
 // treats as misleading advertising when paired with "bonded" (see
 // HANDOFF.md's 2026-09-22 entry). Renders nothing when site.insurance is
 // unset.
@@ -13,17 +16,19 @@ interface Props {
 
 const { onDark = false } = Astro.props;
 const insurance = site.insurance;
-const limit = insurance ? `$${(insurance.perOccurrence / 1000).toLocaleString()}K` : '';
+const detail = insurance
+  ? `General liability insured — ${insurance.carrier}, $${insurance.perOccurrence.toLocaleString()} per occurrence / $${insurance.generalAggregate.toLocaleString()} aggregate. Policy ${insurance.policyNumber}.`
+  : '';
 ---
 {insurance && (
-  <span class:list={['credential-tag', { 'is-on-dark': onDark }]}>
+  <span class:list={['credential-tag', { 'is-on-dark': onDark }]} title={detail} aria-label={detail}>
     <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
       <rect x="2.5" y="4.5" width="15" height="11" rx="1" />
       <line x1="5.5" y1="8" x2="14.5" y2="8" />
       <line x1="5.5" y1="10.5" x2="11.5" y2="10.5" />
       <line x1="5.5" y1="13" x2="9.5" y2="13" />
     </svg>
-    <span>General Liability Insured &middot; {limit}/Occurrence</span>
+    <span aria-hidden="true">Insured</span>
   </span>
 )}
 
