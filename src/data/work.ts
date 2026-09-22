@@ -56,6 +56,12 @@ import darkGreenFlagsShutters from '../assets/work/dark-green-flags-shutters.jpg
 // New batch added 2026-09-03
 import newBuildSheathedGarage from '../assets/work/new-build-sheathed-garage.jpg';
 
+// New batch added 2026-09-22
+import tanTrimSliderPorch from '../assets/work/tan-trim-slider-porch.jpg';
+import caulkGunInteriorSill from '../assets/work/caulk-gun-interior-sill.jpg';
+import charcoalTrimHungLadder from '../assets/work/charcoal-trim-hung-ladder.jpg';
+import newBuildTanCorner from '../assets/work/new-build-tan-corner.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -380,6 +386,42 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'new construction',
     featured: true,
     order: 37,
+  },
+  {
+    id: 'tan-trim-slider-porch',
+    image: tanTrimSliderPorch,
+    alt: 'New white vinyl slider window with primed tan trim, seen from under a covered porch roof',
+    caption: 'Slider set, trim primed and ready to paint',
+    kind: 'process',
+    featured: false,
+    order: 38,
+  },
+  {
+    id: 'caulk-gun-interior-sill',
+    image: caulkGunInteriorSill,
+    alt: 'Caulk gun resting on the sill of a newly set window, seen from inside looking out at the job truck and ladder',
+    caption: 'Sealing the sill from inside',
+    kind: 'process',
+    featured: false,
+    order: 39,
+  },
+  {
+    id: 'charcoal-trim-hung-ladder',
+    image: charcoalTrimHungLadder,
+    alt: 'Finished window with dark charcoal trim on white lap siding, ladder still standing after the install',
+    caption: 'Dark trim, finished, ladder still out',
+    kind: 'process',
+    featured: false,
+    order: 40,
+  },
+  {
+    id: 'new-build-tan-corner',
+    image: newBuildTanCorner,
+    alt: 'Multiple black-framed windows set into a modern new-construction home with tan panel siding and exposed weather barrier at the base',
+    caption: 'Corner windows set, new build',
+    kind: 'new construction',
+    featured: false,
+    order: 41,
   },
 ];
 

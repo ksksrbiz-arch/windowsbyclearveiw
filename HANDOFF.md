@@ -167,6 +167,15 @@ On the wording caution from the entry above: did not wait for a fresh L&I/attorn
 
 **Follow-up — 2026-09-22, shortened the visible tag text:** The user asked to drop the dollar amounts and just say "bonded and insured" outright. Declined — that's the literal phrase this repo already blocks and the exact prior mistake this file documents, and dropping the specific numbers would have made the claim *less* defensible (a bare "bonded and insured" implies more protection than a $30,000 statutory bond actually provides), not more compliant. What shipped instead, once the user picked this option explicitly: `InsuranceTag`'s and `BondTag`'s visible text shortened to just "Insured" and "WA Bonded" — the real carrier, policy/bond number, and dollar amounts moved into `title` (hover/long-press tooltip) and `aria-label` (so every screen reader still gets the full disclosure regardless of screen size). The inner text span carries `aria-hidden="true"` so screen readers read only the full `aria-label`, not both. Still never renders the combined "bonded and insured" phrase anywhere in markup — verified in `dist/` after build.
 
+**Follow-up — 2026-09-22, four new work photos added:** The user sent four real job photos (via a different session's file staging, which never actually reached this repo — pulled directly from the user's own upload instead once that became clear). Matched by actual content rather than the other session's guessed filenames, since two of the guesses didn't match what the photos actually showed:
+
+- `tan-trim-slider-porch.jpg` — new slider window, primed tan trim not yet painted, shot from under a covered porch roof. `kind: 'process'` (unpainted trim = cosmetically mid-job).
+- `caulk-gun-interior-sill.jpg` — caulk gun resting on the sill, interior view looking out at the job truck and ladder. `kind: 'process'`.
+- `charcoal-trim-hung-ladder.jpg` — finished window with dark charcoal trim, ladder still standing in front. `kind: 'process'`, following this file's existing convention that a ladder still in frame means `process` even when the trim itself reads finished (see `blue-hung-ladder`, `blue-ladder`, `gable-arch-ladders`).
+- `new-build-tan-corner.jpg` — modern new-construction home, tan panel siding, black window frames, exposed weather barrier at the base. `kind: 'new construction'`.
+
+Added to `src/assets/work/` and wired into `src/data/work.ts` with real alt text and captions, following the exact existing pattern (individual imports, not a glob, so a missing photo fails the build) — none use the `window-`-prefixed naming the other session guessed, to match this file's actual id convention (color/material-first, e.g. `tan-upper-slider`, `charcoal-corner-picture-window`). All `featured: false`. Verified in `dist/` after build: all four appear on `/gallery` (via `allWork`), the three `process`-kind photos appear on `/process` (via `processWork`), and the new-construction photo appears on `/new-construction` (via `newBuildWork`).
+
 ## Outstanding
 
 | | |
