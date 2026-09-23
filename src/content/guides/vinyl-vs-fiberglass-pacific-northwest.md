@@ -28,7 +28,7 @@ Short answer: for a standard-size Washington window, vinyl is the workhorse — 
 
 ## Why the Pacific Northwest even makes this a question
 
-This region isn't defined by extreme heat or cold — it's defined by nine wet months, three dry ones, and daily-to-seasonal temperature swings that are moderate compared to a desert or continental climate but still constant. That combination matters less for whether a frame material survives here (both do) and more for how it moves and how it's finished. A material that expands and contracts a lot with every swing stresses its seals over years of that cycling. A material that holds paint matters more somewhere people repaint trim than somewhere siding just gets pressure-washed. Vinyl and fiberglass answer those questions differently.
+This region isn't extreme heat or cold. It's nine wet months, three dry ones, and daily-to-seasonal swings — moderate next to a desert or continental climate, but constant. That matters less for whether a frame material survives here (both do) and more for how it moves and how it's finished. A material that expands and contracts a lot with every swing stresses its seals over years of that cycling. A material that holds paint matters more somewhere people repaint trim than somewhere siding just gets pressure-washed. Vinyl and fiberglass answer those questions differently.
 
 ## Thermal movement: the real technical difference
 
