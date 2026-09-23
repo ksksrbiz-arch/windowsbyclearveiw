@@ -54,7 +54,7 @@ export type WindowBrand = {
 export const pricing = {
   basis: {
     source: 'clearview',
-    region: 'Washington / Portland metro',
+    region: 'Washington',
     reviewedAt: '2026-08-21',
     maxAgeDays: 180,
     notes:

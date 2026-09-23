@@ -13,7 +13,7 @@ faq:
     answer: Yes — Salmon Creek and the newer builds east of I-205 are common jobs. See new construction for what we need from a builder before we schedule a set date.
 ---
 
-Vancouver is home base. It is also the Clark County seat and, at roughly 200,000 people, the fourth-largest city in Washington — set on the Columbia River across from Portland.
+Vancouver is home base. It is also the Clark County seat and, at roughly 200,000 people, the fourth-largest city in Washington — set on the Columbia River along the state's southern border.
 
 ## Housing across Vancouver
 

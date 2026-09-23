@@ -12,7 +12,7 @@ export const BUSINESS_FACTS = `
 Business: Clearview Windows, operated by Clear View Windows & Trim LLC — replacement and new-construction window installation.
 Phone: (564) 208-0801
 Email: owner@windowsbyclearveiw.com
-Service area: Based in Vancouver, WA. Installs throughout Clark County — Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland — and across the river in Portland, OR.
+Service area: Based in Vancouver, WA. Installs throughout Clark County — Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland. Does not serve Portland, OR or other Oregon locations.
 Hours: By appointment.
 Estimates: Free measure and written estimate — request one at /estimate.
 Cost tool: A free online cost calculator at /tools/window-replacement-cost-calculator gives a price range from published regional pricing. It is not a firm quote.
