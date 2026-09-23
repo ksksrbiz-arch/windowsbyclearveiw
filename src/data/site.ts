@@ -14,7 +14,7 @@ export const site = {
    * Long form, for the JSON-LD business entity where length does not matter.
    */
   description:
-    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland — plus Portland, Oregon across the river.',
+    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland.',
   /**
    * Short form, for the homepage <meta name="description">. Google truncates
    * around 160 characters and the long version was 253, so the service-area
@@ -40,9 +40,7 @@ export const site = {
     postalCode: '',
   },
   serviceArea: 'Vancouver, WA',
-  serviceAreaNote:
-    'Based in Vancouver, WA. We install throughout Clark County, north to Woodland, and across the river in Portland.',
-  // Region travels with the city so the schema does not park Portland in Washington.
+  serviceAreaNote: 'Based in Vancouver, WA. We install throughout Clark County, north to Woodland.',
   nearby: [
     { name: 'Vancouver', region: 'WA', state: 'Washington' },
     { name: 'Camas', region: 'WA', state: 'Washington' },
@@ -52,7 +50,6 @@ export const site = {
     { name: 'Ridgefield', region: 'WA', state: 'Washington' },
     { name: 'La Center', region: 'WA', state: 'Washington' },
     { name: 'Woodland', region: 'WA', state: 'Washington' },
-    { name: 'Portland', region: 'OR', state: 'Oregon' },
   ],
   lniNumber: 'CLEARVW74601',
   /**

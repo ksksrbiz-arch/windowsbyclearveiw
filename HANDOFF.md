@@ -7,7 +7,7 @@ Technical detail lives in [README.md](./README.md); this file is the *why*.
 
 ## What this is
 
-A marketing site for **Clearview Windows** — my friend Mark's window installation company in Vancouver, WA. He does replacement work for homeowners and new-construction installs for builders, across Clark County and across the river into Portland.
+A marketing site for **Clearview Windows** — my friend Mark's window installation company in Vancouver, WA. He does replacement work for homeowners and new-construction installs for builders, across Clark County. Does not operate in Portland or elsewhere in Oregon (see 2026-09-23 entry below).
 
 - **Live:** https://windowsbyclearview.com
 - **Repo:** `ksksrbiz-arch/windowsbyclearveiw` (public), deploys from `main`
@@ -35,7 +35,7 @@ These came out of real problems and are easy to undo by accident.
 
 1. **No invented reviews.** `/reviews` is deliberately empty. It previously shipped three fabricated testimonials attributed to named people in a city Mark does not serve. Reviews default to `published: false`. Only real quotes from real customers who agreed, ever.
 2. **No invented credentials.** `site.lniNumber` is now the real WA L&I contractor registration number (`CLEARVW74601`, set 2026-09-22 once Mark's Facebook Business Page showed it live). Washington requires a contractor registration number in advertising (RCW 18.27.100) and separately **prohibits** advertising that a contractor is "bonded and insured" — that phrase was removed and must stay out. The rule itself doesn't change now that a real number exists: never invent or guess a credential: `functions/ask/api/chat.js`'s `HARD_BANNED` filter still deliberately scrubs any L&I/license number from `/ask` conversational output — the real number lives in the deterministic site (footer, JSON-LD, printed contracts), not in freeform AI text.
-3. **Pricing must say whose numbers it is.** The estimator currently shows published 2026 Washington / Portland-metro averages, labelled as exactly that on the page, with a review date. When Mark supplies his own ranges, set `basis.source` to `'clearview'` and the copy switches itself. Never present somebody else's averages as ours.
+3. **Pricing must say whose numbers it is.** The estimator currently shows Mark's own installed pricing (`basis.source: 'clearview'`), labelled as exactly that on the page, with a review date. If it ever reverts to published regional averages, set `basis.source` back to `'averages'` and the copy switches itself. Never present somebody else's averages as ours.
 4. **The pricing worker does not discover prices.** There is no authoritative feed for Clark County window pricing. It validates, serves, and nags — it does not scrape cost guides or ask a model to guess.
 5. **Honest copy generally.** Plain language, name the weather, admit when condensation is just a humid bathroom. No "unparalleled solutions". The federal 25C tax credit ended for installs after 2025-12-31 — do not sell it.
 6. **Client-side navigation stays cheap.** `BaseLayout.astro` navigation handlers run on every in-site navigation. Batch layout reads, then writes; never interleave DOM reads/writes in per-element loops. Defer nonessential analytics work.
@@ -175,6 +175,18 @@ On the wording caution from the entry above: did not wait for a fresh L&I/attorn
 - `new-build-tan-corner.jpg` — modern new-construction home, tan panel siding, black window frames, exposed weather barrier at the base. `kind: 'new construction'`.
 
 Added to `src/assets/work/` and wired into `src/data/work.ts` with real alt text and captions, following the exact existing pattern (individual imports, not a glob, so a missing photo fails the build) — none use the `window-`-prefixed naming the other session guessed, to match this file's actual id convention (color/material-first, e.g. `tan-upper-slider`, `charcoal-corner-picture-window`). All `featured: false`. Verified in `dist/` after build: all four appear on `/gallery` (via `allWork`), the three `process`-kind photos appear on `/process` (via `processWork`), and the new-construction photo appears on `/new-construction` (via `newBuildWork`).
+
+**Follow-up — 2026-09-23, Portland removed as a service area:** The user decided Clearview will not operate in Portland, OR (previously listed alongside the eight Clark County, WA towns). Swept every surface that claimed or implied Portland coverage:
+
+- `src/content/cities/portland.md` — deleted. `/areas/portland` no longer builds; `public/_redirects` sends that URL to `/areas` (301) rather than leaving Google's existing index entry for it as a bare 404.
+- `src/data/site.ts` — removed the `nearby` entry for Portland (this one change fixes the `areaServed` JSON-LD schema on every page that maps over it: `JsonLd.astro`, `replacement.astro`, `new-construction.astro`, `sliding-glass-doors.astro`, and the "Where we work" list on `/about`), and dropped the "across the river in Portland" clauses from `description` and `serviceAreaNote`.
+- `src/pages/index.astro`, `src/components/Footer.astro` — removed the hardcoded Portland entries from the homepage service-area links and the footer's Areas column (both were literal arrays, not driven by the content collection, so deleting the city page alone wouldn't have caught these — they'd have kept linking to a 404).
+- `src/pages/about.astro`, `src/pages/areas/index.astro` — removed "and we cross the river into Portland" / "plus Portland, OR" prose.
+- `functions/ask/_lib/facts.mjs` — the `/ask` business-facts block now explicitly states Clearview does *not* serve Portland or Oregon, so the AI won't imply otherwise.
+- `src/data/pricing.ts`, `src/components/CostEstimator.astro`, `src/pages/tools/window-replacement-cost-calculator.astro` — the cost-estimator copy referenced "Washington and Portland-metro averages" as the source of the *regional comparison* pricing data (not a service-area claim). Reworded to "regional averages" / `region: 'Washington'` rather than leave any Portland mention standing, per the instruction to remove it entirely.
+- `src/content/cities/vancouver.md` — "set on the Columbia River across from Portland" reworded to "along the state's southern border." Purely geographic color, not a service claim, but removed anyway since the instruction was to drop Portland from the site outright.
+
+Confirmed no open PR and no remaining branch depends on `/areas/portland` before deleting it. Ran a full case-insensitive repo grep afterward — the only remaining hits are the new "does not serve Portland" line in `facts.mjs` and historical, dated HANDOFF entries above this one (GBP competitor research, old traffic numbers) that describe what was true *at the time* and should not be rewritten.
 
 ## Outstanding
 

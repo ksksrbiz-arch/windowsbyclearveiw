@@ -29,7 +29,6 @@ const serviceLinks = [
   { slug: 'ridgefield', label: 'Ridgefield' },
   { slug: 'la-center', label: 'La Center' },
   { slug: 'woodland', label: 'Woodland' },
-  { slug: 'portland', label: 'Portland, OR' },
 ];
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
