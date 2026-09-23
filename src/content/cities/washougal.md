@@ -13,11 +13,11 @@ faq:
     answer: Yes, nailing-fin units set to schedule. See new construction for what we need from the builder before we book a date.
 ---
 
-Washougal takes Columbia River Gorge weather along SR-14 — wind and a long wet season that finds a weak spot in a wall faster than a sheltered lot would. The city incorporated in 1908 as a mill town, and Pendleton Woolen Mills is still running there today, one of the few original mills in the area that never shut down. Washougal sits around 18,000 residents now, with growth spreading east and up the hill above the old riverside core.
+Washougal takes Columbia River Gorge weather along SR-14 — wind and a long wet season that finds a weak spot in a wall faster than a sheltered lot would. Older riverside core, newer growth spreading east and up the hill.
 
 ## Housing in Washougal
 
-The older riverside blocks carry original sash and early-vinyl replacements that are themselves due; the newer construction east and up the hill is recent enough that most of it is sound, standard-issue vinyl.
+The older riverside blocks carry original sash and early-vinyl replacements that are themselves due for another round; the newer construction east and up the hill is recent enough that most of it is sound, standard-issue vinyl.
 
 ## What tends to go wrong
 

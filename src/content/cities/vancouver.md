@@ -13,18 +13,18 @@ faq:
     answer: Yes — Salmon Creek and the newer builds east of I-205 are common jobs. See new construction for what we need from a builder before we schedule a set date.
 ---
 
-Vancouver is home base. It is also the Clark County seat and, at roughly 200,000 people, the fourth-largest city in Washington — set on the Columbia River along the state's southern border.
+Vancouver is home base — Hazel Dell to Fisher's Landing, we're never far.
 
 ## Housing across Vancouver
 
-The stock spans a real range: a 19th-century core near Fort Vancouver, waves of postwar and 1960s-and-up suburbs, and newer builds around Salmon Creek and east of I-205. Different decades, same rain and the same heating season — a window that was standard in 1975 is not standard anymore.
+The stock spans a real range: a 19th-century core near Fort Vancouver, waves of postwar and 1960s-and-up suburbs, and newer builds around Salmon Creek and east of I-205. Different decades, same rain, same heating season — a window that was standard in 1975 isn't standard now.
 
 ## What tends to go wrong
 
-In the older postwar neighborhoods, the usual call is a single-pane aluminum slider or a first-generation vinyl unit with a failed seal — a foggy pane that never clears is a broken argon seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). Closer to the historic core, original wood sash sticks, drafts at the lock, and single-pane glass loses heat all winter. In the newer Salmon Creek and east-county builds, the windows are usually fine; when they're not, it's a builder-grade unit worth a second opinion rather than anything structural.
+Older postwar neighborhoods: single-pane aluminum sliders or first-generation vinyl with a failed seal. A foggy pane that never clears is a broken argon seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). Closer to the historic core: original wood sash sticking, drafts at the lock, single-pane glass losing heat all winter. Newer Salmon Creek and east-county builds are usually fine — when they're not, it's a builder-grade unit worth a second opinion, not a structural issue.
 
 ## What we do here
 
-Insert or full-frame for existing houses, and nailing-fin sets for new construction in the growing parts of the city. We measure for the actual opening in front of us — not a guess from the neighborhood's build year — and write the estimate before anything is ordered. See [vinyl vs. fiberglass](/guides/vinyl-vs-fiberglass-pacific-northwest) if you're choosing material, or [what a Washington replacement actually costs](/guides/window-replacement-cost-washington) if you're pricing the job first.
+Insert or full-frame for existing houses. Nailing-fin sets for new construction in the growing parts of the city. We measure the actual opening in front of us, not a guess from the neighborhood's build year, and write the estimate before anything is ordered. Choosing material? See [vinyl vs. fiberglass](/guides/vinyl-vs-fiberglass-pacific-northwest). Pricing the job first? See [what a Washington replacement actually costs](/guides/window-replacement-cost-washington).
 
 Nearby: [Camas](/areas/camas), [Washougal](/areas/washougal), [Battle Ground](/areas/battle-ground), [Ridgefield](/areas/ridgefield), [La Center](/areas/la-center), and [Woodland](/areas/woodland) — same crew.

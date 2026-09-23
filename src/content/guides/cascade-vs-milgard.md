@@ -24,7 +24,7 @@ faq:
     answer: No. Same crew, same flashing and sealing method either way. The brand changes what's in the opening, not how Mark sets it.
 ---
 
-Short answer: Cascade and Milgard are both legitimate Pacific Northwest window manufacturers, and Clearview installs both. Cascade is the standard window on most jobs — solid, vinyl, built in Washington. Milgard is the step up: more product lines, more glass and hardware options, and a higher price per opening for the same install labor. Neither is "the good one" — they're two different price-to-feature points, and the right pick depends on the opening and the budget, not brand loyalty.
+Short answer: Cascade and Milgard are both legitimate Pacific Northwest window manufacturers, and Clearview installs both. Cascade is the standard window on most jobs — solid, vinyl, built in Washington. Milgard is the step up: more product lines, more glass and hardware options, a higher price per opening for the same install labor. Neither is "the good one." They're two price-to-feature points. The right pick depends on the opening and the budget, not brand loyalty.
 
 ## Where each one comes from
 
@@ -40,7 +40,7 @@ Neither brand is one window — each is a family of lines at different price poi
 
 **Cascade** builds around a core vinyl series aimed at the standard-opening, standard-budget replacement — the window most Clearview jobs are quoted with.
 
-**Milgard** spans a wider range: entry vinyl lines, mid-tier vinyl (its Tuscany and Trinsic-class product), a dedicated fiberglass line, and specialty lines like sound-reduction glass. That range is Milgard's real advantage over Cascade — not that every Milgard window beats every Cascade window, but that Milgard has more tiers to step into if a specific opening calls for it.
+**Milgard** spans a wider range: entry vinyl lines, mid-tier vinyl (its Tuscany and Trinsic-class product), a dedicated fiberglass line, and specialty lines like sound-reduction glass. That's Milgard's real edge over Cascade — more tiers to step into when a specific opening calls for it.
 
 If a quote just says "Cascade" or "Milgard" with no line name, ask which one. The gap between an entry vinyl line and a top vinyl line, within either brand, can matter more than the gap between brands.
 
@@ -54,7 +54,7 @@ That range overlaps enough between brands that the brand name alone does not tel
 
 Cascade backs its residential vinyl product with a lifetime limited warranty for the original owner, with separate terms for commercial work. Milgard backs its vinyl lines with a full lifetime warranty for the original owner that steps down to a limited term — commonly ten years — for a subsequent owner.
 
-"Lifetime" from either manufacturer means the life of the original ownership, not literally forever, and both documents carve out specific coverage for glass, hardware, and labor rather than blanket-covering everything. If you plan to sell within the warranty period, the transfer terms matter more than the headline word "lifetime." Ask to see the actual document for the line you're buying, not a summary.
+"Lifetime" means the life of the original owner, not literally forever. Both documents carve out specific coverage for glass, hardware, and labor — neither blanket-covers everything. Selling within the warranty period? The transfer terms matter more than the headline word "lifetime." Ask to see the actual document for the line you're buying, not a summary.
 
 That manufacturer warranty is separate from Clearview's install warranty — the glass and hardware are the factory's promise; the flashing, sealing, and fit are Mark's.
 
