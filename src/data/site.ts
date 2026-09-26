@@ -84,6 +84,11 @@ export const site = {
     // Set once Mark's Instagram profile is live — every link below reads
     // from this field and disappears on its own while it is empty.
     instagram: '',
+    // The Google Business Profile share/maps URL (the "Share profile" link
+    // from the GBP dashboard, or the maps.app.goo.gl short link). Drives the
+    // footer "Review us on Google" link, the reviews page's GBP link, and
+    // the JsonLd sameAs entry the same way facebook does above — set this
+    // and all three light up on their own, nothing else to wire.
     google: '',
   },
 } as const;

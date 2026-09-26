@@ -87,7 +87,23 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
                 </a>
               </li>
             )}
-            <li>Or leave it on the Google Business Profile once it is live</li>
+            <li>
+              {site.social.google ? (
+                <>
+                  Or leave it on our{' '}
+                  <a
+                    class="inline-social"
+                    href={site.social.google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Google Business Profile
+                  </a>
+                </>
+              ) : (
+                'Or leave it on the Google Business Profile once it is live'
+              )}
+            </li>
           </ul>
         </div>
         <div>
