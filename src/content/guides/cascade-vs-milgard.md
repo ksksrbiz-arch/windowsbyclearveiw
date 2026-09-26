@@ -60,7 +60,7 @@ That manufacturer warranty is separate from Clearview's install warranty — the
 
 ## What it costs
 
-On Clearview's own pricing, Cascade is the baseline window — no added charge over the base installed price for a standard vinyl opening. Milgard adds roughly $100 to $200 per window opening on top of that same install, for the upgraded product. That gap is per window, not per house — it does not apply to doors, since the brand choice here is a window-line decision, not a door one. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how that fits into a full quote.
+On Clearview's own pricing, Cascade is the baseline window — no added charge over the base installed price for a standard vinyl opening. Milgard adds roughly $100 per window opening on top of that same install, for the upgraded product. That gap is per window, not per house — it does not apply to doors, since the brand choice here is a window-line decision, not a door one. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how that fits into a full quote.
 
 ## How to actually decide
 
