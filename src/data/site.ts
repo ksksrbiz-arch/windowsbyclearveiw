@@ -14,7 +14,7 @@ export const site = {
    * Long form, for the JSON-LD business entity where length does not matter.
    */
   description:
-    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland.',
+    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement windows, sliding glass doors, and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland.',
   /**
    * Short form, for the homepage <meta name="description">. Google truncates
    * around 160 characters and the long version was 253, so the service-area
