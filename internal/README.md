@@ -37,6 +37,29 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## Google reviews feed (public `/reviews` page)
+
+`functions/api/google-reviews.js` serves the pinned Google Business Profile's
+reviews to `/reviews`. It is optional: with nothing configured it returns
+`{ status: "unconfigured" }` and the page keeps its honest empty state.
+
+Cloudflare Pages -> this project -> **Settings -> Variables and Secrets**:
+
+| Variable | Type | Value |
+| --- | --- | --- |
+| `GOOGLE_PLACES_API_KEY` | Secret | Google Cloud key, restricted to **Places API (New)** only |
+| `GOOGLE_PLACE_ID` | Text | Place ID of *Clearview windows and trim LLC*. Find it with `GOOGLE_PLACES_API_KEY=... npm run find:google-place-id` (matches on phone number, not just name) |
+| `GOOGLE_PLACE_EXPECTED_NAME` | Text, optional | Defaults to `Clearview windows and trim LLC`. If Google returns a different name for the Place ID, the feed shows nothing |
+| `GOOGLE_REVIEWS_TTL_SECONDS` | Text, optional | Edge cache for good responses. Default 21600 (6 h), clamped 300-86400 |
+
+Notes: the Places API returns at most the 5 most relevant reviews, not all of
+them. Reviews are shown as written with Google attribution, and no
+`aggregateRating` / review schema is emitted (Google treats self-serving review
+markup as ineligible). Places API content has caching limits in Google's terms,
+so keep the TTL short-ish; the compliant way to show *every* review later is the
+Business Profile API with owner OAuth (Keith manages the profile), which needs
+Google's API access approval.
+
 ## Local development
 
 ```bash

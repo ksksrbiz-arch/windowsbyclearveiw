@@ -33,7 +33,7 @@ Working and deployed:
 
 These came out of real problems and are easy to undo by accident.
 
-1. **No invented reviews.** `/reviews` is deliberately empty. It previously shipped three fabricated testimonials attributed to named people in a city Mark does not serve. Reviews default to `published: false`. Only real quotes from real customers who agreed, ever.
+1. **No invented reviews.** `/reviews` is deliberately empty *unless real reviews exist*: it may show curated quotes (`src/content/reviews/`, `published: true`, customer agreed) and the live Google Business Profile feed (`/api/google-reviews`, only what Google returns for the pinned Place ID, name-checked; see 2026-09-26 entry). Nothing typed in by us that a customer did not write. It previously shipped three fabricated testimonials attributed to named people in a city Mark does not serve. Reviews default to `published: false`. Only real quotes from real customers who agreed, ever.
 2. **No invented credentials.** `site.lniNumber` is now the real WA L&I contractor registration number (`CLEARVW74601`, set 2026-09-22 once Mark's Facebook Business Page showed it live). Washington requires a contractor registration number in advertising (RCW 18.27.100) and separately **prohibits** advertising that a contractor is "bonded and insured" — that phrase was removed and must stay out. The rule itself doesn't change now that a real number exists: never invent or guess a credential: `functions/ask/api/chat.js`'s `HARD_BANNED` filter still deliberately scrubs any L&I/license number from `/ask` conversational output — the real number lives in the deterministic site (footer, JSON-LD, printed contracts), not in freeform AI text.
 3. **Pricing must say whose numbers it is.** The estimator currently shows Mark's own installed pricing (`basis.source: 'clearview'`), labelled as exactly that on the page, with a review date. If it ever reverts to published regional averages, set `basis.source` back to `'averages'` and the copy switches itself. Never present somebody else's averages as ours.
 4. **The pricing worker does not discover prices.** There is no authoritative feed for Clark County window pricing. It validates, serves, and nags — it does not scrape cost guides or ask a model to guess.
@@ -188,6 +188,18 @@ Added to `src/assets/work/` and wired into `src/data/work.ts` with real alt text
 
 Confirmed no open PR and no remaining branch depends on `/areas/portland` before deleting it. Ran a full case-insensitive repo grep afterward — the only remaining hits are the new "does not serve Portland" line in `facts.mjs` and historical, dated HANDOFF entries above this one (GBP competitor research, old traffic numbers) that describe what was true *at the time* and should not be rewritten.
 
+### 2026-09-26 — Google reviews feed on `/reviews` (branch `feature/google-reviews-feed`)
+
+Built, tested, **not yet deployed or enabled**.
+
+- `functions/_lib/google-reviews.mjs` — pure logic: Places API (New) call, sanitising, bounds, and the **name guard** (a Place ID that resolves to any business other than *Clearview windows and trim LLC* fails closed, because near-identical trade names exist in this service area).
+- `functions/api/google-reviews.js` — `GET /api/google-reviews`, edge-cached, fails soft (`unconfigured` / `unavailable` / `name-mismatch` -> empty list).
+- `src/components/GoogleReviews.astro` + `src/pages/reviews.astro` — hidden section revealed only when real reviews arrive; hides the "nothing here yet" block and swaps the lede; text written via `textContent` only.
+- `scripts/test-google-reviews.mjs` (`npm run test:google-reviews`, wired into CI) and `scripts/find-google-place-id.mjs` (`npm run find:google-place-id`, phone-matched).
+- Verified in a real browser (Chromium) against a mock feed at 1280 and 390 px: renders, hostile markup stays inert, all failure modes keep the existing empty state, no horizontal scroll.
+
+**Go-live checklist:** set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID` in Cloudflare Pages (see `internal/README.md`); confirm `/api/google-reviews` returns `status: "ok"` and the profile's real name; then update `src/pages/about.astro` ("No reviews yet" honesty entry) and the `/reviews` meta description so they no longer say the page is empty; add the Google Maps data use to `src/content/legal/privacy.md` only if counsel wants it (visitors' browsers only talk to this site, not Google).
+
 ## Outstanding
 
 | | |
@@ -195,7 +207,7 @@ Confirmed no open PR and no remaining branch depends on `/areas/portland` before
 | **Mark's real pricing** | Replace regional averages when actual ranges are supplied. |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
-| **Google Business Profile** | Urgent — none exists. Must also disambiguate from `clearviewpdx.com`, an unrelated same-named competitor already claimed in the same service area (see 2026-09-16 audit follow-up above). |
+| **Google Business Profile** | Exists as of 2026-09-26 ("Clearview windows and trim LLC", managed by Keith, 5.0 / 1 review). Still needs name/category/service-area disambiguation from `clearviewpdx.com` (see 2026-09-16 audit follow-up above). Reviews feed built, waiting on the Places API key + Place ID. |
 | **Single-color logo glyph** | Commission a simplified flat glyph for embroidery/engraving/one-color applications. |
 
 ## How I like to work

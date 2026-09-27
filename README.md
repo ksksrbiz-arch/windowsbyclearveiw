@@ -22,6 +22,7 @@ The platform has been through a substantial hardening pass covering the public m
 - [ ] Set `REQUIRE_LNI=1` in the production Pages environment now that the number is set, so a future accidental removal fails the build instead of just warning.
 - [ ] **`RESEND_API_KEY` on Pages** — required for live estimate delivery.
 - [ ] **Reviews** — `/reviews` intentionally remains empty until real customer quotes are approved for publication.
+- [ ] **Google reviews feed** — code is built and tested (`npm run test:google-reviews`); set `GOOGLE_PLACES_API_KEY` and `GOOGLE_PLACE_ID` in Cloudflare Pages to turn it on (see `internal/README.md`). Until then `/reviews` stays on its honest empty state.
 - [ ] **Internal production bindings** — `QUOTES_DB`, `INTERNAL_PASSWORD`, and `INTERNAL_SESSION_SECRET` must be configured in Cloudflare Pages.
 - [x] **Groq/Gemini integration** — `/ask` has provider fallback and graceful degradation.
 - [ ] **Workers AI `AI` binding** — required for `/ask` photo analysis; the rest of `/ask` continues to work without it.
