@@ -6,7 +6,7 @@ import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
-import WindowAnatomy from '../components/diagrams/WindowAnatomy.astro';
+import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
@@ -71,7 +71,12 @@ const stylePhotos = [
   <section class="section section-sunk">
     <div class="wrap is-wide" data-reveal>
       <p class="rule-label">Start with the physical window</p>
-      <WindowAnatomy heading="Window anatomy" />
+      <CanvaGuideEmbed
+        desktopId="DAHWbdSHTPc"
+        mobileId="DAHWbknWoxE"
+        title="Window anatomy"
+        description="A clear visual guide to the main parts of a modern replacement window."
+      />
     </div>
   </section>
 
