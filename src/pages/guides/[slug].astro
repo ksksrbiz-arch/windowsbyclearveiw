@@ -66,6 +66,12 @@ const diagramNotes = {
     body: 'Look at the two panes, the insulated space between them, and the sealed edge that keeps the unit together.',
     answer: 'The glass package is a system. A failure at the edge can affect what you see between the panes.',
   },
+  'vinyl-vs-fiberglass': {
+    eyebrow: 'Frame construction',
+    title: 'See the difference in the frame itself.',
+    body: 'Vinyl and fiberglass can both work well. The useful comparison is how the frame is built, how it behaves on larger openings, and what that means for the finished window.',
+    answer: 'Vinyl uses a hollow multi-chamber profile. Fiberglass uses a denser profile with a slimmer sightline. The right choice depends on the opening and finish.',
+  },
   'signs-checklist': {
     eyebrow: 'Photo guide',
     title: 'Inspect the opening before you decide what the symptom means.',
@@ -184,13 +190,21 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
               description="A visual explanation of two glass panes, the insulating space, Low-E coating, spacer and edge seal."
             />
           )}
+          {guide.data.diagram === 'vinyl-vs-fiberglass' && (
+            <CanvaGuideEmbed
+              desktopId="DAHWbmI7TSg"
+              mobileId="DAHWblmkAH4"
+              title="Vinyl vs. fiberglass window frames"
+              description="A visual comparison of how vinyl and fiberglass frames are constructed and where the difference matters."
+            />
+          )}
           {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
         </div>
       </div>
     </section>
   )}
 
-  {!guide.data.diagram && guide.data.heroImage && (
+  {guide.data.heroImage && (
     <section class="section is-tight section-sunk">
       <div class="wrap is-narrow" data-reveal>
         <figure class="guide-photo">
