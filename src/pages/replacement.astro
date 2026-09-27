@@ -1,6 +1,6 @@
 ---
 import { getImage, Image } from 'astro:assets';
-import vinylFiberglassGraphic from '../content/guides/img-vinyl-vs-fiberglass.png';
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
@@ -158,13 +158,11 @@ const spec = [
         difference before we get into the cost and sizing tradeoffs.
       </p>
       <figure class="replacement-material-graphic">
-        <Image
-          src={vinylFiberglassGraphic}
+        <img
+          src="/guides/vinyl-fiberglass-guide.svg"
           alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
-          widths={[760, 1140, 1580]}
-          sizes="(max-width: 800px) 100vw, 1100px"
-          quality={82}
           loading="lazy"
+          decoding="async"
         />
       </figure>
       <p class="section-link">
