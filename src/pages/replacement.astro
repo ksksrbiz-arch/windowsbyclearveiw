@@ -1,10 +1,12 @@
 ---
 import { getImage, Image } from 'astro:assets';
-
+import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
+import oldWindowReplacementDesktop from '../assets/guides/old-window-replacement-desktop.png';
+import oldWindowReplacementMobile from '../assets/guides/old-window-replacement-mobile.png';
 import WorkCard from '../components/WorkCard.astro';
 import { replacementWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
@@ -99,8 +101,8 @@ const spec = [
     <div class="wrap" data-reveal>
       <p class="rule-label">See the change</p>
       <CanvaGuideEmbed
-        desktopSrc="/6_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
-        mobileSrc="/1_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
+        desktopSrc={oldWindowReplacementDesktop}
+        mobileSrc={oldWindowReplacementMobile}
         alt="Before-and-after infographic comparing an older window assembly with a modern ClearView replacement."
         title="Old window to ClearView replacement"
         description="A visual before-and-after comparison of an older window assembly and a modern replacement."
@@ -158,11 +160,13 @@ const spec = [
         difference before we get into the cost and sizing tradeoffs.
       </p>
       <figure class="replacement-material-graphic">
-        <img
-          src="/guides/vinyl-fiberglass-guide.svg"
+        <Image
+          src={vinylFiberglassGraphic}
           alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
+          widths={[760, 1140, 1580]}
+          sizes="(max-width: 800px) 100vw, 1100px"
+          quality={82}
           loading="lazy"
-          decoding="async"
         />
       </figure>
       <p class="section-link">
