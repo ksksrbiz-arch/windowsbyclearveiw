@@ -3,6 +3,7 @@ import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 import FacebookIcon from './icons/FacebookIcon.astro';
 import GoogleIcon from './icons/GoogleIcon.astro';
+import NextdoorIcon from './icons/NextdoorIcon.astro';
 import LicenseTag from './LicenseTag.astro';
 import InsuranceTag from './InsuranceTag.astro';
 import BondTag from './BondTag.astro';
@@ -12,11 +13,13 @@ const year = new Date().getFullYear();
 // Google Business Profile link comes last: it is what we most want a
 // customer who already trusts us to click (that's where reviews live), but
 // Facebook is the one link people expect to see first. Its own link text
-// ("Review us on...") rather than "Follow on Google" — nobody follows a
-// Google Business Profile, they review it.
+// ("Review us on...", "Find us on...") rather than "Follow on Google" or
+// "Follow on Nextdoor" — nobody follows a Google Business Profile or a
+// Nextdoor business page, they review or recommend it.
 const socialLinks = [
   ['Follow on Facebook', site.social.facebook, FacebookIcon],
   ['Review us on Google', site.social.google, GoogleIcon],
+  ['Find us on Nextdoor', site.social.nextdoor, NextdoorIcon],
   ['Follow on Instagram', site.social.instagram, null],
 ].filter(
   (entry): entry is [string, string, typeof FacebookIcon | null] => Boolean(entry[1])

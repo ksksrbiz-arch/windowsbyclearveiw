@@ -91,6 +91,12 @@ export const site = {
     // facebook does above — set this and all three light up on their own,
     // nothing else to wire.
     google: 'https://share.google/cdPgOCHSjkwMazSOC',
+    // Canonical Nextdoor business page (stripped of the utm_campaign/
+    // share_action_id tracking params on the personal share link Keith sent —
+    // those track one specific share action, not the business page itself).
+    // Drives the header and footer Nextdoor links the same way facebook and
+    // google do above.
+    nextdoor: 'https://nextdoor.com/page/clear-view-windows-and-trim',
   },
 } as const;
 
