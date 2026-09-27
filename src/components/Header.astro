@@ -2,6 +2,8 @@
 import { site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 import FacebookIcon from './icons/FacebookIcon.astro';
+import GoogleIcon from './icons/GoogleIcon.astro';
+import NextdoorIcon from './icons/NextdoorIcon.astro';
 
 const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
@@ -33,6 +35,18 @@ const links = [
         <a class="header-social" href={site.social.facebook} target="_blank" rel="noopener noreferrer">
           <FacebookIcon class="header-social-icon" />
           <span class="visually-hidden">Follow {site.shortName} on Facebook</span>
+        </a>
+      )}
+      {site.social.google && (
+        <a class="header-social header-social-extra" href={site.social.google} target="_blank" rel="noopener noreferrer">
+          <GoogleIcon class="header-social-icon" />
+          <span class="visually-hidden">Review {site.shortName} on Google</span>
+        </a>
+      )}
+      {site.social.nextdoor && (
+        <a class="header-social header-social-extra" href={site.social.nextdoor} target="_blank" rel="noopener noreferrer">
+          <NextdoorIcon class="header-social-icon" />
+          <span class="visually-hidden">Find {site.shortName} on Nextdoor</span>
         </a>
       )}
       <a class="btn btn-light header-cta" href={telHref()}>
@@ -267,6 +281,19 @@ const links = [
   .header-social:focus-visible {
     background: color-mix(in srgb, white 12%, transparent);
     transform: translateY(-1px);
+  }
+
+  /* The inline nav's gap above was tuned to close a small, constant overlap
+     against exactly one .header-social icon (see the .nav comment above) —
+     it stays tight at every width down to the 1280px breakpoint where nav
+     becomes a hamburger. Two more icons here would reopen that overlap well
+     before 1280px, so Google/Nextdoor only join the header once nav is
+     already hidden behind the toggle and the row has real room again. They
+     are always reachable from the footer regardless of screen size. */
+  .header-social-extra { display: none; }
+
+  @media (max-width: 1280px) {
+    .header-social-extra { display: flex; }
   }
 
   .header-social-icon { width: 1.4rem; height: 1.4rem; }
