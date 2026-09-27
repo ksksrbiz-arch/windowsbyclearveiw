@@ -1,5 +1,6 @@
 ---
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
+import vinylFiberglassGraphic from '../content/guides/img-vinyl-vs-fiberglass.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
@@ -148,6 +149,30 @@ const spec = [
     </div>
   </section>
 
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <p class="rule-label">Frame materials</p>
+      <h2>Vinyl vs. fiberglass.</h2>
+      <p class="lede">
+        Two common frame materials, shown at the same scale so you can see the construction
+        difference before we get into the cost and sizing tradeoffs.
+      </p>
+      <figure class="replacement-material-graphic">
+        <Image
+          src={vinylFiberglassGraphic}
+          alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
+          widths={[760, 1140, 1580]}
+          sizes="(max-width: 800px) 100vw, 1100px"
+          quality={82}
+          loading="lazy"
+        />
+      </figure>
+      <p class="section-link">
+        <a href="/guides/vinyl-vs-fiberglass-pacific-northwest">See the full vinyl vs. fiberglass guide →</a>
+      </p>
+    </div>
+  </section>
+
   <section class="section">
     <div class="wrap split" data-reveal>
       <div>
@@ -204,6 +229,21 @@ const spec = [
 </BaseLayout>
 
 <style>
+  .replacement-material-graphic {
+    margin: var(--space-l) 0 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .replacement-material-graphic img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   .page-hero-photo {
     position: relative;
     background-size: cover;
