@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoHero from '../components/VideoHero.astro';
 import CtaBar from '../components/CtaBar.astro';
@@ -9,16 +8,10 @@ import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { featuredWork, findWork, workKindLabel } from '../data/work';
-import slidingDoorsTileSrc from '../assets/hero/sliding-glass-doors.png';
 
 const replacementTile = findWork('stone-craftsman')!;
 const newBuildTile = findWork('new-build-sheathed-garage')!;
-
-// The sliding-doors tile has no real installed-job photo yet (see
-// sliding-glass-doors.astro), so unlike the two tiles above it borrows the
-// same AI-generated hero image that page uses. TODO: swap for a real
-// installed-job photo once one exists, same as the other two tiles.
-const slidingDoorsTile = await getImage({ src: slidingDoorsTileSrc, width: 900, format: 'webp', quality: 72 });
+const slidingDoorsTile = findWork('gray-siding-white-slider-deck')!;
 
 const serviceLinks = [
   { slug: 'vancouver', label: 'Vancouver' },
@@ -92,7 +85,6 @@ const signs = [
           <div class="service-tile-copy">
             <p class="kicker">Homeowners</p>
             <h2>Replace old windows and sliding glass doors</h2>
-            <p>Pull the tired unit. Leave the room usable.</p>
           </div>
         </a>
         <a class="service-tile" href="/new-construction">
@@ -107,15 +99,20 @@ const signs = [
           <div class="service-tile-copy">
             <p class="kicker">Builders</p>
             <h2>New construction</h2>
-            <p>Flashed openings. Nailing fins. Ready for siding.</p>
           </div>
         </a>
         <a class="service-tile" href="/sliding-glass-doors">
-          <img src={slidingDoorsTile.src} alt="" loading="lazy" decoding="async" />
+          <Image
+            src={slidingDoorsTile.image}
+            alt=""
+            widths={[400, 640, 900]}
+            sizes="(max-width: 800px) 100vw, 33vw"
+            format="webp"
+            quality={72}
+          />
           <div class="service-tile-copy">
-            <p class="kicker">Homeowners <span class="tile-badge">Concept imagery</span></p>
+            <p class="kicker">Homeowners</p>
             <h2>Sliding glass doors</h2>
-            <p>Standard, multi-panel, and French rail patio doors.</p>
           </div>
         </a>
       </div>
@@ -308,20 +305,6 @@ const signs = [
     margin: 0;
     color: var(--on-dark-soft);
     font-size: var(--step--1);
-  }
-
-  .tile-badge {
-    display: inline-block;
-    margin-left: 0.45rem;
-    padding: 0.18rem 0.4rem;
-    border: 1px solid color-mix(in srgb, var(--accent-bright) 46%, transparent);
-    border-radius: 999px;
-    color: var(--on-dark-faint);
-    font-size: 0.68em;
-    line-height: 1.1;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    vertical-align: 0.12em;
   }
 
   /* An accent rule that draws in on hover: the only motion on the tile that
