@@ -292,7 +292,13 @@ const links = [
      are always reachable from the footer regardless of screen size. */
   .header-social-extra { display: none; }
 
-  @media (max-width: 1280px) {
+  /* Room reopens once nav collapses behind the hamburger toggle at 1280px,
+     but closes again on phone widths: the brand mark/wordmark, three fixed
+     2.25rem icons, and the non-shrinking Menu button don't all fit inside
+     .wrap at 320px (Codex caught this — measured overflow of ~90px). Below
+     480px only Facebook stays, matching .header-cta's own narrower cutoff
+     just below; Google/Nextdoor remain one tap away in the footer. */
+  @media (max-width: 1280px) and (min-width: 481px) {
     .header-social-extra { display: flex; }
   }
 
