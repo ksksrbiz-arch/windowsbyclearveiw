@@ -36,7 +36,7 @@ Watch-outs: you give up a little glass area, and any rot hiding in that old fram
 
 ## Full-frame replacement
 
-The entire old window comes out to the rough opening. We flash the opening, set a new unit, and close the interior and exterior finishes back up. On most Clark County houses that means a nailing-fin installation — the same fin-and-flashing method used on new construction — rather than an insert built to sit inside an old frame.
+The entire old window comes out to the rough opening. We flash the opening, set a new unit, and close the interior and exterior finishes back up — a nailing-fin installation, the same fin-and-flashing method used on new construction, rather than an insert built to sit inside an old frame.
 
 Choose this when:
 
