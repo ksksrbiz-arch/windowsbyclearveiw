@@ -10,6 +10,7 @@ import WindowAnatomy from '../../components/diagrams/WindowAnatomy.astro';
 import OldWindowReplacement from '../../components/diagrams/OldWindowReplacement.astro';
 import DoublePaneGlass from '../../components/diagrams/DoublePaneGlass.astro';
 import CanvaGuideEmbed from '../../components/CanvaGuideEmbed.astro';
+import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
@@ -191,12 +192,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
             />
           )}
           {guide.data.diagram === 'vinyl-vs-fiberglass' && (
-            <CanvaGuideEmbed
-              desktopSrc="/3_Double-pane%20energy-efficient%20glass%20infographic.png"
-              alt="Customer-facing ClearView frame comparison graphic."
-              title="Vinyl vs. fiberglass window frames"
-              description="A visual comparison graphic from the ClearView customer guide library."
-            />
+            <FrameMaterials />
           )}
           {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
         </div>
