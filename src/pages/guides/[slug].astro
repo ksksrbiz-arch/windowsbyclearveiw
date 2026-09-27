@@ -181,8 +181,25 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
           )}
           {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
           {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
-          {guide.data.diagram === 'window-anatomy' && <WindowAnatomy heading={null} />}
-          {guide.data.diagram === 'old-window-replacement' && <OldWindowReplacement heading={null} />}
+          {guide.data.diagram === 'window-anatomy' && (
+            <CanvaGuideEmbed
+              desktopSrc="/5_Window%20Anatomy%20infographic.png"
+              mobileSrc="/5_Window%20Anatomy%20infographic.png"
+              desktopMaxWidth="760px"
+              alt="Window anatomy infographic labeling the main parts of a modern replacement window."
+              title="Window anatomy"
+              description="A clear visual guide to the main parts of a modern replacement window."
+            />
+          )}
+          {guide.data.diagram === 'old-window-replacement' && (
+            <CanvaGuideEmbed
+              desktopSrc="/6_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
+              mobileSrc="/1_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
+              alt="Before-and-after infographic comparing an older window assembly with a modern ClearView replacement."
+              title="Old window to ClearView replacement"
+              description="A visual before-and-after comparison of an older window assembly and a modern replacement."
+            />
+          )}
           {guide.data.diagram === 'double-pane-glass' && (
             <CanvaGuideEmbed
               desktopSrc="/2_Double-pane%20energy-efficient%20glass%20infographic.png"
