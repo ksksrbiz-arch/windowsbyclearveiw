@@ -6,6 +6,9 @@ import CtaBar from '../../components/CtaBar.astro';
 import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
+import WindowAnatomy from '../../components/diagrams/WindowAnatomy.astro';
+import OldWindowReplacement from '../../components/diagrams/OldWindowReplacement.astro';
+import DoublePaneGlass from '../../components/diagrams/DoublePaneGlass.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
@@ -43,6 +46,24 @@ const diagramNotes = {
     title: 'The location of the moisture tells you what failed.',
     body: 'Compare moisture inside the insulated glass unit with condensation sitting on the room-facing surface.',
     answer: 'Fog trapped between panes points to an insulated-glass seal failure. Water on the room-side surface is surface condensation.',
+  },
+  'window-anatomy': {
+    eyebrow: 'Window anatomy',
+    title: 'Start with the physical pieces.',
+    body: 'A modern replacement window is a system of a few major components. Seeing them first makes the rest of the guide easier to follow.',
+    answer: 'Frame, sash, insulated glass, spacer, weather seal, and hardware each have a distinct job.',
+  },
+  'old-window-replacement': {
+    eyebrow: 'Before and after',
+    title: 'See what changes when the old unit comes out.',
+    body: 'The physical difference is easier to understand when the two assemblies are shown at the same scale.',
+    answer: 'A modern replacement changes more than the glass: the sealed unit, perimeter, hardware, and finished opening all matter.',
+  },
+  'double-pane-glass': {
+    eyebrow: 'Glass construction',
+    title: 'See how an insulated glass unit is built.',
+    body: 'Look at the two panes, the insulated space between them, and the sealed edge that keeps the unit together.',
+    answer: 'The glass package is a system. A failure at the edge can affect what you see between the panes.',
   },
   'signs-checklist': {
     eyebrow: 'Photo guide',
@@ -152,6 +173,9 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
           )}
           {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
           {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
+          {guide.data.diagram === 'window-anatomy' && <WindowAnatomy heading={null} />}
+          {guide.data.diagram === 'old-window-replacement' && <OldWindowReplacement heading={null} />}
+          {guide.data.diagram === 'double-pane-glass' && <DoublePaneGlass heading={null} />}
           {guide.data.diagram === 'signs-checklist' && <SignsChecklist />}
         </div>
       </div>
