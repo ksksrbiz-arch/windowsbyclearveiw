@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-08-31
+updated: 2026-09-27
 order: 1
 summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---

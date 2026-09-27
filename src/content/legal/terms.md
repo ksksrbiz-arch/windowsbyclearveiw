@@ -1,7 +1,7 @@
 ---
 title: Terms of use
 description: The terms that apply to using windowsbyclearview.com, including what the cost calculator is and is not.
-updated: 2026-09-22
+updated: 2026-09-27
 order: 2
 summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
 ---
