@@ -11,7 +11,7 @@ heroImageAlt: White slider window installed on a dark blue house beside a wood d
 heroImageCredit: Clearview job photo — finished slider installation
 faq:
   - question: Does Clearview install other brands besides these two?
-    answer: Cascade and Milgard cover the range Mark orders for most jobs. If a project needs something outside that — a specific historic-district requirement, for example — he will say so at the measure rather than force-fit one of these two.
+    answer: Cascade and Milgard cover the range we order for most jobs. If a project needs something outside that — a specific historic-district requirement, for example — we will say so at the measure rather than force-fit one of these two.
   - question: Is Milgard actually a better window, or just a pricier one?
     answer: Milgard's step-up lines add options — better glass packages, more hardware and color choices, sometimes tighter U-factors — that Cascade's lineup doesn't offer at every tier. Whether that's worth the money depends on the opening and what you want from it, not a blanket "better."
   - question: Do Cascade and Milgard use the same glass?
@@ -21,7 +21,7 @@ faq:
   - question: Can I mix brands on one house?
     answer: It happens less often than mixing insert and full-frame, but yes — a homeowner upgrading a few street-facing openings to Milgard while the rest of the house takes Cascade is a normal way to control budget.
   - question: Does the brand change how the window is installed?
-    answer: No. Same crew, same flashing and sealing method either way. The brand changes what's in the opening, not how Mark sets it.
+    answer: No. Same crew, same flashing and sealing method either way. The brand changes what's in the opening, not how we set it.
 ---
 
 Short answer: Cascade and Milgard are both legitimate Pacific Northwest window manufacturers, and Clearview installs both. Cascade is the standard window on most jobs — solid, vinyl, built in Washington. Milgard is the step up: more product lines, more glass and hardware options, a higher price per opening for the same install labor. Neither is "the good one." They're two price-to-feature points. The right pick depends on the opening and the budget, not brand loyalty.
@@ -56,7 +56,7 @@ Cascade backs its residential vinyl product with a lifetime limited warranty for
 
 "Lifetime" means the life of the original owner, not literally forever. Both documents carve out specific coverage for glass, hardware, and labor — neither blanket-covers everything. Selling within the warranty period? The transfer terms matter more than the headline word "lifetime." Ask to see the actual document for the line you're buying, not a summary.
 
-That manufacturer warranty is separate from Clearview's install warranty — the glass and hardware are the factory's promise; the flashing, sealing, and fit are Mark's.
+That manufacturer warranty is separate from Clearview's install warranty — the glass and hardware are the factory's promise; the flashing, sealing, and fit are ours.
 
 ## What it costs
 

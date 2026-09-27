@@ -192,7 +192,7 @@ export const pricing = {
       label: 'Oversize or custom shapes',
       blurb:
         'Arches, transoms, and anything past standard sizing. Still the regional average here — ' +
-        "not yet Mark's own figure.",
+        "not yet our own figure.",
       perOpening: true,
       low: 150,
       high: 450,

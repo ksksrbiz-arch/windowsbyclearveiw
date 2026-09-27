@@ -21,7 +21,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
 ---
 <BaseLayout
   title="Reviews"
-  description="What Vancouver, WA and Clark County homeowners say about Clearview Windows — real names only, no invented testimonials. Ask Mark for references."
+  description="What Vancouver, WA and Clark County homeowners say about Clearview Windows — real names only, no invented testimonials. Ask us for references."
   path="/reviews"
   crumbs={[{ name: 'Reviews', href: '/reviews' }]}
 >
@@ -78,7 +78,8 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
               <>
                 <h2>{googleHeading}</h2>
                 <p class="lede">
-                  {site.shortName} is Mark’s own shop, and this site is new. Google shows{' '}
+                  {site.shortName} is a locally owned shop, and both the business and this site
+                  are new. Google shows{' '}
                   {google.count === 1 ? 'one review' : `${google.count} reviews`} on our Business
                   Profile, averaging {google.rating.toFixed(1)} stars. Anyone can read it there,
                   and leave one of their own.
@@ -100,9 +101,9 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
               <>
                 <h2>Nothing here yet, and that is on purpose.</h2>
                 <p class="lede">
-                  {site.shortName} is Mark’s own shop, and this site is new. Rather than fill the
-                  page with invented quotes, we left it empty until real customers put their names
-                  to something.
+                  {site.shortName} is a locally owned shop, and both the business and this site
+                  are new. Rather than fill the page with invented quotes, we left it empty until
+                  real customers put their names to something.
                 </p>
                 <p>
                   A fabricated testimonial is not just tacky — since 2024 it is against federal
@@ -112,8 +113,8 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
               </>
             )}
             <p>
-              Ask Mark for references when he comes out to measure. He can put you in touch
-              with past customers who have said they are happy to talk about their project.
+              Ask for references when we come out to measure. We can put you in touch with past
+              customers who have said they are happy to talk about their project.
             </p>
           </div>
         </div>
@@ -130,7 +131,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
           <p class="rule-label">Already worked with us?</p>
           <h2>{hasGoogle ? 'We would rather have more real ones.' : 'We would rather have one real one.'}</h2>
           <ul class="plain-list">
-            <li>Tell Mark you are happy to be quoted here</li>
+            <li>Tell us you are happy to be quoted here</li>
             {site.social.facebook && (
               <li>
                 Or leave it on our{' '}
@@ -162,8 +163,9 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
         <div>
           <p class="rule-label">In the meantime</p>
           <p>
-            <a href="/gallery">The gallery</a> is all real jobs — Mark’s photos, his openings,
-            no stock. It is the closest thing to proof this site can honestly offer today.
+            <a href="/gallery">The gallery</a> is all real jobs — our own photos, our own
+            openings, no stock. It is the closest thing to proof this site can honestly offer
+            today.
           </p>
         </div>
       </div>

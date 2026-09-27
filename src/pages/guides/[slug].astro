@@ -57,12 +57,7 @@ const article = {
   headline: guide.data.title,
   description: guide.data.description,
   dateModified: guide.data.updated.toISOString(),
-  author: {
-    '@type': 'Person',
-    name: site.owner,
-    jobTitle: 'Owner and installer',
-    worksFor: { '@type': 'Organization', name: site.legalName },
-  },
+  author: { '@type': 'Organization', name: site.legalName },
   publisher: { '@type': 'Organization', name: site.legalName },
   mainEntityOfPage: `${site.url}/guides/${guide.id}`,
 };
@@ -127,7 +122,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
         <a href="/ask">Ask a question</a>
       </div>
       <p class="article-meta">
-        <span>Written by <a href="/about">{site.owner}</a>, owner and installer</span>
+        <span>Written by <a href="/about">{site.shortName}</a>, owner-operated</span>
         <span>{guide.data.topic}</span>
         <span>Updated {updated}</span>
         <span>{minutes} min read</span>

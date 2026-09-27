@@ -42,7 +42,7 @@ aim at the Web Content Accessibility Guidelines (WCAG) 2.2, Level AA.
   sharper without reshooting.
 - **The cost calculator needs JavaScript.** Without it, the tool cannot run.
   The page still explains the trade-offs in text, and the phone number works —
-  call and Mark will walk you through the same questions.
+  call and we will walk you through the same questions.
 - **We have not commissioned a formal third-party audit.** Testing so far has
   been our own, against automated checks and keyboard use. We would rather say
   that than imply a certification we do not have.
