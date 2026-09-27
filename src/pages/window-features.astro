@@ -6,6 +6,7 @@ import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
+import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
@@ -92,12 +93,7 @@ const stylePhotos = [
         ))}
       </div>
       <div class="diagram-slot">
-        <CanvaGuideEmbed
-          desktopSrc="/2_Double-pane%20energy-efficient%20glass%20infographic.png"
-          alt="ClearView educational graphic comparing energy-efficient window construction."
-          title="Vinyl vs. Fiberglass Window Frames"
-          description="A visual comparison graphic prepared for the ClearView customer guide."
-        />
+        <FrameMaterials />
       </div>
       <p class="fine-print">
         We install both. Which one makes sense depends on the opening size and what you want
