@@ -5,8 +5,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
-import GlassAnatomy from '../../components/diagrams/GlassAnatomy.astro';
 import CanvaGuideEmbed from '../../components/CanvaGuideEmbed.astro';
+import windowAnatomyGraphic from '../../assets/guides/window-anatomy.png';
+import oldWindowReplacementDesktop from '../../assets/guides/old-window-replacement-desktop.png';
+import oldWindowReplacementMobile from '../../assets/guides/old-window-replacement-mobile.png';
+import doublePaneGlassDesktop from '../../assets/guides/double-pane-glass-desktop.png';
+import doublePaneGlassMobile from '../../assets/guides/double-pane-glass-mobile.png';
 import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
@@ -39,12 +43,6 @@ const diagramNotes = {
     title: 'Follow the water path, not the product names.',
     body: 'Start with the installation photo, then use the numbered notes to see how sill, jamb, head, and WRB treatments work together.',
     answer: 'The objective is controlled drainage: water moves down through the exterior layers and leaves the wall assembly instead of turning inward.',
-  },
-  'glass-anatomy': {
-    eyebrow: 'Photo guide',
-    title: 'The location of the moisture tells you what failed.',
-    body: 'Compare moisture inside the insulated glass unit with condensation sitting on the room-facing surface.',
-    answer: 'Fog trapped between panes points to an insulated-glass seal failure. Water on the room-side surface is surface condensation.',
   },
   'window-anatomy': {
     eyebrow: 'Window anatomy',
@@ -112,6 +110,14 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
 
+// These diagram types already wrap a full photo (see PhotoGuide.astro), so
+// showing the guide's own heroImage right after them would duplicate the
+// section. The illustration-style diagrams below (window-anatomy,
+// old-window-replacement, double-pane-glass, vinyl-vs-fiberglass) are
+// graphics, not photos, so pairing them with a real job photo is intentional.
+const photoBasedDiagrams = ['insert-vs-full-frame', 'flashing-order', 'signs-checklist'];
+const diagramIsPhotoBased = guide.data.diagram ? photoBasedDiagrams.includes(guide.data.diagram) : false;
+
 const slugifyHeading = (value) => value
   .toLowerCase()
   .trim()
@@ -177,11 +183,10 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
             <InsertVsFullFrame heading={null} />
           )}
           {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
-          {guide.data.diagram === 'glass-anatomy' && <GlassAnatomy heading={null} />}
           {guide.data.diagram === 'window-anatomy' && (
             <CanvaGuideEmbed
-              desktopSrc="/5_Window%20Anatomy%20infographic.png"
-              mobileSrc="/5_Window%20Anatomy%20infographic.png"
+              desktopSrc={windowAnatomyGraphic}
+              mobileSrc={windowAnatomyGraphic}
               desktopMaxWidth="760px"
               alt="Window anatomy infographic labeling the main parts of a modern replacement window."
               title="Window anatomy"
@@ -190,8 +195,8 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
           )}
           {guide.data.diagram === 'old-window-replacement' && (
             <CanvaGuideEmbed
-              desktopSrc="/6_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
-              mobileSrc="/1_Old%20Window%20to%20ClearView%20Replacement%20Infographic.png"
+              desktopSrc={oldWindowReplacementDesktop}
+              mobileSrc={oldWindowReplacementMobile}
               alt="Before-and-after infographic comparing an older window assembly with a modern ClearView replacement."
               title="Old window to ClearView replacement"
               description="A visual before-and-after comparison of an older window assembly and a modern replacement."
@@ -199,8 +204,8 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
           )}
           {guide.data.diagram === 'double-pane-glass' && (
             <CanvaGuideEmbed
-              desktopSrc="/2_Double-pane%20energy-efficient%20glass%20infographic.png"
-              mobileSrc="/4_Double-pane%20glass%20education%20infographic.png"
+              desktopSrc={doublePaneGlassDesktop}
+              mobileSrc={doublePaneGlassMobile}
               alt="Double-pane glass education infographic showing two glass panes, insulating space, Low-E coating, spacer and edge seal."
               title="How double-pane energy-efficient glass works"
               description="A visual explanation of two glass panes, the insulating space, Low-E coating, spacer and edge seal."
@@ -215,7 +220,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
     </section>
   )}
 
-  {guide.data.heroImage && (
+  {!diagramIsPhotoBased && guide.data.heroImage && (
     <section class="section is-tight section-sunk">
       <div class="wrap is-narrow" data-reveal>
         <figure class="guide-photo">

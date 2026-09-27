@@ -1,11 +1,13 @@
 ---
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
+import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
+import windowAnatomyGraphic from '../assets/guides/window-anatomy.png';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
@@ -71,8 +73,8 @@ const stylePhotos = [
     <div class="wrap is-wide" data-reveal>
       <p class="rule-label">Start with the physical window</p>
       <CanvaGuideEmbed
-        desktopSrc="/5_Window%20Anatomy%20infographic.png"
-        mobileSrc="/5_Window%20Anatomy%20infographic.png"
+        desktopSrc={windowAnatomyGraphic}
+        mobileSrc={windowAnatomyGraphic}
         desktopMaxWidth="760px"
         alt="Window anatomy infographic labeling the main parts of a modern replacement window."
         title="Window anatomy"
@@ -95,13 +97,15 @@ const stylePhotos = [
       </div>
       <div class="diagram-slot">
         <figure class="frame-materials-graphic">
-        <img
-          src="/guides/vinyl-fiberglass-guide.svg"
-          alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
-          loading="lazy"
-          decoding="async"
-        />
-      </figure>
+          <Image
+            src={vinylFiberglassGraphic}
+            alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
+            widths={[760, 1140, 1580]}
+            sizes="(max-width: 800px) 100vw, 1100px"
+            quality={82}
+            loading="lazy"
+          />
+        </figure>
       </div>
       <p class="fine-print">
         We install both. Which one makes sense depends on the opening size and what you want

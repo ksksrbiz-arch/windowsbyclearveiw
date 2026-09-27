@@ -35,7 +35,7 @@ const guides = defineCollection({
     published: z.boolean().default(true),
     updated: z.coerce.date(),
     order: z.number().default(99),
-    diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'glass-anatomy', 'signs-checklist', 'window-anatomy', 'old-window-replacement', 'double-pane-glass', 'vinyl-vs-fiberglass']).optional(),
+    diagram: z.enum(['insert-vs-full-frame', 'flashing-order', 'signs-checklist', 'window-anatomy', 'old-window-replacement', 'double-pane-glass', 'vinyl-vs-fiberglass']).optional(),
     secondaryDiagram: z.enum(['flashing-order', 'cost-build-up']).optional(),
     heroImage: image().optional(),
     heroImageAlt: z.string().optional(),
