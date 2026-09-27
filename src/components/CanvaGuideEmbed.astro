@@ -5,11 +5,12 @@ interface Props {
   alt: string;
   title?: string;
   description?: string;
+  desktopMaxWidth?: string;
 }
 
-const { desktopSrc, mobileSrc, alt, title, description } = Astro.props;
+const { desktopSrc, mobileSrc, alt, title, description, desktopMaxWidth = '100%' } = Astro.props;
 ---
-<figure class="guide-graphic">
+<figure class="guide-graphic" style={'--desktop-max-width:' + desktopMaxWidth}>
   <picture class="guide-picture">
     {mobileSrc && <source media="(max-width: 760px)" srcset={mobileSrc} />}
     <img
@@ -25,31 +26,24 @@ const { desktopSrc, mobileSrc, alt, title, description } = Astro.props;
 </figure>
 
 <style>
-  .guide-graphic{margin:0}
+  .guide-graphic{margin:0;width:100%}
   .guide-picture{
-    display:block;
-    width:100%;
-    border:1px solid var(--line);
-    border-radius:var(--radius-lg);
-    background:var(--paper-raised);
-    overflow:hidden;
-    box-shadow:var(--shadow-soft)
+    display:block;width:100%;max-width:var(--desktop-max-width);margin-inline:auto;
+    border:1px solid var(--line);border-radius:var(--radius-lg);
+    background:var(--paper-raised);overflow:hidden;box-shadow:var(--shadow-soft)
   }
-  .guide-image{
-    display:block;
-    width:100%;
-    height:auto;
-    max-width:none;
-  }
+  .guide-image{display:block;width:100%;height:auto;max-width:100%;object-fit:contain}
   .guide-caption{
-    margin:.65rem 0 0;
-    color:var(--ink-soft);
-    font-size:var(--step--2);
-    line-height:1.45;
+    width:min(100%,var(--desktop-max-width));margin:.65rem auto 0;
+    color:var(--ink-soft);font-size:var(--step--2);line-height:1.45
   }
   .sr-only{
-    position:absolute!important;
-    width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
-    clip:rect(0,0,0,0);white-space:nowrap;border:0
+    position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0
+  }
+  @media(max-width:760px){
+    .guide-picture,.guide-caption{max-width:100%}
+    .guide-picture{border-radius:14px}
+    .guide-image{width:100%;height:auto}
   }
 </style>
