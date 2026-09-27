@@ -1,0 +1,68 @@
+---
+interface Props {
+  desktopId: string;
+  mobileId?: string;
+  title: string;
+  description?: string;
+}
+
+const { desktopId, mobileId, title, description } = Astro.props;
+const desktopSrc = `https://www.canva.com/design/${desktopId}/view?embed`;
+const mobileSrc = mobileId ? `https://www.canva.com/design/${mobileId}/view?embed` : desktopSrc;
+---
+<figure class="canva-guide" aria-label={title}>
+  <div class="canva-frame desktop">
+    <iframe
+      title={title}
+      src={desktopSrc}
+      loading="lazy"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+  </div>
+
+  <div class="canva-frame mobile">
+    <iframe
+      title={`${title} — mobile`}
+      src={mobileSrc}
+      loading="lazy"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></iframe>
+  </div>
+
+  {description && <figcaption>{description}</figcaption>}
+</figure>
+
+<style>
+  .canva-guide{margin:0}
+  .canva-frame{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    background:#fff;
+    box-shadow:var(--shadow-soft);
+  }
+  .canva-frame.desktop{aspect-ratio:16/9}
+  .canva-frame.mobile{display:none;aspect-ratio:4/5}
+  .canva-frame iframe{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border:0;
+    display:block;
+    background:#fff;
+  }
+  .canva-guide figcaption{
+    margin-top:var(--space-2xs);
+    color:var(--ink-faint);
+    font-size:var(--step--2);
+  }
+  @media(max-width:760px){
+    .canva-frame.desktop{display:none}
+    .canva-frame.mobile{display:block}
+  }
+</style>
