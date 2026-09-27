@@ -29,16 +29,27 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
   <section class="section">
     <div class="wrap">
       {reviews.length > 0 ? (
-        <div class="review-list">
-          {reviews.map((review) => (
-            <ReviewCard
-              quote={review.data.quote}
-              name={review.data.name}
-              city={review.data.city}
-              source={review.data.source}
-            />
-          ))}
-        </div>
+        <>
+          <div class="review-list">
+            {reviews.map((review) => (
+              <ReviewCard
+                quote={review.data.quote}
+                name={review.data.name}
+                city={review.data.city}
+                source={review.data.source}
+              />
+            ))}
+          </div>
+          {site.social.google && (
+            <p class="post-reviews-cta">
+              Leave a review of your own on our{' '}
+              <a class="inline-social" href={site.social.google} target="_blank" rel="noopener noreferrer">
+                Google Business Profile
+              </a>
+              .
+            </p>
+          )}
+        </>
       ) : (
         <div class="empty" data-reveal>
           <div class="empty-mark" aria-hidden="true">
@@ -87,7 +98,23 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
                 </a>
               </li>
             )}
-            <li>Or leave it on the Google Business Profile once it is live</li>
+            <li>
+              {site.social.google ? (
+                <>
+                  Or leave it on our{' '}
+                  <a
+                    class="inline-social"
+                    href={site.social.google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Google Business Profile
+                  </a>
+                </>
+              ) : (
+                'Or leave it on the Google Business Profile once it is live'
+              )}
+            </li>
           </ul>
         </div>
         <div>
@@ -117,6 +144,10 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
     .review-list {
       grid-template-columns: 1fr;
     }
+  }
+
+  .post-reviews-cta {
+    margin-top: var(--space-l);
   }
 
   /* An empty page is the whole argument here, so it gets composed rather than

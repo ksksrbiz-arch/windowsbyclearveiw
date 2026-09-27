@@ -79,6 +79,14 @@ const ogImageUrl = new URL(ogImage.src, site.url).toString();
 // load the beacon twice.
 const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN as string | undefined;
 
+// Google Search Console ownership verification (Settings > Ownership
+// verification > HTML tag, the "content" value of the meta tag it gives
+// you — not the whole tag). Kept behind an env var rather than hardcoded so
+// this repo never carries a real verification token in source control; set
+// PUBLIC_GOOGLE_SITE_VERIFICATION in the Cloudflare Pages project once the
+// property is added in Search Console.
+const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as string | undefined;
+
 const breadcrumbSchema =
   crumbs.length > 0
     ? {
@@ -101,6 +109,9 @@ const breadcrumbSchema =
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, follow" />}
+    {googleSiteVerification && (
+      <meta name="google-site-verification" content={googleSiteVerification} />
+    )}
     <link rel="canonical" href={canonical} />
 
     <meta property="og:site_name" content={site.shortName} />

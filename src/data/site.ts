@@ -84,7 +84,13 @@ export const site = {
     // Set once Mark's Instagram profile is live — every link below reads
     // from this field and disappears on its own while it is empty.
     instagram: '',
-    google: '',
+    // The Google Business Profile share link (Google's own "Share profile"
+    // button on the listing for "Clear View Windows & Trim LLC",
+    // g/11p19_ddh4). Drives the footer "Review us on Google" link, the
+    // reviews page's GBP link, and the JsonLd sameAs entry the same way
+    // facebook does above — set this and all three light up on their own,
+    // nothing else to wire.
+    google: 'https://share.google/cdPgOCHSjkwMazSOC',
   },
 } as const;
 

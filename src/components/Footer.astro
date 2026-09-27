@@ -2,15 +2,22 @@
 import { mailHref, site, telHref } from '../data/site';
 import Brand from './Brand.astro';
 import FacebookIcon from './icons/FacebookIcon.astro';
+import GoogleIcon from './icons/GoogleIcon.astro';
 import LicenseTag from './LicenseTag.astro';
 import InsuranceTag from './InsuranceTag.astro';
 import BondTag from './BondTag.astro';
 
 const year = new Date().getFullYear();
 
+// Google Business Profile link comes last: it is what we most want a
+// customer who already trusts us to click (that's where reviews live), but
+// Facebook is the one link people expect to see first. Its own link text
+// ("Review us on...") rather than "Follow on Google" — nobody follows a
+// Google Business Profile, they review it.
 const socialLinks = [
-  ['Facebook', site.social.facebook, FacebookIcon],
-  ['Instagram', site.social.instagram, null],
+  ['Follow on Facebook', site.social.facebook, FacebookIcon],
+  ['Review us on Google', site.social.google, GoogleIcon],
+  ['Follow on Instagram', site.social.instagram, null],
 ].filter(
   (entry): entry is [string, string, typeof FacebookIcon | null] => Boolean(entry[1])
 );
@@ -68,7 +75,7 @@ const columns = [
             <li>
               <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer">
                 {Icon ? <Icon class="footer-social-icon" /> : null}
-                <span>Follow on {label}</span>
+                <span>{label}</span>
               </a>
             </li>
           ))}
