@@ -1,6 +1,6 @@
 # Clearview Windows
 
-Marketing site and internal quoting platform for **Clearview Windows**, operated by **Clear View Windows & Trim LLC**. The public site covers replacement and new-construction windows in Vancouver, WA, Clark County, and the surrounding service area.
+Marketing site and internal quoting platform for **Clearview Windows**, operated by **Clearview Windows & Trim LLC**. The public site covers replacement and new-construction windows in Vancouver, WA, Clark County, and the surrounding service area.
 
 - **Production:** https://windowsbyclearview.com
 - **Stack:** Astro 7, static build, Cloudflare Pages

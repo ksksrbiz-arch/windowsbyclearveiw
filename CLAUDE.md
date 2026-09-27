@@ -5,7 +5,7 @@ It is intentionally short enough to load first. Detailed architecture and state 
 
 ## Mission
 
-Build and maintain a trustworthy operating system for Clear View Windows & Trim LLC, not merely a marketing site. The public site, Command Center, deterministic services, and AI workflows must remain coherent.
+Build and maintain a trustworthy operating system for Clearview Windows & Trim LLC, not merely a marketing site. The public site, Command Center, deterministic services, and AI workflows must remain coherent.
 
 ## Non-negotiables
 
