@@ -134,14 +134,19 @@ lead-submission signals to `facebook.com`.
 
 ## Who else sees your estimate request
 
-Your form submission is handled by exactly three companies, each doing one job:
+Your submitted fields — name, phone, city, and the rest — are handled by
+exactly three companies, each doing one job:
 
 | Company | What they do | What they see |
 | --- | --- | --- |
 | Cloudflare | Runs the function that receives the form and stores the record described below | The submitted fields and visit history, in transit and at rest |
 | Resend | Delivers the two emails | The submitted fields, in the message body |
 | Google Workspace | Hosts the business mailbox the lead arrives in | The submitted fields, in the message |
-| Meta | Measures our Facebook/Instagram advertising, via the pixel described above | That a "Lead" event happened, and the browser's Meta advertising cookie — not the fields you typed |
+
+Separately, **Meta** — via the advertising pixel described above — is told
+that a "Lead" event happened, so we can measure ad performance. It does not
+receive the fields you typed; only its own advertising cookie and the fact
+that a submission occurred.
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
