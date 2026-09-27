@@ -6,6 +6,7 @@ import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
+import WindowAnatomy from '../components/diagrams/WindowAnatomy.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
@@ -64,6 +65,13 @@ const stylePhotos = [
         None of that means every window needs replacing. It means the choices below are worth
         understanding before you pay for one — whether that's with us or anyone else.
       </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-wide" data-reveal>
+      <p class="rule-label">Start with the physical window</p>
+      <WindowAnatomy heading="Window anatomy" />
     </div>
   </section>
 
