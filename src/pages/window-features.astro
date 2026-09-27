@@ -5,7 +5,6 @@ import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
-import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
@@ -93,7 +92,12 @@ const stylePhotos = [
         ))}
       </div>
       <div class="diagram-slot">
-        <FrameMaterials />
+        <CanvaGuideEmbed
+          desktopId="DAHWbmI7TSg"
+          mobileId="DAHWblmkAH4"
+          title="Vinyl vs. Fiberglass Window Frames"
+          description="A visual comparison of how vinyl and fiberglass window frames are constructed and where the difference matters."
+        />
       </div>
       <p class="fine-print">
         We install both. Which one makes sense depends on the opening size and what you want
