@@ -6,7 +6,6 @@ import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork } from '../data/work';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
-import FrameMaterials from '../components/diagrams/FrameMaterials.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
@@ -95,7 +94,14 @@ const stylePhotos = [
         ))}
       </div>
       <div class="diagram-slot">
-        <FrameMaterials />
+        <figure class="frame-materials-graphic">
+        <img
+          src="/guides/vinyl-fiberglass-guide.svg"
+          alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
       </div>
       <p class="fine-print">
         We install both. Which one makes sense depends on the opening size and what you want
@@ -218,6 +224,21 @@ const stylePhotos = [
 </BaseLayout>
 
 <style>
+  .frame-materials-graphic {
+    margin: var(--space-l) 0 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .frame-materials-graphic img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
   .page-hero-photo {
     position: relative;
     background-size: cover;
