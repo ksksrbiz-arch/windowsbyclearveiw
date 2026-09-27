@@ -1,20 +1,18 @@
 ---
 interface Props {
-  desktopId: string;
-  mobileId?: string;
+  desktopUrl: string;
+  mobileUrl?: string;
   title: string;
   description?: string;
 }
 
-const { desktopId, mobileId, title, description } = Astro.props;
-const desktopSrc = `https://www.canva.com/design/${desktopId}/view?embed`;
-const mobileSrc = mobileId ? `https://www.canva.com/design/${mobileId}/view?embed` : desktopSrc;
+const { desktopUrl, mobileUrl, title, description } = Astro.props;
 ---
 <figure class="canva-guide" aria-label={title}>
   <div class="canva-frame desktop">
     <iframe
       title={title}
-      src={desktopSrc}
+      src={desktopUrl + '?embed'}
       loading="lazy"
       allowfullscreen
       referrerpolicy="strict-origin-when-cross-origin"
@@ -23,12 +21,16 @@ const mobileSrc = mobileId ? `https://www.canva.com/design/${mobileId}/view?embe
 
   <div class="canva-frame mobile">
     <iframe
-      title={`${title} — mobile`}
-      src={mobileSrc}
+      title={title + ' — mobile'}
+      src={(mobileUrl ?? desktopUrl) + '?embed'}
       loading="lazy"
       allowfullscreen
       referrerpolicy="strict-origin-when-cross-origin"
     ></iframe>
+  </div>
+
+  <div class="canva-fallback">
+    <a href={desktopUrl} target="_blank" rel="noopener noreferrer">View this guide in Canva</a>
   </div>
 
   {description && <figcaption>{description}</figcaption>}
@@ -37,30 +39,15 @@ const mobileSrc = mobileId ? `https://www.canva.com/design/${mobileId}/view?embe
 <style>
   .canva-guide{margin:0}
   .canva-frame{
-    position:relative;
-    width:100%;
-    overflow:hidden;
-    border:1px solid var(--line);
-    border-radius:var(--radius-lg);
-    background:#fff;
-    box-shadow:var(--shadow-soft);
+    position:relative;width:100%;overflow:hidden;border:1px solid var(--line);
+    border-radius:var(--radius-lg);background:#fff;box-shadow:var(--shadow-soft)
   }
   .canva-frame.desktop{aspect-ratio:16/9}
   .canva-frame.mobile{display:none;aspect-ratio:4/5}
-  .canva-frame iframe{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    border:0;
-    display:block;
-    background:#fff;
-  }
-  .canva-guide figcaption{
-    margin-top:var(--space-2xs);
-    color:var(--ink-faint);
-    font-size:var(--step--2);
-  }
+  .canva-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#fff}
+  .canva-fallback{margin-top:.65rem;font-size:var(--step--2)}
+  .canva-fallback a{color:var(--accent-ink);text-decoration:underline}
+  .canva-guide figcaption{margin-top:var(--space-2xs);color:var(--ink-faint);font-size:var(--step--2)}
   @media(max-width:760px){
     .canva-frame.desktop{display:none}
     .canva-frame.mobile{display:block}
