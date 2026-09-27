@@ -1,7 +1,7 @@
 export const site = {
   name: 'Clearview Windows',
   shortName: 'Clearview Windows',
-  legalName: 'Clear View Windows & Trim LLC',
+  legalName: 'Clearview Windows & Trim LLC',
   /**
    * Washington Unified Business Identifier. Distinct from lniNumber (the WA
    * L&I contractor registration).
@@ -14,7 +14,7 @@ export const site = {
    * Long form, for the JSON-LD business entity where length does not matter.
    */
   description:
-    'Clearview Windows, operated by Clear View Windows & Trim LLC, installs replacement windows, sliding glass doors, and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland.',
+    'Clearview Windows, operated by Clearview Windows & Trim LLC, installs replacement windows, sliding glass doors, and new-construction windows in Vancouver, Washington and surrounding Clark County: Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, and Woodland.',
   /**
    * Short form, for the homepage <meta name="description">. Google truncates
    * around 160 characters and the long version was 253, so the service-area
@@ -85,7 +85,7 @@ export const site = {
     // from this field and disappears on its own while it is empty.
     instagram: '',
     // The Google Business Profile share link (Google's own "Share profile"
-    // button on the listing for "Clear View Windows & Trim LLC",
+    // button on the listing for "Clearview Windows & Trim LLC",
     // g/11p19_ddh4). Drives the footer "Review us on Google" link, the
     // reviews page's GBP link, and the JsonLd sameAs entry the same way
     // facebook does above — set this and all three light up on their own,

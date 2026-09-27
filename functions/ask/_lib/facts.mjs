@@ -14,7 +14,7 @@
 // ever reverts to 'averages', reword the line back to "published regional
 // pricing" rather than letting it silently drift out of sync again.
 export const BUSINESS_FACTS = `
-Business: Clearview Windows, operated by Clear View Windows & Trim LLC — replacement windows, sliding glass doors, and new-construction window installation.
+Business: Clearview Windows, operated by Clearview Windows & Trim LLC — replacement windows, sliding glass doors, and new-construction window installation.
 Phone: (564) 208-0801
 Email: owner@windowsbyclearveiw.com
 Service area: Based in Vancouver, WA. Installs throughout Clark County — Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland. Does not serve Portland, OR or other Oregon locations.

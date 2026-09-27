@@ -6,7 +6,7 @@ order: 2
 summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
 ---
 
-These terms apply to your use of windowsbyclearview.com, operated by Clear View
+These terms apply to your use of windowsbyclearview.com, operated by Clearview
 Windows & Trim LLC, doing business as Clearview Windows ("Clearview", "we",
 "us"), a Washington limited liability company based in Vancouver, Washington.
 By using the site you agree to them. If you do not, please do not use the
@@ -62,7 +62,7 @@ unlawful, abusive, or automated.
 
 ## Our content
 
-The text, photographs, diagrams, and design on this site belong to Clear View
+The text, photographs, diagrams, and design on this site belong to Clearview
 Windows & Trim LLC. **The job photographs are of real work performed by
 Clearview Windows**; they are not stock imagery and they are not licensed for
 reuse.
@@ -92,7 +92,7 @@ by our negligence, or for fraud.
 
 ## Contractor registration
 
-Clear View Windows & Trim LLC is a Washington contractor, registered with the
+Clearview Windows & Trim LLC is a Washington contractor, registered with the
 Department of Labor & Industries under registration number CLEARVW74601.
 Verify it yourself using the Washington State L&I contractor lookup. You
 should do that with every contractor you let near your walls, including us.
@@ -123,6 +123,6 @@ and the version published here is the one that applies.
 
 ## Contact
 
-- Clear View Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
+- Clearview Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

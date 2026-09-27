@@ -13,7 +13,7 @@ A marketing site for **Clearview Windows** — my friend Mark's window installat
 - **Repo:** `ksksrbiz-arch/windowsbyclearveiw` (public), deploys from `main`
 - **Stack:** Astro, static, no adapter. Cloudflare Pages. Estimate form is a Pages Function. Resend for mail.
 - **Pricing worker:** https://clearview-pricing.skdev-371.workers.dev
-- **Legal entity:** Clear View Windows & Trim LLC (WA UBI 605 779 798), doing business as "Clearview Windows". `site.legalName` in `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold the trade name.
+- **Legal entity:** Clearview Windows & Trim LLC (WA UBI 605 779 798), doing business as "Clearview Windows". `site.legalName` in `src/data/site.ts` holds the legal name; `site.name`/`site.shortName` hold the trade name. (Corrected 2026-09-27 — this was previously misdocumented as two words, "Clear View"; Keith confirmed the actual filed LLC name is one word, matching the trade name and domain. Fixed across site.ts, legal pages, invoices, the /ask system prompt and facts, CLAUDE.md, and README.md.)
 - **On the spelling:** the public website uses `windowsbyclearview.com`. The working production mailbox for lead notifications is still on the legacy typo domain `windowsbyclearveiw.com`. Do **not** change the default notification address to `@windowsbyclearview.com` until a real mailbox has been provisioned and tested on that domain. The old domain's HTTP redirect does not affect SMTP/mail delivery.
 
 ## Where it stands
