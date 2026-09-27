@@ -2,94 +2,87 @@
 interface Props { heading?: string | null; }
 const { heading = 'Old window → modern replacement' } = Astro.props;
 ---
-<figure class="replacement">
+<figure class="replacement-guide">
   {heading && <figcaption class="heading">{heading}</figcaption>}
-  <p class="intro">The easiest way to understand a replacement is to compare the two openings side by side.</p>
+  <p class="intro">Same opening. Very different window system.</p>
 
-  <div class="comparison" role="img" aria-label="Before and after diagram comparing an older window assembly with a modern replacement window.">
-    <div class="side old">
-      <div class="side-head"><span>BEFORE</span><strong>Older window assembly</strong></div>
-      <svg viewBox="0 0 520 520" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id="oldFrame" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#5b5d57"/><stop offset="1" stop-color="#77736a"/>
-          </linearGradient>
-        </defs>
-        <rect width="520" height="520" fill="#efece5"/>
-        <rect x="108" y="62" width="304" height="360" rx="4" fill="url(#oldFrame)" stroke="#3d403b" stroke-width="5"/>
-        <rect x="132" y="86" width="256" height="314" fill="#d9e4df" stroke="#4a4e49" stroke-width="18"/>
-        <path d="M142 95 L210 95 L163 160 L142 160Z" fill="#fff" opacity=".26"/>
-        <rect x="250" y="88" width="18" height="312" fill="#4a4e49"/>
-        <rect x="126" y="207" width="268" height="20" fill="#4a4e49"/>
-        <circle cx="259" cy="216" r="7" fill="#b8b8ae"/>
-        <path d="M83 195 C61 210,61 240,83 254" stroke="#a74a45" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <path d="M58 191 C28 210,28 242,58 262" stroke="#d06a63" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/>
-        <path d="M95 410 C118 433,148 444,174 444" stroke="#a74a45" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <path d="M346 433 C370 444,400 445,426 432" stroke="#a74a45" stroke-width="6" fill="none" stroke-linecap="round"/>
-      </svg>
-      <div class="callouts">
-        <div><b>Older assembly</b><span>Worn frame, older glazing, dated hardware.</span></div>
-        <div><b>Perimeter gaps</b><span>Draft cues around the opening.</span></div>
+  <div class="comparison">
+    <article class="side old">
+      <header><span>BEFORE</span><h3>Older window</h3></header>
+      <div class="illustration" role="img" aria-label="Illustration of an older window assembly with worn framing and perimeter gaps.">
+        <svg viewBox="0 0 520 480" aria-hidden="true">
+          <defs><linearGradient id="cv-old-frame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5c56"/><stop offset="1" stop-color="#77736a"/></linearGradient></defs>
+          <rect width="520" height="480" fill="#efece5"/>
+          <rect x="110" y="56" width="300" height="352" rx="6" fill="url(#cv-old-frame)" stroke="#3d403b" stroke-width="5"/>
+          <rect x="136" y="82" width="248" height="300" fill="#d8e4df" stroke="#4a4e49" stroke-width="18"/>
+          <rect x="248" y="84" width="18" height="296" fill="#4a4e49"/>
+          <rect x="130" y="216" width="260" height="20" fill="#4a4e49"/>
+          <circle cx="257" cy="226" r="7" fill="#b9b9ae"/>
+          <path d="M86 205 C56 220 56 250 86 265" fill="none" stroke="#a74a45" stroke-width="7" stroke-linecap="round"/>
+          <path d="M54 201 C20 223 20 255 54 276" fill="none" stroke="#d06a63" stroke-width="4" stroke-linecap="round"/>
+          <path d="M103 392 C130 416 160 427 190 427" fill="none" stroke="#a74a45" stroke-width="7" stroke-linecap="round"/>
+          <path d="M330 424 C360 432 390 430 416 414" fill="none" stroke="#a74a45" stroke-width="7" stroke-linecap="round"/>
+        </svg>
       </div>
-    </div>
-
-    <div class="swap" aria-hidden="true">
-      <span class="swap-mark">→</span>
-      <span>REPLACE</span>
-    </div>
-
-    <div class="side new">
-      <div class="side-head"><span>AFTER</span><strong>Modern replacement</strong></div>
-      <svg viewBox="0 0 520 520" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id="newFrame" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#24463b"/><stop offset="1" stop-color="#557266"/>
-          </linearGradient>
-          <linearGradient id="newGlass" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#f7fbfa"/><stop offset=".55" stop-color="#d5ebe4"/><stop offset="1" stop-color="#b8d7cd"/>
-          </linearGradient>
-        </defs>
-        <rect width="520" height="520" fill="#eef4f0"/>
-        <rect x="98" y="54" width="324" height="376" rx="6" fill="#dce5df" stroke="#b2c5bc" stroke-width="12"/>
-        <rect x="116" y="72" width="288" height="340" rx="4" fill="url(#newFrame)"/>
-        <rect x="142" y="98" width="236" height="288" fill="url(#newGlass)"/>
-        <rect x="144" y="237" width="232" height="16" rx="4" fill="#355247"/>
-        <rect x="252" y="98" width="16" height="288" rx="4" fill="#355247"/>
-        <path d="M162 117 L230 117 L183 182 L156 182Z" fill="#fff" opacity=".42"/>
-        <rect x="247" y="233" width="26" height="30" rx="7" fill="#d5ded8"/>
-        <rect x="98" y="54" width="324" height="376" rx="6" fill="none" stroke="#2d7d63" stroke-width="5" opacity=".55"/>
-        <path d="M88 442 H432" stroke="#6e8278" stroke-width="3"/>
-        <path d="M110 453 H410" stroke="#a1b2aa" stroke-width="3"/>
-      </svg>
-      <div class="callouts">
-        <div><b>Modern insulated glass</b><span>Two-pane construction with an insulated space.</span></div>
-        <div><b>Tight perimeter seal</b><span>New frame and sealing surfaces close the opening.</span></div>
-        <div><b>Finished replacement</b><span>Fresh unit, trim and a clean final opening.</span></div>
+      <div class="points">
+        <div><span>01</span><div><strong>Older assembly</strong><p>Worn frame, older glazing and dated hardware.</p></div></div>
+        <div><span>02</span><div><strong>Perimeter gaps</strong><p>Air can move through weak seals and joints.</p></div></div>
       </div>
-    </div>
+    </article>
+
+    <div class="swap" aria-hidden="true"><span>REPLACE</span><b>→</b></div>
+
+    <article class="side new">
+      <header><span>AFTER</span><h3>Modern replacement</h3></header>
+      <div class="illustration" role="img" aria-label="Illustration of a modern replacement window with insulated glass and a finished sealed perimeter.">
+        <svg viewBox="0 0 520 480" aria-hidden="true">
+          <defs>
+            <linearGradient id="cv-new-frame" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#24463b"/><stop offset="1" stop-color="#557266"/></linearGradient>
+            <linearGradient id="cv-new-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fbfa"/><stop offset=".55" stop-color="#d5ebe4"/><stop offset="1" stop-color="#b8d7cd"/></linearGradient>
+          </defs>
+          <rect width="520" height="480" fill="#edf4f0"/>
+          <rect x="100" y="50" width="320" height="350" rx="8" fill="#dce5df" stroke="#b2c5bc" stroke-width="12"/>
+          <rect x="117" y="67" width="286" height="316" rx="4" fill="url(#cv-new-frame)"/>
+          <rect x="143" y="93" width="234" height="264" fill="url(#cv-new-glass)"/>
+          <rect x="145" y="220" width="230" height="16" rx="4" fill="#355247"/>
+          <rect x="251" y="93" width="16" height="264" rx="4" fill="#355247"/>
+          <rect x="244" y="218" width="28" height="30" rx="8" fill="#d6ded9"/>
+          <path d="M163 112 L230 112 L183 174 L157 174Z" fill="#fff" opacity=".42"/>
+          <rect x="99" y="49" width="322" height="352" rx="8" fill="none" stroke="#2d7d63" stroke-width="5" opacity=".6"/>
+        </svg>
+      </div>
+      <div class="points">
+        <div><span>01</span><div><strong>Modern insulated glass</strong><p>Two panes separated by an insulated space.</p></div></div>
+        <div><span>02</span><div><strong>Tight perimeter</strong><p>New frame and sealing surfaces close the opening.</p></div></div>
+        <div><span>03</span><div><strong>Finished replacement</strong><p>A clean, complete unit in the opening.</p></div></div>
+      </div>
+    </article>
   </div>
 </figure>
 
 <style>
-  .replacement{margin:0}
+  .replacement-guide{margin:0}
   .heading{display:block;margin:0 0 .35rem;font-size:var(--step-2);font-weight:650;letter-spacing:var(--tracking-display);line-height:var(--leading-display)}
-  .intro{margin:0 0 var(--space-l);max-width:74ch;color:var(--ink-soft);font-size:var(--step--1)}
-  .comparison{display:grid;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr);align-items:stretch;gap:var(--space-s)}
+  .intro{margin:0 0 var(--space-l);max-width:72ch;color:var(--ink-soft);font-size:var(--step--1)}
+  .comparison{display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);align-items:center;gap:var(--space-s)}
   .side{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--paper-raised);box-shadow:var(--shadow-soft)}
-  .side-head{display:grid;gap:.15rem;padding:var(--space-s) var(--space-m);border-bottom:1px solid var(--line)}
-  .side-head span{font-size:10px;font-weight:750;letter-spacing:.12em}
-  .side-head strong{font-size:var(--step-1)}
-  .old .side-head{color:#7d4a42}
-  .new .side-head{color:var(--accent-ink)}
-  .side svg{display:block;width:100%;height:auto}
-  .callouts{display:grid;gap:.6rem;padding:var(--space-m)}
-  .callouts>div{display:grid;gap:.18rem;padding:.65rem .75rem;background:var(--paper-sunk);border-left:3px solid var(--line-strong)}
-  .old .callouts>div:first-child{border-left-color:#a74a45}
-  .old .callouts>div:last-child{border-left-color:#d06a63}
-  .new .callouts>div{border-left-color:var(--accent)}
-  .callouts b{font-size:var(--step--1)}
-  .callouts span{font-size:var(--step--2);line-height:1.35;color:var(--ink-soft)}
-  .swap{display:grid;align-content:center;justify-items:center;gap:.4rem;color:var(--accent-ink);font-size:10px;font-weight:750;letter-spacing:.12em}
-  .swap-mark{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--paper-raised);font-size:26px;box-shadow:var(--shadow-sm)}
-  @media(max-width:900px){.comparison{grid-template-columns:1fr}.swap{grid-row:auto;grid-template-columns:auto 1fr;justify-items:start;align-items:center;padding:var(--space-2xs) 0}.swap-mark{width:38px;height:38px;font-size:22px}}
+  .side header{padding:var(--space-s) var(--space-m);border-bottom:1px solid var(--line)}
+  .side header span{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;margin-bottom:.18rem}
+  .side header h3{margin:0;font-size:var(--step-1)}
+  .old header{color:#7d4a42}.new header{color:var(--accent-ink)}
+  .illustration{background:#f7f8f5}
+  .illustration svg{display:block;width:100%;height:auto}
+  .points{display:grid;gap:.55rem;padding:var(--space-m)}
+  .points>div{display:grid;grid-template-columns:26px 1fr;gap:.45rem;padding:.7rem .75rem;border-left:3px solid var(--line-strong);background:var(--paper-sunk)}
+  .old .points>div{border-left-color:#a74a45}.new .points>div{border-left-color:var(--accent)}
+  .points>div>span{font-size:10px;font-weight:800;color:var(--accent-ink)}
+  .points strong{font-size:var(--step--1);line-height:1.15}.points p{margin:.2rem 0 0;font-size:11px;line-height:1.35;color:var(--ink-soft)}
+  .swap{display:grid;justify-items:center;gap:.45rem;color:var(--accent-ink);font-size:10px;font-weight:800;letter-spacing:.12em}
+  .swap b{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--paper-raised);border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));font-size:25px;box-shadow:var(--shadow-sm)}
+  @media(max-width:900px){
+    .comparison{grid-template-columns:1fr;gap:var(--space-s)}
+    .swap{grid-template-columns:auto auto;justify-content:center;gap:.6rem;padding:.15rem 0}
+    .swap b{width:40px;height:40px;font-size:21px}
+    .swap b{transform:rotate(90deg)}
+  }
 </style>
