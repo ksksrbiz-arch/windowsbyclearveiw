@@ -80,12 +80,16 @@ import { site, telHref } from '../../data/site';
 </BaseLayout>
 
 <script>
-  // GA4 conversion signal for the no-JS fallback path: estimate.js 303s here
-  // on a real form post, which is a hard navigation, so this runs once per
-  // arrival — no astro:page-load listener needed the way trackPageView()
+  // GA4/Meta conversion signal for the no-JS fallback path: estimate.js 303s
+  // here on a real form post, which is a hard navigation, so this runs once
+  // per arrival — no astro:page-load listener needed the way trackPageView()
   // needs one, since this page is never reached by client-side routing.
   // The JS-intercepted submit path pushes the same event itself, from
-  // EstimateForm.astro, because it never navigates here at all.
+  // EstimateForm.astro's success handler, because it never navigates here at
+  // all — it shows the inline success state via fetch()/JSON instead. Both
+  // paths push the same "generate_lead" event name so the single GA4 Event
+  // tag and the Meta Pixel's generate_lead→Lead mapping in GTM-WGCFVHQM
+  // cover both routes without any GTM-side changes.
   try {
     // @ts-expect-error — initialized by the GTM snippet in BaseLayout's <head>.
     window.dataLayer = window.dataLayer || [];
