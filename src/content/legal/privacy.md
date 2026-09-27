@@ -3,7 +3,7 @@ title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
 updated: 2026-09-27
 order: 1
-summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID — it is not used for advertising, and ad personalization features are switched off. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
+summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---
 
 Clearview Windows, operated by Clearview Windows & Trim LLC ("Clearview", "we",
@@ -31,8 +31,8 @@ Cloudflare Pages. Like any web host, Cloudflare's edge network processes your
 IP address and browser user-agent in order to deliver the page and to block
 abusive traffic. We do not receive, store, or analyze those logs ourselves.
 
-**Traffic counting.** The site uses two analytics tools side by side, and they
-work differently:
+**Traffic counting.** The site uses Google Analytics and Cloudflare Web
+Analytics side by side, and they work differently:
 
 - **Cloudflare Web Analytics** counts page views. It records the page
   visited, the referring site, your browser and operating system, your
@@ -40,15 +40,16 @@ work differently:
   identifier on your device, and does not fingerprint you — it cannot follow
   you between visits, and we cannot tell that two page views came from the
   same person.
-- **Google Analytics (GA4)** also records page views, plus which pages you
-  came from and left through in one visit. Unlike Cloudflare's tool, it sets
-  a cookie in your browser and assigns you a randomly generated ID, so it can
-  tell that the same browser viewed several pages in one visit or came back
-  later. We have not turned on Google Signals or any advertising-personalization
-  feature for this property, so Google Analytics is not, to our knowledge,
-  linking your visits here to a Google account or using them for ad
-  targeting on this site. Your data is still processed on Google's servers
-  under Google's own privacy policy, which we do not control.
+- **Google Analytics (GA4)**, run through Google Tag Manager, also records
+  page views, plus which pages you came from and left through in one visit.
+  Unlike Cloudflare's tool, it sets a cookie in your browser and assigns you a
+  randomly generated ID, so it can tell that the same browser viewed several
+  pages in one visit or came back later. We have not turned on Google Signals
+  or any advertising-personalization feature for this property, so Google
+  Analytics is not, to our knowledge, linking your visits here to a Google
+  account or using them for ad targeting on this site. Your data is still
+  processed on Google's servers under Google's own privacy policy, which we do
+  not control.
 
   We also send Google Analytics a small number of aggregate event counts: when
   someone clicks a phone number, clicks a link to the estimate form, reads at
@@ -59,10 +60,20 @@ work differently:
 We use both to see which pages are worth writing and which are not. That is
 the whole purpose.
 
-**We do not collect** heatmaps, session recordings, advertising identifiers,
-mouse or scroll tracking, or location beyond the city you type in. There is no
-Meta pixel, no ad network tag, and no tag manager beyond the Google Analytics
-snippet described above.
+**Advertising.** The site also runs a Meta (Facebook/Instagram) pixel,
+delivered through the same Google Tag Manager. Unlike the analytics tools
+above, this one exists specifically to measure our own Facebook and Instagram
+ads — it is advertising technology, not neutral analytics. It sets its own
+cookie in your browser, distinct from Google's, and tells Meta when a page is
+viewed and, separately, when the estimate form is submitted (as a "Lead"
+signal, not the contents of what you typed). Meta processes this under its
+own privacy policy, which we do not control. If you arrived here from a Meta
+ad, or if you are logged into Facebook or Instagram in the same browser, Meta
+may be able to connect this visit to your account; if you use ad blockers or
+tracking protection, some or all of this pixel will not load at all.
+
+**We do not collect** heatmaps, session recordings, mouse or scroll tracking,
+or location beyond the city you type in.
 
 ## If you request an estimate: your visit history
 
@@ -89,8 +100,9 @@ shared, and never turned into a mailing list.
 ## Cookies and local storage
 
 **Google Analytics sets a small number of first-party cookies** (named `_ga`
-and `_ga_*`) so it can recognize a returning visit. That is the only cookie
-this site sets. Cloudflare Web Analytics sets none.
+and `_ga_*`) so it can recognize a returning visit. **The Meta pixel** sets its
+own cookies (named `_fbp`, and `_fbc` if you arrived from a Meta ad) so Meta
+can do the same for its own measurement. Cloudflare Web Analytics sets none.
 
 The cost calculator also stores one item in your browser's `sessionStorage` — the
 project scope you built, under the key `clearview:scope` — so that the estimate
@@ -111,12 +123,14 @@ background — they only reach us if you submit the estimate form.
 Very few. Every asset this site needs — the stylesheet, the typeface, the
 photographs, the icons — is served from this domain. There is no font CDN.
 
-Two exceptions, both analytics scripts described above: **Cloudflare Web
-Analytics**, which loads from `static.cloudflareinsights.com` (Cloudflare
-already handles every request to this site as its host, so this does not
-introduce a company that was not already in the path), and **Google
-Analytics**, which loads its tag from `googletagmanager.com` and sends visit
-data to Google's servers.
+Three exceptions, all described above: **Cloudflare Web Analytics**, which
+loads from `static.cloudflareinsights.com` (Cloudflare already handles every
+request to this site as its host, so this does not introduce a company that
+was not already in the path); **Google Analytics**, run through **Google Tag
+Manager**, which loads from `googletagmanager.com` and sends visit data to
+Google's servers; and the **Meta pixel**, also delivered through Google Tag
+Manager, which loads from `connect.facebook.net` and sends page-view and
+lead-submission signals to `facebook.com`.
 
 ## Who else sees your estimate request
 
@@ -127,6 +141,7 @@ Your form submission is handled by exactly three companies, each doing one job:
 | Cloudflare | Runs the function that receives the form and stores the record described below | The submitted fields and visit history, in transit and at rest |
 | Resend | Delivers the two emails | The submitted fields, in the message body |
 | Google Workspace | Hosts the business mailbox the lead arrives in | The submitted fields, in the message |
+| Meta | Measures our Facebook/Instagram advertising, via the pixel described above | That a "Lead" event happened, and the browser's Meta advertising cookie — not the fields you typed |
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
