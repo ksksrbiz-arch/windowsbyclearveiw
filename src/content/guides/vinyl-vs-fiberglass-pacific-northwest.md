@@ -9,6 +9,7 @@ order: 6
 heroImage: ../../assets/work/tan-upper-slider.jpg
 heroImageAlt: Close view of an upper-story white slider on tan vertical siding, showing the kind of opening where frame size and exposure matter.
 heroImageCredit: Clearview job photo — upper-story slider opening
+diagram: vinyl-vs-fiberglass
 faq:
   - question: Does fiberglass rot or rust like wood or metal?
     answer: No. Fiberglass is a glass-reinforced resin — it doesn't absorb water the way wood does or corrode the way steel and older aluminum frames do. It can still trap moisture behind bad flashing like any frame material; the frame itself just isn't the thing failing.
