@@ -134,9 +134,9 @@ we received the request.
 We do not use a customer relationship manager or a marketing platform, and
 nothing here is used to build a mailing list. We do keep your submission — the
 fields you typed and the visit history above — in a small database on
-Cloudflare that only Mark can browse, so he has that context in front of him
-when he calls or emails you back. That database record, and the email in
-Mark's inbox, are the only stored records of your submission.
+Cloudflare that only we can browse, so we have that context in front of us
+when we call or email you back. That database record, and the email in
+our inbox, are the only stored records of your submission.
 
 ## What we do with it
 
@@ -156,7 +156,7 @@ otherwise. Either way, tell us to stop and we will stop.
 
 ## How long we keep it
 
-Your request lives as an email in the business mailbox Mark reads, and as a
+Your request lives as an email in the business mailbox we read, and as a
 record in the database described above. We keep both for active and recent
 jobs so we can honour what we agreed to. If you ask us to delete your
 information and you are not a current customer with an open job, we will
@@ -189,7 +189,7 @@ you believe a child has sent us information, contact us and we will delete it.
 ## Security
 
 Traffic to this site is encrypted in transit. Access to the mailbox holding your
-request is limited to Mark. No method of transmission or storage is completely
+request is limited to us. No method of transmission or storage is completely
 secure, and we do not claim otherwise.
 
 ## Changes

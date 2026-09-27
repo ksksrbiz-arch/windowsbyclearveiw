@@ -3,7 +3,7 @@ title: Terms of use
 description: The terms that apply to using windowsbyclearview.com, including what the cost calculator is and is not.
 updated: 2026-09-27
 order: 2
-summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when Mark has measured your openings and put it in writing.
+summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when we have measured your openings and put it in writing.
 ---
 
 These terms apply to your use of windowsbyclearview.com, operated by Clearview
@@ -34,7 +34,7 @@ Specifically:
   knowledge of your house, your openings, your frames, or your access. That is
   true whether the underlying figures are regional averages or our own
   pricing.
-- A real number requires a site visit. Mark measures every opening, identifies
+- A real number requires a site visit. We measure every opening, identify
   which ones take an insert and which need full-frame replacement, and puts the
   result in writing.
 

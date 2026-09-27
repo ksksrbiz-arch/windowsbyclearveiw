@@ -9,7 +9,7 @@ interface Props {
 
 const {
   heading = 'Get your free estimate.',
-  body = 'Mark measures the glass, sills, and trim in person, then gives you a number in writing — not a guess from a photo.',
+  body = 'We measure the glass, sills, and trim in person, then give you a number in writing — not a guess from a photo.',
 } = Astro.props;
 ---
 <section class="cta-band">
@@ -25,7 +25,7 @@ const {
     </div>
     <div class="cta-actions">
       <a class="cta-phone" href={telHref()}>
-        <span class="cta-phone-label">Call Mark</span>
+        <span class="cta-phone-label">Call us</span>
         <span class="cta-phone-number" aria-hidden="true">{site.phoneDisplay}</span>
         <span class="visually-hidden">{site.phoneDisplay}</span>
       </a>
