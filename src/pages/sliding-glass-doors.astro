@@ -5,18 +5,17 @@ import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
 import { findWork, workKindLabel } from '../data/work';
-import slidingDoorsHeroSrc from '../assets/hero/sliding-glass-doors.png';
 import { site } from '../data/site';
 
-// Real installed sliding-door jobs, added 2026-09-27 — the OG image now
-// shows an actual door instead of a window photo borrowed for lack of one.
+// Real installed sliding-door jobs, added 2026-09-27 — the OG image and the
+// hero background now show actual doors instead of the AI-generated concept
+// image and a window photo borrowed for lack of one.
 const doorWork = [findWork('gray-siding-white-slider-deck')!, findWork('tan-slider-kitchen-view')!];
 const ogPhoto = doorWork[0];
 
-// Full-bleed hero background. AI-generated, not a real elevation, so it is
-// captioned as such — the same rule the other service-page heroes follow
-// (replacement.astro, new-construction.astro, window-features.astro).
-const heroBg = await getImage({ src: slidingDoorsHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// Full-bleed hero background, cropped from the same real elevation as the
+// gallery below (see the "Real installs" section) rather than AI imagery.
+const heroBg = await getImage({ src: doorWork[0].image, width: 2400, format: 'webp', quality: 76 });
 
 // The estimator already prices sliding patio doors as their own opening type
 // (doors are not brand-specific — see pricing.ts) — reuse that single source
@@ -166,7 +165,6 @@ const schema = {
         the same call. Replacing a window instead? See <a href="/replacement">window replacement</a>.
       </p>
     </div>
-    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
   </section>
 
   <section class="section" id="configurations">
@@ -333,23 +331,12 @@ const schema = {
 </BaseLayout>
 
 <style>
-  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
-     not a photo of a real job — hence the small credit line — matching the
-     treatment used on replacement.astro and new-construction.astro. */
+  /* Full-bleed photo hero, cropped from a real installed job — same
+     treatment as replacement.astro's. */
   .page-hero-photo {
     position: relative;
     background-size: cover;
     background-position: center;
-  }
-
-  .hero-photo-credit {
-    position: absolute;
-    right: var(--space-s);
-    bottom: var(--space-2xs);
-    margin: 0;
-    font-size: var(--step--2);
-    color: var(--on-dark-faint);
-    opacity: 0.75;
   }
 
   .hero-actions {
