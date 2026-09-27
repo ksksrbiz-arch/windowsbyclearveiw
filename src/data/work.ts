@@ -62,6 +62,12 @@ import caulkGunInteriorSill from '../assets/work/caulk-gun-interior-sill.jpg';
 import charcoalTrimHungLadder from '../assets/work/charcoal-trim-hung-ladder.jpg';
 import newBuildTanCorner from '../assets/work/new-build-tan-corner.jpg';
 
+// First real sliding glass door installs, added 2026-09-27 — replaces the
+// AI-generated concept imagery sliding-glass-doors.astro and the homepage
+// tile were using for lack of an actual job photo.
+import graySidingWhiteSliderDeck from '../assets/work/gray-siding-white-slider-deck.jpg';
+import tanSliderKitchenView from '../assets/work/tan-slider-kitchen-view.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -422,6 +428,24 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'new construction',
     featured: false,
     order: 41,
+  },
+  {
+    id: 'gray-siding-white-slider-deck',
+    image: graySidingWhiteSliderDeck,
+    alt: 'Finished two-panel white vinyl sliding glass door on a gray lap-siding house, seen from a wood deck',
+    caption: 'Two-panel slider, finished install',
+    kind: 'after',
+    featured: true,
+    order: 42,
+  },
+  {
+    id: 'tan-slider-kitchen-view',
+    image: tanSliderKitchenView,
+    alt: 'Finished sliding glass door with retractable screen on a tan house, kitchen visible through the glass',
+    caption: 'Slider with screen, finished install',
+    kind: 'after',
+    featured: false,
+    order: 43,
   },
 ];
 

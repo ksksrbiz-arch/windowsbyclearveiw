@@ -1,13 +1,17 @@
 ---
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
+import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
-import { findWork } from '../data/work';
+import { findWork, workKindLabel } from '../data/work';
 import slidingDoorsHeroSrc from '../assets/hero/sliding-glass-doors.png';
 import { site } from '../data/site';
 
-const ogPhoto = findWork('stone-craftsman')!;
+// Real installed sliding-door jobs, added 2026-09-27 — the OG image now
+// shows an actual door instead of a window photo borrowed for lack of one.
+const doorWork = [findWork('gray-siding-white-slider-deck')!, findWork('tan-slider-kitchen-view')!];
+const ogPhoto = doorWork[0];
 
 // Full-bleed hero background. AI-generated, not a real elevation, so it is
 // captioned as such — the same rule the other service-page heroes follow
@@ -295,16 +299,19 @@ const schema = {
   </section>
 
   <section class="section section-sunk">
-    <div class="wrap is-narrow" data-reveal>
+    <div class="wrap" data-reveal>
       <p class="rule-label">Real installs</p>
-      <h2>Photos of a finished patio door: coming as jobs finish.</h2>
-      <p>
-        Every photo on this site is a real Clearview job — we do not run stock or staged photos of
-        finished work. We have not yet photographed a completed patio-door install specifically
-        (most of the sliders in the gallery are slider-style windows, not patio doors), so we are
-        not going to caption one as something it is not. As jobs finish, real installs land here
-        the same way the new-construction photos did.
-      </p>
+      <h2>Finished patio door installs.</h2>
+      <div class="work-grid">
+        {doorWork.map((photo) => (
+          <WorkCard
+            image={photo.image}
+            alt={photo.alt}
+            caption={photo.caption}
+            kind={workKindLabel(photo.kind)}
+          />
+        ))}
+      </div>
       <p class="section-link">
         <a href="/gallery">See the rest of Mark&rsquo;s work</a>
         {site.social.facebook && (
