@@ -1,55 +1,55 @@
 ---
 interface Props {
-  desktopUrl: string;
-  mobileUrl?: string;
-  title: string;
+  desktopSrc: string;
+  mobileSrc?: string;
+  alt: string;
+  title?: string;
   description?: string;
 }
 
-const { desktopUrl, mobileUrl, title, description } = Astro.props;
+const { desktopSrc, mobileSrc, alt, title, description } = Astro.props;
 ---
-<figure class="canva-guide" aria-label={title}>
-  <div class="canva-frame desktop">
-    <iframe
-      title={title}
-      src={desktopUrl + '?embed'}
+<figure class="guide-graphic">
+  <picture class="guide-picture">
+    {mobileSrc && <source media="(max-width: 760px)" srcset={mobileSrc} />}
+    <img
+      src={desktopSrc}
+      alt={alt}
       loading="lazy"
-      allowfullscreen
-      referrerpolicy="strict-origin-when-cross-origin"
-    ></iframe>
-  </div>
-
-  <div class="canva-frame mobile">
-    <iframe
-      title={title + ' — mobile'}
-      src={(mobileUrl ?? desktopUrl) + '?embed'}
-      loading="lazy"
-      allowfullscreen
-      referrerpolicy="strict-origin-when-cross-origin"
-    ></iframe>
-  </div>
-
-  <div class="canva-fallback">
-    <a href={desktopUrl} target="_blank" rel="noopener noreferrer">View this guide in Canva</a>
-  </div>
-
-  {description && <figcaption>{description}</figcaption>}
+      decoding="async"
+      class="guide-image"
+    />
+  </picture>
+  {title && <figcaption class="sr-only">{title}</figcaption>}
+  {description && <p class="guide-caption">{description}</p>}
 </figure>
 
 <style>
-  .canva-guide{margin:0}
-  .canva-frame{
-    position:relative;width:100%;overflow:hidden;border:1px solid var(--line);
-    border-radius:var(--radius-lg);background:#fff;box-shadow:var(--shadow-soft)
+  .guide-graphic{margin:0}
+  .guide-picture{
+    display:block;
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    background:var(--paper-raised);
+    overflow:hidden;
+    box-shadow:var(--shadow-soft)
   }
-  .canva-frame.desktop{aspect-ratio:16/9}
-  .canva-frame.mobile{display:none;aspect-ratio:4/5}
-  .canva-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#fff}
-  .canva-fallback{margin-top:.65rem;font-size:var(--step--2)}
-  .canva-fallback a{color:var(--accent-ink);text-decoration:underline}
-  .canva-guide figcaption{margin-top:var(--space-2xs);color:var(--ink-faint);font-size:var(--step--2)}
-  @media(max-width:760px){
-    .canva-frame.desktop{display:none}
-    .canva-frame.mobile{display:block}
+  .guide-image{
+    display:block;
+    width:100%;
+    height:auto;
+    max-width:none;
+  }
+  .guide-caption{
+    margin:.65rem 0 0;
+    color:var(--ink-soft);
+    font-size:var(--step--2);
+    line-height:1.45;
+  }
+  .sr-only{
+    position:absolute!important;
+    width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0
   }
 </style>
