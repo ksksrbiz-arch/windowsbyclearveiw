@@ -1,0 +1,188 @@
+---
+// Live Google Business Profile reviews for /reviews.
+//
+// Progressive enhancement: the server renders an empty, hidden section. The
+// script below asks /api/google-reviews and only reveals the section if
+// Google returned real reviews for the pinned profile. Without JS, without
+// configuration, or on any error, the page stays exactly as it was.
+//
+// Review text is untrusted third-party content: it is written with
+// textContent only, so it is never parsed as markup.
+import { site } from '../data/site';
+
+const googleUrl = site.social.google;
+---
+<section
+  class="section google-reviews"
+  id="google-reviews"
+  aria-labelledby="google-reviews-title"
+  data-google-reviews
+  hidden
+>
+  <div class="wrap">
+    <p class="kicker">From Google</p>
+    <h2 id="google-reviews-title">What customers wrote on Google.</h2>
+    <p class="lede" data-gr-summary></p>
+    <div class="gr-list" data-gr-list></div>
+    <p class="fine-print gr-attribution">
+      Reviews shown as written, straight from Google Maps. Only the most relevant
+      few are shown here.
+      {googleUrl && (
+        <>
+          {' '}
+          <a href={googleUrl} target="_blank" rel="noopener noreferrer">See and leave reviews on Google</a>.
+        </>
+      )}
+    </p>
+  </div>
+</section>
+
+<style>
+  .google-reviews[hidden] {
+    display: none;
+  }
+
+  .gr-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-l) var(--space-xl);
+    margin-top: var(--space-l);
+  }
+
+  @media (max-width: 800px) {
+    .gr-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gr-attribution {
+    margin-top: var(--space-l);
+  }
+
+  /* Elements are created by the script below, so Astro's scoped selectors
+     would not reach them. */
+  .gr-list :global(.gr-review) {
+    margin: 0;
+    padding: var(--space-s) 0 var(--space-s) var(--space-m);
+    border-left: 2px solid var(--accent);
+  }
+
+  .gr-list :global(.gr-stars) {
+    letter-spacing: 0.12em;
+    color: var(--accent-ink, var(--accent));
+    margin: 0 0 var(--space-2xs);
+  }
+
+  .gr-list :global(.gr-text) {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step-1);
+    line-height: 1.45;
+    text-wrap: pretty;
+    white-space: pre-line;
+  }
+
+  .gr-list :global(.gr-author) {
+    display: block;
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-google-reviews]');
+
+  type GoogleReview = {
+    rating: number;
+    text: string;
+    author: string;
+    authorUrl: string;
+    when: string;
+  };
+
+  type Feed = {
+    status: string;
+    rating?: number | null;
+    count?: number | null;
+    reviews?: GoogleReview[];
+  };
+
+  function stars(rating: number): string {
+    const n = Math.max(1, Math.min(5, Math.round(rating)));
+    return '★'.repeat(n) + '☆'.repeat(5 - n);
+  }
+
+  function render(feed: Feed) {
+    if (!root || feed.status !== 'ok' || !feed.reviews || feed.reviews.length === 0) return;
+
+    const list = root.querySelector<HTMLElement>('[data-gr-list]');
+    const summary = root.querySelector<HTMLElement>('[data-gr-summary]');
+    if (!list || !summary) return;
+
+    list.replaceChildren();
+    for (const review of feed.reviews) {
+      const item = document.createElement('blockquote');
+      item.className = 'gr-review';
+
+      const starLine = document.createElement('p');
+      starLine.className = 'gr-stars';
+      starLine.setAttribute('role', 'img');
+      starLine.setAttribute('aria-label', `${review.rating} out of 5 stars`);
+      starLine.textContent = stars(review.rating);
+
+      const text = document.createElement('p');
+      text.className = 'gr-text';
+      text.textContent = `“${review.text}”`;
+
+      const footer = document.createElement('footer');
+      const author = document.createElement('strong');
+      author.className = 'gr-author';
+      if (review.authorUrl) {
+        const link = document.createElement('a');
+        link.href = review.authorUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer nofollow';
+        link.textContent = review.author;
+        author.append(link);
+      } else {
+        author.textContent = review.author;
+      }
+      const meta = document.createElement('div');
+      meta.className = 'fine-print';
+      meta.textContent = ['Google review', review.when].filter(Boolean).join(' · ');
+
+      footer.append(author, meta);
+      item.append(starLine, text, footer);
+      list.append(item);
+    }
+
+    const parts: string[] = [];
+    if (typeof feed.rating === 'number') parts.push(`${feed.rating.toFixed(1)} out of 5`);
+    if (typeof feed.count === 'number' && feed.count > 0) {
+      parts.push(`${feed.count} Google review${feed.count === 1 ? '' : 's'}`);
+    }
+    summary.textContent = parts.join(' · ');
+    summary.hidden = parts.length === 0;
+
+    root.hidden = false;
+
+    // The page's "nothing here yet" copy would now be untrue. Hide it and
+    // swap the lede for the accurate one.
+    document.querySelectorAll<HTMLElement>('[data-hide-when-google-reviews]').forEach((el) => {
+      el.hidden = true;
+      el.style.display = 'none';
+    });
+    document.querySelectorAll<HTMLElement>('[data-lede-google]').forEach((el) => {
+      el.textContent = el.dataset.ledeGoogle || el.textContent;
+    });
+  }
+
+  if (root) {
+    fetch('/api/google-reviews', { headers: { accept: 'application/json' } })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((feed: Feed | null) => {
+        if (feed) render(feed);
+      })
+      .catch(() => {
+        /* Leave the page as the honest default. */
+      });
+  }
+</script>

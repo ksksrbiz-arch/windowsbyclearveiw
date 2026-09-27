@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ReviewCard from '../components/ReviewCard.astro';
 import CtaBar from '../components/CtaBar.astro';
+import GoogleReviews from '../components/GoogleReviews.astro';
 import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { site } from '../data/site';
 
@@ -18,7 +19,10 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
     <div class="wrap">
       <p class="kicker">Reviews</p>
       <h1>Neighbors first, ratings second.</h1>
-      <p class="lede">
+      <p
+        class="lede"
+        data-lede-google="Real reviews from real customers, pulled live from our Google Business Profile."
+      >
         {reviews.length > 0
           ? 'Quotes from Clark County customers, republished with their permission.'
           : 'We would rather show an empty page than borrowed praise.'}
@@ -51,7 +55,7 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
           )}
         </>
       ) : (
-        <div class="empty" data-reveal>
+        <div class="empty" data-reveal data-hide-when-google-reviews>
           <div class="empty-mark" aria-hidden="true">
             <span></span>
             <span></span>
@@ -80,6 +84,8 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
       )}
     </div>
   </section>
+
+  <GoogleReviews />
 
   {reviews.length === 0 && (
     <section class="section section-sunk">
