@@ -8,6 +8,16 @@ import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { site } from '../data/site';
 
 const reviews = await getCollection('reviews', ({ data }) => data.published);
+
+// The rating Google shows on the Business Profile. We can honestly say how
+// many reviews there are and what they average, but we only quote a review's
+// words when we have them (curated collection or the live feed).
+const google = site.googleReviews;
+const hasGoogle = google.count > 0;
+const earnedStars = hasGoogle ? Math.round(google.rating) : 0;
+const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
+  google.rating === 5 ? 'five-star ' : ''
+}${google.count === 1 ? 'review' : 'reviews'} on Google so far.`;
 ---
 <BaseLayout
   title="Reviews"
@@ -25,7 +35,9 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
       >
         {reviews.length > 0
           ? 'Quotes from Clark County customers, republished with their permission.'
-          : 'We would rather show an empty page than borrowed praise.'}
+          : hasGoogle
+            ? 'Real customers, real names, and nothing we wrote ourselves.'
+            : 'We would rather show an empty page than borrowed praise.'}
       </p>
     </div>
   </section>
@@ -57,24 +69,48 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
       ) : (
         <div class="empty" data-reveal data-hide-when-google-reviews>
           <div class="empty-mark" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span class={i < earnedStars ? 'earned' : ''}></span>
+            ))}
           </div>
           <div class="empty-copy">
-            <h2>Nothing here yet, and that is on purpose.</h2>
-            <p class="lede">
-              {site.shortName} is Mark’s own shop, and this site is new. Rather than fill the
-              page with invented quotes, we left it empty until real customers put their names
-              to something.
-            </p>
-            <p>
-              A fabricated testimonial is not just tacky — since 2024 it is against federal
-              rules. Plenty of contractor sites carry five glowing reviews written the week the
-              domain was registered. This one will carry none until they are real.
-            </p>
+            {hasGoogle ? (
+              <>
+                <h2>{googleHeading}</h2>
+                <p class="lede">
+                  {site.shortName} is Mark’s own shop, and this site is new. Google shows{' '}
+                  {google.count === 1 ? 'one review' : `${google.count} reviews`} on our Business
+                  Profile, averaging {google.rating.toFixed(1)} stars. Anyone can read it there,
+                  and leave one of their own.
+                </p>
+                {site.social.google && (
+                  <p>
+                    <a class="inline-social" href={site.social.google} target="_blank" rel="noopener noreferrer">
+                      See it on our Google Business Profile
+                    </a>
+                  </p>
+                )}
+                <p>
+                  We show the rating and link to the source instead of retyping anyone’s words.
+                  A fabricated testimonial is not just tacky — since 2024 it is against federal
+                  rules — so this page only carries what real customers actually wrote.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Nothing here yet, and that is on purpose.</h2>
+                <p class="lede">
+                  {site.shortName} is Mark’s own shop, and this site is new. Rather than fill the
+                  page with invented quotes, we left it empty until real customers put their names
+                  to something.
+                </p>
+                <p>
+                  A fabricated testimonial is not just tacky — since 2024 it is against federal
+                  rules. Plenty of contractor sites carry five glowing reviews written the week the
+                  domain was registered. This one will carry none until they are real.
+                </p>
+              </>
+            )}
             <p>
               Ask Mark for references when he comes out to measure. He can put you in touch
               with past customers who have said they are happy to talk about their project.
@@ -92,7 +128,7 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
       <div class="wrap split" data-reveal>
         <div>
           <p class="rule-label">Already worked with us?</p>
-          <h2>We would rather have one real one.</h2>
+          <h2>{hasGoogle ? 'We would rather have more real ones.' : 'We would rather have one real one.'}</h2>
           <ul class="plain-list">
             <li>Tell Mark you are happy to be quoted here</li>
             {site.social.facebook && (
@@ -157,9 +193,9 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
   }
 
   /* An empty page is the whole argument here, so it gets composed rather than
-     apologised for. The mark is five outlined stars — outlined because none
-     have been earned yet, and drawing them filled would be the exact thing
-     this page refuses to do. */
+     apologised for. The mark is five stars, and only the ones Google actually
+     shows on the Business Profile are filled — drawing more would be the exact
+     thing this page refuses to do. */
   .empty {
     display: grid;
     grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr);
@@ -181,6 +217,10 @@ const reviews = await getCollection('reviews', ({ data }) => data.published);
       79% 91%, 50% 70%, 21% 91%, 32% 57%,
       2% 35%, 39% 35%
     );
+  }
+
+  .empty-mark span.earned {
+    background: var(--accent);
   }
 
   .empty-copy h2 {

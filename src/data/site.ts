@@ -92,6 +92,11 @@ export const site = {
     // nothing else to wire.
     google: 'https://share.google/cdPgOCHSjkwMazSOC',
   },
+  // What the Google Business Profile itself shows, checked by hand. Update
+  // this when the profile changes (or once the live feed is configured, the
+  // /reviews page shows the real count straight from Google instead). Never
+  // round up: count is the number Google displays.
+  googleReviews: { rating: 5, count: 1, asOf: '2026-09-26' },
 } as const;
 
 export function phoneDigits() {
