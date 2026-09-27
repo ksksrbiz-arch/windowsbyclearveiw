@@ -79,25 +79,6 @@ const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp
       <h2>What we have not earned yet.</h2>
       <dl class="honest">
         <div>
-          <dt>{site.googleReviews.count > 0 ? 'Very few reviews so far' : 'No reviews yet'}</dt>
-          <dd>
-            {site.googleReviews.count > 0 ? (
-              <>
-                The company is new. Google shows {site.googleReviews.count}{' '}
-                {site.googleReviews.count === 1 ? 'review' : 'reviews'} so far. The{' '}
-                <a href="/reviews">reviews page</a> only carries what real customers wrote —
-                nothing invented to fill the space. Ask Mark for references when he comes out.
-              </>
-            ) : (
-              <>
-                The company is new. Rather than fill a page with invented quotes, the{' '}
-                <a href="/reviews">reviews page</a> stays empty until real customers put their
-                names to something. Ask Mark for references when he comes out.
-              </>
-            )}
-          </dd>
-        </div>
-        <div>
           <dt>{pricesAreAverages ? 'Prices are regional averages' : 'Prices are still ranges'}</dt>
           <dd>
             {pricesAreAverages ? (
