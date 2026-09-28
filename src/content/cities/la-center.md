@@ -6,7 +6,7 @@ description: Replacement windows for La Center, WA homes and acreage — insert 
 published: true
 faq:
   - question: Is La Center too small or too far out for a normal quote?
-    answer: No — the same measure and written estimate process, handled by the Clearview installation team. Short drive north, not a special trip.
+    answer: No — the same measure and written estimate process, handled the same way. Short drive north, not a special trip.
   - question: What's the most common window problem in La Center?
     answer: Tired sliders and fogged insulated units — the same failure points as the rest of Clark County, since it's the same rain and the same heating season.
   - question: Do you set windows on new construction here too?
