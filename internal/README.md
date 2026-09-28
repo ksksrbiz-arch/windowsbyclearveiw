@@ -37,6 +37,45 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## Analytics (internal `/internal/analytics` page)
+
+The page shows two things. **Where leads came from** is counted from the
+first-touch attribution already stored on each lead in D1, so it works with no
+setup. **Site traffic** comes from the Google Analytics 4 Data API through
+`functions/internal/api/analytics.js` and is optional: until it is configured the
+page says "Not connected" and everything else keeps working. Google Tag Manager
+only collects data (it has no reports), so its numbers are the GA4 numbers.
+Ahrefs is a link only, because Ahrefs Webmaster Tools (the free plan) has no API.
+
+Setup, in order (needs Google Cloud, GA4 and Cloudflare access):
+
+1. **Find the GA4 property ID.** GA4 -> Admin -> Property settings -> *Property ID*
+   (a number such as `123456789`). It is **not** the `G-YE96XMJSWJ` measurement ID.
+2. **Enable the API.** Google Cloud Console (any project) -> APIs & Services ->
+   enable **Google Analytics Data API**.
+3. **Create a service account.** IAM & Admin -> Service accounts -> create
+   `clearview-analytics-reader`. It needs no project roles.
+4. **Create a key.** That account -> Keys -> Add key -> JSON. If the organization
+   blocks key creation (policy `iam.disableServiceAccountKeyCreation`), stop and
+   ask Keith; do not work around it.
+5. **Grant read access in GA4.** GA4 -> Admin -> Property access management -> add
+   the service account's email as **Viewer**.
+6. **Store the credentials.** Cloudflare Pages -> this project -> Settings ->
+   Variables and Secrets (Production):
+
+| Variable | Type | Value |
+| --- | --- | --- |
+| `GA4_PROPERTY_ID` | Text | The numeric property ID from step 1 |
+| `GA4_SERVICE_ACCOUNT_JSON` | Secret | The whole downloaded JSON key file, pasted as-is |
+
+7. **Redeploy**, sign in, open `/internal/analytics`; the Site traffic panel should
+   read **Connected**. Then delete the downloaded key file from your machine. The
+   key must never be committed to the repo or pasted into chat.
+
+The service account can only read analytics (scope `analytics.readonly`). If the
+panel shows "Unavailable" after setup, the usual causes are the account not yet
+added as Viewer, the Data API not enabled, or a wrong property ID.
+
 ## Google reviews feed (public `/reviews` page)
 
 `functions/api/google-reviews.js` serves the pinned Google Business Profile's
