@@ -27,4 +27,4 @@ Older postwar neighborhoods: single-pane aluminum sliders or first-generation vi
 
 Insert or full-frame for existing houses. Nailing-fin sets for new construction in the growing parts of the city. We measure the actual opening in front of us, not a guess from the neighborhood's build year, and write the estimate before anything is ordered. Choosing material? See [vinyl vs. fiberglass](/guides/vinyl-vs-fiberglass-pacific-northwest). Pricing the job first? See [what a Washington replacement actually costs](/guides/window-replacement-cost-washington).
 
-Nearby: [Camas](/areas/camas), [Washougal](/areas/washougal), [Battle Ground](/areas/battle-ground), [Ridgefield](/areas/ridgefield), [La Center](/areas/la-center), and [Woodland](/areas/woodland) — same crew.
+Nearby: [Camas](/areas/camas), [Washougal](/areas/washougal), [Battle Ground](/areas/battle-ground), [Ridgefield](/areas/ridgefield), [La Center](/areas/la-center), and [Woodland](/areas/woodland) — the same installation standard.

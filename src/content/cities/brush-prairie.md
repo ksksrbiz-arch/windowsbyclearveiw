@@ -6,7 +6,7 @@ description: Replacement and new-construction window installation for Brush Prai
 published: true
 faq:
   - question: Does an unincorporated area like Brush Prairie change how you quote a job?
-    answer: No — same measure, same written estimate, same crew as anywhere else in Clark County. Unincorporated just means no city government of its own, not different work.
+    answer: No — the same measure, written estimate, and installation standard apply anywhere in Clark County. Unincorporated just means no city government of its own, not different work.
   - question: Does a rural lot actually need different flashing than an in-town house?
     answer: The flashing detail is the same either way; what changes is how much a mistake in it costs you. A rural lot with nothing to break the wind takes wind-driven rain harder than a tucked-in city street, so a slightly-off lapped seam shows up sooner.
   - question: Do you set nailing-fin windows on new Brush Prairie builds?

@@ -8,7 +8,7 @@ faq:
   - question: Is Battle Ground mostly older housing or new construction?
     answer: Mostly newer. Most of what we see is suburban construction from the last few decades, not an old town core — so the windows are failing on seals and hardware, not the frame.
   - question: Do you cover Yacolt and the rest of north county too?
-    answer: Yes, quoted the same way — same crew, same written estimate, we just factor the drive in.
+    answer: Yes, quoted the same way — the same written estimate and installation standard, with the drive factored in.
   - question: Can you set windows on a new Battle Ground build?
     answer: Yes. See new construction for the opening schedule and rough-opening details we work from.
 ---
@@ -25,6 +25,6 @@ Aluminum-frame sliders from the older subdivisions are the most common tear-out 
 
 ## What we do here
 
-We check the frame first, then call insert or full-frame based on what's actually there — not the neighborhood's age. See [full-frame vs. insert](/guides/full-frame-vs-insert) for how that call gets made. Same Vancouver crew, same written estimate. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
+We check the frame first, then call insert or full-frame based on what's actually there — not the neighborhood's age. See [full-frame vs. insert](/guides/full-frame-vs-insert) for how that call gets made. The Clearview installation team uses the same written estimate process. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
 
 Nearby: [Brush Prairie](/areas/brush-prairie) and [Vancouver](/areas/vancouver).
