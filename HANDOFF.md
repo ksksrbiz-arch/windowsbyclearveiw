@@ -220,6 +220,15 @@ Found by executing the site rather than reading it: a Chromium pass over every p
 
 **VERIFY:** production `leads` is 0 rows (2026-09-28), although the entry above records a live test lead. Either it was cleaned up or leads are not being written. Submit one real test lead and re-check `SELECT COUNT(*) FROM leads`.
 
+### 2026-09-28 — Speed-to-lead alert + post-job review request (same branch)
+
+These are gaps 1 and 3 from `.ai/references/command-center-gap-analysis.md`.
+
+- **Lead alert** (`functions/_lib/lead-alert.mjs`, called from `functions/api/estimate.js`): an ntfy phone push on every valid lead. It is independent of Resend and sends no customer data, so the privacy policy's three-company list stays true. **Off until `LEAD_ALERT_NTFY_TOPIC` is set.** Setup: install the ntfy app on Mark's phone, subscribe to a long random topic, and add that topic as a Pages secret. Tests: `test:estimate`.
+- **Review request** (`functions/internal/api/review-request.js`, `functions/_lib/review-request.mjs`, panel on `/internal/jobs/closeout`): available only after the closeout is finalized, never for cancelled jobs, one ask per job across channels. The D1 slot is reserved before sending and released if the email fails. Channels: email via Resend, or an `sms:` link Mark sends from his own phone. The fixed message never suggests content or a rating. Tests: `test:review-request`.
+- **Privacy policy** (`src/content/legal/privacy.md`, updated 2026-09-28) now states the single post-job review ask. **VERIFY:** Keith/Mark are happy with the wording.
+- **Review link:** currently the profile share link. Once `GOOGLE_PLACE_ID` is set (see the 2026-09-26 entry), it automatically becomes Google's direct write-review form.
+
 ## Outstanding
 
 | | |

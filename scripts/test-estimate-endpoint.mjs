@@ -38,7 +38,12 @@ function fakeDb({ failReads = false } = {}) {
 }
 
 const sent = [];
+const pushes = [];
 globalThis.fetch = async (url, init) => {
+  if (String(url).startsWith('https://ntfy.sh/')) {
+    pushes.push({ url: String(url), headers: init.headers, body: init.body });
+    return new Response('{}', { status: 200 });
+  }
   sent.push(JSON.parse(init.body));
   return new Response(JSON.stringify({ id: `msg_${sent.length}` }), { status: 200 });
 };
@@ -106,6 +111,29 @@ const base = { name: 'Pat Doe', phone: '(360) 555-0100', city: 'Camas', email: '
 {
   const { status, body } = await submit({ RESEND_API_KEY: 'test' }, { ...base, phone: '555' });
   assert(status === 400 && typeof body.fields?.phone === 'string', 'short phone numbers are rejected with a field error');
+}
+
+// 5. Speed-to-lead push: fires once per valid lead, carries no customer data,
+//    stays off without a long topic, and never fires for honeypot or invalid posts.
+{
+  const TOPIC = 'cv-leads-3f9a1c7e2b8d4a60';
+  pushes.length = 0;
+  await submit({ QUOTES_DB: fakeDb(), RESEND_API_KEY: 'test', LEAD_ALERT_NTFY_TOPIC: TOPIC }, { ...base, notes: 'Two sliders' });
+  assert(pushes.length === 1 && pushes[0].url === `https://ntfy.sh/${TOPIC}`, 'a valid lead sends one push to the configured topic');
+  const payload = JSON.stringify(pushes[0]);
+  assert(!/Pat|Camas|555|example\.com|sliders/i.test(payload), 'push carries no submitted customer fields');
+  assert(pushes[0].headers.Click === 'https://windowsbyclearview.com/internal/leads', 'push opens the authenticated leads view');
+
+  pushes.length = 0;
+  await submit({ QUOTES_DB: fakeDb(), RESEND_API_KEY: 'test', LEAD_ALERT_NTFY_TOPIC: 'short' }, base);
+  await submit({ QUOTES_DB: fakeDb(), RESEND_API_KEY: 'test' }, base);
+  await submit({ RESEND_API_KEY: 'test', LEAD_ALERT_NTFY_TOPIC: TOPIC }, { ...base, company: 'bot' });
+  await submit({ RESEND_API_KEY: 'test', LEAD_ALERT_NTFY_TOPIC: TOPIC }, { ...base, phone: '1' });
+  assert(pushes.length === 0, 'no push when unconfigured, topic too short, honeypot tripped, or validation fails');
+
+  pushes.length = 0;
+  const { status } = await submit({ QUOTES_DB: fakeDb(), LEAD_ALERT_NTFY_TOPIC: TOPIC }, base);
+  assert(status === 503 && pushes.length === 1, 'push still fires when mail is not configured');
 }
 
 console.log('estimate endpoint tests passed');

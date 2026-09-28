@@ -1,3 +1,5 @@
+import { sendLeadAlert } from '../_lib/lead-alert.mjs';
+
 const MAX = {
   name: 120,
   phone: 40,
@@ -355,6 +357,9 @@ export async function onRequestPost(context) {
   // counts against itself.
   const skipReceipt = emailLooksReal && await receiptRecentlySent(context.env, lead.email);
   context.waitUntil(logLead(context.env, lead, journey, visitorId));
+  // Phone push fires for every valid lead, independent of mail delivery, so
+  // a Resend outage never delays the callback. It carries no customer data.
+  context.waitUntil(sendLeadAlert(context.env));
 
   const key = context.env?.RESEND_API_KEY;
   if (!key) {

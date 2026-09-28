@@ -212,6 +212,14 @@ Current environment variables:
 | `RESEND_API_KEY` | Yes | — |
 | `NOTIFY_EMAIL` | No | `owner@windowsbyclearveiw.com` |
 | `RESEND_FROM` | No | `Clearview Windows <estimates@windowsbyclearveiw.com>` |
+| `LEAD_ALERT_NTFY_TOPIC` | No | unset (push alert off). 20–64 random `[A-Za-z0-9_-]` chars; treat as a secret |
+| `LEAD_ALERT_NTFY_SERVER` | No | `https://ntfy.sh` |
+| `LEAD_ALERT_NTFY_TOKEN` | No | unset. Bearer token for a protected ntfy topic |
+| `GOOGLE_REVIEW_URL` | No | unset. Overrides the review link; otherwise the `GOOGLE_PLACE_ID` write-review form, then the profile share link |
+
+**Speed-to-lead alert.** When `LEAD_ALERT_NTFY_TOPIC` is set, every valid estimate request also sends a high-priority phone push through ntfy. It fires independently of mail delivery and carries no customer data: just "New estimate request" and a tap-through to `/internal/leads`. The privacy policy's list of companies that see submitted fields stays true. Setup: install the ntfy app, subscribe to the topic, then set the same topic as a Pages secret.
+
+**Review request.** `/internal/jobs/closeout` shows "Ask for a Google review" after a closeout is finalized. Each job gets one ask, by email (Resend) or by text from Mark's own phone (`sms:` link, so no SMS provider). The ask is recorded in D1 `review_requests`. It never drafts or suggests review content.
 
 Do not change the legacy `clearveiw` mailbox address merely to correct the spelling; verify and migrate the actual mailbox first.
 
