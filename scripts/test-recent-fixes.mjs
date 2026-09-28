@@ -15,6 +15,8 @@ const internalLayout = read('src/layouts/InternalLayout.astro');
 const sitemap = read('astro.config.mjs');
 const robots = read('src/pages/robots.txt.ts');
 const estimate = read('functions/api/estimate.js');
+const today = read('src/pages/internal/today.astro');
+const followUp = read('src/pages/internal/follow-up.astro');
 
 // #74 regression guards: the active stage must actually constrain the grid,
 // and stale async renders must not overwrite a newer filter selection.
@@ -40,9 +42,15 @@ assert(!/UPDATE invoices SET status = 'sent', sent_at/.test(invoices), 'invoice 
 
 // SEO privacy fixes must cover the exact /internal route as well as children.
 assert(/path !== '\/internal'/.test(sitemap) && /path\.startsWith\('\/internal\/'\)/.test(sitemap), 'sitemap excludes /internal and descendants');
-assert(/Disallow: \/internal\n/.test(robots), 'robots excludes /internal and its descendants');
+assert(/Disallow: \/internal\r?\n/.test(robots), 'robots excludes /internal and its descendants');
 
 // Keep the multi-field estimate validation contract intact.
 assert(/fieldErrors/.test(estimate) && /json\(\{ error: 'Fix the highlighted fields\.', fields: fieldErrors \}/.test(estimate), 'estimate API returns field-specific validation errors');
+
+// The Today and Follow-up screens must target the task list correctly and not
+// hide failed completion requests behind an unconditional refresh.
+assert(/q\('\[data-tasks\]'\)/.test(today), 'today screen selects the task list');
+assert(/if\(!r\.ok\)throw new Error\(d\.error\|\|'Could not complete that follow-up\.'\)/.test(today), 'today screen checks task completion responses');
+assert(/if\(!r\.ok\)throw new Error\(d\.error\|\|'Could not complete that follow-up\.'\)/.test(followUp), 'follow-up screen checks task completion responses');
 
 console.log('Recent-fix regression checks passed.');
