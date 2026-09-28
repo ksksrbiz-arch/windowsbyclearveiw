@@ -29,5 +29,6 @@ jobs:
       - run: npm run test:copilot
       - run: npm run test:ai-surfaces
       - run: npm run test:google-reviews
+      - run: npm run test:estimate
       - run: npm run eval:build-plan
       - run: npm run build

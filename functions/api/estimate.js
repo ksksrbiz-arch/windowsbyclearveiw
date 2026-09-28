@@ -7,6 +7,10 @@ const MAX = {
   notes: 2000,
 };
 const MAX_BODY_BYTES = 64 * 1024;
+// One customer receipt per address per window. The notification to Mark is
+// never suppressed; only the courtesy email to the address typed into the
+// form is, so the form cannot be used to repeatedly mail a third party.
+const RECEIPT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'owner@windowsbyclearveiw.com';
 
@@ -44,6 +48,38 @@ function clean(value, max) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, max);
+}
+
+// Notes keep their line breaks: the calculator and quiz pre-fill one detail
+// per line, and Mark reads them in the lead email and the internal lead view.
+function cleanMultiline(value, max) {
+  return String(value || '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, max);
+}
+
+async function receiptRecentlySent(env, email, now = Date.now()) {
+  if (!env?.QUOTES_DB || !email) return false;
+  try {
+    const since = new Date(now - RECEIPT_WINDOW_MS).toISOString();
+    const row = await env.QUOTES_DB.prepare(
+      'SELECT COUNT(*) AS n FROM leads WHERE lower(email) = lower(?) AND created_at > ?',
+    )
+      .bind(email, since)
+      .first();
+    return Number(row?.n || 0) > 0;
+  } catch (error) {
+    // Fail open: a missing receipt is worse for a real customer than one
+    // extra courtesy email during a database outage.
+    console.error('receipt-dedupe-failed', error);
+    return false;
+  }
 }
 
 function telUri(phone) {
@@ -283,7 +319,7 @@ export async function onRequestPost(context) {
     email: clean(form.get('email'), MAX.email),
     city: clean(form.get('city'), MAX.city),
     role: clean(form.get('role'), MAX.role),
-    notes: clean(form.get('notes'), MAX.notes),
+    notes: cleanMultiline(form.get('notes'), MAX.notes),
   };
 
   const fieldErrors = {};
@@ -315,6 +351,9 @@ export async function onRequestPost(context) {
   const journey = parseJourney(clean(form.get('visit_journey'), 8000));
   const journeySummary = summarizeJourney(journey);
 
+  // Checked before this lead is written so the current submission never
+  // counts against itself.
+  const skipReceipt = emailLooksReal && await receiptRecentlySent(context.env, lead.email);
   context.waitUntil(logLead(context.env, lead, journey, visitorId));
 
   const key = context.env?.RESEND_API_KEY;
@@ -361,7 +400,7 @@ export async function onRequestPost(context) {
       : redirect(request, '/estimate/problem');
   }
 
-  if (lead.email && emailLooksReal) {
+  if (lead.email && emailLooksReal && !skipReceipt) {
     context.waitUntil(
       sendTemplate(key, {
         from,

@@ -15,6 +15,7 @@ const internalLayout = read('src/layouts/InternalLayout.astro');
 const sitemap = read('astro.config.mjs');
 const robots = read('src/pages/robots.txt.ts');
 const estimate = read('functions/api/estimate.js');
+const costEstimator = read('src/components/CostEstimator.astro');
 const today = read('src/pages/internal/today.astro');
 const followUp = read('src/pages/internal/follow-up.astro');
 const jobPrep = read('src/pages/internal/jobs/prepare.astro');
@@ -44,6 +45,10 @@ assert(!/UPDATE invoices SET status = 'sent', sent_at/.test(invoices), 'invoice 
 // SEO privacy fixes must cover the exact /internal route as well as children.
 assert(/path !== '\/internal'/.test(sitemap) && /path\.startsWith\('\/internal\/'\)/.test(sitemap), 'sitemap excludes /internal and descendants');
 assert(/Disallow: \/internal\r?\n/.test(robots), 'robots excludes /internal and its descendants');
+
+// The single-column calculator grid must not use a bare `1fr` track: its
+// implicit min-content minimum pushed the page 1px wider than a 375px phone.
+assert(/\.estimator-grid \{\s*grid-template-columns: minmax\(0, 1fr\);/.test(costEstimator), 'calculator mobile grid cannot overflow the viewport');
 
 // Keep the multi-field estimate validation contract intact.
 assert(/fieldErrors/.test(estimate) && /json\(\{ error: 'Fix the highlighted fields\.', fields: fieldErrors \}/.test(estimate), 'estimate API returns field-specific validation errors');

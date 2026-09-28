@@ -200,6 +200,15 @@ Built, tested, **not yet deployed or enabled**.
 
 **Go-live checklist:** set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID` in Cloudflare Pages (see `internal/README.md`); confirm `/api/google-reviews` returns `status: "ok"` and the profile's real name; then update `src/pages/about.astro` ("No reviews yet" honesty entry) and the `/reviews` meta description so they no longer say the page is empty; add the Google Maps data use to `src/content/legal/privacy.md` only if counsel wants it (visitors' browsers only talk to this site, not Google).
 
+### 2026-09-28 — Lead-path hardening + phone layout fix (branch `claude/amazing-volta-n93yt5`)
+
+Found by executing the site rather than reading it: a Chromium pass over every public page at 375px, plus a behavioural test that runs `functions/api/estimate.js` against a stub D1 and Resend.
+
+- **Estimate notes lost their line breaks.** The calculator and quiz pre-fill the estimate form one detail per line (`Home type: …\nApproximate openings: …`), but the endpoint's `clean()` collapsed all whitespace, so Mark got those details run together in the lead email and D1. Notes now go through `cleanMultiline()` (line breaks kept, runs of blank lines capped at one, control characters stripped). Internal lead views (`/internal/leads`, `/internal/leads/analyze`) render notes with `white-space: pre-line`. The hosted Resend template `estimate-request` must render `NOTES` with preserved line breaks — the journey summary already relied on this; **VERIFY** in the Resend dashboard if a lead email looks flattened.
+- **Receipt email could be used to mail third parties.** Anyone could type someone else's address and resubmit to send repeated "estimate received" emails from the production mail domain. The customer receipt is now sent at most once per address per 24h (case-insensitive lookup against `leads` before the new row is written). Mark's notification and the D1 lead row are never suppressed. The lookup fails open so a D1 outage never costs a real customer their receipt.
+- **Calculator overflowed phones by 1px.** `.estimator-grid` used a bare `1fr` track under 900px; a min-content child pushed it wider than the viewport. Now `minmax(0, 1fr)`; guarded in `test:recent-fixes`.
+- New `npm run test:estimate` (`scripts/test-estimate-endpoint.mjs`) is in CI. It fails on the pre-change handler and passes now.
+
 ## Outstanding
 
 | | |
