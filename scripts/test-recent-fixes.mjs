@@ -68,5 +68,9 @@ assert(/if\(!r\.ok\)throw new Error\(d\.error\|\|'Could not complete that follow
 assert(/dueDate&&!Number\.isFinite\(dueDate\.getTime\(\)\)/.test(followUp), 'follow-up screen rejects invalid due dates before sending');
 assert(/submit\.disabled=true;submit\.textContent='Saving…'/.test(followUp) && /finally\{if\(submit instanceof HTMLButtonElement\)\{submit\.disabled=false/.test(followUp), 'follow-up form prevents duplicate submissions and restores its button');
 assert(/try\{note\.value=localStorage\.getItem\(noteKey\)\|\|'';\}catch/.test(jobPrep) && /catch\{if\(saveState\)saveState\.textContent='Could not save on this browser/.test(jobPrep), 'job prep handles browser storage errors without losing the page');
+assert(/new URLSearchParams\(location\.search\)\.get\('leadId'\)/.test(followUp), 'follow-up handoff reads the selected lead from the link');
+assert(/leadIdInput\.value=linkedLeadId;addCard\.hidden=false/.test(followUp), 'follow-up handoff opens with the inquiry already linked');
+assert(/data-linked-lead/.test(followUp) && /For \$\{lead\.name\}/.test(followUp), 'follow-up form identifies the linked customer');
+assert(/form\.reset\(\);if\(linkedLeadId&&leadIdInput instanceof HTMLInputElement\)leadIdInput\.value=linkedLeadId/.test(followUp), 'repeat follow-ups remain linked to the selected inquiry');
 
 console.log('Recent-fix regression checks passed.');
