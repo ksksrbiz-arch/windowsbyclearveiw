@@ -149,15 +149,15 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td class="index-cell">${index + 1}</td>
-          <td><input type="text" value="${esc(opening.room)}" data-field="room" maxlength="100" placeholder="Living room" aria-label="Room or location"></td>
-          <td><select data-field="type" aria-label="Window type">${TYPES.map((type) => `<option value="${esc(type)}" ${type === opening.type ? 'selected' : ''}>${esc(type)}</option>`).join('')}</select></td>
-          <td><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.width === '' ? '' : esc(opening.width)}" data-field="width" aria-label="Width in inches"></td>
-          <td><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.height === '' ? '' : esc(opening.height)}" data-field="height" aria-label="Height in inches"></td>
-          <td><input class="qty-input" type="number" min="1" step="1" inputmode="numeric" value="${qty}" data-field="quantity" aria-label="Quantity"></td>
-          <td class="area-cell">${fmt(rowArea)} sq ft</td>
-          <td><input type="text" value="${esc(opening.notes)}" data-field="notes" maxlength="300" placeholder="Trim / rot / glass" aria-label="Opening notes"></td>
-          <td><button type="button" class="remove-button" data-remove aria-label="Remove opening ${index + 1}">×</button></td>
+          <td class="index-cell" data-label="Opening">${index + 1}</td>
+          <td data-label="Room / location"><input type="text" value="${esc(opening.room)}" data-field="room" maxlength="100" placeholder="Living room" aria-label="Room or location"></td>
+          <td data-label="Type"><select data-field="type" aria-label="Window type">${TYPES.map((type) => `<option value="${esc(type)}" ${type === opening.type ? 'selected' : ''}>${esc(type)}</option>`).join('')}</select></td>
+          <td data-label="Width (in)"><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.width === '' ? '' : esc(opening.width)}" data-field="width" aria-label="Width in inches"></td>
+          <td data-label="Height (in)"><input type="number" min="0" step="0.125" inputmode="decimal" value="${opening.height === '' ? '' : esc(opening.height)}" data-field="height" aria-label="Height in inches"></td>
+          <td data-label="Quantity"><input class="qty-input" type="number" min="1" step="1" inputmode="numeric" value="${qty}" data-field="quantity" aria-label="Quantity"></td>
+          <td class="area-cell" data-label="Area">${fmt(rowArea)} sq ft</td>
+          <td data-label="Notes"><input type="text" value="${esc(opening.notes)}" data-field="notes" maxlength="300" placeholder="Trim / rot / glass" aria-label="Opening notes"></td>
+          <td data-label="Remove"><button type="button" class="remove-button" data-remove aria-label="Remove opening ${index + 1}">×</button></td>
         `;
         row.querySelectorAll('[data-field]').forEach((field) => {
           field.addEventListener('change', () => {
@@ -269,5 +269,6 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   .text-button { border:0; background:transparent; color:var(--danger); font:inherit; font-size:var(--step--1); cursor:pointer; padding:.5rem; }
   .legal-note { margin-top:var(--space-s); color:var(--ink-faint); font-size:var(--step--2); }
   @media (max-width:760px) { .tool-head, .job-bar { grid-template-columns:1fr; align-items:start; flex-direction:column; } .job-bar { display:grid; } .save-state { padding-bottom:0; } .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .notes-grid { grid-template-columns:1fr; } }
+  @media (max-width:620px) { .measure-table{min-width:0;width:100%}.measure-table thead{display:none}.measure-table tbody{display:grid;gap:.75rem;padding:.75rem}.measure-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--paper-raised)}.measure-table td{min-width:0;padding:.6rem;border-bottom:1px solid var(--line);display:grid;align-content:start;gap:.3rem}.measure-table td::before{content:attr(data-label);font-size:.68rem;font-weight:700;color:var(--ink-faint)}.measure-table td:nth-child(2),.measure-table td:nth-child(8){grid-column:1/-1}.measure-table td:last-child{display:flex;align-items:center;justify-content:flex-end}.measure-table td:last-child::before{margin-right:auto}.measure-table input,.measure-table select{min-width:0;min-height:44px;padding:.55rem}.index-cell{font-size:1rem}.remove-button{width:44px;height:44px}.panel-head{align-items:flex-start}.panel-head .btn{min-height:44px}.workflow-actions{display:grid;grid-template-columns:1fr}.workflow-actions>*{width:100%;min-height:48px}.tool-head .head-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.tool-head .head-actions>*{min-height:48px;display:flex;justify-content:center;align-items:center}}
   @media print { .head-actions, .job-bar, .summary-grid, .panel-head button, .workflow-actions, .legal-note, .save-state, .remove-button { display:none !important; } .table-wrap { overflow:visible; } .measure-table { min-width:0; } .measure-table input, .measure-table select, .note-panel textarea { border:0; padding:0; background:transparent; } .empty-state { display:none !important; } }
 </style>

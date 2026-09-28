@@ -18,7 +18,9 @@ const navItems = [
   { href: '/internal/ask-logs', label: 'Ask' },
 ];
 const isActive = (href: string) => href === '/internal/' ? pathname === href : pathname.startsWith(href);
-const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/leads', '/internal/quotes', '/internal/jobs', '/internal/payments'].includes(item.href));
+const mobilePrimary = navItems.filter((item) => ['/internal/today', '/internal/follow-up', '/internal/quotes', '/internal/jobs'].includes(item.href));
+const mobileMoreItems = navItems.filter((item) => ['/internal/', '/internal/leads', '/internal/invoices', '/internal/schedule', '/internal/payments', '/internal/tools', '/internal/ask-logs'].includes(item.href));
+const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ? pathname === item.href : pathname.startsWith(item.href));
 ---
 <!doctype html>
 <html lang="en">
@@ -31,7 +33,7 @@ const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/lea
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   </head>
-  <body class="internal">
+  <body class:list={['internal', { 'field-mode': pathname === '/internal/jobs/field' }]}>
     <header class="internal-header">
       <div class="internal-header-inner">
         <a class="internal-brand" href="/internal/" aria-label="Clearview Command Center">Clearview <span>Command Center</span></a>
@@ -50,18 +52,23 @@ const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/lea
 
     {showLogout && (
       <nav class="internal-mobile-nav" aria-label="Primary mobile navigation">
-        {mobileItems.map((item) => (
+        {mobilePrimary.map((item) => (
           <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class:list={{ active: isActive(item.href) }}>
             <span class="mobile-nav-icon" aria-hidden="true">
               {item.href === '/internal/today' && '◷'}
-              {item.href === '/internal/leads' && '◉'}
+              {item.href === '/internal/follow-up' && '✓'}
               {item.href === '/internal/quotes' && '≡'}
               {item.href === '/internal/jobs' && '⌂'}
-              {item.href === '/internal/payments' && '$'}
             </span>
             <span>{item.label}</span>
           </a>
         ))}
+        <button type="button" class:list={{ active: isMoreActive }} data-mobile-more aria-expanded="false" aria-controls="internal-more-menu">
+          <span class="mobile-nav-icon" aria-hidden="true">···</span><span>More</span>
+        </button>
+      </nav>
+      <nav class="internal-more-menu" id="internal-more-menu" aria-label="More internal pages" hidden>
+        {mobileMoreItems.map((item) => <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>)}
       </nav>
     )}
 
@@ -69,6 +76,18 @@ const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/lea
 
     <script>
       (() => {
+        const moreButton = document.querySelector('[data-mobile-more]');
+        const moreMenu = document.getElementById('internal-more-menu');
+        if (moreButton instanceof HTMLButtonElement && moreMenu instanceof HTMLElement) {
+          const closeMore = () => { moreMenu.hidden = true; moreButton.setAttribute('aria-expanded', 'false'); };
+          moreButton.addEventListener('click', () => {
+            const opening = moreMenu.hidden;
+            moreMenu.hidden = !opening;
+            moreButton.setAttribute('aria-expanded', String(opening));
+          });
+          document.addEventListener('click', (event) => { if (event.target instanceof Node && !moreMenu.contains(event.target) && !moreButton.contains(event.target)) closeMore(); });
+          document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMore(); });
+        }
         const MEASUREMENT_KEY = 'clearview:measurement-worksheet:v1';
         const normalize = (value) => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
@@ -164,11 +183,11 @@ const mobileItems = navItems.filter((item) => ['/internal/today', '/internal/lea
       .internal-header-right{display:flex;align-items:center;gap:var(--space-s);min-width:0}.internal-nav{display:flex;align-items:center;gap:.15rem;min-width:0;overflow-x:auto;scrollbar-width:none}.internal-nav::-webkit-scrollbar{display:none}
       .internal-nav a{position:relative;color:var(--on-dark-soft);text-decoration:none;font-size:var(--step--2);font-weight:650;padding:.48rem .58rem;border-radius:var(--radius);white-space:nowrap}.internal-nav a::after{content:'';position:absolute;left:.58rem;right:.58rem;bottom:.16rem;height:2px;border-radius:999px;background:var(--accent-bright);transform:scaleX(0);transform-origin:center;transition:transform 140ms ease}.internal-nav a:hover,.internal-nav a:focus-visible,.internal-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .08)}.internal-nav a.active::after{transform:scaleX(1)}
       .internal-logout{background:transparent;border:1px solid var(--dark-line-strong);color:var(--on-dark-soft);border-radius:var(--radius);padding:.48rem .78rem;font:inherit;font-size:var(--step--2);font-weight:650;cursor:pointer;white-space:nowrap}.internal-logout:hover{border-color:var(--accent-bright);color:var(--on-dark)}
-      .internal-main{max-width:76rem;margin-inline:auto;padding:clamp(1.25rem,3vw,2rem) var(--space-m) clamp(5.5rem,8vw,7rem)}.internal-mobile-nav{display:none}
+      .internal-main{max-width:76rem;margin-inline:auto;padding:clamp(1.25rem,3vw,2rem) var(--space-m) clamp(5.5rem,8vw,7rem)}.internal-mobile-nav,.internal-more-menu{display:none}
       .measurement-import-bar{margin:0 0 var(--space-m);padding:.9rem var(--space-m);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:var(--radius);background:var(--accent-wash);display:flex;justify-content:space-between;align-items:center;gap:var(--space-m)}.measurement-import-bar>div{display:grid;gap:.15rem}.measurement-import-bar span{color:var(--ink-soft);font-size:var(--step--2)}
       .quote-invoice-status{display:inline-flex;align-items:center;padding:.42rem .65rem;border:1px solid var(--line);border-radius:var(--radius);font-size:var(--step--2);color:var(--ink-soft);white-space:nowrap}
       @media(max-width:980px){.internal-header-inner{gap:var(--space-s)}.internal-header-right{flex:1;justify-content:flex-end}.internal-nav a{padding-inline:.45rem}.internal-nav a::after{left:.45rem;right:.45rem}.internal-brand span{display:none}}
-      @media(max-width:680px){.internal-header-inner{padding:.72rem var(--space-s)}.internal-brand{font-size:.95rem}.internal-logout{padding:.5rem .68rem}.internal-nav{display:none}.internal-main{padding:1rem var(--space-s) 6.25rem}.internal-mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);padding:.42rem .35rem calc(.42rem + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--black) 98%,transparent);border-top:1px solid var(--dark-line-strong);box-shadow:0 -10px 30px rgb(0 0 0 / .12);backdrop-filter:blur(16px)}.internal-mobile-nav a{min-width:0;min-height:3.7rem;display:grid;place-items:center;align-content:center;gap:.16rem;color:var(--on-dark-soft);text-decoration:none;border-radius:.75rem;font-size:.64rem;font-weight:700;line-height:1.05}.internal-mobile-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .09)}.mobile-nav-icon{font-size:1.15rem;line-height:1;font-weight:500}.measurement-import-bar{align-items:flex-start;flex-direction:column;padding:.85rem}.measurement-import-bar .btn{width:100%}.quote-invoice-status{width:100%}}
+      @media(max-width:680px){.internal-header-inner{padding:.72rem var(--space-s)}.internal-brand{font-size:.95rem}.internal-logout{min-height:44px;padding:.5rem .68rem}.internal-nav{display:none}.internal-main{padding:1rem var(--space-s) 6.25rem}.internal-mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:.35rem .35rem calc(.35rem + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--black) 98%,transparent);border-top:1px solid var(--dark-line-strong);box-shadow:0 -10px 30px rgb(0 0 0 / .12);backdrop-filter:blur(16px)}.internal-mobile-nav a,.internal-mobile-nav button{min-width:0;min-height:3.7rem;display:grid;place-items:center;align-content:center;gap:.16rem;color:var(--on-dark-soft);text-decoration:none;border:0;background:transparent;border-radius:.75rem;font:inherit;font-size:.64rem;font-weight:700;line-height:1.05;cursor:pointer}.internal-mobile-nav a.active,.internal-mobile-nav button.active{color:var(--on-dark);background:rgb(255 255 255 / .09)}.mobile-nav-icon{font-size:1.15rem;line-height:1;font-weight:600}.internal-more-menu{position:fixed;left:.6rem;right:.6rem;bottom:calc(5rem + env(safe-area-inset-bottom));z-index:51;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem;padding:.65rem;border:1px solid var(--dark-line-strong);border-radius:1rem;background:var(--black);box-shadow:var(--shadow-lg)}.internal-more-menu[hidden]{display:none}.internal-more-menu a{min-height:48px;display:flex;align-items:center;padding:.65rem .8rem;border-radius:.65rem;color:var(--on-dark);text-decoration:none;font-size:.82rem;font-weight:700}.internal-more-menu a[aria-current=page]{background:rgb(255 255 255 / .1);color:var(--accent-bright)}.field-mode .internal-mobile-nav{display:none}.measurement-import-bar{align-items:flex-start;flex-direction:column;padding:.85rem}.measurement-import-bar .btn{width:100%}.quote-invoice-status{width:100%}}
       @media(max-width:420px){.internal-main{padding-inline:.7rem}.internal-logout{font-size:.7rem}.internal-mobile-nav a{min-height:3.55rem;font-size:.6rem}}
       @media(prefers-reduced-motion:reduce){.internal-nav a::after{transition:none}}
       @media print{.internal-header,.internal-mobile-nav{display:none}.internal-main{max-width:none;padding:0}.measurement-import-bar,.quote-invoice-status{display:none}}
