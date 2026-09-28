@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { pacificDayRange } from '../functions/internal/api/dashboard.js';
 
 const read = (path) => fs.readFileSync(path, 'utf8');
 const assert = (condition, message) => {
@@ -16,6 +17,8 @@ const sitemap = read('astro.config.mjs');
 const robots = read('src/pages/robots.txt.ts');
 const estimate = read('functions/api/estimate.js');
 const costEstimator = read('src/components/CostEstimator.astro');
+const dashboardApi = read('functions/internal/api/dashboard.js');
+const todayPage = read('src/pages/internal/today.astro');
 const today = read('src/pages/internal/today.astro');
 const followUp = read('src/pages/internal/follow-up.astro');
 const jobPrep = read('src/pages/internal/jobs/prepare.astro');
@@ -72,5 +75,11 @@ assert(/new URLSearchParams\(location\.search\)\.get\('leadId'\)/.test(followUp)
 assert(/leadIdInput\.value=linkedLeadId;addCard\.hidden=false/.test(followUp), 'follow-up handoff opens with the inquiry already linked');
 assert(/data-linked-lead/.test(followUp) && /For \$\{lead\.name\}/.test(followUp), 'follow-up form identifies the linked customer');
 assert(/form\.reset\(\);if\(linkedLeadId&&leadIdInput instanceof HTMLInputElement\)leadIdInput\.value=linkedLeadId/.test(followUp), 'repeat follow-ups remain linked to the selected inquiry');
+assert(/timeZone: 'America\/Los_Angeles'/.test(dashboardApi) && /pacificDayRange/.test(dashboardApi), 'dashboard due-today counts use the business timezone');
+assert(/due_at >= \? AND due_at < \?/.test(dashboardApi) && /\.bind\(weekAgo, today\.start, today\.end, now\)/.test(dashboardApi), 'dashboard due-today counts use exact local-day boundaries');
+assert(/due_at < \?\) AS tasks_overdue/.test(dashboardApi) && /\.bind\(weekAgo, today\.start, today\.end, now\)/.test(dashboardApi), 'overdue counts compare consistent ISO timestamps');
+assert(/AS active_jobs/.test(dashboardApi) && /Number\(c\.active_jobs\)\|\|0/.test(todayPage), 'Today active-job count is not limited to the preview list');
+assert(JSON.stringify(pacificDayRange(new Date('2026-03-08T18:00:00Z'))) === JSON.stringify({ start: '2026-03-08T08:00:00.000Z', end: '2026-03-09T07:00:00.000Z' }), 'Pacific due-today range handles spring daylight-saving transition');
+assert(JSON.stringify(pacificDayRange(new Date('2026-11-01T18:00:00Z'))) === JSON.stringify({ start: '2026-11-01T07:00:00.000Z', end: '2026-11-02T08:00:00.000Z' }), 'Pacific due-today range handles fall daylight-saving transition');
 
 console.log('Recent-fix regression checks passed.');
