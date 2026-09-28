@@ -17,6 +17,7 @@ const robots = read('src/pages/robots.txt.ts');
 const estimate = read('functions/api/estimate.js');
 const today = read('src/pages/internal/today.astro');
 const followUp = read('src/pages/internal/follow-up.astro');
+const jobPrep = read('src/pages/internal/jobs/prepare.astro');
 
 // #74 regression guards: the active stage must actually constrain the grid,
 // and stale async renders must not overwrite a newer filter selection.
@@ -52,5 +53,8 @@ assert(/fieldErrors/.test(estimate) && /json\(\{ error: 'Fix the highlighted fie
 assert(/q\('\[data-tasks\]'\)/.test(today), 'today screen selects the task list');
 assert(/if\(!r\.ok\)throw new Error\(d\.error\|\|'Could not complete that follow-up\.'\)/.test(today), 'today screen checks task completion responses');
 assert(/if\(!r\.ok\)throw new Error\(d\.error\|\|'Could not complete that follow-up\.'\)/.test(followUp), 'follow-up screen checks task completion responses');
+assert(/dueDate&&!Number\.isFinite\(dueDate\.getTime\(\)\)/.test(followUp), 'follow-up screen rejects invalid due dates before sending');
+assert(/submit\.disabled=true;submit\.textContent='Saving…'/.test(followUp) && /finally\{if\(submit instanceof HTMLButtonElement\)\{submit\.disabled=false/.test(followUp), 'follow-up form prevents duplicate submissions and restores its button');
+assert(/try\{note\.value=localStorage\.getItem\(noteKey\)\|\|'';\}catch/.test(jobPrep) && /catch\{if\(saveState\)saveState\.textContent='Could not save on this browser/.test(jobPrep), 'job prep handles browser storage errors without losing the page');
 
 console.log('Recent-fix regression checks passed.');
