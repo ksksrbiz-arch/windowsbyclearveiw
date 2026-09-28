@@ -9,10 +9,7 @@ const MAX = {
   notes: 2000,
 };
 const MAX_BODY_BYTES = 64 * 1024;
-// One customer receipt per address per window. The notification to Mark is
-// never suppressed; only the courtesy email to the address typed into the
-// form is, so the form cannot be used to repeatedly mail a third party.
-const RECEIPT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RECEIPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'owner@windowsbyclearveiw.com';
 
@@ -64,24 +61,6 @@ function cleanMultiline(value, max) {
     .replace(/\n{3,}/g, '\n\n')
     .trim()
     .slice(0, max);
-}
-
-async function receiptRecentlySent(env, email, now = Date.now()) {
-  if (!env?.QUOTES_DB || !email) return false;
-  try {
-    const since = new Date(now - RECEIPT_WINDOW_MS).toISOString();
-    const row = await env.QUOTES_DB.prepare(
-      'SELECT COUNT(*) AS n FROM leads WHERE lower(email) = lower(?) AND created_at > ?',
-    )
-      .bind(email, since)
-      .first();
-    return Number(row?.n || 0) > 0;
-  } catch (error) {
-    // Fail open: a missing receipt is worse for a real customer than one
-    // extra courtesy email during a database outage.
-    console.error('receipt-dedupe-failed', error);
-    return false;
-  }
 }
 
 function telUri(phone) {
@@ -274,6 +253,23 @@ async function sendTemplate(key, payload) {
   return body;
 }
 
+async function claimReceiptEmail(db, email, now = Date.now()) {
+  if (!db || !email) return false;
+  await db.prepare(`CREATE TABLE IF NOT EXISTS estimate_receipt_limits (
+    email_hash TEXT PRIMARY KEY,
+    last_sent_at INTEGER NOT NULL
+  )`).run();
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.trim().toLowerCase()));
+  const emailHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  const claimed = await db.prepare(`
+    INSERT INTO estimate_receipt_limits (email_hash, last_sent_at) VALUES (?, ?)
+    ON CONFLICT(email_hash) DO UPDATE SET last_sent_at = excluded.last_sent_at
+    WHERE estimate_receipt_limits.last_sent_at <= excluded.last_sent_at - ?
+    RETURNING email_hash
+  `).bind(emailHash, now, RECEIPT_COOLDOWN_MS).first();
+  return Boolean(claimed);
+}
+
 export async function onRequestPost(context) {
   const { request } = context;
   const asJson = wantsJson(request);
@@ -353,9 +349,6 @@ export async function onRequestPost(context) {
   const journey = parseJourney(clean(form.get('visit_journey'), 8000));
   const journeySummary = summarizeJourney(journey);
 
-  // Checked before this lead is written so the current submission never
-  // counts against itself.
-  const skipReceipt = emailLooksReal && await receiptRecentlySent(context.env, lead.email);
   context.waitUntil(logLead(context.env, lead, journey, visitorId));
   // Phone push fires for every valid lead, independent of mail delivery, so
   // a Resend outage never delays the callback. It carries no customer data.
@@ -405,22 +398,32 @@ export async function onRequestPost(context) {
       : redirect(request, '/estimate/problem');
   }
 
-  if (lead.email && emailLooksReal && !skipReceipt) {
-    context.waitUntil(
-      sendTemplate(key, {
-        from,
-        to: [lead.email],
-        template: {
-          id: TEMPLATES.receipt.id,
-          variables: {
-            CUSTOMER_NAME: lead.name,
-            CITY: lead.city,
+  if (lead.email && emailLooksReal) {
+    let shouldSendReceipt = false;
+    try {
+      shouldSendReceipt = await claimReceiptEmail(context.env?.QUOTES_DB, lead.email);
+    } catch (error) {
+      // Fail closed for customer mail if the limiter is unavailable. The
+      // inquiry and Mark's notification have already been processed above.
+      console.error('receipt-limit-failed', error);
+    }
+    if (shouldSendReceipt) {
+      context.waitUntil(
+        sendTemplate(key, {
+          from,
+          to: [lead.email],
+          template: {
+            id: TEMPLATES.receipt.id,
+            variables: {
+              CUSTOMER_NAME: lead.name,
+              CITY: lead.city,
+            },
           },
-        },
-      }).catch((error) => {
-        console.error('receipt-failed', error);
-      }),
-    );
+        }).catch((error) => {
+          console.error('receipt-failed', error);
+        }),
+      );
+    }
   }
 
   return asJson ? json({ ok: true }) : redirect(request, '/estimate/sent');

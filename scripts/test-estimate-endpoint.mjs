@@ -3,38 +3,27 @@
 // stand-in and a stubbed Resend, so they catch wiring mistakes, not just
 // missing strings.
 import { onRequestPost } from '../functions/api/estimate.js';
+import { createD1 } from './_lib/d1-sqlite.mjs';
+
+process.removeAllListeners('warning');
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(`FAIL: ${message}`);
   console.log(`PASS: ${message}`);
 };
 
+// Real SQLite with the production leads schema, so the receipt limiter's
+// INSERT ... ON CONFLICT ... RETURNING runs exactly as it does on D1.
+const leadCount = (db) => db.raw.prepare('SELECT COUNT(*) AS n FROM leads').get().n;
+const firstLead = (db) => db.raw.prepare('SELECT * FROM leads ORDER BY id LIMIT 1').get();
+
 function fakeDb({ failReads = false } = {}) {
-  const leads = [];
-  return {
-    leads,
-    prepare(sql) {
-      return {
-        bind(...args) {
-          return {
-            async run() {
-              if (/^\s*INSERT INTO leads/i.test(sql)) {
-                leads.push({ created_at: args[0], email: args[3], notes: args[6] });
-              }
-            },
-            async first() {
-              if (failReads) throw new Error('d1 down');
-              const [email, since] = args;
-              const n = leads.filter(
-                (l) => l.email && l.email.toLowerCase() === String(email).toLowerCase() && l.created_at > since,
-              ).length;
-              return { n };
-            },
-          };
-        },
-      };
-    },
-  };
+  const db = createD1({ schemaFiles: ['functions/api/_data/schema.sql'] });
+  if (failReads) {
+    const prepare = db.prepare;
+    db.prepare = (sql) => (/estimate_receipt_limits/.test(sql) ? { bind: () => ({ run: async () => { throw new Error('d1 down'); }, first: async () => { throw new Error('d1 down'); } }), run: async () => { throw new Error('d1 down'); } } : prepare(sql));
+  }
+  return db;
 }
 
 const sent = [];
@@ -71,7 +60,7 @@ const base = { name: 'Pat Doe', phone: '(360) 555-0100', city: 'Camas', email: '
   const notes = 'Home type: Two-story\r\nApproximate openings:   8\n\n\n\nMain concern: drafts\u0007';
   const { status, body } = await submit(env, { ...base, notes });
   assert(status === 200 && body.ok === true, 'valid submission succeeds');
-  const stored = env.QUOTES_DB.leads[0].notes;
+  const stored = firstLead(env.QUOTES_DB).notes;
   assert(stored === 'Home type: Two-story\nApproximate openings: 8\n\nMain concern: drafts', 'notes keep one detail per line, collapse runs, strip control chars');
   assert(sent[0].template.variables.NOTES.startsWith('Home type: Two-story\nApproximate openings: 8'), 'lead email NOTES preserves line breaks');
   assert(sent.length === 2 && sent[1].to[0] === 'pat@example.com', 'first submission sends Mark notification and customer receipt');
@@ -88,7 +77,7 @@ const base = { name: 'Pat Doe', phone: '(360) 555-0100', city: 'Camas', email: '
   const receipts = sent.filter((m) => m.template.id === 'estimate-received');
   assert(toMark.length === 2, 'every submission notifies Mark');
   assert(receipts.length === 1, 'receipt is sent once per address per day (case-insensitive)');
-  assert(env.QUOTES_DB.leads.length === 2, 'every submission is still logged');
+  assert(leadCount(env.QUOTES_DB) === 2, 'every submission is still logged');
 }
 
 // 3. A different address is unaffected, and a D1 read failure fails open.
@@ -104,7 +93,7 @@ const base = { name: 'Pat Doe', phone: '(360) 555-0100', city: 'Camas', email: '
   console.error = () => {};
   const { status } = await submit({ QUOTES_DB: fakeDb({ failReads: true }), RESEND_API_KEY: 'test' }, base);
   console.error = original;
-  assert(status === 200 && sent.some((m) => m.template.id === 'estimate-received'), 'receipt still sends when the dedupe lookup fails');
+  assert(status === 200 && sent.some((m) => m.template.id === 'estimate-request') && !sent.some((m) => m.template.id === 'estimate-received'), 'limiter outage fails closed: Mark is notified, no customer receipt');
 }
 
 // 4. Existing validation contract is unchanged.

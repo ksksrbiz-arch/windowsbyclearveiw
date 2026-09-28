@@ -4,7 +4,7 @@ import { getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { site } from '../../data/site';
-import areasHeroSrc from '../../assets/hero/areas.jpg';
+import { findWork } from '../../data/work';
 
 // Vancouver is home base, so it leads the list rather than landing wherever
 // the filesystem glob happens to sort it. Everything else follows
@@ -15,9 +15,10 @@ const cities = (await getCollection('cities'))
     a.id === 'vancouver' ? -1 : b.id === 'vancouver' ? 1 : a.data.name.localeCompare(b.data.name),
   );
 
-// Real stock photography of the Cascades, not a specific Clark County job
-// site -- same disclosure the other stock and AI hero photos carry.
-const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// A real finished Clearview job. It is not tagged to a town, so the credit
+// line does not claim one.
+const heroPhoto = findWork('tan-two-story')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title="Service areas"
@@ -31,7 +32,7 @@ const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', 
       <h1>Vancouver, WA and nearby</h1>
       <p class="lede">{site.serviceAreaNote}</p>
     </div>
-    <p class="hero-photo-credit">Stock photography — not an actual Clearview job or job site</p>
+    <p class="hero-photo-credit">Clearview job photo — finished windows</p>
   </section>
 
   <section class="section">

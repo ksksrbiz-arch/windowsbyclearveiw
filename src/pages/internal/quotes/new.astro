@@ -146,6 +146,7 @@ const catalog = {
     const searchParams = new URLSearchParams(location.search);
     const editId = searchParams.get('edit');
     const duplicateId = editId ? null : searchParams.get('duplicate');
+    const leadId = !editId && !duplicateId ? searchParams.get('leadId') : null;
 
     const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
     const items: LineItem[] = [];
@@ -406,8 +407,40 @@ const catalog = {
       }
     }
 
+    async function loadFromLead(id: string) {
+      form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) el.disabled = true;
+      });
+      try {
+        const response = await fetch('/internal/api/leads');
+        if (!response.ok) throw new Error('Could not load that inquiry.');
+        const { leads } = await response.json();
+        const lead = leads.find((item: any) => String(item.id) === id);
+        if (!lead) throw new Error('That inquiry could not be found. It may have moved beyond the recent inquiry list.');
+        setField('name', lead.name);
+        setField('phone', lead.phone);
+        setField('email', lead.email);
+        setField('city', lead.city);
+        setField('notes', lead.notes);
+        if (lead.role === 'Builder / GC' || lead.role === 'Homeowner') setRadio('role', lead.role);
+        if (headingEl) headingEl.textContent = `Quote for ${lead.name || 'new customer'}`;
+        if (ledeEl) ledeEl.textContent = 'Customer details started from the inquiry. Confirm the address and build the quote.';
+        form.querySelectorAll('input, select, textarea, button').forEach((el) => {
+          if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) el.disabled = false;
+        });
+        syncBrandVisibility();
+      } catch (error) {
+        if (loadErrorEl instanceof HTMLElement) {
+          loadErrorEl.hidden = false;
+          loadErrorEl.textContent = error instanceof Error ? error.message : 'Could not load that inquiry.';
+        }
+        form.hidden = true;
+      }
+    }
+
     if (editId) loadForEdit(editId, 'edit');
     else if (duplicateId) loadForEdit(duplicateId, 'duplicate');
+    else if (leadId) loadFromLead(leadId);
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();

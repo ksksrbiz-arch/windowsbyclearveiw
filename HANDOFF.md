@@ -205,7 +205,7 @@ Built, tested, **not yet deployed or enabled**.
 Found by executing the site rather than reading it: a Chromium pass over every public page at 375px, plus a behavioural test that runs `functions/api/estimate.js` against a stub D1 and Resend.
 
 - **Estimate notes lost their line breaks.** The calculator and quiz pre-fill the estimate form one detail per line (`Home type: …\nApproximate openings: …`), but the endpoint's `clean()` collapsed all whitespace, so Mark got those details run together in the lead email and D1. Notes now go through `cleanMultiline()` (line breaks kept, runs of blank lines capped at one, control characters stripped). Internal lead views (`/internal/leads`, `/internal/leads/analyze`) render notes with `white-space: pre-line`. The hosted Resend template `estimate-request` must render `NOTES` with preserved line breaks — the journey summary already relied on this; **VERIFY** in the Resend dashboard if a lead email looks flattened.
-- **Receipt email could be used to mail third parties.** Anyone could type someone else's address and resubmit to send repeated "estimate received" emails from the production mail domain. The customer receipt is now sent at most once per address per 24h (case-insensitive lookup against `leads` before the new row is written). Mark's notification and the D1 lead row are never suppressed. The lookup fails open so a D1 outage never costs a real customer their receipt.
+- **Receipt email could be used to mail third parties.** Superseded at merge by `main`'s limiter (commit bdf6589): an atomic `estimate_receipt_limits` claim on a SHA-256 of the address, 24h cooldown, which **fails closed** (no receipt) if D1 is unavailable. Mark's notification and the D1 lead row are never suppressed. `test:estimate` now exercises that limiter on real SQLite.
 - **Calculator overflowed phones by 1px.** `.estimator-grid` used a bare `1fr` track under 900px; a min-content child pushed it wider than the viewport. Now `minmax(0, 1fr)`; guarded in `test:recent-fixes`.
 - New `npm run test:estimate` (`scripts/test-estimate-endpoint.mjs`) is in CI. It fails on the pre-change handler and passes now.
 
@@ -229,11 +229,23 @@ These are gaps 1 and 3 from `.ai/references/command-center-gap-analysis.md`.
 - **Privacy policy** (`src/content/legal/privacy.md`, updated 2026-09-28) now states the single post-job review ask. **VERIFY:** Keith/Mark are happy with the wording.
 - **Review link:** currently the profile share link. Once `GOOGLE_PLACE_ID` is set (see the 2026-09-26 entry), it automatically becomes Google's direct write-review form.
 
+### 2026-09-27 to 2026-09-28 — public copy, guide graphics, real hero photos
+
+Shipped via PRs #110–#113. What changed and the rules that came out of it:
+
+- **No personal name on the public site (owner's own request).** "Mark" was removed from all customer-facing copy (pages, CTAs, form confirmations, legal pages, guide byline). The guide `Article` JSON-LD author is now the `Organization`. `site.owner` still exists for internal use, and internal Command Center pages and code comments still say "Mark" on purpose.
+- **No claims about who handles what.** The public copy neither implies a team/staff/office nor discloses a small operation. It describes the *process* (in-person measure, written estimate, final walkthrough) in plain company voice ("we"). Do not reintroduce "the team responsible for...", "our installation team", "one-person company", "point of contact", or a crew doing the work. Generic references to *other trades'* crews (the builder's siding crew) and photo captions are fine. This stays consistent with CLAUDE.md rule 2 and WA CPA exposure noted in `terms.md`; if the real staffing picture changes, update the copy from facts the owner confirms.
+- **Fragment copy fixed.** Telegraphic lines such as "You try every sash. Debris leaves with us." were rewritten as plain sentences (homepage steps, cost-calculator steps). Prefer complete sentences a first-time visitor can parse.
+- **Guide graphics.** New infographics (window anatomy, old-window-to-replacement, double-pane glass, vinyl vs fiberglass) live in `src/assets/guides/` and render through `CanvaGuideEmbed.astro` using `getImage()` (WebP, explicit dimensions). Never put Canva exports in `public/`: they were 1–3.4 MB raw PNGs (one "SVG" was 2.6 MB of 49 embedded PNGs). `guides/[slug].astro` hides a guide's `heroImage` only for photo-based diagram types (`insert-vs-full-frame`, `flashing-order`, `signs-checklist`); the illustration-style diagrams intentionally pair with a photo.
+- **Privacy policy** discloses the Meta pixel (delivered through the existing GTM container `GTM-WGCFVHQM`, no inline pixel code). The estimate form's JS success path now pushes the same `generate_lead` dataLayer event the no-JS `/estimate/sent` page does.
+- **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
+- **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
+
 ## Outstanding
 
 | | |
 | --- | --- |
-| **Mark's real pricing** | Replace regional averages when actual ranges are supplied. |
+| **Oversize/custom-shape pricing** | `src/data/pricing.ts` now carries Mark's own installed pricing (reviewed 2026-09-26) except the oversize/custom-shape modifier, which is still a regional average. |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
 | **Google Business Profile** | Exists as of 2026-09-26 ("Clearview windows and trim LLC", managed by Keith, 5.0 / 1 review). Still needs name/category/service-area disambiguation from `clearviewpdx.com` (see 2026-09-16 audit follow-up above). Reviews feed built, waiting on the Places API key + Place ID. |

@@ -4,13 +4,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { pricingIsUsable } from '../../data/pricing';
 import { site } from '../../data/site';
-import toolsHeroSrc from '../../assets/hero/tools.jpg';
+import { findWork } from '../../data/work';
 
 const showMoney = pricingIsUsable();
 
-// Real stock photography rather than AI imagery -- a tape measure needs no
-// disclaimer for being generic, only for being staged as a Clearview job.
-const heroBg = await getImage({ src: toolsHeroSrc, width: 2400, format: 'webp', quality: 76 });
+const heroPhoto = findWork('caulk-gun-interior-sill')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
 // Must match the title the calculator page itself gives that URL (see
 // window-replacement-cost-calculator.astro) or the listing and the page it
@@ -49,7 +48,7 @@ const schema = {
         tools when you have a more specific question. There is no requirement to contact us.
       </p>
     </div>
-    <p class="hero-photo-credit">Stock photography — not an actual Clearview job or job site</p>
+    <p class="hero-photo-credit">Clearview job photo — sealing a window sill</p>
   </section>
 
   <section class="section">

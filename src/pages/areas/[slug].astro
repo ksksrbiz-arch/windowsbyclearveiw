@@ -6,8 +6,7 @@ import CtaBar from '../../components/CtaBar.astro';
 import WorkCard from '../../components/WorkCard.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
 import { site } from '../../data/site';
-import { replacementWork, workKindLabel } from '../../data/work';
-import areasHeroSrc from '../../assets/hero/areas.jpg';
+import { replacementWork, workKindLabel, findWork } from '../../data/work';
 
 export async function getStaticPaths() {
   const cities = await getCollection('cities', ({ data }) => data.published);
@@ -90,10 +89,10 @@ const schema = {
   '@graph': faqPage ? [serviceSchema, faqPage] : [serviceSchema],
 };
 
-// Same Cascades stock photo the areas index uses, with the same disclosure --
-// not a photo of this specific city or of a real Clearview job site, so it is
-// never captioned as one.
-const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// Same real job photo the areas index uses. It is not tagged to any town, so
+// the credit line says so rather than implying it was shot in this city.
+const heroPhoto = findWork('tan-two-story')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
   title={city.data.title}
@@ -111,7 +110,7 @@ const heroBg = await getImage({ src: areasHeroSrc, width: 2400, format: 'webp', 
       <h1>{city.data.title}</h1>
       <p class="lede">{city.data.description}</p>
     </div>
-    <p class="hero-photo-credit">Stock photography — not a photo of {city.data.name} or an actual Clearview job site</p>
+    <p class="hero-photo-credit">Clearview job photo — not specific to {city.data.name}</p>
   </section>
 
   <section class="section">

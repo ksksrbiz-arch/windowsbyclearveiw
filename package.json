@@ -21,7 +21,7 @@
     "test:copilot": "node scripts/test-copilot.mjs",
     "test:ai-surfaces": "node scripts/test-ai-surfaces.mjs",
     "test:google-reviews": "node scripts/test-google-reviews.mjs",
-    "test:estimate": "node scripts/test-estimate-endpoint.mjs",
+    "test:estimate": "node --disable-warning=ExperimentalWarning scripts/test-estimate-endpoint.mjs",
     "test:review-request": "node --disable-warning=ExperimentalWarning scripts/test-review-request.mjs",
     "test:quote-to-job": "node --disable-warning=ExperimentalWarning scripts/test-quote-to-job-flow.mjs",
     "find:google-place-id": "node scripts/find-google-place-id.mjs"

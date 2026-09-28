@@ -1,4 +1,4 @@
-# ICM State — 2026-09-09
+# ICM State — 2026-09-28
 
 ## Status
 
@@ -59,9 +59,13 @@ The application now:
 
 ## CI / verification
 
-The GitHub build workflow contains the repository regression suite and production build. Connector-visible latest commits have not yet produced a usable workflow execution, so CI execution remains unverified. This is an external GitHub Actions startup/billing issue, not an application test result.
+The GitHub build workflow runs the full regression suite (`test:icm`, `test:build-plan-state`, `test:build-plan-integration`, `test:production-hardening`, `test:marketing-platform`, `test:ask-security`, `test:recent-fixes`, `test:copilot`, `test:ai-surfaces`, `test:google-reviews`, `eval:build-plan`) and the production build. It does execute. Two failure modes exist: a ~4 s failure where no runner is allocated (GitHub-side infrastructure, not a test result) and a longer failure that is a real test failure; reproduce the latter locally with the same sequence from `.github/workflows/build.yml`. Cloudflare Pages previews are an independent build signal.
 
 Direct production execution of `/ask`, `/internal/copilot`, Lead Analyzer, and the Cloudflare Workers AI binding remains a deployment verification task.
+
+## Public copy boundaries
+
+Public pages must not state or imply who performs each step of the work: no team/staff/office claims, no "one-person" disclaimer, no personal owner name. Describe the process instead. The ICM specialists and internal pages may name the owner. See the 2026-09-27 entry in `HANDOFF.md`.
 
 ## Known architectural boundaries
 

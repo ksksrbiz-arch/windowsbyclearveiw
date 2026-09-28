@@ -52,6 +52,13 @@ assert(/\.estimator-grid \{\s*grid-template-columns: minmax\(0, 1fr\);/.test(cos
 
 // Keep the multi-field estimate validation contract intact.
 assert(/fieldErrors/.test(estimate) && /json\(\{ error: 'Fix the highlighted fields\.', fields: fieldErrors \}/.test(estimate), 'estimate API returns field-specific validation errors');
+assert(/RECEIPT_COOLDOWN_MS = 24 \* 60 \* 60 \* 1000/.test(estimate), 'customer estimate receipts use a 24-hour cooldown');
+assert(/INSERT INTO estimate_receipt_limits[\s\S]*ON CONFLICT\(email_hash\)[\s\S]*RETURNING email_hash/.test(estimate), 'estimate receipt cooldown claim is atomic and keyed by email hash');
+assert(/shouldSendReceipt = await claimReceiptEmail\(context\.env\?\.QUOTES_DB, lead\.email\)/.test(estimate), 'receipt cooldown only gates customer confirmation mail');
+assert(/await sendTemplate\(key, \{[\s\S]*template:[\s\S]*id: TEMPLATES\.lead\.id/.test(estimate), 'Mark notification remains independent of the customer receipt cooldown');
+assert(/context\.waitUntil\(logLead\(context\.env, lead, journey, visitorId\)\)/.test(estimate), 'every accepted estimate continues to save the lead');
+assert(/@media \(max-width: 900px\) \{[\s\S]*grid-template-columns: minmax\(0, 1fr\)/.test(costEstimator), 'mobile calculator grid permits columns to shrink below min-content width');
+assert(/\.estimator-grid > \* \{\s*min-width: 0;\s*\}/.test(costEstimator), 'calculator grid children cannot force horizontal page overflow');
 
 // The Today and Follow-up screens must target the task list correctly and not
 // hide failed completion requests behind an unconditional refresh.

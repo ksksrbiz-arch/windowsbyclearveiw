@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS leads (
 CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_name ON leads(name);
 CREATE INDEX IF NOT EXISTS idx_leads_visitor_id ON leads(visitor_id);
+
+-- Prevent the public estimate form from repeatedly emailing a typed address.
+-- Store only a normalized SHA-256 digest; the cooldown is claimed atomically
+-- by functions/api/estimate.js so concurrent submissions cannot race through.
+CREATE TABLE IF NOT EXISTS estimate_receipt_limits (
+  email_hash           TEXT PRIMARY KEY,
+  last_sent_at         INTEGER NOT NULL -- Unix epoch milliseconds
+);
