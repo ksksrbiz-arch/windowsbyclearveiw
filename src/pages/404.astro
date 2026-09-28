@@ -40,6 +40,19 @@ import { site, telHref } from '../data/site';
   </section>
 </BaseLayout>
 
+<script>
+  if (location.pathname === '/internal' || location.pathname.startsWith('/internal/')) {
+    const main = document.querySelector('main');
+    if (main) {
+      const notice = document.createElement('section');
+      notice.className = 'internal-404';
+      notice.setAttribute('aria-labelledby', 'internal-404-title');
+      notice.innerHTML = '<p class="kicker">Clearview internal</p><h2 id="internal-404-title">Internal page not found</h2><p>That Command Center link is missing or no longer available.</p><p><a href="/internal/">Return to Dashboard</a> <a href="/internal/tools">Open Tools</a></p>';
+      main.prepend(notice);
+    }
+  }
+</script>
+
 <style>
   .lost-phone {
     margin: 0 0 var(--space-2xs);
@@ -56,4 +69,7 @@ import { site, telHref } from '../data/site';
   .lost-phone a:hover {
     color: var(--accent-ink);
   }
+
+  .internal-404{margin:1rem auto;max-width:42rem;padding:1rem 1.2rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}
+  .internal-404 h2{margin:.2rem 0 .4rem}.internal-404 p:last-child{display:flex;gap:1rem;flex-wrap:wrap}.internal-404 a{font-weight:700}
 </style>

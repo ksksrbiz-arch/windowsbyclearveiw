@@ -3,7 +3,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 ---
 <InternalLayout title="Invoices">
   <div class="il-head"><div><p class="kicker">Accounts receivable</p><h1>Invoices</h1><p class="lede">Every invoice created from a quote, with its current delivery state and amount.</p></div><a class="btn btn-ghost" href="/internal/quotes">Quotes</a></div>
-  <section class="invoice-command"><div><span>SALES → CASH</span><strong>Finalize the quote. Send the invoice.</strong><p>Invoices are snapshots of the finalized quote and remain stable after the quote is locked.</p></div><a href="/internal/payments">Open balances →</a></section>
+  <section class="invoice-command"><div><span>SALES → CASH</span><strong>Prepare the invoice. Finalize before sending.</strong><p>Draft invoices can be prepared before finalization; only finalized quotes can be sent and remain stable after the quote is locked.</p></div><a href="/internal/payments">Open balances →</a></section>
   <p data-loading>Loading…</p><p class="il-error" data-error hidden role="alert"></p><p data-empty hidden>No invoices yet. Start a quote to create one automatically.</p>
   <div class="invoice-list" data-list></div>
 </InternalLayout>
