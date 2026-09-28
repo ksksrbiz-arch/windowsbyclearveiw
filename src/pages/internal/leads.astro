@@ -96,7 +96,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
           return;
         }
 
-        if (searchWrap instanceof HTMLElement) searchWrap.hidden = leads.length < 6;
+        if (searchWrap instanceof HTMLElement) searchWrap.hidden = leads.length < 2;
 
         if (list instanceof HTMLElement) {
           list.hidden = false;
@@ -122,6 +122,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
                 <time class="ld-when">${formatWhen(lead.created_at)}</time>
               </div>
               <div class="ld-card-actions">
+                <a class="ld-action ld-action-primary" href="/internal/quotes/new?leadId=${leadId}">Start quote</a>
                 <a class="ld-action" href="/internal/follow-up?leadId=${leadId}">Add follow-up</a>
                 ${phoneHref ? `<a class="ld-action" href="${phoneHref}">Call</a>` : ''}
                 ${lead.email ? `<a class="ld-action" href="mailto:${escapeHtml(lead.email)}">Email</a>` : ''}
@@ -188,6 +189,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   :global(.ld-card-actions) { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.65rem; }
   :global(.ld-action) { display:inline-flex; align-items:center; min-height:2rem; padding:.32rem .6rem; border:1px solid var(--line); border-radius:999px; color:inherit; text-decoration:none; font-size:var(--step--2); font-weight:700; }
   :global(.ld-action:hover) { border-color:var(--line-strong); background:var(--accent-wash); }
+  :global(.ld-action-primary) { border-color:var(--accent); background:var(--accent); color:var(--on-accent, #fff); }
+  :global(.ld-action-primary:hover) { background:var(--accent-strong, var(--accent)); color:var(--on-accent, #fff); }
   :global(.ld-notes) { margin:var(--space-xs) 0 0; font-size:var(--step--1); }
   :global(.ld-journey-wrap) { margin-top:var(--space-xs); font-size:var(--step--2); color:var(--ink-faint); }
   :global(.ld-journey-wrap summary) { cursor:pointer; color:var(--ink-soft); }
