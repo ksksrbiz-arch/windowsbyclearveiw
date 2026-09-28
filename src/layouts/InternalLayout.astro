@@ -14,12 +14,13 @@ const navItems = [
   { href: '/internal/jobs', label: 'Jobs' },
   { href: '/internal/schedule', label: 'Schedule' },
   { href: '/internal/payments', label: 'Payments' },
+  { href: '/internal/analytics', label: 'Analytics' },
   { href: '/internal/tools', label: 'Tools' },
   { href: '/internal/ask-logs', label: 'Ask' },
 ];
 const isActive = (href: string) => href === '/internal/' ? pathname === href : pathname.startsWith(href);
 const mobilePrimary = navItems.filter((item) => ['/internal/today', '/internal/follow-up', '/internal/quotes', '/internal/jobs'].includes(item.href));
-const mobileMoreItems = navItems.filter((item) => ['/internal/', '/internal/leads', '/internal/invoices', '/internal/schedule', '/internal/payments', '/internal/tools', '/internal/ask-logs'].includes(item.href));
+const mobileMoreItems = navItems.filter((item) => ['/internal/', '/internal/leads', '/internal/invoices', '/internal/schedule', '/internal/payments', '/internal/analytics', '/internal/tools', '/internal/ask-logs'].includes(item.href));
 const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ? pathname === item.href : pathname.startsWith(item.href));
 ---
 <!doctype html>
