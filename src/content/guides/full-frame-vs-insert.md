@@ -70,4 +70,4 @@ Then the estimate lists the method per opening, not one price that hides a worse
 
 ## What this means for cost and time
 
-Inserts are usually faster and cost less per opening. Full-frame takes more crew time and more finish work. A mixed house is normal. Read [what a Washington project costs](/guides/window-replacement-cost-washington) for ranges, then get a measure so the number is about *your* openings.
+Inserts are usually faster and cost less per opening. Full-frame takes more time on site and more finish work. A mixed house is normal. Read [what a Washington project costs](/guides/window-replacement-cost-washington) for ranges, then get a measure so the number is about *your* openings.

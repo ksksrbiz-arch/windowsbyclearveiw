@@ -25,6 +25,6 @@ Aluminum-frame sliders from the older subdivisions are the most common tear-out 
 
 ## What we do here
 
-We check the frame first, then call insert or full-frame based on what's actually there — not the neighborhood's age. See [full-frame vs. insert](/guides/full-frame-vs-insert) for how that call gets made. The Clearview installation team uses the same written estimate process. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
+We check the frame first, then call insert or full-frame based on what's actually there — not the neighborhood's age. See [full-frame vs. insert](/guides/full-frame-vs-insert) for how that call gets made. The same written estimate process applies. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
 
 Nearby: [Brush Prairie](/areas/brush-prairie) and [Vancouver](/areas/vancouver).

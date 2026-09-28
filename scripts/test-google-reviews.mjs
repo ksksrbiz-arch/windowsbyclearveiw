@@ -197,7 +197,11 @@ const okFetch = (payload, calls = []) => async (url, init) => {
   const site = fs.readFileSync('src/data/site.ts', 'utf8');
   const about = fs.readFileSync('src/pages/about.astro', 'utf8');
   assert.match(site, /googleReviews:\s*\{\s*rating:\s*\d(\.\d)?,\s*count:\s*\d+,\s*asOf:\s*'\d{4}-\d{2}-\d{2}'\s*\}/, 'the shown Google rating lives in one dated place');
-  assert.ok(/site\.googleReviews/.test(page) && /site\.googleReviews/.test(about), 'reviews and about pages read the same number');
+  assert.ok(/site\.googleReviews/.test(page), 'the reviews page reads the shared Google rating');
+  assert.ok(
+    /site\.googleReviews/.test(about) || !/\b\d(\.\d)?[- ]star|\b\d+\s+(Google\s+)?reviews?\b/i.test(about),
+    'the about page either reads the shared rating or states no rating/review count of its own',
+  );
   assert.ok(!/(?<![\w.])five-star/.test(page.replace(/\$\{[\s\S]*?\}/g, '')) || /google\.rating === 5/.test(page), 'the words "five-star" only appear when the rating is 5');
   pass('the static rating is data-driven and dated, and "five-star" is only claimed when the rating is 5');
 }

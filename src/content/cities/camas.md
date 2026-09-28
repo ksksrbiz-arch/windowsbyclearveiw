@@ -25,6 +25,6 @@ In the old mill-town core, it's frame condition more than glass — a sill or ja
 
 ## What we do here
 
-We replace tired downtown-era units and set new-construction windows on the builds still going up toward Lacamas Lake. A Camas job gets the Clearview installation team, a written estimate after we see the openings, and the same flashing and finish standard as the rest of Clark County.
+We replace tired downtown-era units and set new-construction windows on the builds still going up toward Lacamas Lake. A Camas job gets a written estimate after we see the openings, and the same flashing and finish standard as the rest of Clark County.
 
 Nearby: [Washougal](/areas/washougal) and [Vancouver](/areas/vancouver).
