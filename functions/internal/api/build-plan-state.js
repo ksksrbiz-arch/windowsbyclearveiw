@@ -101,9 +101,12 @@ export async function onRequestPost({ env, request }) {
 
   const now = new Date().toISOString();
   next.quality = checked.quality;
+  // A state transition never refreshes the quote snapshot. Only re-saving the
+  // plan in the editor reconciles it with the quote; otherwise sending a stale
+  // plan to review would silently mark it current and let it be approved.
   const persistedUpdatedAt = next.status === BUILD_PLAN_STATES.APPROVED ? (next.approvedAt || now) : now;
   await env.QUOTES_DB.prepare(`UPDATE quote_build_plans SET state = ?, state_history_json = ?, plan_json = ?, quality_json = ?, source_json = ?, approved_at = ?, approved_by = ?, updated_at = ?, updated_by = ? WHERE quote_id = ?`)
-    .bind(next.status, JSON.stringify(next.stateHistory), JSON.stringify(next), JSON.stringify(checked.quality), JSON.stringify(checked.currentSource), next.approvedAt, next.approvedBy, persistedUpdatedAt, actor, quoteId).run();
+    .bind(next.status, JSON.stringify(next.stateHistory), JSON.stringify(next), JSON.stringify(checked.quality), JSON.stringify(checked.savedSource), next.approvedAt, next.approvedBy, persistedUpdatedAt, actor, quoteId).run();
   return json({ ok: true, quoteId, status: next.status, version: loaded.plan.version, approvedAt: next.approvedAt, approvedBy: next.approvedBy, stateHistory: next.stateHistory, quality: checked.quality, stale: checked.stale });
 }
 

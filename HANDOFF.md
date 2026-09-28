@@ -200,6 +200,35 @@ Built, tested, **not yet deployed or enabled**.
 
 **Go-live checklist:** set `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID` in Cloudflare Pages (see `internal/README.md`); confirm `/api/google-reviews` returns `status: "ok"` and the profile's real name; then update `src/pages/about.astro` ("No reviews yet" honesty entry) and the `/reviews` meta description so they no longer say the page is empty; add the Google Maps data use to `src/content/legal/privacy.md` only if counsel wants it (visitors' browsers only talk to this site, not Google).
 
+### 2026-09-28 — Lead-path hardening + phone layout fix (branch `claude/amazing-volta-n93yt5`)
+
+Found by executing the site rather than reading it: a Chromium pass over every public page at 375px, plus a behavioural test that runs `functions/api/estimate.js` against a stub D1 and Resend.
+
+- **Estimate notes lost their line breaks.** The calculator and quiz pre-fill the estimate form one detail per line (`Home type: …\nApproximate openings: …`), but the endpoint's `clean()` collapsed all whitespace, so Mark got those details run together in the lead email and D1. Notes now go through `cleanMultiline()` (line breaks kept, runs of blank lines capped at one, control characters stripped). Internal lead views (`/internal/leads`, `/internal/leads/analyze`) render notes with `white-space: pre-line`. The hosted Resend template `estimate-request` must render `NOTES` with preserved line breaks — the journey summary already relied on this; **VERIFY** in the Resend dashboard if a lead email looks flattened.
+- **Receipt email could be used to mail third parties.** Superseded at merge by `main`'s limiter (commit bdf6589): an atomic `estimate_receipt_limits` claim on a SHA-256 of the address, 24h cooldown, which **fails closed** (no receipt) if D1 is unavailable. Mark's notification and the D1 lead row are never suppressed. `test:estimate` now exercises that limiter on real SQLite.
+- **Calculator overflowed phones by 1px.** `.estimator-grid` used a bare `1fr` track under 900px; a min-content child pushed it wider than the viewport. Now `minmax(0, 1fr)`; guarded in `test:recent-fixes`.
+- New `npm run test:estimate` (`scripts/test-estimate-endpoint.mjs`) is in CI. It fails on the pre-change handler and passes now.
+
+### 2026-09-28 — Quote → job pipeline executed end to end (same branch)
+
+`npm run test:quote-to-job` (`scripts/test-quote-to-job-flow.mjs`) drives the real handlers — create quote → generate/save plan → review → approve → sign → create job — against a real SQLite engine (`scripts/_lib/d1-sqlite.mjs`, a D1 stand-in on `node:sqlite`). It found four bugs, all fixed:
+
+- **Job creation always failed.** `jobs.js` `INSERT INTO jobs` supplied 18 values for 17 columns (`…,'mark','mark'`). Every "create job" 500'd. Production D1 confirmed it (read-only query, 2026-09-28): the only job is a cancelled 2026-09-06 test created before Build Plan snapshots existed.
+- **Quote list flagged every plan stale.** It compared two saved copies with mismatched keys and never read current items. It now compares the saved snapshot against live items via `sourceSnapshot()`, the same function the gates use.
+- **State transitions laundered stale plans.** `build-plan-state.js` rewrote `source_json` to the current quote on every transition, so submit-review on an outdated plan made it approvable and signable. Transitions now keep the saved snapshot. Only re-saving in the editor reconciles.
+- **Half-cent money.** Fractional quantities (for example linear feet of trim) produced non-integer `line_total_cents`. Now rounded server-side (authoritative) and in the quote builder preview.
+
+**VERIFY:** production `leads` is 0 rows (2026-09-28), although the entry above records a live test lead. Either it was cleaned up or leads are not being written. Submit one real test lead and re-check `SELECT COUNT(*) FROM leads`.
+
+### 2026-09-28 — Speed-to-lead alert + post-job review request (same branch)
+
+These are gaps 1 and 3 from `.ai/references/command-center-gap-analysis.md`.
+
+- **Lead alert** (`functions/_lib/lead-alert.mjs`, called from `functions/api/estimate.js`): an ntfy phone push on every valid lead. It is independent of Resend and sends no customer data, so the privacy policy's three-company list stays true. **Off until `LEAD_ALERT_NTFY_TOPIC` is set.** Setup: install the ntfy app on Mark's phone, subscribe to a long random topic, and add that topic as a Pages secret. Tests: `test:estimate`.
+- **Review request** (`functions/internal/api/review-request.js`, `functions/_lib/review-request.mjs`, panel on `/internal/jobs/closeout`): available only after the closeout is finalized, never for cancelled jobs, one ask per job across channels. The D1 slot is reserved before sending and released if the email fails. Channels: email via Resend, or an `sms:` link Mark sends from his own phone. The fixed message never suggests content or a rating. Tests: `test:review-request`.
+- **Privacy policy** (`src/content/legal/privacy.md`, updated 2026-09-28) now states the single post-job review ask. **VERIFY:** Keith/Mark are happy with the wording.
+- **Review link:** currently the profile share link. Once `GOOGLE_PLACE_ID` is set (see the 2026-09-26 entry), it automatically becomes Google's direct write-review form.
+
 ### 2026-09-27 to 2026-09-28 — public copy, guide graphics, real hero photos
 
 Shipped via PRs #110–#113. What changed and the rules that came out of it:

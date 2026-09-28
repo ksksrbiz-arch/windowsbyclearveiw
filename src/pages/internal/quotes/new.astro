@@ -218,7 +218,7 @@ const catalog = {
 
       let subtotal = 0;
       items.forEach((item, index) => {
-        const lineTotal = item.quantity * item.unitPrice;
+        const lineTotal = Math.round(item.quantity * item.unitPrice * 100) / 100;
         subtotal += lineTotal;
 
         const row = document.createElement('tr');

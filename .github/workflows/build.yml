@@ -30,5 +30,8 @@ jobs:
       - run: npm run test:ai-surfaces
       - run: npm run test:google-reviews
       - run: npm run test:analytics
+      - run: npm run test:estimate
+      - run: npm run test:quote-to-job
+      - run: npm run test:review-request
       - run: npm run eval:build-plan
       - run: npm run build
