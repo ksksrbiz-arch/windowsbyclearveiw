@@ -22,6 +22,7 @@
     "test:ai-surfaces": "node scripts/test-ai-surfaces.mjs",
     "test:google-reviews": "node scripts/test-google-reviews.mjs",
     "test:estimate": "node scripts/test-estimate-endpoint.mjs",
+    "test:quote-to-job": "node --disable-warning=ExperimentalWarning scripts/test-quote-to-job-flow.mjs",
     "find:google-place-id": "node scripts/find-google-place-id.mjs"
   },
   "dependencies": { "@astrojs/sitemap": "^3.7.4", "astro": "^7.2.10" },

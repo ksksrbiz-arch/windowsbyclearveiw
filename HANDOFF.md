@@ -209,6 +209,17 @@ Found by executing the site rather than reading it: a Chromium pass over every p
 - **Calculator overflowed phones by 1px.** `.estimator-grid` used a bare `1fr` track under 900px; a min-content child pushed it wider than the viewport. Now `minmax(0, 1fr)`; guarded in `test:recent-fixes`.
 - New `npm run test:estimate` (`scripts/test-estimate-endpoint.mjs`) is in CI. It fails on the pre-change handler and passes now.
 
+### 2026-09-28 — Quote → job pipeline executed end to end (same branch)
+
+`npm run test:quote-to-job` (`scripts/test-quote-to-job-flow.mjs`) drives the real handlers — create quote → generate/save plan → review → approve → sign → create job — against a real SQLite engine (`scripts/_lib/d1-sqlite.mjs`, a D1 stand-in on `node:sqlite`). It found four bugs, all fixed:
+
+- **Job creation always failed.** `jobs.js` `INSERT INTO jobs` supplied 18 values for 17 columns (`…,'mark','mark'`). Every "create job" 500'd. Production D1 confirmed it (read-only query, 2026-09-28): the only job is a cancelled 2026-09-06 test created before Build Plan snapshots existed.
+- **Quote list flagged every plan stale.** It compared two saved copies with mismatched keys and never read current items. It now compares the saved snapshot against live items via `sourceSnapshot()`, the same function the gates use.
+- **State transitions laundered stale plans.** `build-plan-state.js` rewrote `source_json` to the current quote on every transition, so submit-review on an outdated plan made it approvable and signable. Transitions now keep the saved snapshot. Only re-saving in the editor reconciles.
+- **Half-cent money.** Fractional quantities (for example linear feet of trim) produced non-integer `line_total_cents`. Now rounded server-side (authoritative) and in the quote builder preview.
+
+**VERIFY:** production `leads` is 0 rows (2026-09-28), although the entry above records a live test lead. Either it was cleaned up or leads are not being written. Submit one real test lead and re-check `SELECT COUNT(*) FROM leads`.
+
 ## Outstanding
 
 | | |

@@ -50,7 +50,9 @@ export function parseQuoteBody(body) {
       description: clean(raw?.description, 500),
       quantity,
       unitPriceCents,
-      lineTotalCents: quantity * unitPriceCents,
+      // Rounded to whole cents: fractional quantities (linear feet of trim) must
+      // never put half-cents on a signed contract or invoice.
+      lineTotalCents: Math.round(quantity * unitPriceCents),
     });
   }
 
