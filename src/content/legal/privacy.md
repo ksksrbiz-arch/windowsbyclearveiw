@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-09-27
+updated: 2026-09-28
 order: 1
 summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
 ---
@@ -150,6 +150,11 @@ that a submission occurred.
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
+
+If we install windows for you, once the job is finished and you have signed
+off on it, we may ask one time for a Google review. We ask either by email,
+sent through Resend, or by a text from our own phone. We ask once per job and
+never follow up on it.
 
 We do not use a customer relationship manager or a marketing platform, and
 nothing here is used to build a mailing list. We do keep your submission — the

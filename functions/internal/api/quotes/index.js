@@ -1,5 +1,6 @@
 import { TERMS_VERSION, json, parseQuoteBody } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
+import { sourceSnapshot } from '../../../_lib/build-plan-rules.mjs';
 
 function newQuoteId() {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -32,16 +33,27 @@ export async function onRequestGet(context) {
      LEFT JOIN quote_build_plans bp ON bp.quote_id = q.id
      ORDER BY q.created_at DESC LIMIT 200`,
   ).all();
+  // Stale = the quote's current items differ from the snapshot the plan was
+  // saved against. Uses the same sourceSnapshot() as the approval, signing
+  // and job gates so the list badge can never disagree with them.
+  const { results: itemRows } = await env.QUOTES_DB.prepare(
+    `SELECT * FROM quote_items WHERE quote_id IN (SELECT id FROM quotes ORDER BY created_at DESC LIMIT 200)
+     ORDER BY quote_id, sort_order ASC, id ASC`,
+  ).all();
+  const itemsByQuote = new Map();
+  for (const item of itemRows || []) {
+    if (!itemsByQuote.has(item.quote_id)) itemsByQuote.set(item.quote_id, []);
+    itemsByQuote.get(item.quote_id).push(item);
+  }
   const quotes = (results || []).map((quote) => {
-    let source = [];
-    try { source = quote.build_plan_source_json ? JSON.parse(quote.build_plan_source_json) : []; } catch {}
     let plan = {};
     try { plan = quote.build_plan_json ? JSON.parse(quote.build_plan_json) : {}; } catch {}
-    const sourceKey = JSON.stringify(source || []);
-    const currentKey = JSON.stringify((plan.sourceItems || []).map((item) => ({ label: item.label, quantity: item.quantity, description: item.description, line_total_cents: item.line_total_cents })));
+    let source = plan.sourceItems || [];
+    try { if (quote.build_plan_source_json) source = JSON.parse(quote.build_plan_source_json); } catch {}
+    const currentKey = JSON.stringify(sourceSnapshot(itemsByQuote.get(quote.id) || []));
     const hasPlan = Boolean(quote.build_plan_json);
     const planState = quote.build_plan_state || plan.status || null;
-    const stale = hasPlan && source.length > 0 && sourceKey !== currentKey;
+    const stale = hasPlan && JSON.stringify(source || []) !== currentKey;
     return {
       id: quote.id, created_at: quote.created_at, status: quote.status, customer_name: quote.customer_name,
       customer_city: quote.customer_city, total_cents: quote.total_cents, signature_method: quote.signature_method,

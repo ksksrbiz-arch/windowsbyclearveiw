@@ -1,3 +1,5 @@
+import { sendLeadAlert } from '../_lib/lead-alert.mjs';
+
 const MAX = {
   name: 120,
   phone: 40,
@@ -43,6 +45,20 @@ function clean(value, max) {
   return String(value || '')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
     .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max);
+}
+
+// Notes keep their line breaks: the calculator and quiz pre-fill one detail
+// per line, and Mark reads them in the lead email and the internal lead view.
+function cleanMultiline(value, max) {
+  return String(value || '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
     .slice(0, max);
 }
@@ -301,7 +317,7 @@ export async function onRequestPost(context) {
     email: clean(form.get('email'), MAX.email),
     city: clean(form.get('city'), MAX.city),
     role: clean(form.get('role'), MAX.role),
-    notes: clean(form.get('notes'), MAX.notes),
+    notes: cleanMultiline(form.get('notes'), MAX.notes),
   };
 
   const fieldErrors = {};
@@ -334,6 +350,9 @@ export async function onRequestPost(context) {
   const journeySummary = summarizeJourney(journey);
 
   context.waitUntil(logLead(context.env, lead, journey, visitorId));
+  // Phone push fires for every valid lead, independent of mail delivery, so
+  // a Resend outage never delays the callback. It carries no customer data.
+  context.waitUntil(sendLeadAlert(context.env));
 
   const key = context.env?.RESEND_API_KEY;
   if (!key) {
