@@ -455,6 +455,7 @@ const model = {
   .estimator-inputs {
     display: grid;
     gap: var(--space-m);
+    min-width: 0;
   }
 
   .est-block {
@@ -790,8 +791,12 @@ const model = {
 
   @media (max-width: 900px) {
     .estimator-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--space-l);
+    }
+
+    .estimator-grid > * {
+      min-width: 0;
     }
 
     .estimator-inputs {

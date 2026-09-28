@@ -7,6 +7,7 @@ const MAX = {
   notes: 2000,
 };
 const MAX_BODY_BYTES = 64 * 1024;
+const RECEIPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'owner@windowsbyclearveiw.com';
 
@@ -236,6 +237,23 @@ async function sendTemplate(key, payload) {
   return body;
 }
 
+async function claimReceiptEmail(db, email, now = Date.now()) {
+  if (!db || !email) return false;
+  await db.prepare(`CREATE TABLE IF NOT EXISTS estimate_receipt_limits (
+    email_hash TEXT PRIMARY KEY,
+    last_sent_at INTEGER NOT NULL
+  )`).run();
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.trim().toLowerCase()));
+  const emailHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  const claimed = await db.prepare(`
+    INSERT INTO estimate_receipt_limits (email_hash, last_sent_at) VALUES (?, ?)
+    ON CONFLICT(email_hash) DO UPDATE SET last_sent_at = excluded.last_sent_at
+    WHERE estimate_receipt_limits.last_sent_at <= excluded.last_sent_at - ?
+    RETURNING email_hash
+  `).bind(emailHash, now, RECEIPT_COOLDOWN_MS).first();
+  return Boolean(claimed);
+}
+
 export async function onRequestPost(context) {
   const { request } = context;
   const asJson = wantsJson(request);
@@ -362,21 +380,31 @@ export async function onRequestPost(context) {
   }
 
   if (lead.email && emailLooksReal) {
-    context.waitUntil(
-      sendTemplate(key, {
-        from,
-        to: [lead.email],
-        template: {
-          id: TEMPLATES.receipt.id,
-          variables: {
-            CUSTOMER_NAME: lead.name,
-            CITY: lead.city,
+    let shouldSendReceipt = false;
+    try {
+      shouldSendReceipt = await claimReceiptEmail(context.env?.QUOTES_DB, lead.email);
+    } catch (error) {
+      // Fail closed for customer mail if the limiter is unavailable. The
+      // inquiry and Mark's notification have already been processed above.
+      console.error('receipt-limit-failed', error);
+    }
+    if (shouldSendReceipt) {
+      context.waitUntil(
+        sendTemplate(key, {
+          from,
+          to: [lead.email],
+          template: {
+            id: TEMPLATES.receipt.id,
+            variables: {
+              CUSTOMER_NAME: lead.name,
+              CITY: lead.city,
+            },
           },
-        },
-      }).catch((error) => {
-        console.error('receipt-failed', error);
-      }),
-    );
+        }).catch((error) => {
+          console.error('receipt-failed', error);
+        }),
+      );
+    }
   }
 
   return asJson ? json({ ok: true }) : redirect(request, '/estimate/sent');
