@@ -5,14 +5,13 @@ import CtaBar from '../components/CtaBar.astro';
 import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { newBuildWork, findWork, workKindLabel } from '../data/work';
-import newConstructionHeroSrc from '../assets/hero/new-construction.png';
 import { site, mailHref, telHref } from '../data/site';
 
 const ogPhoto = findWork('new-build-sheathed-garage')!;
 
-// Full-bleed hero background. AI-generated, not a real job site, so it is
-// captioned as such — the same rule the guide photos already follow.
-const heroBg = await getImage({ src: newConstructionHeroSrc, width: 2400, format: 'webp', quality: 76 });
+// Full-bleed hero background: a real new-construction job.
+const heroPhoto = findWork('new-build-tan-corner')!;
+const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 
 // Mirrors the numbered list below exactly — if the sequence changes, this
 // must change with it, or the markup and the schema will say different
@@ -128,7 +127,7 @@ const projectInquiryMailto = site.email
         See <a href="/sliding-glass-doors">sliding glass doors</a>.
       </p>
     </div>
-    <p class="hero-photo-credit">AI-generated imagery — not an actual Clearview job or job site</p>
+    <p class="hero-photo-credit">Clearview job photo — new build with windows set</p>
   </section>
 
   <section class="section">
@@ -343,8 +342,7 @@ const projectInquiryMailto = site.email
 </BaseLayout>
 
 <style>
-  /* Full-bleed photo hero. The image is AI-generated environmental imagery,
-     not a photo of a real job site — hence the small credit line. */
+  /* Full-bleed photo hero, a real Clearview job. */
   .page-hero-photo {
     position: relative;
     background-size: cover;
