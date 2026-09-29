@@ -22,6 +22,13 @@ const todayPage = read('src/pages/internal/today.astro');
 const today = read('src/pages/internal/today.astro');
 const followUp = read('src/pages/internal/follow-up.astro');
 const jobPrep = read('src/pages/internal/jobs/prepare.astro');
+const measurements = read('src/pages/internal/tools/measurements.astro');
+const quoteApi = read('functions/internal/api/quotes/index.js');
+const jobsApi = read('functions/internal/api/jobs.js');
+const tasksApi = read('functions/internal/api/tasks.js');
+const askPage = read('src/pages/ask.astro');
+const jobList = read('src/pages/internal/jobs/index.astro');
+const quoteList = read('src/pages/internal/quotes/index.astro');
 
 // #74 regression guards: the active stage must actually constrain the grid,
 // and stale async renders must not overwrite a newer filter selection.
@@ -30,6 +37,15 @@ assert(/let renderVersion=0/.test(photos) && /const version=\+\+renderVersion/.t
 assert(/if\(version!==renderVersion\)return/.test(photos), 'stale photo renders are discarded');
 assert(/let savedCount=0/.test(photos) && /savedCount\+\+/.test(photos), 'photo capture reports only successfully saved images');
 assert(/activeUrls\.forEach\(URL\.revokeObjectURL\)/.test(photos), 'photo object URLs are revoked before replacement');
+assert(/clearview-photo-backup/.test(photos) && /dataUrl/.test(photos) && /data-import-trigger/.test(photos), 'photo backup includes originals and can be restored');
+assert(/data-save-error/.test(measurements) && /Not saved — export this worksheet now/.test(measurements), 'measurement storage failure is visible instead of silently losing changes');
+assert(/data-import-trigger/.test(measurements) && /clearview-measurements/.test(measurements) && /Backup restored/.test(measurements), 'measurement backup can be exported and restored');
+assert(/field\.addEventListener\('input'/.test(measurements), 'measurement dimensions and quantities recalculate during typing');
+assert(/LIMIT \? OFFSET \?/.test(jobsApi) && /totalPages/.test(jobsApi) && /data-page-next/.test(jobList), 'job history has API and UI pagination');
+assert(/LIMIT \? OFFSET \?/.test(quoteApi) && /totalPages/.test(quoteApi) && /data-page-next/.test(quoteList), 'quote history has API and UI pagination');
+assert(/LIMIT \? OFFSET \?/.test(tasksApi) && /totalPages/.test(tasksApi) && /data-page-next/.test(followUp), 'follow-up history has API and UI pagination');
+assert(/action="\/ask\/api\/chat" method="post"/.test(askPage), 'Ask composer declares a non-GET native submit route');
+assert(/image\/heic,image\/heif/.test(askPage) && /createImageBitmap\(file\)/.test(askPage) && /cannot decode that HEIC\/HEIF/.test(askPage), 'Ask photo picker accepts supported mobile formats and explains decoder limits');
 
 // Login hardening should compare fixed-size digests rather than branch on
 // password length. Keep the security rationale aligned with the implementation.

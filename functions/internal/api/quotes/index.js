@@ -21,9 +21,13 @@ async function ensureBuildPlanSchema(db) {
 
 export async function onRequestGet(context) {
   const { env } = context;
+  const url = new URL(context.request.url);
+  const page = Math.max(1, Number.parseInt(url.searchParams.get('page') || '1', 10) || 1);
+  const pageSize = 200;
+  const offset = (page - 1) * pageSize;
   await ensureInvoiceSchema(env.QUOTES_DB);
   await ensureBuildPlanSchema(env.QUOTES_DB);
-  const { results } = await env.QUOTES_DB.prepare(
+  const [{ results }, countRow] = await Promise.all([env.QUOTES_DB.prepare(
     `SELECT q.id, q.created_at, q.status, q.customer_name, q.customer_city, q.total_cents, q.signature_method,
             i.id AS invoice_id, i.invoice_number, i.status AS invoice_status, i.sent_at AS invoice_sent_at,
             bp.state AS build_plan_state, bp.version AS build_plan_version, bp.approved_at AS build_plan_approved_at,
@@ -31,15 +35,15 @@ export async function onRequestGet(context) {
      FROM quotes q
      LEFT JOIN invoices i ON i.quote_id = q.id
      LEFT JOIN quote_build_plans bp ON bp.quote_id = q.id
-     ORDER BY q.created_at DESC LIMIT 200`,
-  ).all();
+     ORDER BY q.created_at DESC LIMIT ? OFFSET ?`,
+  ).bind(pageSize, offset).all(), env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM quotes`).first()]);
   // Stale = the quote's current items differ from the snapshot the plan was
   // saved against. Uses the same sourceSnapshot() as the approval, signing
   // and job gates so the list badge can never disagree with them.
   const { results: itemRows } = await env.QUOTES_DB.prepare(
-    `SELECT * FROM quote_items WHERE quote_id IN (SELECT id FROM quotes ORDER BY created_at DESC LIMIT 200)
+    `SELECT * FROM quote_items WHERE quote_id IN (SELECT id FROM quotes ORDER BY created_at DESC LIMIT ? OFFSET ?)
      ORDER BY quote_id, sort_order ASC, id ASC`,
-  ).all();
+  ).bind(pageSize, offset).all();
   const itemsByQuote = new Map();
   for (const item of itemRows || []) {
     if (!itemsByQuote.has(item.quote_id)) itemsByQuote.set(item.quote_id, []);
@@ -62,7 +66,8 @@ export async function onRequestGet(context) {
       build_plan_stale: stale,
     };
   });
-  return json({ quotes });
+  const total = Number(countRow?.total || 0);
+  return json({ quotes, page, pageSize, total, totalPages: Math.ceil(total / pageSize) });
 }
 
 export async function onRequestPost(context) {

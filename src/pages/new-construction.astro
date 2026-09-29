@@ -19,23 +19,23 @@ const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp
 const sequence = [
   {
     name: 'Send the schedule',
-    text: 'Plan set or a window schedule, whichever you have. We confirm opening sizes, styles, and quantities against it before quoting anything.',
+    text: 'Send the plan set or window schedule. We verify sizes, styles, and quantities before quoting.',
   },
   {
     name: 'Written quote and lead time',
-    text: 'One number for the whole opening count, with the manufacturer lead time attached — so you can put a real date on your own schedule, not a placeholder.',
+    text: 'Get one written price for the job and the manufacturer lead time for scheduling.',
   },
   {
     name: 'Order placed, framing checked',
-    text: 'Units are ordered to the schedule. Before your set date, we confirm the openings are framed to the sizes we quoted — a framing change after ordering is the single most common cause of a delay.',
+    text: 'Before the set date, we confirm the rough openings match the quoted sizes. Changes after ordering can delay the job.',
   },
   {
     name: 'Set day, on your sequence',
-    text: 'We set once the shell is sheathed and wrapped, ahead of siding or stucco. Shimmed plumb and square, sill pan flashed first, fins taped into the weather barrier in lap order.',
+    text: 'After sheathing and wrap, we set and flash each window before siding or stucco.',
   },
   {
     name: 'Walk and sign-off',
-    text: 'We walk every opening with your super or PM, note anything that needs a callback, and hand the elevation back ready for the next trade.',
+    text: 'We review each opening with your super or PM and hand the elevation back ready for the next trade.',
   },
 ];
 
@@ -136,24 +136,20 @@ const projectInquiryMailto = site.email
         <p class="rule-label">How we work</p>
         <h2>From schedule to set day.</h2>
         <p>
-          {site.legalName} confirms the schedule, measures every opening, orders the
-          materials, and sets the windows to the build sequence.
+          We verify the schedule, confirm each opening, order the windows, and install to your build sequence.
         </p>
         <p>
-          On a new-construction job, a missed installation date can hold up the trades scheduled
-          after it, such as siding. If your schedule changes, let us know as soon
-          as possible so the installation date can be coordinated and any constraint communicated.
+          Schedule changes can delay siding and other trades. Let us know early so we can confirm a workable set date.
         </p>
       </article>
       <article>
         <p class="rule-label">The business behind it</p>
         <p>
-          Clearview Windows is operated by {site.legalName}, a registered Washington LLC
-          (UBI {site.ubiNumber}), holding WA L&amp;I contractor registration {site.lniNumber}.
-          Verify it yourself at the{' '}
+          {site.legalName} is a Washington-registered LLC (UBI {site.ubiNumber}) and WA L&amp;I contractor
+          (registration {site.lniNumber}).{' '}
           <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
-            L&amp;I contractor lookup
-          </a> — you should do that with anyone you let near your walls.
+            Verify our registration
+          </a>.
         </p>
       </article>
     </div>
@@ -165,15 +161,10 @@ const projectInquiryMailto = site.email
         <p class="rule-label">What we need from you</p>
         <h2>The window schedule, or the plan set.</h2>
         <p>
-          Either one works. A window schedule gives us opening sizes, styles, and quantities in
-          one pass; a full plan set lets us pull that ourselves and flag anything ambiguous before
-          it becomes a change order. Either way we confirm sizes against the schedule and price
-          the whole job as one number, not a per-opening guess.
+          Either works. We confirm sizes, styles, and quantities, flag unclear details, and quote the full job—not a per-window guess.
         </p>
         <p>
-          If the schedule calls out egress sizing for bedrooms, tempered glass at doors and wet
-          locations, or a specific U-factor for Washington's energy code path, tell us — we order
-          to what the schedule and the code official require, not a default spec.
+          Include any required bedroom egress, tempered glass, or U-factor specifications. We order to the plans and code requirements, not a default spec.
         </p>
       </article>
       <article>
@@ -197,28 +188,19 @@ const projectInquiryMailto = site.email
       <p class="rule-label">The part that decides whether it leaks</p>
       <h2>Rough opening and flashing expectations.</h2>
       <p class="lede">
-        A set window looks the same from the street whether or not it was flashed in the right
-        sequence, and whether or not the rough opening was actually square. It does not stay that
-        way. Here is what we need at the opening, and the order we flash it in, every time.
+        Correct opening prep and flashing protect the assembly. Here are the rough-opening requirements and installation sequence.
       </p>
       <div class="ro-notes">
         <article>
           <h3>Opening tolerance</h3>
           <p>
-            We work from the manufacturer's rough-opening spec for the exact unit ordered —
-            typically the frame size plus a shim gap on each side, but it varies by line and we
-            confirm the number per order rather than assume a round figure. What we ask of framing
-            is tighter: no more than about 1/4&Prime; out of square corner-to-corner. Past that, a
-            unit can still be shimmed plumb, but it takes longer and the trim reveal shows it.
+            Follow the ordered unit's rough-opening spec; it varies by product. Keep openings within 1/4&Prime; of square corner-to-corner for a clean install and trim reveal.
           </p>
         </article>
         <article>
           <h3>Sequence at the wall</h3>
           <p>
-            Sheathed and wrapped before we show up — housewrap or another WRB lapped correctly at
-            the seams, not stapled loose and left for us to fix. We do not set into an opening
-            that is still bare OSB with no barrier; that is a callback waiting to happen for
-            everyone on the job.
+            Sheathing and housewrap (or another weather-resistive barrier) must be installed and properly lapped before we set. We do not install into bare, unwrapped openings.
           </p>
         </article>
       </div>
@@ -243,9 +225,7 @@ const projectInquiryMailto = site.email
       <p class="rule-label">Jobsite coordination</p>
       <h2>What has to be true before we set a date.</h2>
       <p class="lede">
-        Most delays on a new-construction job are not about the window — they are about the
-        opening not being ready for it, or a trade sequence nobody told us changed. This is what
-        we ask for so your set date holds.
+        These jobsite conditions help keep the set date on track:
       </p>
       <ul class="plain-list">
         <li>Openings framed to the sizes on the schedule we quoted — not "close enough"</li>
@@ -276,9 +256,7 @@ const projectInquiryMailto = site.email
         </article>
       </div>
       <p class="fine-print">
-        Anything outside this split — interior or exterior trim, a rot repair found mid-set, an
-        opening that does not match the schedule — gets called out before we do it, not billed
-        after.
+        We flag out-of-scope work or openings that differ from the schedule before proceeding.
       </p>
     </div>
   </section>
@@ -289,9 +267,7 @@ const projectInquiryMailto = site.email
         <p class="rule-label">From a framed job</p>
         <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
         <p class="lede">
-          Nailing fins taped into the weather barrier, sill flashed, unit plumb. This is what we
-          hand back to the builder. We have one of these jobs photographed so far — more go up as
-          each build finishes.
+          Windows set plumb, sill flashed, and nailing fins integrated with the weather barrier—ready for the next trade.
         </p>
         <p class="section-link"><a href="/gallery">More of the work</a></p>
       </div>
@@ -313,24 +289,20 @@ const projectInquiryMailto = site.email
       <p class="rule-label">Start a project</p>
       <h2>Send the plans or the schedule. We take it from there.</h2>
       <p>
-        Two ways to start, both land with us directly:
+        Send the plans or use the builder estimate form:
       </p>
       <ol class="steps">
         <li>
-          <strong>Email the plan set or window schedule.</strong> Attach whatever you have —
-          a full PDF plan set, a window schedule pulled from it, or a photo of a hand-marked
-          elevation. <a href={projectInquiryMailto}>{site.email}</a> opens with a template for
-          the address, opening count, and target date filled in.
+          <strong>Email the plans or schedule.</strong> A marked-up elevation works too.
+          <a href={projectInquiryMailto}>{site.email}</a> opens with the project details we need.
         </li>
         <li>
-          <strong>Or start with the estimate form.</strong> Pick "Builder or GC" and describe the
-          job in the notes — city, rough opening count, and target set date is enough to get a
-          callback going. <a href="/estimate?role=builder">Open the builder estimate form</a>.
+          <strong>Prefer the form?</strong> Choose "Builder or GC" and include the city, opening count, and target date.
+          <a href="/estimate?role=builder">Open the builder estimate form</a>.
         </li>
       </ol>
       <p class="fine-print">
-        Either way you get a call back, usually the same day, and a written quote with a lead time
-        attached before anything is ordered.
+        We’ll follow up with a written quote and lead time before ordering.
       </p>
     </div>
   </section>

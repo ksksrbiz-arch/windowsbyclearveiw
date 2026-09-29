@@ -6,7 +6,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     <div>
       <p class="kicker">Field tool</p>
       <h1>Window measurements</h1>
-      <p class="lede">Capture the opening schedule while you are at the house. This worksheet stays on the device until you export or clear it.</p>
+      <p class="lede">Capture the opening schedule while you are at the house. This worksheet stays in this browser on this device until you export it.</p>
     </div>
     <div class="head-actions">
       <a class="btn btn-ghost" href="/internal/tools">All tools</a>
@@ -59,6 +59,8 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       <p class="muted">Once the schedule is complete, export it or hand the device to the quote builder. The quote workflow can then turn each opening into editable line items.</p>
       <div class="workflow-actions">
         <button class="btn btn-primary" type="button" data-export>Export measurements</button>
+        <button class="btn btn-ghost" type="button" data-import-trigger>Restore worksheet</button>
+        <input type="file" accept="application/json,.json" data-import hidden />
         <a class="btn btn-ghost" href="/internal/quotes/new">Open quote builder</a>
         <button class="text-button" type="button" data-clear>Clear worksheet</button>
       </div>
@@ -126,8 +128,14 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       data.jobName = jobName.value;
       data.jobAddress = jobAddress.value;
       data.jobNotes = jobNotes.value;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      saveState.textContent = message;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        saveState.textContent = message;
+        saveState.removeAttribute('data-save-error');
+      } catch {
+        saveState.textContent = 'Not saved — export this worksheet now';
+        saveState.dataset.saveError = 'true';
+      }
     }
 
     const esc = (v: unknown) => { const d = document.createElement('div'); d.textContent = String(v ?? ''); return d.innerHTML; };
@@ -160,6 +168,30 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
           <td data-label="Remove"><button type="button" class="remove-button" data-remove aria-label="Remove opening ${index + 1}">×</button></td>
         `;
         row.querySelectorAll('[data-field]').forEach((field) => {
+          // Re-render on every edit so the area summary responds while dimensions are typed.
+          field.addEventListener('input', () => {
+            const key = (field as HTMLInputElement | HTMLSelectElement).dataset.field as keyof Opening;
+            if (key !== 'width' && key !== 'height' && key !== 'quantity') return;
+            const input = field as HTMLInputElement;
+            const value = input.value;
+            if (key === 'width' || key === 'height') opening[key] = value === '' ? '' : Math.max(0, num(value));
+            else opening.quantity = Math.max(1, Math.floor(num(value) || 1));
+            const rowArea = num(opening.width) && num(opening.height)
+              ? (num(opening.width) * num(opening.height) / 144) * opening.quantity
+              : 0;
+            const areaCell = row.querySelector('.area-cell');
+            if (areaCell) areaCell.textContent = `${fmt(rowArea)} sq ft`;
+            let totalUnits = 0;
+            let totalArea = 0;
+            data.openings.forEach((item) => {
+              const itemQty = Math.max(1, Math.floor(num(item.quantity) || 1));
+              totalUnits += itemQty;
+              if (num(item.width) && num(item.height)) totalArea += (num(item.width) * num(item.height) / 144) * itemQty;
+            });
+            units.textContent = String(totalUnits);
+            area.textContent = `${fmt(totalArea)} sq ft`;
+            save();
+          });
           field.addEventListener('change', () => {
             const key = (field as HTMLInputElement | HTMLSelectElement).dataset.field as keyof Opening;
             const value = (field as HTMLInputElement).value;
@@ -206,7 +238,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     root.querySelector('[data-print]')?.addEventListener('click', () => window.print());
     root.querySelector('[data-export]')?.addEventListener('click', () => {
       save('Exported');
-      const payload = JSON.stringify({ exportedAt: new Date().toISOString(), ...data }, null, 2);
+      const payload = JSON.stringify({ format: 'clearview-measurements', version: 1, exportedAt: new Date().toISOString(), ...data }, null, 2);
       const blob = new Blob([payload], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -214,7 +246,33 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       anchor.href = url;
       anchor.download = `${safeName}-measurements.json`;
       anchor.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    root.querySelector('[data-import-trigger]')?.addEventListener('click', () => root.querySelector<HTMLInputElement>('[data-import]')?.click());
+    root.querySelector<HTMLInputElement>('[data-import]')?.addEventListener('change', async (event) => {
+      const input = event.currentTarget;
+      if (!(input instanceof HTMLInputElement) || !input.files?.[0]) return;
+      try {
+        const imported = JSON.parse(await input.files[0].text()) as Partial<Worksheet> & { format?: string; version?: number };
+        if (imported.format !== 'clearview-measurements' || imported.version !== 1 || !Array.isArray(imported.openings)) throw new Error('Choose a Clearview measurements backup created by Export measurements.');
+        data = {
+          jobName: typeof imported.jobName === 'string' ? imported.jobName.slice(0, 160) : '',
+          jobAddress: typeof imported.jobAddress === 'string' ? imported.jobAddress.slice(0, 260) : '',
+          jobNotes: typeof imported.jobNotes === 'string' ? imported.jobNotes.slice(0, 8000) : '',
+          openings: imported.openings.slice(0, 500).map((opening) => ({
+            room: typeof opening?.room === 'string' ? opening.room.slice(0, 100) : '',
+            type: typeof opening?.type === 'string' && TYPES.includes(opening.type) ? opening.type : 'Double-hung',
+            width: typeof opening?.width === 'number' && Number.isFinite(opening.width) ? Math.max(0, opening.width) : '',
+            height: typeof opening?.height === 'number' && Number.isFinite(opening.height) ? Math.max(0, opening.height) : '',
+            quantity: typeof opening?.quantity === 'number' && Number.isFinite(opening.quantity) ? Math.max(1, Math.floor(opening.quantity)) : 1,
+            notes: typeof opening?.notes === 'string' ? opening.notes.slice(0, 300) : '',
+          })),
+        };
+        jobName.value = data.jobName; jobAddress.value = data.jobAddress; jobNotes.value = data.jobNotes;
+        render(); save('Backup restored');
+      } catch (error) {
+        saveState.textContent = error instanceof Error ? error.message : 'Could not restore this worksheet.';
+      } finally { input.value = ''; }
     });
     root.querySelector('[data-clear]')?.addEventListener('click', () => {
       if (!window.confirm('Clear the measurement worksheet from this device?')) return;
@@ -222,7 +280,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       jobName.value = '';
       jobAddress.value = '';
       jobNotes.value = '';
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { saveState.textContent = 'Could not clear browser storage'; return; }
       render();
       saveState.textContent = 'Worksheet cleared';
     });

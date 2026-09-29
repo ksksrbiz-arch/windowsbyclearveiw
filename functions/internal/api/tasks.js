@@ -25,6 +25,9 @@ export async function onRequestGet(context) {
   await ensureSchema(env.QUOTES_DB);
   const url = new URL(context.request.url);
   const leadId = url.searchParams.get('leadId');
+  const page = Math.max(1, Number.parseInt(url.searchParams.get('page') || '1', 10) || 1);
+  const limit = 200;
+  const offset = (page - 1) * limit;
   const where = leadId ? 'WHERE t.lead_id = ?' : '';
   const statement = env.QUOTES_DB.prepare(`
     SELECT t.*, l.name AS lead_name, l.phone AS lead_phone, l.email AS lead_email, l.city AS lead_city
@@ -32,10 +35,13 @@ export async function onRequestGet(context) {
     LEFT JOIN leads l ON l.id = t.lead_id
     ${where}
     ORDER BY CASE WHEN t.status = 'open' THEN 0 ELSE 1 END, COALESCE(t.due_at, '9999-12-31T23:59:59Z') ASC, t.created_at DESC
-    LIMIT 200
+    LIMIT ? OFFSET ?
   `);
-  const result = leadId ? await statement.bind(leadId).all() : await statement.all();
-  return json({ tasks: result.results || [] });
+  const result = leadId ? await statement.bind(leadId, limit, offset).all() : await statement.bind(limit, offset).all();
+  const countQuery = env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM follow_up_tasks t ${where}`);
+  const count = leadId ? await countQuery.bind(leadId).first() : await countQuery.first();
+  const total = Number(count?.total || 0);
+  return json({ tasks: result.results || [], page, pageSize: limit, total, totalPages: Math.ceil(total / limit) });
 }
 
 export async function onRequestPost(context) {

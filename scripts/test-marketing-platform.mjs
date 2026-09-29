@@ -99,6 +99,8 @@ for (const [route, sources] of literalHrefs) {
   if (routeFiles.has(route) || matchesDynamic(route)) continue;
   const asset = path.join(publicRoot, route.replace(/^\//, ''));
   if (fs.existsSync(asset)) continue;
+  const endpoint = path.join(root, 'functions', `${route.slice(1)}.js`);
+  if (fs.existsSync(endpoint)) continue;
   failures.push(`Broken internal route ${route} referenced by ${sources.slice(0, 3).join(', ')}`);
 }
 
