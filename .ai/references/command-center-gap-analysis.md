@@ -8,7 +8,7 @@ Most published numbers come from vendors or agencies selling the fix. Treat them
 
 ## Production reality check (D1, read-only, 2026-09-28)
 
-2 quotes (1 finalized), 1 job (cancelled test), 0 leads. **The bottleneck is volume, not tooling.** No Command Center feature beats getting more real leads, answering them fast, and closing them. Under the Cathedral Principle (Foundation → Revenue → Systems → Scale), everything below the line in the table is Systems/Scale and should wait for sustained job volume.
+2 quotes (1 finalized), 1 job (cancelled test), 0 leads. Re-checked 2026-09-29: still 0 leads ever; the live `leads` columns match `functions/api/estimate.js`, and quotes write through the same binding, so the form has simply received no submissions. **The bottleneck is volume, not tooling.** No Command Center feature beats getting more real leads, answering them fast, and closing them. Under the Cathedral Principle (Foundation → Revenue → Systems → Scale), everything below the line in the table is Systems/Scale and should wait for sustained job volume.
 
 ## What Clearview already has that the big platforms do not
 
@@ -20,7 +20,7 @@ Most published numbers come from vendors or agencies selling the fix. Treat them
 | # | Gap | What platforms do | Evidence | Clearview today | Build size |
 |---|-----|-------------------|----------|-----------------|------------|
 | 1 | **Speed-to-lead alert** (built 2026-09-28) | Instant push/SMS to the owner and an instant auto-reply | Responding within 5 min makes contact ~100× and qualification ~21× more likely than at 30 min (Oldroyd/MIT). Vendor claim: 62% conversion at 2 min vs 28% at 42 min (ServiceTitan) | Email to Mark plus a customer receipt email. No phone push | S: push notification on lead insert |
-| 2 | **Quote follow-up cadence** | Automated reminders on quotes that go quiet | Vendor claim: +25% quote approval (Jobber). Case studies show 10–20 point close-rate lifts | Manual `follow_up_tasks`. Nothing fires on its own | S–M: cron creates due tasks at day 2/7/14 for unsigned quotes. Keep reminders to Mark; don't auto-message customers until reviewed |
+| 2 | **Quote follow-up cadence** (built 2026-09-29) | Automated reminders on quotes that go quiet | Vendor claim: +25% quote approval (Jobber). Case studies show 10–20 point close-rate lifts | Manual `follow_up_tasks`. Nothing fires on its own | S–M: cron creates due tasks at day 2/7/14 for unsigned quotes. Keep reminders to Mark; don't auto-message customers until reviewed |
 | 3 | **Post-job review request** (built 2026-09-28) | Automatic text/email after completion | 83% of consumers asked for a review left one (BrightLocal 2026) | Closeout exists but asks for nothing. GBP has 1 review | S: button on finalized closeout that sends a Google review link. Never pre-writes review text |
 | 4 | **Customer-facing quote link + deposit** | Customer views, e-signs and pays a deposit online | Window deposits are commonly 20–50% before the manufacturer order (industry forums and installer guides) | Signing happens on Mark's device only. Deposits and payments are recorded by hand | M–L: signed public token page, Stripe Checkout for the deposit, webhook into `job_payments`. Stripe connector is not authorized in this session |
 | 5 | Online invoice payment | Pay-by-link on every invoice | Vendor claim: "paid 4× faster" (Jobber) | Invoices are sent. Payment is recorded manually | M: reuses #4's Stripe work |
