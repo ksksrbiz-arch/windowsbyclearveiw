@@ -1,6 +1,6 @@
 ---
 title: Window replacement cost in Washington
-description: What drives the price of replacement windows in Washington — method, material, glass, and access — plus honest ranges and what a measure is for.
+description: What drives the price of replacement windows in Washington — scope, material, glass, and access — plus honest ranges and what a measure is for.
 kicker: Planning the budget
 topic: Cost
 published: true
@@ -37,7 +37,7 @@ Permits, if the city requires them for the scope, sit on top of that.
 
 That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once scope and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and openings that need extra work push well past a "typical opening" number built around a standard vinyl window in a sound opening.
 
-Treat all of it as a starting point. Your openings, your trim, and your method will move the number — that is what a measure is for.
+Treat all of it as a starting point. Your openings, your trim, and the work each opening needs will move the number — that is what a measure is for.
 
 ## How to think about value
 
@@ -63,11 +63,11 @@ The single biggest cause of "why is this quote double the other one" is not mark
 - **Haul-away and disposal.** Some bids quietly exclude it.
 - **Permits, if the scope needs one.** A lower bid that skips a required permit is not actually lower.
 
-Ask each bidder to write the method and glass spec per opening, not just a total. That is the only way two numbers become comparable.
+Ask each bidder to write the approach and glass spec per opening, not just a total. That is the only way two numbers become comparable.
 
 ## What an estimate from us includes
 
-- Method per opening
+- Approach per opening
 - Product and glass
 - Labor, haul-away, and basic finish
 - Lead time
