@@ -1,3 +1,5 @@
+import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -54,6 +56,7 @@ export function pacificDayRange(now = new Date()) {
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureTaskSchema(env.QUOTES_DB);
+  await syncQuoteFollowUps(env.QUOTES_DB).catch((error) => console.error('quote-follow-up-sync-failed', error));
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const now = new Date().toISOString();
   const today = pacificDayRange(new Date(now));
@@ -85,8 +88,10 @@ export async function onRequestGet(context) {
     `).all(),
     env.QUOTES_DB.prepare(`SELECT COALESCE(NULLIF(city, ''), 'City not provided') AS city, COUNT(*) AS count FROM leads GROUP BY city ORDER BY count DESC, city ASC LIMIT 6`).all(),
     env.QUOTES_DB.prepare(`
-      SELECT t.id, t.title, t.due_at, t.status, t.lead_id, l.name AS lead_name, l.phone AS lead_phone, l.city AS lead_city
-      FROM follow_up_tasks t LEFT JOIN leads l ON l.id = t.lead_id
+      SELECT t.id, t.title, t.due_at, t.status, t.lead_id, t.quote_id,
+             COALESCE(l.name, q.customer_name) AS lead_name, COALESCE(l.phone, q.customer_phone) AS lead_phone,
+             COALESCE(l.city, q.customer_city) AS lead_city
+      FROM follow_up_tasks t LEFT JOIN leads l ON l.id = t.lead_id LEFT JOIN quotes q ON q.id = t.quote_id
       WHERE t.status = 'open'
       ORDER BY CASE WHEN t.due_at IS NULL THEN 1 ELSE 0 END, t.due_at ASC, t.created_at ASC
       LIMIT 8

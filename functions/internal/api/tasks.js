@@ -1,3 +1,5 @@
+import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } });
 }
@@ -23,6 +25,8 @@ async function ensureSchema(db) {
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureSchema(env.QUOTES_DB);
+  // Quote reminders are created on read; a failure must never hide Mark's queue.
+  await syncQuoteFollowUps(env.QUOTES_DB).catch((error) => console.error('quote-follow-up-sync-failed', error));
   const url = new URL(context.request.url);
   const leadId = url.searchParams.get('leadId');
   const page = Math.max(1, Number.parseInt(url.searchParams.get('page') || '1', 10) || 1);
@@ -30,9 +34,11 @@ export async function onRequestGet(context) {
   const offset = (page - 1) * limit;
   const where = leadId ? 'WHERE t.lead_id = ?' : '';
   const statement = env.QUOTES_DB.prepare(`
-    SELECT t.*, l.name AS lead_name, l.phone AS lead_phone, l.email AS lead_email, l.city AS lead_city
+    SELECT t.*, COALESCE(l.name, q.customer_name) AS lead_name, COALESCE(l.phone, q.customer_phone) AS lead_phone,
+           COALESCE(l.email, q.customer_email) AS lead_email, COALESCE(l.city, q.customer_city) AS lead_city
     FROM follow_up_tasks t
     LEFT JOIN leads l ON l.id = t.lead_id
+    LEFT JOIN quotes q ON q.id = t.quote_id
     ${where}
     ORDER BY CASE WHEN t.status = 'open' THEN 0 ELSE 1 END, COALESCE(t.due_at, '9999-12-31T23:59:59Z') ASC, t.created_at DESC
     LIMIT ? OFFSET ?

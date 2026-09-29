@@ -33,6 +33,7 @@ jobs:
       - run: npm run test:estimate
       - run: npm run test:quote-to-job
       - run: npm run test:lead-links
+      - run: npm run test:quote-follow-ups
       - run: npm run test:review-request
       - run: npm run eval:build-plan
       - run: npm run build

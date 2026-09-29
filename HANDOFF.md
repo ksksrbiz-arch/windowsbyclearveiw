@@ -256,6 +256,14 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Traced attribution:** *Which sources bring paying work* on `/internal/analytics` credits requests, quotes, signed $ and collected $ (quote → job → `job_payments`) to the linked inquiry's first-touch source, and shows how many quotes in the window are still unlinked. Quotes made before this change need linking from their quote page to count.
 - Tests: `scripts/test-analytics-pipeline.mjs` (`npm run test:analytics`) and `scripts/test-lead-links.mjs` (`npm run test:lead-links`, in CI), both on real SQLite via `scripts/_lib/d1-sqlite.mjs`.
 
+### 2026-09-29 — Quote follow-up cadence
+
+- Draft quotes now get an automatic reminder in Mark's queue at **day 2, 7 and 14** after they were written (`functions/internal/_lib/quote-follow-ups.mjs`). Reminders are `follow_up_tasks` rows with `quote_id` + `cadence_step` (`created_by = 'system'`), guarded by a unique index so a step is created at most once. At most one open reminder per quote; an old draft gets one reminder (latest due step), not three. Signing or deleting the quote closes its open reminders.
+- No cron: `syncQuoteFollowUps()` runs when `/internal/api/tasks` or `/internal/api/dashboard` is read (Today, Follow-up, Command Center), fail-soft. It **never contacts the customer**; the reminder text says so.
+- Reminders show the quote's customer name/phone even when the quote isn't linked to a lead, with a *Quote* link on Today and Follow-up.
+- Tests: `npm run test:quote-follow-ups` (real SQLite, in CI).
+- **Volume check (production D1, read-only):** 0 leads ever, 2 quotes, 0 tasks. The `leads` schema matches the insert, so the form has had no submissions. More pipeline tooling will not change revenue until real requests arrive; the next lever is traffic/outreach, not code.
+
 ## Outstanding
 
 | | |
