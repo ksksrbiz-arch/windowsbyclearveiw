@@ -84,29 +84,35 @@ export async function onRequestPost(context) {
   const now = new Date().toISOString();
   const userAgent = String(request.headers.get('user-agent') || '').slice(0, 300) || null;
   const tokenHash = resolved.row.token_hash;
-  // One D1 batch = one transaction. The quote only finalizes if this exact
-  // link is still live at write time (not revoked/replaced/expired during the
-  // awaits above), and the link is only stamped if this request finalized the
-  // quote, so the signature and its link evidence always land together.
-  const [quoteResult, linkResult] = await db.batch([
+  // One D1 batch = one transaction, and the three statements together enforce
+  // "signature and link evidence land together or not at all":
+  //   1. stamp this link, only while it is live and the quote is still a draft;
+  //   2. finalize the quote, only if step 1 stamped this link in this request;
+  //   3. if the quote did not finalize for any reason, clear the stamp again.
+  // A link revoked/replaced/expired during the awaits above therefore cannot
+  // finalize the quote, and a zero-row step never leaves half a signature.
+  const [linkResult, quoteResult] = await db.batch([
+    db.prepare(
+      `UPDATE quote_sign_links SET signed_at = ?, signer_user_agent = ?
+       WHERE token_hash = ? AND quote_id = ? AND revoked_at IS NULL AND signed_at IS NULL AND expires_at > ?
+         AND EXISTS (SELECT 1 FROM quotes WHERE id = ? AND status = 'draft')`,
+    ).bind(now, userAgent, tokenHash, quoteId, now, quoteId),
     db.prepare(
       `UPDATE quotes SET signature_method = 'digital', signature_svg = ?, signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ?
        WHERE id = ? AND status = 'draft'
-         AND EXISTS (SELECT 1 FROM quote_sign_links
-                     WHERE token_hash = ? AND quote_id = ? AND revoked_at IS NULL AND signed_at IS NULL AND expires_at > ?)`,
+         AND EXISTS (SELECT 1 FROM quote_sign_links WHERE token_hash = ? AND quote_id = ? AND signed_at = ?)`,
     ).bind(signature.svg, name, now, now, quoteId, tokenHash, quoteId, now),
     db.prepare(
-      `UPDATE quote_sign_links SET signed_at = ?, signer_user_agent = ?
-       WHERE token_hash = ? AND signed_at IS NULL
-         AND EXISTS (SELECT 1 FROM quotes WHERE id = ? AND status = 'finalized' AND signed_at = ? AND signature_name = ?)`,
-    ).bind(now, userAgent, tokenHash, quoteId, now, name),
+      `UPDATE quote_sign_links SET signed_at = NULL, signer_user_agent = NULL
+       WHERE token_hash = ? AND signed_at = ?
+         AND NOT EXISTS (SELECT 1 FROM quotes WHERE id = ? AND status = 'finalized' AND signed_at = ?)`,
+    ).bind(tokenHash, now, quoteId, now),
   ]);
-  if (!quoteResult?.meta?.changes) {
+  if (!linkResult?.meta?.changes || !quoteResult?.meta?.changes) {
     const still = await resolveLink(db, body?.t);
     if (still.error) return json({ error: still.error }, still.status);
     return json({ error: 'This quote has already been signed.' }, 409);
   }
-  if (!linkResult?.meta?.changes) console.error('quote-sign-link-stamp-missing', quoteId);
 
   // The signature is saved. An invoice hiccup must not tell the customer it failed:
   // Mark's quote and invoice pages re-run ensureInvoiceForQuote(finalize) on open.

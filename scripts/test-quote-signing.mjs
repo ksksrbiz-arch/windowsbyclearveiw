@@ -205,6 +205,21 @@ const submit = (env, body) => call(sign.onRequest, env, { method: 'POST', path: 
   assert.equal(db.raw.prepare(`SELECT status FROM quotes WHERE id = ?`).get(id).status, 'draft');
   assert.equal(db.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 0);
 
+  // Invariant: if the quote update affects zero rows after the link was stamped,
+  // the same transaction clears the stamp, so neither half of the signature lands.
+  const env3 = freshEnv();
+  const id3 = await approvedQuote(env3);
+  const t3 = tokenOf((await call(share.onRequestPost, env3, { method: 'POST', body: { quoteId: id3 } })).body.url);
+  const db3 = env3.QUOTES_DB;
+  const orig3 = db3.prepare;
+  db3.prepare = (sql) => orig3(/^\s*UPDATE quotes SET signature_method = 'digital', signature_svg/.test(sql) ? sql.replace('WHERE id = ?', 'WHERE 0 AND id = ?') : sql);
+  const zero = await submit(env3, { t: t3, name: 'Pat Doe', strokes, consent: true });
+  db3.prepare = orig3;
+  assert.notEqual(zero.status, 200, 'a zero-row quote update is reported as a failure');
+  assert.equal(db3.raw.prepare(`SELECT status FROM quotes WHERE id = ?`).get(id3).status, 'draft', 'the quote remains a draft');
+  assert.equal(db3.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 0, 'the link stamp is rolled back in the same transaction');
+  assert.equal((await submit(env3, { t: t3, name: 'Pat Doe', strokes, consent: true })).status, 200, 'the customer can simply sign again');
+
   // Invoice failure after the signature is saved: the customer still sees success,
   // quote and link evidence are both recorded, and the invoice is finalized later.
   const env2 = freshEnv();
