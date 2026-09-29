@@ -429,6 +429,9 @@ const model = {
   }
 
   .est-block {
+    /* A fieldset defaults to min-width: min-content, which pushed the calculator
+       32px wider than a 320px phone. */
+    min-width: 0;
     border: 1px solid var(--line);
     margin: 0;
     padding: var(--space-m);
@@ -507,6 +510,11 @@ const model = {
   .counter.is-chosen {
     border-color: var(--accent);
     background: var(--accent-wash);
+  }
+
+  .counter-copy {
+    min-width: 0; /* let the label shrink and wrap so the +/- controls never push past a 320px screen */
+    overflow-wrap: anywhere;
   }
 
   .counter-copy strong {

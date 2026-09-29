@@ -419,6 +419,9 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 .page-hero h1 {
   max-width: 16ch;
   color: inherit;
+  /* "accountability." at ~48px is wider than a 320px screen; break it rather than scroll sideways. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .page-hero .kicker {
@@ -662,6 +665,10 @@ input:focus, textarea:focus, select:focus {
   border-radius: 0;
   padding: 1.15rem 0 1.15rem 3rem;
   counter-increment: step;
+  /* A grid item won't shrink below its longest word; without these a long
+     email address in a step pushed /new-construction 19px wider than a phone. */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .steps li::before {

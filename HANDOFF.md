@@ -290,6 +290,12 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - Guard: `npm run test:seo` (after `npm run build`, in CI) checks missing/duplicate/over-length titles and descriptions, canonical == own URL, sitemap == canonical set, and `_redirects` loops. Four older pages exceed the limits and are listed as known exceptions to fix later.
 - After merge (Keith): Search Console URL Inspection → Request Indexing for the changed pages; re-check clicks/impressions/CTR/position at 14 and 28 days.
 
+### 2026-09-29 — Bug sweep (forms, mobile layout)
+
+- **Estimate form phone validation was silently off.** The phone input's `pattern` used `[\s.-]`; an unescaped `-` in a character class is a SyntaxError under the `v` flag browsers use for `pattern`, so the browser skipped the check (`abc` and `555` passed client-side; only the server caught them). Escaped to `[\s.\-]`. Guard: `npm run test:form-patterns` (after `npm run build`, in CI) compiles every built `pattern` with the `v` flag.
+- **Horizontal scroll on phones** (checked all 63 built pages at 320 and 375 px in Chromium): `/new-construction` (long email in a `.steps` item), the cost calculator at 320 px (fieldset and counter rows), `/about` at 320 px (a ~48 px headline word), and two Command Center pages (`/internal/analytics` grid, `/internal/ask-logs` header). All fixed with `min-width: 0` / wrapping; no page overflows at either width now. There is no CI check for this (needs a browser); rerun the sweep after big layout changes.
+- Also checked, no change needed: internal links (0 broken across the built site), console errors and failed requests on every public page, image alt text, duplicate ids, `_blank` links.
+
 ### 2026-09-29 — Ask price tool restored; production check
 
 - **`estimate_price` (Ask) was broken.** The tool declared `openings` ('1'/'2–5'…), `home_type`, `complexity`, but `estimatePrice()` needs `lines`, so every call errored. Production `ask_logs` shows it worked on 2026-08-28 (4 calls) and has not been called since: a later pricing refactor broke it silently. `functions/ask/_lib/pricing.mjs` now owns the tool declaration (`estimatePriceToolDeclaration()`, enums built from `PRICING`) and the adapter (`estimateFromToolArgs()`, returns a range plus a "planning range, not a quote" note and never names install methods). Bad or missing input returns an error with a hint, never a price. Covered by `npm run test:ask-pricing`.
