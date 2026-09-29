@@ -57,3 +57,23 @@ export async function sendLeadAlert(env, fetchImpl = fetch) {
     return { status: 'failed' };
   }
 }
+
+// Same channel, for other owner-only events (e.g. a customer signed a quote).
+// Callers must keep customer data out of title/body, as above.
+export async function sendOpsAlert(env, { title, body, click, tags = 'house' }, fetchImpl = fetch) {
+  const config = leadAlertConfig(env);
+  if (!config) return { status: 'unconfigured' };
+  const headers = { Title: title, Priority: 'high', Tags: tags, Click: click, 'content-type': 'text/plain; charset=utf-8' };
+  if (config.token) headers.Authorization = `Bearer ${config.token}`;
+  try {
+    const response = await fetchImpl(config.url, { method: 'POST', headers, body });
+    if (!response.ok) {
+      console.error('ops-alert-failed', response.status);
+      return { status: 'failed' };
+    }
+    return { status: 'sent' };
+  } catch (error) {
+    console.error('ops-alert-failed', error?.message || error);
+    return { status: 'failed' };
+  }
+}

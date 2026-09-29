@@ -16,6 +16,17 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
   </div>
   <p class="qv-error" data-delete-error hidden role="alert"></p>
   <p class="qv-error" data-job-error hidden role="alert"></p>
+  <section class="qv-share no-print" data-share-panel hidden aria-label="Customer signing link">
+    <div class="qv-share-head">
+      <p class="qv-lead-line" data-share-line></p>
+      <div class="qv-lead-actions" data-share-actions></div>
+    </div>
+    <div class="qv-share-link" data-share-link hidden>
+      <input type="text" readonly data-share-url aria-label="Signing link" />
+      <div class="qv-lead-actions" data-share-send></div>
+      <p class="qv-share-note">This link is shown once. Creating a new link replaces it.</p>
+    </div>
+  </section>
   <section class="qv-lead no-print" data-lead-panel hidden aria-label="Website inquiry">
     <p class="qv-lead-line" data-lead-line></p>
     <div class="qv-lead-actions" data-lead-actions></div>
@@ -218,6 +229,93 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       }
     }
 
+    // Customer signing link: the customer reviews and signs on their own phone.
+    async function loadShareLink(quoteId: string, created?: any) {
+      const panel = document.querySelector('[data-share-panel]');
+      const line = document.querySelector('[data-share-line]');
+      const actions = document.querySelector('[data-share-actions]');
+      const linkBox = document.querySelector('[data-share-link]');
+      const urlInput = document.querySelector('[data-share-url]');
+      const send = document.querySelector('[data-share-send]');
+      if (!(panel instanceof HTMLElement) || !(line instanceof HTMLElement) || !(actions instanceof HTMLElement)
+        || !(linkBox instanceof HTMLElement) || !(urlInput instanceof HTMLInputElement) || !(send instanceof HTMLElement)) return;
+      const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '');
+      const button = (label: string, onClick: () => void, primary = false) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = primary ? 'btn btn-primary' : 'btn btn-ghost';
+        b.textContent = label;
+        b.addEventListener('click', onClick);
+        return b;
+      };
+      const anchor = (label: string, href: string) => {
+        const a = document.createElement('a');
+        a.className = 'btn btn-ghost';
+        a.href = href;
+        a.textContent = label;
+        return a;
+      };
+      const request = async (method: 'POST' | 'DELETE') => {
+        actions.querySelectorAll('button').forEach((b) => { (b as HTMLButtonElement).disabled = true; });
+        try {
+          const r = await fetch(
+            method === 'POST' ? '/internal/api/quote-share' : `/internal/api/quote-share?quoteId=${encodeURIComponent(quoteId)}`,
+            method === 'POST'
+              ? { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ quoteId }) }
+              : { method },
+          );
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(data.error || 'Could not update the signing link.');
+          loadShareLink(quoteId, method === 'POST' ? data : undefined);
+        } catch (error) {
+          line.textContent = error instanceof Error ? error.message : 'Could not update the signing link.';
+          actions.querySelectorAll('button').forEach((b) => { (b as HTMLButtonElement).disabled = false; });
+        }
+      };
+      try {
+        const r = await fetch(`/internal/api/quote-share?quoteId=${encodeURIComponent(quoteId)}`);
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        const link = data.link || { state: 'none' };
+        actions.replaceChildren();
+        send.replaceChildren();
+        linkBox.hidden = true;
+        panel.hidden = false;
+        if (data.quoteStatus !== 'draft') {
+          line.textContent = link.state === 'signed'
+            ? `Signed by the customer from their link on ${fmt(link.signedAt)}.`
+            : 'Signed. Signing links are closed.';
+          return;
+        }
+        const states: Record<string, string> = {
+          none: 'No signing link yet. Send the customer a link to review and sign on their own phone.',
+          sent: `Signing link created ${fmt(link.createdAt)}. Not opened yet.`,
+          viewed: `Customer opened the link ${link.viewCount} time${link.viewCount === 1 ? '' : 's'}, last ${fmt(link.lastViewedAt)}. Not signed yet.`,
+          revoked: 'The last signing link was revoked.',
+          expired: `The last signing link expired ${fmt(link.expiresAt)}.`,
+        };
+        line.textContent = data.canCreate
+          ? states[link.state] || states.none
+          : `Approve the Build Plan before sending a signing link. ${data.blockedBy?.error || ''}`.trim();
+        if (data.canCreate) {
+          const live = link.state === 'sent' || link.state === 'viewed';
+          actions.append(button(live ? 'New link' : 'Create signing link', () => request('POST'), !live));
+          if (live) actions.append(button('Revoke', () => request('DELETE')));
+        }
+        if (created?.url) {
+          linkBox.hidden = false;
+          urlInput.value = created.url;
+          send.append(button('Copy link', async () => {
+            try { await navigator.clipboard.writeText(created.url); } catch { urlInput.select(); document.execCommand('copy'); }
+          }, true));
+          if (created.smsHref) send.append(anchor('Text it', created.smsHref));
+          if (created.mailHref) send.append(anchor('Email it', created.mailHref));
+        }
+      } catch {
+        panel.hidden = true;
+      }
+    }
+
     async function load() {
       const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id!)}`);
       if (!response.ok) {
@@ -266,6 +364,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       };
 
       loadLeadLink(quote.id);
+      loadShareLink(quote.id);
 
       set('[data-quote-id]', quote.id);
       set('[data-quote-date]', new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
@@ -576,6 +675,11 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 </script>
 
 <style>
+  .qv-share{margin:0 0 1rem;padding:.7rem .9rem;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--1)}
+  .qv-share-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
+  .qv-share-link{display:grid;gap:.5rem;margin-top:.6rem}
+  .qv-share-link input{font:inherit;padding:.55rem .7rem;border:1px solid var(--line);border-radius:var(--radius);width:100%;box-sizing:border-box}
+  .qv-share-note{margin:0;color:var(--ink-soft)}
   .qv-lead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 1rem;padding:.7rem .9rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--1)}
   .qv-lead-line{margin:0;min-width:0;overflow-wrap:anywhere}
   .qv-lead-actions{display:flex;flex-wrap:wrap;gap:.4rem}

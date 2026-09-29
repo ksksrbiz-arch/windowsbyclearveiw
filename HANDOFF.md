@@ -264,6 +264,15 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - Tests: `npm run test:quote-follow-ups` (real SQLite, in CI).
 - **Volume check (production D1, read-only):** 0 leads ever, 2 quotes, 0 tasks. The `leads` schema matches the insert, so the form has had no submissions. More pipeline tooling will not change revenue until real requests arrive; the next lever is traffic/outreach, not code.
 
+### 2026-09-29 — Customer quote signing links
+
+- Mark can send a customer a private link to review and e-sign a quote on their own phone (`/sign#<token>`). The panel on `/internal/quotes/view` creates the link (only for a draft with an approved, current Build Plan), shows sent / viewed N times / signed, and offers Copy, Text (`sms:` from Mark's phone) and Email (`mailto:`). Nothing is sent by the server.
+- Security (`functions/internal/_lib/quote-signing.mjs`): 256-bit token stored only as SHA-256; token in the URL fragment (never reaches servers, logs, GA4 or referrers), sent to the API in a header/body; one active link per quote; 30-day expiry; the public view is a field whitelist (no notes, phone, email, lead or ids). The customer submits **stroke coordinates only**; the server range-checks them and renders the SVG, because the internal quote page inserts `signature_svg` as HTML.
+- Signing (`functions/api/quote-sign.js`) requires explicit e-sign consent and a typed name, re-runs the approved-Build-Plan gate (now shared in `functions/internal/_lib/quote-gates.mjs`), refuses if the quote's `terms_version` differs from current terms, and finalizes with a conditional UPDATE so it can only happen once. The invoice is finalized, open quote reminders close on the next sync, and an optional ntfy push (`sendOpsAlert`) tells Mark. User-agent is kept as signing evidence; the privacy policy says so.
+- `VERIFY` (legal, unchanged): `src/data/contractTerms.ts` is not attorney-reviewed. Remote e-signing makes a lawyer's look at the terms and the right-to-cancel notice more important, not less.
+- Next on the gap list: deposits/online payment (needs the Stripe connector authorized).
+- Tests: `npm run test:quote-signing` (real SQLite, in CI).
+
 ## Outstanding
 
 | | |

@@ -5,7 +5,10 @@ const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), '
 
 const buildPlanApi = read('functions/internal/api/build-plan.js');
 const stateApi = read('functions/internal/api/build-plan-state.js');
-const quoteApi = read('functions/internal/api/quotes/[id].js');
+// The signing gate lives in quote-gates.mjs, shared by Mark's device and the customer's link.
+const quoteApi = read('functions/internal/api/quotes/[id].js') + read('functions/internal/_lib/quote-gates.mjs');
+assert.match(read('functions/internal/api/quotes/[id].js'), /requireApprovedBuildPlan/);
+assert.match(read('functions/api/quote-sign.js'), /requireApprovedBuildPlan/);
 const jobsApi = read('functions/internal/api/jobs.js');
 const checklistApi = read('functions/internal/api/job-checklist.js');
 const editor = read('src/pages/internal/quotes/build-plan.astro');
