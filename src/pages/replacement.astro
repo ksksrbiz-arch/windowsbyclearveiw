@@ -3,7 +3,6 @@ import { getImage, Image } from 'astro:assets';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
-import InsertVsFullFrame from '../components/diagrams/InsertVsFullFrame.astro';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
 import oldWindowReplacementDesktop from '../assets/guides/old-window-replacement-desktop.png';
 import oldWindowReplacementMobile from '../assets/guides/old-window-replacement-mobile.png';
@@ -28,7 +27,7 @@ const schema = {
   serviceType: 'Window replacement',
   name: 'Window replacement',
   description:
-    'Full-frame and insert window replacement for existing Vancouver, WA and Clark County homes.',
+    'Window replacement for existing Vancouver, WA and Clark County homes, measured on site and quoted in writing.',
   provider: { '@id': `${site.url}/#business` },
   areaServed: site.nearby.map((place) => ({
     '@type': 'City',
@@ -37,30 +36,22 @@ const schema = {
   })),
 };
 
-const decision = [
+const offers = [
   {
-    question: 'Is the existing frame sound and square?',
-    insert: 'Only if it is',
-    full: 'Works either way',
-    note: 'A frame that is rotten, racked, or leaking cannot host an insert. Paying for one wastes the whole job.',
+    title: 'Measured at the opening',
+    text: 'Nobody can size a window from a photo. We measure every opening in person and check the condition of what is already there.',
   },
   {
-    question: 'Do you want to keep the interior trim?',
-    insert: 'Keeps it',
-    full: 'Replaces it',
-    note: 'Insert work leaves the casing and stool alone. Full-frame means new interior finish.',
+    title: 'The right approach, in writing',
+    text: 'We measure every opening and tell you the right approach in the written estimate, opening by opening, before anything is ordered.',
   },
   {
-    question: 'Are you changing the exterior look?',
-    insert: 'Cannot change it',
-    full: 'New trim and sightline',
-    note: 'New exterior trim, a different sightline, or a change of style all need the frame out.',
+    title: 'Interior trim and exterior look',
+    text: 'Keeping your existing trim and siding, or changing the exterior trim, sightline, or window style: tell us which you want and we quote it.',
   },
   {
-    question: 'Are you changing the size or shape of the opening?',
-    insert: 'Same size and shape',
-    full: 'Can be resized or reshaped',
-    note: 'An insert fits inside the existing frame, so the opening stays as it is. Enlarging, shrinking, or reshaping it means working on the framing, which is a full-frame job.',
+    title: 'Damage found is damage explained',
+    text: 'If an opening turns out to have rot or has moved out of square, we tell you what it changes in the scope and the price.',
   },
 ];
 
@@ -74,7 +65,7 @@ const spec = [
 ---
 <BaseLayout
   title="Window replacement"
-  description="Replacement windows for Vancouver and Clark County homes: full-frame and insert installs, from measure to finish."
+  description="Replacement windows for Vancouver and Clark County homes, from measure to finish, with a written estimate before anything is ordered."
   path="/replacement"
   crumbs={[{ name: 'Window replacement', href: '/replacement' }]}
   ogImageSrc={ogPhoto.image}
@@ -112,41 +103,24 @@ const spec = [
 
   <section class="section">
     <div class="wrap" data-reveal>
-      <p class="rule-label">The one decision that sets the price</p>
-      <InsertVsFullFrame heading="Insert, or back to the rough opening?" />
-    </div>
-  </section>
-
-  <section class="section section-sunk">
-    <div class="wrap" data-reveal>
-      <p class="rule-label">Which one is yours</p>
-      <h2>Four questions, answered on site.</h2>
+      <p class="rule-label">What we can do for you</p>
+      <h2>Tell us what you want. We spec every opening.</h2>
       <p class="lede">
-        Nobody can tell you this from a photo. These are the things we check at the
-        opening, and they decide the method before they decide the number.
+        You do not need to work out how it gets done. We measure, look at each opening, and write
+        down exactly what we recommend for it before we put a number on it.
       </p>
 
-      <div class="decide">
-        {decision.map((row) => (
-          <article class="decide-row">
-            <h3>{row.question}</h3>
-            <dl class="decide-answers">
-              <div>
-                <dt class="tag tag-insert">Insert</dt>
-                <dd>{row.insert}</dd>
-              </div>
-              <div>
-                <dt class="tag tag-full">Full-frame</dt>
-                <dd>{row.full}</dd>
-              </div>
-            </dl>
-            <p class="decide-note">{row.note}</p>
+      <div class="offer">
+        {offers.map((item) => (
+          <article class="offer-item">
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
           </article>
         ))}
       </div>
 
       <p class="section-link">
-        <a href="/guides/full-frame-vs-insert">The long version, with what each one costs</a>
+        <a href="/guides/what-your-openings-need">How we decide what each opening needs</a>
       </p>
     </div>
   </section>
@@ -225,8 +199,8 @@ const spec = [
   </section>
 
   <CtaBar
-    heading="Get the method decided, then the price."
-    body="We measure every opening, tell you which ones take an insert and which need full-frame, and write it down."
+    heading="Get every opening spec'd, then the price."
+    body="We measure every opening, tell you the right approach for each one, and write it down in the estimate."
   />
 </BaseLayout>
 
@@ -281,69 +255,29 @@ const spec = [
     color: var(--accent-bright);
   }
 
-  .decide {
+  .offer {
     display: grid;
     grid-template-columns: 1fr 1fr;
     margin-top: var(--space-l);
     border-top: 1px solid var(--line);
   }
 
-  .decide-row {
+  .offer-item {
     padding: var(--space-m) var(--space-m) var(--space-m) 0;
     border-bottom: 1px solid var(--line);
   }
 
-  .decide-row:nth-child(even) {
+  .offer-item:nth-child(even) {
     padding-left: var(--space-m);
     border-left: 1px solid var(--line);
   }
 
-  .decide-row h3 {
+  .offer-item h3 {
     margin: 0 0 var(--space-2xs);
     font-size: var(--step-1);
   }
 
-  .decide-answers {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2xs) var(--space-s);
-    margin: 0 0 var(--space-xs);
-  }
-
-  .decide-answers > div {
-    display: grid;
-    gap: 0.25rem;
-    justify-items: start;
-  }
-
-  .decide-answers dd {
-    margin: 0;
-    font-size: var(--step--1);
-    font-weight: 500;
-  }
-
-  .tag {
-    padding: 0.2rem 0.55rem;
-    border-radius: 2px;
-    font-size: var(--step--2);
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .tag-insert {
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--accent-ink);
-    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  }
-
-  .tag-full {
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    color: var(--danger);
-    border: 1px solid color-mix(in srgb, var(--danger) 32%, transparent);
-  }
-
-  .decide-note {
+  .offer-item p {
     margin: 0;
     font-size: var(--step--1);
     color: var(--ink-soft);
@@ -379,12 +313,12 @@ const spec = [
   }
 
   @media (max-width: 900px) {
-    .decide {
+    .offer {
       grid-template-columns: 1fr;
     }
 
-    .decide-row,
-    .decide-row:nth-child(even) {
+    .offer-item,
+    .offer-item:nth-child(even) {
       padding-left: 0;
       padding-right: 0;
       border-left: 0;

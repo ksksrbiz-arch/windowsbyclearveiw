@@ -8,7 +8,7 @@ faq:
   - question: Does Gorge wind change what you'd recommend for a Washougal house?
     answer: It changes how much the flashing detail matters, not the product. Wind-driven rain along SR-14 finds a weak seal or a poorly lapped flashing faster than a sheltered lot would. We flash every opening the same careful way regardless, but it shows its worth here sooner.
   - question: Is the older riverside core different from the newer east-hill builds?
-    answer: Yes — older sash near the river sticks and loses heat through the glass itself; newer construction up the hill above town is mostly a straightforward insert job when it needs anything at all.
+    answer: Yes — older sash near the river sticks and loses heat through the glass itself; newer construction up the hill above town is mostly a simpler job when it needs anything at all.
   - question: Do you set windows in new Washougal construction?
     answer: Yes, nailing-fin units set to schedule. See new construction for what we need from the builder before we book a date.
 ---

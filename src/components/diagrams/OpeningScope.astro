@@ -2,6 +2,6 @@
 import PhotoGuide from './PhotoGuide.astro';
 
 interface Props { heading?: string | null; }
-const { heading = 'Insert or full-frame? See the difference in a real opening.' } = Astro.props;
+const { heading = 'See what we look at in a real opening.' } = Astro.props;
 ---
 <PhotoGuide type="installation" heading={heading} />

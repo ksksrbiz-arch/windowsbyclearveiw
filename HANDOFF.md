@@ -273,6 +273,16 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - Next on the gap list: deposits/online payment (needs the Stripe connector authorized).
 - Tests: `npm run test:quote-signing` (real SQLite, in CI).
 
+### 2026-09-29 — Install-method terminology removed from customer copy
+
+- **Why:** Mark does not want customers to read "full-frame" as "we tear out your whole window frame." Reference site (thermoloc.co/window-replacement) does not name install methods either: it says "replacement windows" vs "new construction windows" and offers a consultation. Customer copy now says what we can do, and the method is Mark's call at the quote. Public copy also does not name Mark (see the 2026-09-27 boundary).
+- **Rule:** customer-facing pages, guides, city pages, JSON-LD and the Ask knowledge index must not use *insert*, *full-frame*, *pocket*, *block frame* or *nail fin* for existing-home replacement. Say "we measure every opening and tell you the right approach in the written estimate." "Nailing-fin" stays acceptable on new-construction copy. Guarded by `npm run test:public-terminology` (in CI).
+- **What changed:** `/replacement` (method diagram + four-question card replaced by "What we can do for you"); guide `full-frame-vs-insert` rewritten as `/guides/what-your-openings-need` with a 301 in `public/_redirects`; diagram component renamed `OpeningScope` (`diagram: opening-scope`); city pages, other guides, home, tools index, estimate-sent, terms, `JsonLd`, Ask suggestion chips.
+- **Calculator:** the "how much comes out" step is gone. One range for every house, using the old "mixed" assumption (34% of openings get the extra frame-level amount in `pricing.fullFrame`). Numbers in `src/data/pricing.ts` are unchanged, so ranges for a "mixed" house are identical to before; ranges for someone who used to pick "insert" only are now higher, and "full-frame" only lower. `functions/ask/_lib/pricing.mjs` mirrors this (its `method` parameter is removed).
+- **Ask assistant:** system prompt has a TERMINOLOGY rule; `compare_installation_paths` returns `simplerScope` / `moreWork` and a note not to name methods.
+- **Unchanged on purpose:** Command Center, Build Plan and stored quote data still use insert/full-frame internally (`pages/internal/*`, `build-plan-rules.mjs`). Mark picks the method there; renaming stored values would risk saved quotes and jobs.
+- **`VERIFY` / outstanding:** `functions/ask/_data/guides-index.json` was patched by hand (old guide's 5 chunks removed, link text fixed) because embeddings need `GEMINI_API_KEY`. Run `GEMINI_API_KEY=... npm run build:guides-index` to re-embed `what-your-openings-need` so Ask can retrieve it. The `estimate_price` Ask tool's declared arguments (`openings`, `home_type`, `complexity`) do not match `estimatePrice({ lines, ... })`; that mismatch predates this change and was not touched.
+
 ## Outstanding
 
 | | |

@@ -25,6 +25,6 @@ Replacement is the typical job here, not new construction — older sash and ear
 
 ## What we do here
 
-Insert or full-frame, measured the same way as every other town on this list, with the same written estimate before anything is ordered. Farther north in Kalama or Longview? Ask — we quote those case by case.
+Every opening measured the same way as every other town on this list, with the approach for each one written into the estimate, with the same written estimate before anything is ordered. Farther north in Kalama or Longview? Ask — we quote those case by case.
 
 Nearby: [Ridgefield](/areas/ridgefield) and [Vancouver](/areas/vancouver).

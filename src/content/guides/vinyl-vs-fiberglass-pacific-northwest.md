@@ -41,7 +41,7 @@ For a standard-size window, that difference is close to academic — the frame i
 
 Neither material rots. Vinyl is a solid plastic — water doesn't soak into it or feed decay the way it does in wood. Fiberglass is a glass-fiber-reinforced resin — same story, no organic material for moisture to break down. Both are a real upgrade over the wood-frame windows common in older Vancouver-area homes, where a wet sill eventually means soft wood, not just cosmetic weathering.
 
-What actually causes a wet-climate failure with either material isn't the frame — it's bad flashing or a failed sealed glass unit letting water into the wall behind the frame. That's a technique problem, not a vinyl-versus-fiberglass one. See [why Washington windows fog](/guides/fogged-windows) for the glass-seal side of that, and [full-frame vs insert](/guides/full-frame-vs-insert) for what a compromised opening actually needs.
+What actually causes a wet-climate failure with either material isn't the frame — it's bad flashing or a failed sealed glass unit letting water into the wall behind the frame. That's a technique problem, not a vinyl-versus-fiberglass one. See [why Washington windows fog](/guides/fogged-windows) for the glass-seal side of that, and [what each opening needs](/guides/what-your-openings-need) for a compromised opening.
 
 ## Stiffness and size
 

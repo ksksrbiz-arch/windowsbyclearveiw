@@ -2,7 +2,7 @@
 name: Battle Ground
 region: Clark County
 title: Window replacement in Battle Ground, WA
-description: Replacement and new-construction window installation for Battle Ground, WA homes — insert and full-frame, measured on site with a written estimate.
+description: Replacement and new-construction window installation for Battle Ground, WA homes — measured on site with a written estimate.
 published: true
 faq:
   - question: Is Battle Ground mostly older housing or new construction?
@@ -25,6 +25,6 @@ Aluminum-frame sliders from the older subdivisions are the most common tear-out 
 
 ## What we do here
 
-We check the frame first, then call insert or full-frame based on what's actually there — not the neighborhood's age. See [full-frame vs. insert](/guides/full-frame-vs-insert) for how that call gets made. The same written estimate process applies. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
+We check the opening first, then tell you the right approach in the written estimate based on what's actually there — not the neighborhood's age. See [what each opening needs](/guides/what-your-openings-need) for how we look at it. The same written estimate process applies. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
 
 Nearby: [Brush Prairie](/areas/brush-prairie) and [Vancouver](/areas/vancouver).

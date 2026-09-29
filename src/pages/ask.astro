@@ -5,7 +5,7 @@ import { site, telHref } from '../data/site';
 import '../styles/ask.css';
 const guides=(await getCollection('guides',({data})=>data.published)).sort((a,b)=>a.data.order-b.data.order);
 const starters=guides.flatMap(g=>g.data.faq.slice(0,1).map(item=>item.question)).slice(0,4);
-const paths=[['Need new windows','Help me figure out whether I actually need replacement windows.'],['Compare methods','What is the difference between insert and full-frame replacement?'],['Figure out cost','What information do you need to estimate window replacement cost?'],['Choose glass','What glass options make sense for a Pacific Northwest home?'],['New construction','What should I know about windows for a new-construction project?']];
+const paths=[['Need new windows','Help me figure out whether I actually need replacement windows.'],['What my project needs','What should I know about what my window openings will need?'],['Figure out cost','What information do you need to estimate window replacement cost?'],['Choose glass','What glass options make sense for a Pacific Northwest home?'],['New construction','What should I know about windows for a new-construction project?']];
 ---
 <BaseLayout title="Ask a window question" description="Talk with Clearview's project consultant about window replacement, glass, installation, and project planning in Clark County." path="/ask" crumbs={[{name:'Ask',href:'/ask'}]}>
 <div class="ask-page">

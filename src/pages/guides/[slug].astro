@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
-import InsertVsFullFrame from '../../components/diagrams/InsertVsFullFrame.astro';
+import OpeningScope from '../../components/diagrams/OpeningScope.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import CanvaGuideEmbed from '../../components/CanvaGuideEmbed.astro';
 import windowAnatomyGraphic from '../../assets/guides/window-anatomy.png';
@@ -33,11 +33,11 @@ const related = (await getCollection('guides', ({ data, id }) => data.published 
   .slice(0, 3);
 
 const diagramNotes = {
-  'insert-vs-full-frame': {
+  'opening-scope': {
     eyebrow: 'Photo guide',
     title: 'See what actually changes at the opening.',
-    body: 'The easiest way to understand the two methods is to look at how far the existing assembly is opened up.',
-    answer: 'Insert replacement keeps the existing frame. Full-frame replacement removes that frame and takes the work back to the rough opening.',
+    body: 'The easiest way to understand the scope is to look at what is actually at the opening.',
+    answer: 'The condition of the opening, and what you want the finished window to look like, decide how much work each window takes.',
   },
   'flashing-order': {
     eyebrow: 'Photo guide',
@@ -120,7 +120,7 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
 // section. The illustration-style diagrams below (window-anatomy,
 // old-window-replacement, double-pane-glass, vinyl-vs-fiberglass) are
 // graphics, not photos, so pairing them with a real job photo is intentional.
-const photoBasedDiagrams = ['insert-vs-full-frame', 'flashing-order', 'signs-checklist'];
+const photoBasedDiagrams = ['opening-scope', 'flashing-order', 'signs-checklist'];
 const diagramIsPhotoBased = guide.data.diagram ? photoBasedDiagrams.includes(guide.data.diagram) : false;
 
 const slugifyHeading = (value) => value
@@ -188,8 +188,8 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
         </div>
 
         <div class="visual-frame">
-          {guide.data.diagram === 'insert-vs-full-frame' && (
-            <InsertVsFullFrame heading={null} />
+          {guide.data.diagram === 'opening-scope' && (
+            <OpeningScope heading={null} />
           )}
           {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
           {guide.data.diagram === 'window-anatomy' && (

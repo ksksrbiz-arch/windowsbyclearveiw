@@ -58,6 +58,6 @@ None of that means every unit fails on a schedule. A shaded, north-facing window
 
 1. Try to wipe the haze. If it does not move, the unit has failed.
 2. Note how many openings look like that.
-3. Check the sill for soft wood. Failed glass plus a wet sill is a full-frame conversation.
+3. Check the sill for soft wood. Failed glass plus a wet sill means the opening needs more than a new window.
 
 Bring those notes to an estimate. We will tell you which units are done and which can wait.

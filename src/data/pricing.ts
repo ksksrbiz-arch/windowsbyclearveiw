@@ -170,10 +170,10 @@ export const pricing = {
 
   /** Added per opening that has to come out to the rough framing. */
   fullFrame: {
-    label: 'Full-frame replacement',
+    label: 'Extra frame-level work',
     blurb:
-      'Frame and all comes out. Needed when the frame is rotten or out of square — how bad the ' +
-      'damage is moves the price.',
+      'Applied to a share of openings in the public calculator. Covers openings where the ' +
+      'frame is rotten or out of square — how bad the damage is moves the price.',
     low: 800,
     high: 2000,
   },

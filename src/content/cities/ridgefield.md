@@ -6,7 +6,7 @@ description: Window replacement and new-construction installs for Ridgefield, WA
 published: true
 faq:
   - question: Is Ridgefield mostly new construction now?
-    answer: A lot of it is — Ridgefield's one of the fastest-growing cities in the state. But there's still a small historic downtown with older housing mixed in, so we see a straightforward insert job and a full nailing-fin set in the same week.
+    answer: A lot of it is — Ridgefield's one of the fastest-growing cities in the state. But there's still a small historic downtown with older housing mixed in, so we see replacement work in older houses and new-construction window sets in the same week.
   - question: What should a Ridgefield builder have ready before calling?
     answer: The plan set or window schedule and a target set date. See new construction for the full list and what we check before ordering.
   - question: Do you do anything differently for houses near the wildlife refuge?

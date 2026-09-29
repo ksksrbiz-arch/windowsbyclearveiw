@@ -105,33 +105,6 @@ const model = {
       </fieldset>
 
       <fieldset class="est-block">
-        <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>How much comes out</legend>
-        <div class="est-choices">
-          <label class="choice">
-            <input type="radio" name="est-method" value="insert" checked />
-            <span>
-              <strong>Insert &mdash; the frame stays</strong>
-              <span class="est-hint">Right when the existing frame is solid and square.</span>
-            </span>
-          </label>
-          <label class="choice">
-            <input type="radio" name="est-method" value="mixed" />
-            <span>
-              <strong>Not sure / a mix</strong>
-              <span class="est-hint">Most houses. We tell you which openings need which.</span>
-            </span>
-          </label>
-          <label class="choice">
-            <input type="radio" name="est-method" value="full-frame" />
-            <span>
-              <strong>Full-frame &mdash; back to the framing</strong>
-              <span class="est-hint">Needed where the frame is rotten or out of square.</span>
-            </span>
-          </label>
-        </div>
-      </fieldset>
-
-      <fieldset class="est-block">
         <legend><span class="est-step" aria-hidden="true">{nextStep()}</span>Anything else true?</legend>
         <div class="est-choices">
           {pricing.modifiers.map((modifier) => (
@@ -242,6 +215,10 @@ const model = {
         (el) => el.value,
       );
 
+    // Share of openings assumed to need the extra frame-level work priced in
+    // `model.fullFrame`. Mirrors the 'mixed' assumption the old method picker used.
+    const FRAME_WORK_SHARE = 0.34;
+
     function render() {
       const picked = model.openings
         .map((opening) => ({ ...opening, count: counts.get(opening.id) || 0 }))
@@ -258,7 +235,6 @@ const model = {
       const material =
         model.materials.find((m) => m.id === chosen('est-material')) || model.materials[0];
       const brand = model.brands.find((b) => b.id === chosen('est-brand')) || model.brands[0];
-      const method = chosen('est-method') || 'insert';
       const mods = activeModifiers();
       const windowCount = picked.filter((o) => !o.isDoor).reduce((sum, o) => sum + o.count, 0);
 
@@ -276,11 +252,9 @@ const model = {
         }
       }
 
-      const methodWord =
-        method === 'insert' ? 'insert' : method === 'full-frame' ? 'full-frame' : 'a mix of methods';
       const brandWord = windowCount > 0 && brand.id !== model.brands[0].id ? `${brand.label} ` : '';
       if (scope instanceof HTMLElement) {
-        scope.textContent = `${total} opening${total === 1 ? '' : 's'} · ${brandWord}${material.label.toLowerCase()} · ${methodWord}`;
+        scope.textContent = `${total} opening${total === 1 ? '' : 's'} · ${brandWord}${material.label.toLowerCase()}`;
       }
 
       // --- range ----------------------------------------------------------
@@ -297,10 +271,11 @@ const model = {
         low += brand.low * windowCount;
         high += brand.high * windowCount;
 
-        // "Mixed" assumes roughly a third of the openings need full-frame.
-        const fullFrameShare = method === 'full-frame' ? 1 : method === 'mixed' ? 0.34 : 0;
-        low += model.fullFrame.low * total * fullFrameShare;
-        high += model.fullFrame.high * total * fullFrameShare;
+        // One range for every house: assumes roughly a third of the openings
+        // need the extra frame-level work priced in `fullFrame`. The measure
+        // sorts out which ones.
+        low += model.fullFrame.low * total * FRAME_WORK_SHARE;
+        high += model.fullFrame.high * total * FRAME_WORK_SHARE;
 
         for (const id of mods) {
           const modifier = model.modifiers.find((m) => m.id === id);
@@ -315,13 +290,9 @@ const model = {
 
       // --- what moves the number -----------------------------------------
       const notes: string[] = [];
-      if (method === 'full-frame') {
-        notes.push('Full-frame on every opening is the expensive end. Some may only need an insert.');
-      } else if (method === 'mixed') {
-        notes.push('We assumed about a third need full-frame. The measure sorts out which.');
-      } else {
-        notes.push('Insert pricing assumes the existing frames are sound. Soft sills change that.');
-      }
+      notes.push(
+        'This range allows for about a third of the openings needing more work than the rest. The measure sorts out which ones.',
+      );
       if (material.id !== 'vinyl') {
         notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);
       }
@@ -360,7 +331,6 @@ const model = {
           picked.map((o) => `${o.count} ${o.label.toLowerCase()}`).join(', '),
         `Material: ${material.label}`,
         windowCount > 0 && brand.id !== model.brands[0].id ? `Window brand: ${brand.label}` : '',
-        `Method: ${methodWord}`,
         mods.length
           ? `Also: ${mods
               .map((id) => model.modifiers.find((m) => m.id === id)?.label || id)

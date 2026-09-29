@@ -42,12 +42,12 @@ function round(value, step) {
 /**
  * Same formula as CostEstimator.astro's render(): per-opening range times
  * material multiplier, brand adder on window (not door) openings only,
- * full-frame share (1 for full-frame, 0.34 for "mixed", 0 for insert),
+ * a fixed share of openings (0.34) assumed to need extra frame-level work,
  * then flat modifiers. Returns null on unrecognized ids rather than
  * silently pricing at zero — a wrong id undercounting a job is worse than
  * a tool call that visibly failed.
  */
-export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade', method = 'insert', modifierIds = [] }) {
+export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade', modifierIds = [] }) {
   if (!Array.isArray(lines) || lines.length === 0) {
     return { error: 'At least one opening with a type and quantity is required.' };
   }
@@ -55,9 +55,6 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
   const material = PRICING.materials.find((m) => m.id === materialId);
   if (!material) return { error: `Unknown material "${materialId}".` };
   const brand = PRICING.brands.find((b) => b.id === brandId) || PRICING.brands[0];
-  if (!['insert', 'full-frame', 'mixed'].includes(method)) {
-    return { error: `Unknown method "${method}" — must be insert, full-frame, or mixed.` };
-  }
 
   let low = 0;
   let high = 0;
@@ -83,9 +80,10 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
   low += brand.low * windowOpenings;
   high += brand.high * windowOpenings;
 
-  const fullFrameShare = method === 'full-frame' ? 1 : method === 'mixed' ? 0.34 : 0;
-  low += PRICING.fullFrame.low * totalOpenings * fullFrameShare;
-  high += PRICING.fullFrame.high * totalOpenings * fullFrameShare;
+  // Same single-range assumption as CostEstimator.astro (FRAME_WORK_SHARE).
+  const FRAME_WORK_SHARE = 0.34;
+  low += PRICING.fullFrame.low * totalOpenings * FRAME_WORK_SHARE;
+  high += PRICING.fullFrame.high * totalOpenings * FRAME_WORK_SHARE;
 
   const appliedModifiers = [];
   for (const id of modifierIds) {
@@ -100,7 +98,7 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
   return {
     lowCents: round(low, PRICING.rounding) * 100,
     highCents: round(high, PRICING.rounding) * 100,
-    scope: `${scopeParts.join(', ')} — ${material.label.toLowerCase()}${brand.id !== PRICING.brands[0].id ? `, ${brand.label}` : ''}, ${method}`,
+    scope: `${scopeParts.join(', ')} — ${material.label.toLowerCase()}${brand.id !== PRICING.brands[0].id ? `, ${brand.label}` : ''}`,
     appliedModifiers,
     basedOn: 'Clearview\'s own published pricing model (same as /tools/window-replacement-cost-calculator), reviewed ' + PRICING.reviewedAt,
   };
