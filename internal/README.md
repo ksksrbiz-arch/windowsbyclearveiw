@@ -39,7 +39,12 @@ real Cloudflare Pages build.
 
 ## Analytics (internal `/internal/analytics` page)
 
-The page shows two things. **Where leads came from** is counted from the
+The page shows three things. **Requests to revenue** counts the last 90 days of
+estimate requests, quotes, signatures, jobs and payments straight from D1 (no
+setup), plus stale drafts and finalized quotes still waiting on a job. Those totals
+are separate counts. Below them, **Which sources bring paying work** follows
+quotes linked to a website inquiry (set by *Start quote*, or by clicking a
+suggested match on the quote page) through to signature and payment. **Where leads came from** is counted from the
 first-touch attribution already stored on each lead in D1, so it works with no
 setup. **Site traffic** comes from the Google Analytics 4 Data API through
 `functions/internal/api/analytics.js` and is optional: until it is configured the

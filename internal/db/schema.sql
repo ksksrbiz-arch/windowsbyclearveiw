@@ -43,9 +43,16 @@ CREATE TABLE IF NOT EXISTS quotes (
   signature_name     TEXT,                   -- printed name alongside the signature
   signed_at          TEXT,
 
-  created_by         TEXT NOT NULL DEFAULT 'mark'
+  created_by         TEXT NOT NULL DEFAULT 'mark',
+
+  -- The website inquiry (leads.id) this quote came from, if any. Attribution
+  -- only; set by "Start quote" or confirmed by Mark on the quote page. Not a
+  -- foreign key because leads lives in the public-form schema file.
+  lead_id            INTEGER,
+  lead_linked_at     TEXT
 );
 
+CREATE INDEX IF NOT EXISTS idx_quotes_lead_id ON quotes(lead_id);
 CREATE INDEX IF NOT EXISTS idx_quotes_created_at ON quotes(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_quotes_customer_name ON quotes(customer_name);
 CREATE INDEX IF NOT EXISTS idx_quotes_status ON quotes(status);

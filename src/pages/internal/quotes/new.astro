@@ -474,6 +474,8 @@ const catalog = {
         discountCents: Math.round((Number(discountInput.value) || 0) * 100),
         discountReason: discountReasonEl instanceof HTMLInputElement ? discountReasonEl.value : '',
         signatureMethod: data.get('signatureMethod'),
+        // Only a new quote started from an inquiry carries it; edits keep the stored link.
+        ...(!editId && leadId && /^\d+$/.test(leadId) ? { leadId } : {}),
       };
 
       if (submitBtn instanceof HTMLButtonElement) {

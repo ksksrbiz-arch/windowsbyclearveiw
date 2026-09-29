@@ -122,7 +122,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
                 <time class="ld-when">${formatWhen(lead.created_at)}</time>
               </div>
               <div class="ld-card-actions">
-                <a class="ld-action ld-action-primary" href="/internal/quotes/new?leadId=${leadId}">Start quote</a>
+                ${lead.quote_id
+                  ? `<a class="ld-action ld-action-primary" href="/internal/quotes/view?id=${encodeURIComponent(String(lead.quote_id))}">Open quote (${lead.quote_status === 'finalized' ? 'signed' : 'draft'})</a>
+                     <a class="ld-action" href="/internal/quotes/new?leadId=${leadId}">Another quote</a>`
+                  : `<a class="ld-action ld-action-primary" href="/internal/quotes/new?leadId=${leadId}">Start quote</a>`}
                 <a class="ld-action" href="/internal/follow-up?leadId=${leadId}">Add follow-up</a>
                 ${phoneHref ? `<a class="ld-action" href="${phoneHref}">Call</a>` : ''}
                 ${lead.email ? `<a class="ld-action" href="mailto:${escapeHtml(lead.email)}">Email</a>` : ''}

@@ -248,6 +248,14 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Nextdoor:** guides carry a plain "Share on Nextdoor" link using Nextdoor's Share Plugin (`nextdoor.com/sharekit/`; no script, no application, nothing sent until clicked, so no privacy-policy change). Mark runs no Nextdoor ads, so the Conversions API (needs approval from Nextdoor and an ads account plus pixel ID) was not built. The Publishing API is approval-based and "primarily for advertising partners"; apply via Nextdoor's Publishing API form only if posting to Mark's business page from the site becomes worth pursuing.
 - **Still to do outside the repo:** the GA4 service-account setup (Google Cloud + GA4 property access + two Cloudflare variables), assigned to Cowork.
 
+### 2026-09-29 — Analytics: requests-to-revenue pipeline
+
+- `/internal/analytics` now opens with **Requests to revenue** (last 90 days), counted from D1 with no setup: estimate requests, quotes written (+ $ quoted), quotes signed (+ $ signed, by `signed_at`), jobs (non-cancelled) and completed, and $ collected (`job_payments` on jobs created in the window). Rates: quotes per request, signed per quote, median days quote→signature, average signed quote. *Needs attention*: draft quotes older than 14 days (all-time backlog, with $) and finalized quotes with no job (exact SQL `NOT EXISTS`).
+- Logic lives in `functions/internal/_lib/pipeline-summary.mjs` (pure, integer cents). The endpoint returns aggregates only (no names/ids) and fails soft per table: no `jobs` table → jobs unknown; no `job_payments` → collected unknown (not $0).
+- **Lead → quote link (`quotes.lead_id`, `quotes.lead_linked_at`).** Added to `internal/db/schema.sql` and migrated lazily on production by `ensureQuoteLeadColumn()` (`functions/internal/_lib/lead-links.mjs`; `ALTER TABLE` is idempotent, existing quotes stay unlinked). *Start quote* on `/internal/leads` now saves the link (`POST /internal/api/quotes` accepts `leadId`, rejects unknown/invalid ids). The quote page shows the linked inquiry or **exact phone/email match suggestions** that Mark must click to link (`GET/POST /internal/api/quote-lead`); nothing is ever auto-linked. Unlink is available. The link is attribution metadata only and never touches contract fields, so it works on finalized quotes. The leads list shows *Open quote* when a lead already has one.
+- **Traced attribution:** *Which sources bring paying work* on `/internal/analytics` credits requests, quotes, signed $ and collected $ (quote → job → `job_payments`) to the linked inquiry's first-touch source, and shows how many quotes in the window are still unlinked. Quotes made before this change need linking from their quote page to count.
+- Tests: `scripts/test-analytics-pipeline.mjs` (`npm run test:analytics`) and `scripts/test-lead-links.mjs` (`npm run test:lead-links`, in CI), both on real SQLite via `scripts/_lib/d1-sqlite.mjs`.
+
 ## Outstanding
 
 | | |

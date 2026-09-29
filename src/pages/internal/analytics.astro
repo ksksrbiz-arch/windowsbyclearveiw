@@ -11,6 +11,35 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div class="an-hero-actions"><button class="btn btn-ghost" type="button" data-refresh>Refresh</button></div>
   </div>
 
+  <section class="an-section" aria-labelledby="an-pipe-h">
+    <div class="an-head">
+      <div><p class="kicker">Your business</p><h2 id="an-pipe-h">Requests to revenue</h2></div>
+      <span class="an-meta" data-pipe-window>—</span>
+    </div>
+    <p class="an-note">Counted from your own quotes, jobs and payments. These totals count every quote, including ones not linked to a website request, so each stage is its own count for the period, not the same customers followed through. The table below follows only linked quotes.</p>
+    <div class="an-stats an-stats-5">
+      <article class="an-stat"><span>Estimate requests</span><strong data-pipe="leads">—</strong><small>from the website form</small></article>
+      <article class="an-stat"><span>Quotes written</span><strong data-pipe="quotes">—</strong><small data-pipe="quotedValue">—</small></article>
+      <article class="an-stat"><span>Quotes signed</span><strong data-pipe="signed">—</strong><small data-pipe="signedValue">—</small></article>
+      <article class="an-stat"><span>Jobs</span><strong data-pipe="jobs">—</strong><small><span data-pipe="completed">—</span> completed</small></article>
+      <article class="an-stat"><span>Collected</span><strong data-pipe="collected">—</strong><small>on jobs from this period</small></article>
+    </div>
+    <div class="an-grid">
+      <article class="an-panel"><h3>Rates</h3><div data-list="pipeRates"></div></article>
+      <article class="an-panel"><h3>Needs attention</h3><div data-list="pipeAttention"></div></article>
+      <article class="an-panel an-wide">
+        <h3>Which sources bring paying work</h3>
+        <p class="an-note" data-source-coverage>—</p>
+        <div class="an-table-wrap">
+          <table class="an-table">
+            <thead><tr><th scope="col">Source</th><th scope="col">Requests</th><th scope="col">Quotes</th><th scope="col">Signed</th><th scope="col">Signed $</th><th scope="col">Collected</th></tr></thead>
+            <tbody data-source-rows></tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <section class="an-section" aria-labelledby="an-leads-h">
     <div class="an-head">
       <div><p class="kicker">Estimate requests</p><h2 id="an-leads-h">Where leads came from</h2></div>
@@ -72,9 +101,27 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     landingPages?: Row[];
     weekly?: { weekOf: string; value: number }[];
   };
-  type Payload = { ga4: Ga4; leads: Leads; links: Record<string, string> };
+  type Pipeline = {
+    status: 'ok' | 'unavailable';
+    days?: number;
+    staleDraftDays?: number;
+    leads?: number | null;
+    quotes?: { created: number; quotedCents: number; signed: number; signedCents: number; staleDrafts: number; staleDraftCents: number; medianDaysToSign: number | null } | null;
+    jobs?: { created: number; completed: number; collectedCents: number | null } | null;
+    awaitingJob?: number | null;
+    bySource?: {
+      linkedQuotes: number;
+      unlinkedQuotes: number;
+      sources: { label: string; leads: number; quotes: number; signed: number; signedCents: number; collectedCents: number | null }[];
+    } | null;
+    rates?: { quotesPerLead: number | null; signedPerQuote: number | null };
+  };
+  type Payload = { ga4: Ga4; leads: Leads; pipeline?: Pipeline; links: Record<string, string> };
 
   const nf = new Intl.NumberFormat('en-US');
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const dollars = (cents: number | null | undefined) => (typeof cents === 'number' ? money.format(cents / 100) : '—');
+  const count = (value: number | null | undefined) => (typeof value === 'number' ? nf.format(value) : '—');
   const $ = (selector: string) => document.querySelector(selector);
 
   function renderList(name: string, rows: Row[] | undefined, empty: string) {
@@ -142,6 +189,99 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     }
   }
 
+  function renderTextList(name: string, lines: [string, string][]) {
+    const host = $(`[data-list="${name}"]`);
+    if (!(host instanceof HTMLElement)) return;
+    host.replaceChildren();
+    for (const [labelText, valueText] of lines) {
+      const item = document.createElement('div');
+      item.className = 'an-row';
+      const label = document.createElement('span');
+      label.className = 'an-row-label';
+      label.textContent = labelText;
+      const value = document.createElement('strong');
+      value.textContent = valueText;
+      item.append(label, value);
+      host.append(item);
+    }
+  }
+
+  function renderPipeline(pipe: Pipeline | undefined) {
+    if (!pipe || pipe.status !== 'ok') {
+      setText('[data-pipe-window]', 'Unavailable');
+      // Never leave numbers from an earlier load on screen after a failed refresh.
+      document.querySelectorAll('[data-pipe]').forEach((el) => {
+        if (el instanceof HTMLElement) el.textContent = '—';
+      });
+      renderTextList('pipeRates', [['Business data could not be loaded.', '']]);
+      renderTextList('pipeAttention', []);
+      return;
+    }
+    const q = pipe.quotes;
+    const j = pipe.jobs;
+    const pct = (value: number | null | undefined) => (typeof value === 'number' ? `${value}%` : '—');
+    setText('[data-pipe-window]', `Last ${pipe.days ?? 90} days`);
+    setText('[data-pipe="leads"]', count(pipe.leads));
+    setText('[data-pipe="quotes"]', count(q?.created));
+    setText('[data-pipe="quotedValue"]', q ? `${dollars(q.quotedCents)} quoted` : '—');
+    setText('[data-pipe="signed"]', count(q?.signed));
+    setText('[data-pipe="signedValue"]', q ? `${dollars(q.signedCents)} signed` : '—');
+    setText('[data-pipe="jobs"]', count(j?.created));
+    setText('[data-pipe="completed"]', count(j?.completed));
+    setText('[data-pipe="collected"]', dollars(j?.collectedCents));
+    const avgSigned = q && q.signed > 0 ? dollars(Math.round(q.signedCents / q.signed)) : '—';
+    renderTextList('pipeRates', [
+      ['Quotes written per estimate request', pct(pipe.rates?.quotesPerLead)],
+      ['Quotes signed per quote written', pct(pipe.rates?.signedPerQuote)],
+      ['Typical days from quote to signature', typeof q?.medianDaysToSign === 'number' ? `${q.medianDaysToSign} days` : '—'],
+      ['Average signed quote', avgSigned],
+    ]);
+    const stale = q?.staleDrafts ?? 0;
+    renderTextList('pipeAttention', [
+      [`Draft quotes older than ${pipe.staleDraftDays ?? 14} days`, q ? `${nf.format(stale)}${stale ? ` · ${dollars(q.staleDraftCents)}` : ''}` : '—'],
+      ['Finalized quotes not yet a job', count(pipe.awaitingJob)],
+    ]);
+  }
+
+  function renderSources(pipe: Pipeline | undefined) {
+    const body = $('[data-source-rows]');
+    if (!(body instanceof HTMLElement)) return;
+    body.replaceChildren();
+    const data = pipe?.status === 'ok' ? pipe.bySource : null;
+    if (!data) {
+      setText('[data-source-coverage]', 'Source data could not be loaded.');
+      return;
+    }
+    const total = data.linkedQuotes + data.unlinkedQuotes;
+    setText(
+      '[data-source-coverage]',
+      total
+        ? `${nf.format(data.linkedQuotes)} of ${nf.format(total)} quotes from this period are linked to a website request. Link the others from each quote's page to credit their source.`
+        : 'No quotes in this period yet.',
+    );
+    if (!data.sources.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 6;
+      td.className = 'an-empty';
+      td.textContent = 'No website requests or linked quotes yet.';
+      tr.append(td);
+      body.append(tr);
+      return;
+    }
+    for (const row of data.sources) {
+      const tr = document.createElement('tr');
+      const cells = [row.label, nf.format(row.leads), nf.format(row.quotes), nf.format(row.signed), dollars(row.signedCents), dollars(row.collectedCents)];
+      cells.forEach((text, i) => {
+        const cell = document.createElement(i === 0 ? 'th' : 'td');
+        if (i === 0) cell.setAttribute('scope', 'row');
+        cell.textContent = text;
+        tr.append(cell);
+      });
+      body.append(tr);
+    }
+  }
+
   function renderLeads(leads: Leads) {
     if (leads.status !== 'ok') {
       setText('[data-leads-total]', 'Unavailable');
@@ -171,6 +311,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       }
       if (!response.ok) throw new Error('bad status');
       const data = (await response.json()) as Payload;
+      renderPipeline(data.pipeline);
+      renderSources(data.pipeline);
       renderLeads(data.leads);
       renderGa4(data.ga4);
       document.querySelectorAll('[data-link]').forEach((el) => {
@@ -216,7 +358,12 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .an-link:hover,.an-link:focus-visible{border-color:var(--accent)}
   .an-link span{color:var(--ink-soft);font-size:var(--step--1)}
   .an-status{color:var(--ink-soft);font-size:var(--step--1)}
-  @media(max-width:900px){.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .an-table-wrap{overflow-x:auto}
+  .an-table{width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
+  :global(.an-table th),:global(.an-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere}
+  .an-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+  @media(max-width:900px){.an-stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.an-hero{align-items:flex-start;flex-direction:column}.an-grid,.an-links{grid-template-columns:1fr}}
   @media(max-width:420px){.an-stats{grid-template-columns:1fr}}
 </style>
