@@ -8,7 +8,7 @@ import { findWork } from '../data/work';
 
 const pricesAreAverages = pricingIsRegionalAverage();
 
-const description = `Clearview Windows installs replacement windows, sliding glass doors, and new-construction windows in Vancouver, WA and Clark County. Measured in person, quoted in writing.`;
+const description = `Clearview Windows replaces windows and installs sliding glass doors in Vancouver, WA and Clark County. Free in-home measure, written estimate first.`;
 
 const schema = {
   '@context': 'https://schema.org',
@@ -27,7 +27,7 @@ const heroPhoto = findWork('cabin-gable-install-crew')!;
 const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
 ---
 <BaseLayout
-  title="About"
+  title="About Clearview Windows | Vancouver, WA Window Installers"
   description={description}
   path="/about"
   crumbs={[{ name: 'About', href: '/about' }]}

@@ -283,6 +283,13 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Unchanged on purpose:** Command Center, Build Plan and stored quote data still use insert/full-frame internally (`pages/internal/*`, `build-plan-rules.mjs`). Mark picks the method there; renaming stored values would risk saved quotes and jobs.
 - **`VERIFY` / outstanding:** `functions/ask/_data/guides-index.json` was patched by hand (old guide's 5 chunks removed, link text fixed) because embeddings need `GEMINI_API_KEY`. Run `GEMINI_API_KEY=... npm run build:guides-index` to re-embed `what-your-openings-need` so Ask can retrieve it. The `estimate_price` Ask tool's declared arguments (`openings`, `home_type`, `complexity`) do not match `estimatePrice({ lines, ... })`; that mismatch predates this change and was not touched. Also pre-existing: the `PRICING` table in `functions/ask/_lib/pricing.mjs` is an older regional-average copy (reviewed 2026-08-21) and no longer matches `src/data/pricing.ts` (Mark's prices, 2026-09-26); e.g. 5 double-hungs is $4,850–$10,400 on the site calculator but $5,850–$10,900 from the Ask mirror. Sync it (or delete the tool) before relying on Ask for numbers.
 
+### 2026-09-29 — SEO striking-distance titles and descriptions
+
+- Area pages, `/areas`, `/about`, `/gallery` have new titles (50-60 chars) and descriptions (130-155, with "free in-home measure" and "written estimate"). Area titles are `Window Replacement in {City}, WA | Clearview Windows`; Vancouver is `Vancouver, WA Window Replacement | ...` because the home page already owns the first form. Baseline numbers and follow-ups are in `docs/seo-log.md`.
+- Duplicate slash URLs needed no code change: Cloudflare already answers `/x/` with `308 -> /x`, and canonical, `og:url`, sitemap and internal links are slash-free. `/areas/portland/` now also 301s straight to `/areas` (Portland is not served).
+- Guard: `npm run test:seo` (after `npm run build`, in CI) checks missing/duplicate/over-length titles and descriptions, canonical == own URL, sitemap == canonical set, and `_redirects` loops. Four older pages exceed the limits and are listed as known exceptions to fix later.
+- After merge (Keith): Search Console URL Inspection → Request Indexing for the changed pages; re-check clicks/impressions/CTR/position at 14 and 28 days.
+
 ## Outstanding
 
 | | |

@@ -1,8 +1,8 @@
 ---
 name: Battle Ground
 region: Clark County
-title: Window replacement in Battle Ground, WA
-description: Replacement and new-construction window installation for Battle Ground, WA homes — measured on site with a written estimate.
+title: Window Replacement in Battle Ground, WA
+description: Window replacement in Battle Ground, WA. Free in-home measure, then a written estimate before anything is ordered. Call (564) 208-0801 to book.
 published: true
 faq:
   - question: Is Battle Ground mostly older housing or new construction?

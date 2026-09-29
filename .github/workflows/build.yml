@@ -39,3 +39,4 @@ jobs:
       - run: npm run test:review-request
       - run: npm run eval:build-plan
       - run: npm run build
+      - run: npm run test:seo

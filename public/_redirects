@@ -9,6 +9,8 @@
 # page no longer builds. Google had this indexed, so send it to the areas
 # index instead of a bare 404.
 /areas/portland /areas 301
+# Trailing-slash form goes straight to /areas too (one hop, not slash-strip then 301).
+/areas/portland/ /areas 301
 
 # The old guide moved when we dropped install-method terminology from customer copy (2026-09-29).
 /guides/full-frame-vs-insert /guides/what-your-openings-need 301
