@@ -187,6 +187,44 @@ const submit = (env, body) => call(sign.onRequest, env, { method: 'POST', path: 
 }
 
 {
+  // Race: the link is revoked (Mark sends a new one) after the request passed its checks.
+  const env = freshEnv();
+  const id = await approvedQuote(env);
+  const t = tokenOf((await call(share.onRequestPost, env, { method: 'POST', body: { quoteId: id } })).body.url);
+  const db = env.QUOTES_DB;
+  const original = db.prepare;
+  db.prepare = (sql) => {
+    if (/^\s*UPDATE quotes SET signature_method = 'digital', signature_svg/.test(sql)) {
+      db.raw.prepare(`UPDATE quote_sign_links SET revoked_at = '2026-01-01T00:00:00.000Z'`).run();
+    }
+    return original(sql);
+  };
+  const raced = await submit(env, { t, name: 'Pat Doe', strokes, consent: true });
+  db.prepare = original;
+  assert.equal(raced.status, 410, 'a link revoked mid-request cannot finalize the quote');
+  assert.equal(db.raw.prepare(`SELECT status FROM quotes WHERE id = ?`).get(id).status, 'draft');
+  assert.equal(db.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 0);
+
+  // Invoice failure after the signature is saved: the customer still sees success,
+  // quote and link evidence are both recorded, and the invoice is finalized later.
+  const env2 = freshEnv();
+  const id2 = await approvedQuote(env2);
+  const t2 = tokenOf((await call(share.onRequestPost, env2, { method: 'POST', body: { quoteId: id2 } })).body.url);
+  const db2 = env2.QUOTES_DB;
+  const orig2 = db2.prepare;
+  db2.prepare = (sql) => (/FROM invoices WHERE quote_id/.test(sql) ? { bind() { return this; }, first: async () => { throw new Error('invoice down'); }, all: async () => { throw new Error('invoice down'); }, run: async () => { throw new Error('invoice down'); } } : orig2(sql));
+  const quiet = console.error;
+  console.error = () => {};
+  const ok = await submit(env2, { t: t2, name: 'Pat Doe', strokes, consent: true });
+  console.error = quiet;
+  db2.prepare = orig2;
+  assert.equal(ok.status, 200, 'an invoice hiccup never reports a saved signature as failed');
+  assert.equal(db2.raw.prepare(`SELECT status FROM quotes WHERE id = ?`).get(id2).status, 'finalized');
+  assert.equal(db2.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 1, 'link evidence lands with the signature');
+  pass('finalization is atomic with the live link; invoice failures are recovered separately');
+}
+
+{
   const page = fs.readFileSync('src/pages/sign.astro', 'utf8');
   const view = fs.readFileSync('src/pages/internal/quotes/view.astro', 'utf8');
   const config = fs.readFileSync('astro.config.mjs', 'utf8');

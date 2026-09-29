@@ -44,7 +44,8 @@ export function createD1({ schemaFiles = [] } = {}) {
       try {
         const out = statements.map((s) => s._exec());
         db.exec('COMMIT');
-        return out.map(() => ({ success: true }));
+        // Like D1: one result per statement, with its affected-row count.
+        return out.map((info) => ({ success: true, meta: { changes: Number(info?.changes ?? 0), last_row_id: Number(info?.lastInsertRowid ?? 0) } }));
       } catch (error) {
         db.exec('ROLLBACK');
         throw error;
