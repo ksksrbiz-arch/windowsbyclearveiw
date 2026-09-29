@@ -209,7 +209,9 @@ const poster = await getImage({
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 8%;
+    /* stone-craftsman is a tall photo; 25% keeps the gable and upper windows in
+       the wide desktop crop instead of sky alone. */
+    object-position: 50% 25%;
     opacity: 0;
     transition: opacity 1100ms ease;
     pointer-events: none;
