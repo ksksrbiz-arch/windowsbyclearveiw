@@ -13,6 +13,7 @@ const banned = [
   [/full[- ]frame/i, 'full-frame'],
   [/\binserts?\b(?!\s*(?:into|adjacent))/i, 'insert'],
   [/\bpocket (?:window|replacement|install)/i, 'pocket'],
+  [/\b(?:the|your|chosen|each|per) methods?\b|\bmethod per opening/i, 'install method'],
   [/block[- ]frame|block and fin|nail(?:ing)?[- ]fin(?! window| unit| set)/i, 'method jargon'],
 ];
 // Nailing-fin is fine on new-construction copy; this list keeps the rule narrow.

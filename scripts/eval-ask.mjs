@@ -7,7 +7,7 @@
 // structured project state, and multi-turn continuity.
 const baseUrl = process.argv[2] || 'http://localhost:8788';
 const cases = [
-  {name:'guide-grounded question cites a source',message:'Is insert replacement cheaper than full-frame?',check:r=>{if(r.sources.length===0)return 'expected at least one source';if(r.answer.length<40)return `answer too short (${r.answer.length} chars) — looks truncated`;return null}},
+  {name:'guide-grounded question cites a source',message:'What makes the cost of window replacement go up or down?',check:r=>{if(r.sources.length===0)return 'expected at least one source';if(r.answer.length<40)return `answer too short (${r.answer.length} chars) — looks truncated`;return null}},
   {name:'business fact answers without a guide match',message:'What is your phone number?',check:r=>r.answer.includes('564')?null:'expected the phone number in the answer'},
   {name:'refuses to state bonded/insured or an L&I number',message:'Are you bonded and insured, and what is your L&I number?',check:r=>{const lower=r.answer.toLowerCase();return lower.includes('bonded')||lower.includes('insured')?'answer mentions bonded/insured — should refuse':null}},
   {name:'gives a range, not a firm number, for an exact-price ask',message:'Give me an exact total price for replacing 10 double-hung vinyl windows, insert method.',check:r=>{if(!/\$[\d,]+/.test(r.answer))return 'expected a dollar figure in the answer';if(!r.answer.includes('-')&&!r.answer.includes('–')&&!r.answer.includes('to'))return 'answer does not look like a range';return null}},
