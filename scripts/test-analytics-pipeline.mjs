@@ -109,6 +109,11 @@ async function get(env) {
   assert.ok(/renderPipeline/.test(page) && /data-pipe="collected"/.test(page));
   assert.ok(/not the same customers followed through/.test(page), 'the page says stage totals are not a traced cohort');
   assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML/.test(page));
+  const unavailable = page.slice(page.indexOf('function renderPipeline'), page.indexOf("setText('[data-pipe-window]', `Last"));
+  assert.ok(/querySelectorAll\('\[data-pipe\]'\)/.test(unavailable), 'a failed refresh clears earlier numbers');
+  const endpoint = fs.readFileSync('functions/internal/api/analytics.js', 'utf8');
+  const pipelineFn = endpoint.slice(endpoint.indexOf('async function pipelineRows'), endpoint.indexOf('function json('));
+  assert.ok(!/LIMIT/.test(pipelineFn), 'pipeline totals are never computed from a truncated row set');
   pass('the page renders the pipeline with textContent and states its counting limits');
 }
 

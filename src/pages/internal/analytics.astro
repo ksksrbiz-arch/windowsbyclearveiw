@@ -209,6 +209,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   function renderPipeline(pipe: Pipeline | undefined) {
     if (!pipe || pipe.status !== 'ok') {
       setText('[data-pipe-window]', 'Unavailable');
+      // Never leave numbers from an earlier load on screen after a failed refresh.
+      document.querySelectorAll('[data-pipe]').forEach((el) => {
+        if (el instanceof HTMLElement) el.textContent = '—';
+      });
       renderTextList('pipeRates', [['Business data could not be loaded.', '']]);
       renderTextList('pipeAttention', []);
       return;
