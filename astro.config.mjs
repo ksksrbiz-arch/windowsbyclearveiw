@@ -43,6 +43,7 @@ export default defineConfig({
         return (
           path !== '/estimate/sent' &&
           path !== '/estimate/problem' &&
+          path !== '/sign' &&
           path !== '/internal' &&
           !path.startsWith('/internal/') &&
           !/^\/404\/?$/.test(path)

@@ -1,0 +1,268 @@
+---
+// Customer quote review + e-signature. Reached only through a link Mark sends
+// (/sign#<token>). Browsers never send a URL fragment to servers or in
+// Referer, and GA4's page_location drops it; the script also clears it from
+// the address bar. The API receives the token in a header/body only.
+// All customer-provided and quote data is written with textContent.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, telHref } from '../data/site';
+import { contractTerms } from '../data/contractTerms';
+---
+<BaseLayout title="Review and sign your quote" description="Review and sign your Clearview Windows quote." path="/sign" noindex>
+  <section class="section sg">
+    <div class="wrap sg-wrap">
+      <p class="kicker">Your quote</p>
+      <h1 data-sg-title>Loading your quote…</h1>
+      <p class="sg-error" data-sg-error role="alert" hidden></p>
+
+      <div data-sg-body hidden>
+        <p class="lede" data-sg-lede></p>
+        <dl class="sg-meta">
+          <div><dt>Quote</dt><dd data-sg-number></dd></div>
+          <div><dt>Date</dt><dd data-sg-date></dd></div>
+          <div><dt>For</dt><dd data-sg-customer></dd></div>
+          <div><dt>Address</dt><dd data-sg-address></dd></div>
+        </dl>
+
+        <section class="sg-card" aria-labelledby="sg-items-h">
+          <h2 id="sg-items-h">Work included</h2>
+          <ul class="sg-items" data-sg-items></ul>
+          <div class="sg-totals">
+            <div><span>Subtotal</span><span data-sg-subtotal></span></div>
+            <div data-sg-discount-row hidden><span data-sg-discount-label>Discount</span><span data-sg-discount></span></div>
+            <div class="sg-total"><span>Total</span><span data-sg-total></span></div>
+          </div>
+        </section>
+
+        <section class="sg-card sg-terms" aria-labelledby="sg-terms-h">
+          <h2 id="sg-terms-h">Terms</h2>
+          <p>{contractTerms.paymentTerms}</p>
+          <p>{contractTerms.changeOrders}</p>
+          <p>{contractTerms.warranty}</p>
+          <p>{contractTerms.delays}</p>
+          <p>{contractTerms.governingLaw}</p>
+          <h3>{contractTerms.rightToCancel.heading}</h3>
+          {contractTerms.rightToCancel.body.map((para) => <p>{para}</p>)}
+          <p class="sg-ack">{contractTerms.acknowledgement}</p>
+        </section>
+
+        <section class="sg-card" data-sg-sign aria-labelledby="sg-sign-h">
+          <h2 id="sg-sign-h">Sign</h2>
+          <label class="sg-field">
+            Your full name
+            <input type="text" data-sg-name maxlength="200" autocomplete="name" />
+          </label>
+          <div class="sg-pad-wrap">
+            <canvas data-sg-canvas aria-label="Signature pad. Sign with your finger, a stylus, or a mouse."></canvas>
+            <button type="button" class="btn btn-ghost sg-clear" data-sg-clear>Clear</button>
+          </div>
+          <p class="sg-hint">Sign in the box with your finger, a stylus or a mouse.</p>
+          <label class="sg-consent">
+            <input type="checkbox" data-sg-consent />
+            <span>I have read this quote and the terms above, and I agree to sign it electronically. My electronic signature has the same effect as signing on paper.</span>
+          </label>
+          <button type="button" class="btn btn-primary sg-submit" data-sg-submit>Sign quote</button>
+          <p class="sg-error" data-sg-sign-error role="alert" hidden></p>
+        </section>
+
+        <section class="sg-card sg-done" data-sg-done hidden>
+          <h2>Signed</h2>
+          <p data-sg-done-line></p>
+          <p>Clearview will be in touch to schedule the next step. Questions? Call <a href={telHref()}>{site.phoneDisplay}</a>.</p>
+        </section>
+      </div>
+
+      <p class="sg-foot">{site.legalName} · <a href={telHref()}>{site.phoneDisplay}</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const PAD_W = 600;
+  const PAD_H = 180;
+  const money = (cents: number) => (cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const q = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T | null;
+  const text = (sel: string, value: string) => { const el = q(sel); if (el) el.textContent = value; };
+
+  function initSign() {
+    const token = location.hash.replace(/^#/, '');
+    // Take the token out of the address bar right away so it isn't copied, bookmarked or screenshotted.
+    if (token && history.replaceState) history.replaceState(null, '', location.pathname);
+    const errorEl = q('[data-sg-error]');
+    const fail = (message: string) => {
+      text('[data-sg-title]', 'We could not open this quote');
+      if (errorEl) { errorEl.hidden = false; errorEl.textContent = message; }
+    };
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+      fail('This signing link is incomplete. Please open the full link you were sent, or call Clearview.');
+      return;
+    }
+
+    let strokes: [number, number][][] = [];
+    const canvas = q<HTMLCanvasElement>('[data-sg-canvas]');
+    const ctx = canvas?.getContext('2d') || null;
+
+    function setupPad() {
+      if (!canvas || !ctx) return;
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = PAD_W * ratio;
+      canvas.height = PAD_H * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#111214';
+      canvas.style.touchAction = 'none';
+      let current: [number, number][] | null = null;
+      // Coordinates are normalized to the 600x180 pad whatever size the canvas is on screen.
+      const point = (e: PointerEvent): [number, number] => {
+        const r = canvas.getBoundingClientRect();
+        const x = Math.min(PAD_W, Math.max(0, ((e.clientX - r.left) / r.width) * PAD_W));
+        const y = Math.min(PAD_H, Math.max(0, ((e.clientY - r.top) / r.height) * PAD_H));
+        return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+      };
+      canvas.addEventListener('pointerdown', (e) => {
+        canvas.setPointerCapture(e.pointerId);
+        current = [point(e)];
+        strokes.push(current);
+        ctx.beginPath();
+        ctx.moveTo(current[0][0], current[0][1]);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!current) return;
+        const p = point(e);
+        current.push(p);
+        ctx.lineTo(p[0], p[1]);
+        ctx.stroke();
+      });
+      const stop = () => { current = null; };
+      canvas.addEventListener('pointerup', stop);
+      canvas.addEventListener('pointercancel', stop);
+      q('[data-sg-clear]')?.addEventListener('click', () => {
+        strokes = [];
+        ctx.clearRect(0, 0, PAD_W, PAD_H);
+      });
+    }
+
+    function showSigned(name: string, at: string | null) {
+      const sign = q('[data-sg-sign]');
+      const done = q('[data-sg-done]');
+      if (sign) sign.hidden = true;
+      if (done) done.hidden = false;
+      const when = at ? new Date(at).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) : '';
+      text('[data-sg-done-line]', `Signed by ${name || 'the customer'}${when ? ` on ${when}` : ''}. A copy of this page is your record.`);
+      text('[data-sg-title]', 'Your quote is signed');
+    }
+
+    function render(quote: any) {
+      const body = q('[data-sg-body]');
+      if (body) body.hidden = false;
+      text('[data-sg-title]', `Quote for ${quote.customer.name || 'you'}`);
+      text('[data-sg-lede]', 'Please review the work and terms below, then sign at the bottom.');
+      text('[data-sg-number]', quote.number);
+      text('[data-sg-date]', new Date(quote.createdAt).toLocaleDateString('en-US', { dateStyle: 'long' }));
+      text('[data-sg-customer]', quote.customer.name || '—');
+      text('[data-sg-address]', [quote.customer.address, quote.customer.city].filter(Boolean).join(', ') || '—');
+      const list = q('[data-sg-items]');
+      if (list) {
+        list.replaceChildren();
+        for (const item of quote.items) {
+          const li = document.createElement('li');
+          const head = document.createElement('div');
+          head.className = 'sg-item-head';
+          const label = document.createElement('strong');
+          label.textContent = item.quantity > 1 ? `${item.label} × ${item.quantity}` : item.label;
+          const total = document.createElement('span');
+          total.textContent = money(item.lineTotalCents);
+          head.append(label, total);
+          li.append(head);
+          if (item.description) {
+            const d = document.createElement('p');
+            d.textContent = item.description;
+            li.append(d);
+          }
+          list.append(li);
+        }
+      }
+      text('[data-sg-subtotal]', money(quote.subtotalCents));
+      if (quote.discountCents > 0) {
+        const row = q('[data-sg-discount-row]');
+        if (row) row.hidden = false;
+        text('[data-sg-discount-label]', quote.discountReason ? `Discount (${quote.discountReason})` : 'Discount');
+        text('[data-sg-discount]', `−${money(quote.discountCents)}`);
+      }
+      text('[data-sg-total]', money(quote.totalCents));
+      if (quote.status === 'signed') showSigned(quote.signedName, quote.signedAt);
+      else setupPad();
+    }
+
+    fetch('/api/quote-sign', { headers: { accept: 'application/json', 'x-sign-token': token } })
+      .then(async (r) => ({ ok: r.ok, data: await r.json().catch(() => ({})) }))
+      .then(({ ok, data }) => (ok && data.quote ? render(data.quote) : fail(data.error || 'This signing link is not valid.')))
+      .catch(() => fail('We could not load your quote. Check your connection and try again.'));
+
+    const submit = q<HTMLButtonElement>('[data-sg-submit]');
+    submit?.addEventListener('click', async () => {
+      const signError = q('[data-sg-sign-error]');
+      const show = (m: string) => { if (signError) { signError.hidden = false; signError.textContent = m; } };
+      if (signError) signError.hidden = true;
+      const name = (q<HTMLInputElement>('[data-sg-name]')?.value || '').trim();
+      const consent = Boolean(q<HTMLInputElement>('[data-sg-consent]')?.checked);
+      if (name.length < 2) return show('Please type your full name.');
+      if (!strokes.some((s) => s.length > 1)) return show('Please sign in the box.');
+      if (!consent) return show('Please check the box to agree to sign electronically.');
+      submit.disabled = true;
+      submit.textContent = 'Signing…';
+      try {
+        const r = await fetch('/api/quote-sign', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({ t: token, name, strokes, consent }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Could not sign. Please try again.');
+        showSigned(name, data.signedAt || new Date().toISOString());
+        q('[data-sg-done]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (error) {
+        show(error instanceof Error ? error.message : 'Could not sign. Please try again.');
+        submit.disabled = false;
+        submit.textContent = 'Sign quote';
+      }
+    });
+  }
+
+  initSign();
+</script>
+
+<style>
+  .sg-wrap{max-width:46rem}
+  .sg h1{margin:.1rem 0 .5rem}
+  .sg-error{margin:.75rem 0;padding:.8rem 1rem;border:1px solid var(--line);border-left:3px solid #b3261e;border-radius:var(--radius);background:var(--paper-sunk)}
+  .sg-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem 1rem;margin:1rem 0}
+  .sg-meta dt{font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .sg-meta dd{margin:.1rem 0 0;overflow-wrap:anywhere}
+  .sg-card{margin:1rem 0;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}
+  .sg-card h2{margin:0 0 .6rem;font-size:var(--step-1)}
+  .sg-items{list-style:none;margin:0;padding:0}
+  :global(.sg-items li){padding:.6rem 0;border-bottom:1px solid var(--line)}
+  :global(.sg-item-head){display:flex;justify-content:space-between;gap:.75rem}
+  :global(.sg-item-head strong){overflow-wrap:anywhere}
+  :global(.sg-item-head span){font-variant-numeric:tabular-nums;white-space:nowrap}
+  :global(.sg-items li p){margin:.25rem 0 0;color:var(--ink-soft);font-size:var(--step--1)}
+  .sg-totals{margin-top:.6rem;display:grid;gap:.3rem;font-variant-numeric:tabular-nums}
+  .sg-totals div{display:flex;justify-content:space-between}
+  .sg-total{font-weight:800;font-size:var(--step-1);padding-top:.35rem;border-top:1px solid var(--line)}
+  .sg-terms p,.sg-terms h3{font-size:var(--step--1)}
+  .sg-ack{font-weight:700}
+  .sg-field{display:grid;gap:.3rem;font-weight:650;margin-bottom:.8rem}
+  .sg-field input{font:inherit;padding:.7rem .8rem;border:1px solid var(--line);border-radius:var(--radius);width:100%;box-sizing:border-box}
+  .sg-pad-wrap{position:relative}
+  .sg-pad-wrap canvas{display:block;width:100%;aspect-ratio:600/180;border:1px dashed var(--ink-soft);border-radius:var(--radius);background:#fff}
+  .sg-clear{position:absolute;top:.4rem;right:.4rem}
+  .sg-hint{margin:.35rem 0 .8rem;color:var(--ink-soft);font-size:var(--step--1)}
+  .sg-consent{display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1rem;font-size:var(--step--1)}
+  .sg-consent input{margin-top:.2rem;width:1.2rem;height:1.2rem;flex:none}
+  .sg-submit{width:100%}
+  .sg-foot{margin-top:1.5rem;color:var(--ink-soft);font-size:var(--step--1)}
+  @media(max-width:520px){.sg-meta{grid-template-columns:1fr}}
+</style>
