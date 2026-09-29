@@ -1,8 +1,8 @@
 ---
 name: Ridgefield
 region: Clark County
-title: Window replacement in Ridgefield, WA
-description: Window replacement and new-construction installs for Ridgefield, WA — one of the state's fastest-growing cities, from historic downtown to new subdivisions.
+title: Window Replacement in Ridgefield, WA
+description: Window replacement in Ridgefield, WA, from historic downtown to new subdivisions. Free in-home measure and a written estimate. Call (564) 208-0801.
 published: true
 faq:
   - question: Is Ridgefield mostly new construction now?

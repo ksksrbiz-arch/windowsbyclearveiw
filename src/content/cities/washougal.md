@@ -1,8 +1,8 @@
 ---
 name: Washougal
 region: Clark County
-title: Window replacement in Washougal, WA
-description: Window replacement for Washougal, Washington homes, including river-side and newer east-county builds.
+title: Window Replacement in Washougal, WA
+description: Window replacement in Washougal, WA, from river-side homes to newer east-county builds. Free in-home measure and a written estimate. Call (564) 208-0801.
 published: true
 faq:
   - question: Does Gorge wind change what you'd recommend for a Washougal house?

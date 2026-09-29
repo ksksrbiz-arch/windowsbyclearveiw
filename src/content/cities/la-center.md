@@ -1,8 +1,8 @@
 ---
 name: La Center
 region: Clark County
-title: Window replacement in La Center, WA
-description: Replacement windows for La Center, WA homes and acreage — measured on site with a written estimate before anything is ordered.
+title: Window Replacement in La Center, WA
+description: Window replacement in La Center, WA for homes and acreage. Free in-home measure, then a written estimate before anything is ordered. (564) 208-0801
 published: true
 faq:
   - question: Is La Center too small or too far out for a normal quote?

@@ -1,8 +1,8 @@
 ---
 name: Vancouver
 region: Clark County
-title: Window replacement in Vancouver, WA
-description: Replacement and new-construction window installation for Vancouver, Washington homes — Hazel Dell, Salmon Creek, Felida, Orchards, and the rest of the city.
+title: Vancouver, WA Window Replacement
+description: Window replacement in Vancouver, WA, from Hazel Dell to Felida. Free in-home measure, then a written estimate before anything is ordered. (564) 208-0801
 published: true
 faq:
   - question: Which Vancouver neighborhoods do you actually cover?

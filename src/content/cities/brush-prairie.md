@@ -1,8 +1,8 @@
 ---
 name: Brush Prairie
 region: Clark County
-title: Window replacement in Brush Prairie, WA
-description: Replacement and new-construction window installation for Brush Prairie, Washington — acreage homes, older ranches, and new builds off 117th and 182nd.
+title: Window Replacement in Brush Prairie, WA
+description: Window replacement in Brush Prairie, WA, from acreage homes to new builds. Free in-home measure and a written estimate. Call (564) 208-0801.
 published: true
 faq:
   - question: Does an unincorporated area like Brush Prairie change how you quote a job?

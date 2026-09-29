@@ -1,8 +1,8 @@
 ---
 name: Woodland
 region: Cowlitz County
-title: Window replacement in Woodland, WA
-description: Window replacement for Woodland, WA on the Lewis River, just north of Clark County — mostly older housing stock in this diked river town.
+title: Window Replacement in Woodland, WA
+description: Window replacement in Woodland, WA, on the Lewis River. Free in-home measure, then a written estimate before anything is ordered. (564) 208-0801
 published: true
 faq:
   - question: Is Woodland outside your normal service area?

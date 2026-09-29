@@ -1,8 +1,8 @@
 ---
 name: Camas
 region: Clark County
-title: Window replacement in Camas, WA
-description: Window replacement and new-construction installs for Camas, WA — from the old paper-mill-town core to newer builds toward Lacamas Lake.
+title: Window Replacement in Camas, WA
+description: Window replacement in Camas, WA for older downtown homes and newer builds. Free in-home measure, then a written estimate before anything is ordered.
 published: true
 faq:
   - question: Does the old downtown core need different windows than a newer North Camas subdivision?
