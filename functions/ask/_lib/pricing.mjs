@@ -1,21 +1,21 @@
-// Kept in sync with src/data/pricing.ts BY HAND — Pages Functions in this
+// Kept in sync with src/data/pricing.ts BY HAND (npm run test:ask-pricing fails on drift) — Pages Functions in this
 // repo never import from src/ (see functions/api/estimate.js). This is the
 // same numbers, same formula, as the public cost calculator
 // (src/components/CostEstimator.astro) — the chatbot's price tool must
 // never produce a number that disagrees with the page a visitor can see
 // right next to it.
 export const PRICING = {
-  reviewedAt: '2026-08-21',
+  reviewedAt: '2026-09-26',
   rounding: 50,
   openings: [
-    { id: 'slider', label: 'Slider', low: 1000, high: 2500 },
-    { id: 'double-hung', label: 'Double-hung', low: 900, high: 1500 },
-    { id: 'single-hung', label: 'Single-hung', low: 850, high: 1500 },
-    { id: 'picture', label: 'Picture / fixed', low: 700, high: 2000 },
-    { id: 'casement', label: 'Casement', low: 1000, high: 1500 },
-    { id: 'awning', label: 'Awning', low: 1000, high: 2000 },
-    { id: 'bay-bow', label: 'Bay or bow', low: 2000, high: 8000 },
-    { id: 'sliding-door', label: 'Sliding patio door', low: 3000, high: 7000, isDoor: true },
+    { id: 'slider', label: 'Slider', low: 600, high: 1400 },
+    { id: 'double-hung', label: 'Double-hung', low: 700, high: 1400 },
+    { id: 'single-hung', label: 'Single-hung', low: 700, high: 1400 },
+    { id: 'picture', label: 'Picture / fixed', low: 600, high: 1500 },
+    { id: 'casement', label: 'Casement', low: 700, high: 1500 },
+    { id: 'awning', label: 'Awning', low: 800, high: 1500 },
+    { id: 'bay-bow', label: 'Bay or bow', low: 800, high: 1500 },
+    { id: 'sliding-door', label: 'Sliding patio door', low: 1800, high: 2800, isDoor: true },
     { id: 'french-door', label: 'French door', low: 3000, high: 5000, isDoor: true },
   ],
   materials: [
@@ -24,13 +24,15 @@ export const PRICING = {
   ],
   brands: [
     { id: 'cascade', label: 'Cascade', low: 0, high: 0 },
-    { id: 'milgard', label: 'Milgard', low: 100, high: 200 },
+    { id: 'milgard', label: 'Milgard', low: 100, high: 100 },
   ],
   fullFrame: { low: 800, high: 2000 },
   modifiers: [
     { id: 'third-story-plus', label: 'Third story or higher', perOpening: true, low: 100, high: 200 },
     { id: 'oversize', label: 'Oversize or custom shapes', perOpening: true, low: 150, high: 450 },
-    { id: 'trim', label: 'New interior or exterior trim', perOpening: true, low: 250, high: 250 },
+    { id: 'rot-repair', label: 'Suspected rot at the sills', perOpening: false, low: 0, high: 0 },
+    { id: 'trim', label: 'New interior or exterior trim', perOpening: true, low: 150, high: 150 },
+    { id: 'triple-pane', label: 'Triple-pane glass', perOpening: true, low: 200, high: 200 },
     { id: 'metal-removal', label: 'Removing old metal-frame windows', perOpening: true, low: 150, high: 150 },
   ],
 };
