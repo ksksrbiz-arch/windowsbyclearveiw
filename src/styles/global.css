@@ -662,6 +662,10 @@ input:focus, textarea:focus, select:focus {
   border-radius: 0;
   padding: 1.15rem 0 1.15rem 3rem;
   counter-increment: step;
+  /* A grid item won't shrink below its longest word; without these a long
+     email address in a step pushed /new-construction 19px wider than a phone. */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .steps li::before {

@@ -41,3 +41,4 @@ jobs:
       - run: npm run eval:build-plan
       - run: npm run build
       - run: npm run test:seo
+      - run: npm run test:form-patterns
