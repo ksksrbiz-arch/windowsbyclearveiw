@@ -419,6 +419,9 @@ h4 { font-size: var(--step-1); margin: 0 0 var(--space-3xs); }
 .page-hero h1 {
   max-width: 16ch;
   color: inherit;
+  /* "accountability." at ~48px is wider than a 320px screen; break it rather than scroll sideways. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .page-hero .kicker {
