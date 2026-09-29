@@ -154,7 +154,7 @@ const estimateForm = fs.readFileSync(path.join(root, 'src', 'components', 'Estim
 assert.match(estimateForm, /<form[^>]+action=["']\/api\/estimate["']/);
 assert.match(estimateForm, /<form[^>]+method=["']post["']/);
 assert.match(estimateForm, /<form[^>]+enctype=["']multipart\/form-data["']/);
-assert.match(estimateForm, /form\.dataset\.bound\s*===\s*'true'/);
+assert.match(estimateForm, /form\.dataset\.bound\s*===\s*['"]true['"]/);
 assert.match(estimateForm, /button\.disabled\s*=\s*true/);
 assert.match(estimateForm, /new FormData\(form\)/);
 assert.match(estimateForm, /astro:page-load/);
