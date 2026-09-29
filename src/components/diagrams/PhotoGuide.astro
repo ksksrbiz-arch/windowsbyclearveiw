@@ -2,8 +2,8 @@
 import { Image } from 'astro:assets';
 import { findWork, newBuildWork } from '../../data/work';
 
-interface Props { type: 'installation' | 'flashing' | 'symptoms' | 'cost'; heading?: string | null; }
-const { type, heading = null } = Astro.props;
+interface Props { type: 'installation' | 'flashing' | 'symptoms' | 'cost'; heading?: string | null; concise?: boolean; }
+const { type, heading = null, concise = false } = Astro.props;
 
 const photo = {
   installation: {
@@ -20,16 +20,16 @@ const photo = {
     ],
   },
   flashing: {
-    intro: 'Flashing is easiest to understand from actual installation work: the opening is prepared first, then the layers overlap so water has a path out.',
+    intro: concise ? 'Sill, side, and head flashing tie the window into the WRB.' : 'Flashing is easiest to understand from actual installation work: the opening is prepared first, then the layers overlap so water has a path out.',
     source: 'Pexels',
     sourceUrl: 'https://www.pexels.com/photo/crop-worker-applying-sealant-on-seam-of-window-in-house-6124242/',
     image: 'https://images.pexels.com/photos/6124242/pexels-photo-6124242.jpeg?auto=compress&cs=tinysrgb&w=1800',
     alt: 'Clearview installation showing a newly installed window in a sheathed opening.',
-    title: 'Water needs a way out.',
+    title: concise ? 'Lap each layer to shed water.' : 'Water needs a way out.',
     points: [
-      ['01', 'SILL', 'The bottom of the opening is protected first, so water has a path back outside.'],
-      ['02', 'SIDES', 'Side flashing connects the window to the prepared opening.'],
-      ['03', 'TOP', 'Head flashing overlaps the wall weather barrier and directs water outward.'],
+      ['01', 'SILL', concise ? 'Sill pan first; maintain drainage to the exterior.' : 'The bottom of the opening is protected first, so water has a path back outside.'],
+      ['02', 'SIDES', concise ? 'Tie side flashing into the window and WRB.' : 'Side flashing connects the window to the prepared opening.'],
+      ['03', 'TOP', concise ? 'Lap head flashing over the WRB.' : 'Head flashing overlaps the wall weather barrier and directs water outward.'],
     ],
   },
   symptoms: {
@@ -85,7 +85,7 @@ const isClearviewPhoto = Boolean(clearviewPhoto?.image);
     <div class="photo-lead-copy">
       <p class="eyebrow">What to look for</p>
       <h3>{photo.title}</h3>
-      <p>Use the photo to orient yourself, then use the numbered notes to decide what matters at your own opening.</p>
+      <p>{concise ? 'Reference detail; verify against unit specs and project requirements.' : 'Use the photo to orient yourself, then use the numbered notes to decide what matters at your own opening.'}</p>
     </div>
   </div>
 
@@ -99,8 +99,8 @@ const isClearviewPhoto = Boolean(clearviewPhoto?.image);
   </div>
 
   <div class="photo-rule">
-    <strong>Use the photograph as a reference, not a diagnosis.</strong>
-    <span>Every house has different framing, cladding, access, and opening conditions.</span>
+    <strong>{concise ? 'Verify the installation against project specs.' : 'Use the photograph as a reference, not a diagnosis.'}</strong>
+    <span>{concise ? 'Conditions vary by unit and wall assembly.' : 'Every house has different framing, cladding, access, and opening conditions.'}</span>
   </div>
 
   <figcaption class="photo-credit">

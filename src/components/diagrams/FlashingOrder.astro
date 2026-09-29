@@ -1,7 +1,7 @@
 ---
 import PhotoGuide from './PhotoGuide.astro';
 
-interface Props { heading?: string | null; }
-const { heading = 'Window flashing: see the work, then follow the layers.' } = Astro.props;
+interface Props { heading?: string | null; builder?: boolean; }
+const { heading = 'Window flashing: see the work, then follow the layers.', builder = false } = Astro.props;
 ---
-<PhotoGuide type="flashing" heading={heading} />
+<PhotoGuide type="flashing" heading={heading} concise={builder} />

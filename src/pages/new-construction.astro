@@ -18,24 +18,24 @@ const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp
 // things. See process.astro for the homeowner-side equivalent.
 const sequence = [
   {
-    name: 'Send the schedule',
-    text: 'Send the plan set or window schedule. We verify sizes, styles, and quantities before quoting.',
+    name: 'Plans and schedule',
+    text: 'Send plans or the opening schedule. We verify sizes, styles, and count before pricing.',
   },
   {
-    name: 'Written quote and lead time',
-    text: 'Get one written price for the job and the manufacturer lead time for scheduling.',
+    name: 'Quote and lead time',
+    text: 'Receive one written project price and the manufacturer lead time.',
   },
   {
-    name: 'Order placed, framing checked',
-    text: 'Before the set date, we confirm the rough openings match the quoted sizes. Changes after ordering can delay the job.',
+    name: 'Framing check',
+    text: 'We confirm rough openings match the approved schedule before set day.',
   },
   {
-    name: 'Set day, on your sequence',
-    text: 'After sheathing and wrap, we set and flash each window before siding or stucco.',
+    name: 'Window set',
+    text: 'We install after sheathing and WRB, ahead of siding or stucco.',
   },
   {
-    name: 'Walk and sign-off',
-    text: 'We review each opening with your super or PM and hand the elevation back ready for the next trade.',
+    name: 'Walk-through',
+    text: 'We review the openings with your superintendent or PM and release the elevation to the next trade.',
   },
 ];
 
@@ -43,7 +43,7 @@ const rowSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
   name: 'How Clearview Windows sets windows on a new-construction build',
-  description: 'The sequence Clearview Windows follows on a builder or GC job, from the opening schedule to the final walk with the site super.',
+  description: 'Builder window installation sequence: schedule review, framing check, installation, and walk-through.',
   step: sequence.map((step) => ({
     '@type': 'HowToStep',
     name: step.name,
@@ -74,19 +74,18 @@ const schema = { '@context': 'https://schema.org', '@graph': [serviceSchema, row
 
 const scopeSplit = {
   clearview: [
-    'Measuring every opening against the schedule before ordering, not after',
-    'Ordering the units and carrying the manufacturer lead time',
-    'Sill pan flashing, setting the unit plumb and square, and shimming it',
-    'Jamb and head flashing lapped over the fins in the correct order',
-    'Taping the fins into the weather-resistive barrier',
-    'A walk-through with your super or PM before we leave the site',
+    'Verify openings against the schedule before ordering',
+    'Order units and track manufacturer lead times',
+    'Set, shim, and flash the windows',
+    'Integrate flashing with the weather-resistive barrier',
+    'Walk the openings with your superintendent or PM',
   ],
   builder: [
-    'Framing the rough openings to the sizes on the schedule',
-    'Sheathing and housewrap (or equivalent WRB) on before we set',
-    'A safe, clear path to each opening — no scaffolding or material staged in front of it',
-    'Telling us about sequence changes before your set date, not on it',
-    'Siding, trim, or stucco crews scheduled after our walk-through, not around us',
+    'Frame to the approved rough-opening sizes',
+    'Complete sheathing and WRB before installation',
+    'Provide safe, clear access to each opening',
+    'Notify us of schedule or sequence changes',
+    'Schedule siding, stucco, or EIFS after the walk-through',
   ],
 };
 
@@ -102,7 +101,7 @@ const projectInquiryMailto = site.email
 ---
 <BaseLayout
   title="New construction windows for builders and GCs"
-  description="Window setting for new Clark County builds: send the plan or window schedule, get a written quote and lead time, and windows set to your sequence."
+  description="New-construction window installation for Clark County builders. Send plans or a window schedule for project pricing and lead time."
   path="/new-construction"
   crumbs={[{ name: 'New construction', href: '/new-construction' }]}
   ogImageSrc={ogPhoto.image}
@@ -112,19 +111,17 @@ const projectInquiryMailto = site.email
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">For builders and GCs</p>
-      <h1>New construction window installation for builders and general contractors.</h1>
+      <h1>New-construction window installs for builders and GCs.</h1>
       <p class="lede">
-        Send the plan or window schedule, get a written quote with a lead time attached, and a set
-        date your siding crew can actually plan around.
+        Nailing-fin windows, installed to your schedule.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-light" href={projectInquiryMailto}>Email the plans or schedule</a>
+        <a class="btn btn-light" href={projectInquiryMailto}>Send plans or schedule</a>
         <a class="btn btn-ghost btn-on-dark" href={telHref()}>Call {site.phoneDisplay}</a>
       </div>
       <p class="hero-note">
-        Homeowner replacing windows in a house that is already standing? See{' '}
-        <a href="/replacement">window replacement</a> instead. Setting a patio door on the build?
-        See <a href="/sliding-glass-doors">sliding glass doors</a>.
+        Existing-home work? <a href="/replacement">Window replacement</a>. Patio doors?{' '}
+        <a href="/sliding-glass-doors">Sliding glass doors</a>.
       </p>
     </div>
     <p class="hero-photo-credit">Clearview job photo — new build with windows set</p>
@@ -133,22 +130,18 @@ const projectInquiryMailto = site.email
   <section class="section">
     <div class="wrap split" data-reveal>
       <article>
-        <p class="rule-label">How we work</p>
-        <h2>From schedule to set day.</h2>
+        <p class="rule-label">Installation sequence</p>
+        <h2>From plans to set day.</h2>
         <p>
-          We verify the schedule, confirm each opening, order the windows, and install to your build sequence.
-        </p>
-        <p>
-          Schedule changes can delay siding and other trades. Let us know early so we can confirm a workable set date.
+          We verify the opening schedule, provide project pricing and lead time, then install to your sequence.
         </p>
       </article>
       <article>
-        <p class="rule-label">The business behind it</p>
+        <p class="rule-label">Contractor registration</p>
         <p>
-          {site.legalName} is a Washington-registered LLC (UBI {site.ubiNumber}) and WA L&amp;I contractor
-          (registration {site.lniNumber}).{' '}
+          {site.legalName} · WA UBI {site.ubiNumber} · L&amp;I {site.lniNumber}.{' '}
           <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
-            Verify our registration
+            Verify registration
           </a>.
         </p>
       </article>
@@ -158,26 +151,19 @@ const projectInquiryMailto = site.email
   <section class="section section-sunk" id="schedule">
     <div class="wrap split" data-reveal>
       <article>
-        <p class="rule-label">What we need from you</p>
-        <h2>The window schedule, or the plan set.</h2>
-        <p>
-          Either works. We confirm sizes, styles, and quantities, flag unclear details, and quote the full job—not a per-window guess.
-        </p>
-        <p>
-          Include any required bedroom egress, tempered glass, or U-factor specifications. We order to the plans and code requirements, not a default spec.
-        </p>
+        <p class="rule-label">For project pricing</p>
+        <h2>Send plans or a window schedule.</h2>
+        <p>We price the full scope and flag missing or conflicting specs before ordering.</p>
       </article>
       <article>
-        <p class="rule-label">Bring to the first call</p>
+        <p class="rule-label">Include</p>
         <ul class="plain-list">
-          <li>Plan set or window schedule</li>
-          <li>Approximate opening count</li>
-          <li>Window style, brand preference if any, and finish</li>
-          <li>Target set date and who to coordinate sequence with</li>
+          <li>Opening count, sizes, and styles</li>
+          <li>Brand, finish, and required glass or code specs</li>
+          <li>Target set date and site contact</li>
         </ul>
         <p class="fine-print">
-          Not sure which materials or brands fit the spec? See{' '}
-          <a href="/window-features">vinyl vs fiberglass, glass packages, and every style</a>.
+          <a href="/window-features">Window and glass options</a>
         </p>
       </article>
     </div>
@@ -185,33 +171,30 @@ const projectInquiryMailto = site.email
 
   <section class="section">
     <div class="wrap" data-reveal>
-      <p class="rule-label">The part that decides whether it leaks</p>
-      <h2>Rough opening and flashing expectations.</h2>
-      <p class="lede">
-        Correct opening prep and flashing protect the assembly. Here are the rough-opening requirements and installation sequence.
-      </p>
+      <p class="rule-label">Opening requirements</p>
+      <h2>Prep and flashing.</h2>
       <div class="ro-notes">
         <article>
-          <h3>Opening tolerance</h3>
+          <h3>Rough opening</h3>
           <p>
-            Follow the ordered unit's rough-opening spec; it varies by product. Keep openings within 1/4&Prime; of square corner-to-corner for a clean install and trim reveal.
+            Follow the unit spec. Frame within 1/4&Prime; of square, corner to corner.
           </p>
         </article>
         <article>
-          <h3>Sequence at the wall</h3>
+          <h3>Weather barrier</h3>
           <p>
-            Sheathing and housewrap (or another weather-resistive barrier) must be installed and properly lapped before we set. We do not install into bare, unwrapped openings.
+            Sheathing and properly lapped WRB must be complete before installation. No bare, unwrapped openings.
           </p>
         </article>
       </div>
-      <FlashingOrder />
+      <FlashingOrder heading="Flashing sequence" builder />
     </div>
   </section>
 
   <section class="section section-sunk">
     <div class="wrap" data-reveal>
-      <p class="rule-label">In this order, every build</p>
-      <h2>The set, start to finish.</h2>
+      <p class="rule-label">Project sequence</p>
+      <h2>From schedule to handoff.</h2>
       <ol class="steps">
         {sequence.map((step) => (
           <li><strong>{step.name}.</strong> {step.text}</li>
@@ -222,25 +205,22 @@ const projectInquiryMailto = site.email
 
   <section class="section">
     <div class="wrap" data-reveal>
-      <p class="rule-label">Jobsite coordination</p>
-      <h2>What has to be true before we set a date.</h2>
-      <p class="lede">
-        These jobsite conditions help keep the set date on track:
-      </p>
+      <p class="rule-label">Before set day</p>
+      <h2>Site ready. Schedule confirmed.</h2>
       <ul class="plain-list">
-        <li>Openings framed to the sizes on the schedule we quoted — not "close enough"</li>
-        <li>Sheathing and housewrap on, with a clear path to every opening</li>
-        <li>A super or PM we can reach directly if the schedule moves, in either direction</li>
-        <li>Siding, stucco, or EIFS scheduled after our walk-through, so nothing gets flashed over a problem</li>
-        <li>A rain-day understanding — flashing goes in dry or it does not go in at all</li>
+        <li>Rough openings match the approved schedule</li>
+        <li>Sheathing and WRB are complete; access is clear</li>
+        <li>Superintendent or PM is available for schedule changes</li>
+        <li>Siding, stucco, or EIFS follows our walk-through</li>
+        <li>Openings and flashing are dry on install day</li>
       </ul>
     </div>
   </section>
 
   <section class="section section-sunk">
     <div class="wrap" data-reveal>
-      <p class="rule-label">Scope, in writing</p>
-      <h2>What Clearview handles. What the builder handles.</h2>
+      <p class="rule-label">Scope</p>
+      <h2>Clearview / Builder</h2>
       <div class="scope-split">
         <article class="scope-card">
           <h3>Clearview</h3>
@@ -256,7 +236,7 @@ const projectInquiryMailto = site.email
         </article>
       </div>
       <p class="fine-print">
-        We flag out-of-scope work or openings that differ from the schedule before proceeding.
+        We price schedule changes and out-of-scope work before proceeding.
       </p>
     </div>
   </section>
@@ -264,10 +244,10 @@ const projectInquiryMailto = site.email
   <section class="section">
     <div class="wrap newbuild-band" data-reveal>
       <div>
-        <p class="rule-label">From a framed job</p>
-        <h2>Set, flashed, and out of the siding crew&rsquo;s way.</h2>
+        <p class="rule-label">Completed work</p>
+        <h2>Installed and ready for the next trade.</h2>
         <p class="lede">
-          Windows set plumb, sill flashed, and nailing fins integrated with the weather barrier—ready for the next trade.
+          See a recent new-construction installation.
         </p>
         <p class="section-link"><a href="/gallery">More of the work</a></p>
       </div>
@@ -286,30 +266,28 @@ const projectInquiryMailto = site.email
 
   <section class="section section-sunk" id="project-inquiry">
     <div class="wrap is-narrow" data-reveal>
-      <p class="rule-label">Start a project</p>
-      <h2>Send the plans or the schedule. We take it from there.</h2>
-      <p>
-        Send the plans or use the builder estimate form:
-      </p>
+        <p class="rule-label">Request pricing</p>
+        <h2>Send plans or request an estimate.</h2>
       <ol class="steps">
         <li>
-          <strong>Email the plans or schedule.</strong> A marked-up elevation works too.
-          <a href={projectInquiryMailto}>{site.email}</a> opens with the project details we need.
+          <strong>Email plans or schedule.</strong> Marked-up elevations welcome.
+          <a href={projectInquiryMailto}>{site.email}</a>.
         </li>
         <li>
-          <strong>Prefer the form?</strong> Choose "Builder or GC" and include the city, opening count, and target date.
-          <a href="/estimate?role=builder">Open the builder estimate form</a>.
+          <strong>Use the form.</strong> Choose "Builder or GC" and add the city, opening count, and target date.
+          <a href="/estimate?role=builder">Request pricing</a>.
         </li>
       </ol>
       <p class="fine-print">
-        We’ll follow up with a written quote and lead time before ordering.
+        Written price and lead time before ordering.
       </p>
     </div>
   </section>
 
   <CtaBar
-    heading="Tell us the opening schedule."
-    body="Send the plan or the opening count and we will come back with a set date and a written estimate."
+    heading="Price your next window package."
+    body="Send the plans or schedule for project pricing and lead time."
+    showToolLink={false}
   />
 </BaseLayout>
 

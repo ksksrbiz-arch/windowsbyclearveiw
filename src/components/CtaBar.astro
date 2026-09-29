@@ -5,11 +5,13 @@ interface Props {
   /** Override when a page has a more specific next step than "get measured". */
   heading?: string;
   body?: string;
+  showToolLink?: boolean;
 }
 
 const {
   heading = 'Get your free estimate.',
   body = 'We measure the glass, sills, and trim in person, then give you a number in writing — not a guess from a photo.',
+  showToolLink = true,
 } = Astro.props;
 ---
 <section class="cta-band">
@@ -19,9 +21,9 @@ const {
       <p class="cta-label">Next step</p>
       <strong>{heading}</strong>
       <p>{body}</p>
-      <p class="cta-tool-link">
+      {showToolLink && <p class="cta-tool-link">
         <a href="/tools/window-replacement-cost-calculator">Need a rough number first? Use the free cost estimator <span aria-hidden="true">→</span></a>
-      </p>
+      </p>}
     </div>
     <div class="cta-actions">
       <a class="cta-phone" href={telHref()}>
