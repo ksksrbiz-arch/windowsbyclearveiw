@@ -5,8 +5,9 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dist = new URL('../dist', import.meta.url).pathname;
+const dist = fileURLToPath(new URL('../dist', import.meta.url));
 if (!existsSync(dist)) { console.error('dist/ not found. Run `npm run build` first.'); process.exit(1); }
 const decode = (s) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 function* walk(dir) {

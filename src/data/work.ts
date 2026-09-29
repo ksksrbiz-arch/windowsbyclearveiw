@@ -485,5 +485,11 @@ export function workKindLabel(kind: WorkKind): string {
   return KIND_LABELS[kind];
 }
 
-/** The strongest single elevation — used for the hero and social preview. */
-export const heroPhoto = findWork('blue-gable-arch') ?? workPhotos[0];
+/**
+ * The single elevation used for the home hero (the still that the logo sting
+ * crossfades into) and as the default social preview. It needs bright sky and a
+ * readable house under the dark hero wash: the previous pick, blue-gable-arch,
+ * is dark siding under a grey sky and washed out to a near-black smear behind the
+ * headline.
+ */
+export const heroPhoto = findWork('stone-craftsman') ?? workPhotos[0];

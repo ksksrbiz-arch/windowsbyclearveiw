@@ -10,8 +10,9 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
 if (!existsSync(dist)) {
   console.error('dist/ not found. Run `npm run build` before `npm run test:seo`.');
@@ -39,7 +40,7 @@ function* walk(dir) {
 const pages = [];
 for (const file of walk(dist)) {
   const html = readFileSync(file, 'utf8');
-  let path = '/' + relative(dist, file).replace(/\.html$/, '');
+  let path = '/' + relative(dist, file).replace(/\\/g, '/').replace(/\.html$/, '');
   if (path === '/index') path = '/';
   if (path.startsWith('/internal') || path === '/404' || /noindex/i.test(html)) continue;
   const pick = (re) => { const m = html.match(re); return m ? decode(m[1]).trim() : ''; };
