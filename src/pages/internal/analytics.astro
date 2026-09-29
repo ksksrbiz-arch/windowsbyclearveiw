@@ -11,6 +11,25 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div class="an-hero-actions"><button class="btn btn-ghost" type="button" data-refresh>Refresh</button></div>
   </div>
 
+  <section class="an-section" aria-labelledby="an-pipe-h">
+    <div class="an-head">
+      <div><p class="kicker">Your business</p><h2 id="an-pipe-h">Requests to revenue</h2></div>
+      <span class="an-meta" data-pipe-window>—</span>
+    </div>
+    <p class="an-note">Counted from your own quotes, jobs and payments. Requests and quotes are not linked records, so each stage is its own count for the period, not the same customers followed through.</p>
+    <div class="an-stats an-stats-5">
+      <article class="an-stat"><span>Estimate requests</span><strong data-pipe="leads">—</strong><small>from the website form</small></article>
+      <article class="an-stat"><span>Quotes written</span><strong data-pipe="quotes">—</strong><small data-pipe="quotedValue">—</small></article>
+      <article class="an-stat"><span>Quotes signed</span><strong data-pipe="signed">—</strong><small data-pipe="signedValue">—</small></article>
+      <article class="an-stat"><span>Jobs</span><strong data-pipe="jobs">—</strong><small><span data-pipe="completed">—</span> completed</small></article>
+      <article class="an-stat"><span>Collected</span><strong data-pipe="collected">—</strong><small>on jobs from this period</small></article>
+    </div>
+    <div class="an-grid">
+      <article class="an-panel"><h3>Rates</h3><div data-list="pipeRates"></div></article>
+      <article class="an-panel"><h3>Needs attention</h3><div data-list="pipeAttention"></div></article>
+    </div>
+  </section>
+
   <section class="an-section" aria-labelledby="an-leads-h">
     <div class="an-head">
       <div><p class="kicker">Estimate requests</p><h2 id="an-leads-h">Where leads came from</h2></div>
@@ -72,9 +91,22 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     landingPages?: Row[];
     weekly?: { weekOf: string; value: number }[];
   };
-  type Payload = { ga4: Ga4; leads: Leads; links: Record<string, string> };
+  type Pipeline = {
+    status: 'ok' | 'unavailable';
+    days?: number;
+    staleDraftDays?: number;
+    leads?: number | null;
+    quotes?: { created: number; quotedCents: number; signed: number; signedCents: number; staleDrafts: number; staleDraftCents: number; medianDaysToSign: number | null } | null;
+    jobs?: { created: number; completed: number; collectedCents: number | null } | null;
+    awaitingJob?: number | null;
+    rates?: { quotesPerLead: number | null; signedPerQuote: number | null };
+  };
+  type Payload = { ga4: Ga4; leads: Leads; pipeline?: Pipeline; links: Record<string, string> };
 
   const nf = new Intl.NumberFormat('en-US');
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const dollars = (cents: number | null | undefined) => (typeof cents === 'number' ? money.format(cents / 100) : '—');
+  const count = (value: number | null | undefined) => (typeof value === 'number' ? nf.format(value) : '—');
   const $ = (selector: string) => document.querySelector(selector);
 
   function renderList(name: string, rows: Row[] | undefined, empty: string) {
@@ -142,6 +174,56 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     }
   }
 
+  function renderTextList(name: string, lines: [string, string][]) {
+    const host = $(`[data-list="${name}"]`);
+    if (!(host instanceof HTMLElement)) return;
+    host.replaceChildren();
+    for (const [labelText, valueText] of lines) {
+      const item = document.createElement('div');
+      item.className = 'an-row';
+      const label = document.createElement('span');
+      label.className = 'an-row-label';
+      label.textContent = labelText;
+      const value = document.createElement('strong');
+      value.textContent = valueText;
+      item.append(label, value);
+      host.append(item);
+    }
+  }
+
+  function renderPipeline(pipe: Pipeline | undefined) {
+    if (!pipe || pipe.status !== 'ok') {
+      setText('[data-pipe-window]', 'Unavailable');
+      renderTextList('pipeRates', [['Business data could not be loaded.', '']]);
+      renderTextList('pipeAttention', []);
+      return;
+    }
+    const q = pipe.quotes;
+    const j = pipe.jobs;
+    const pct = (value: number | null | undefined) => (typeof value === 'number' ? `${value}%` : '—');
+    setText('[data-pipe-window]', `Last ${pipe.days ?? 90} days`);
+    setText('[data-pipe="leads"]', count(pipe.leads));
+    setText('[data-pipe="quotes"]', count(q?.created));
+    setText('[data-pipe="quotedValue"]', q ? `${dollars(q.quotedCents)} quoted` : '—');
+    setText('[data-pipe="signed"]', count(q?.signed));
+    setText('[data-pipe="signedValue"]', q ? `${dollars(q.signedCents)} signed` : '—');
+    setText('[data-pipe="jobs"]', count(j?.created));
+    setText('[data-pipe="completed"]', count(j?.completed));
+    setText('[data-pipe="collected"]', dollars(j?.collectedCents));
+    const avgSigned = q && q.signed > 0 ? dollars(Math.round(q.signedCents / q.signed)) : '—';
+    renderTextList('pipeRates', [
+      ['Quotes written per estimate request', pct(pipe.rates?.quotesPerLead)],
+      ['Quotes signed per quote written', pct(pipe.rates?.signedPerQuote)],
+      ['Typical days from quote to signature', typeof q?.medianDaysToSign === 'number' ? `${q.medianDaysToSign} days` : '—'],
+      ['Average signed quote', avgSigned],
+    ]);
+    const stale = q?.staleDrafts ?? 0;
+    renderTextList('pipeAttention', [
+      [`Draft quotes older than ${pipe.staleDraftDays ?? 14} days`, q ? `${nf.format(stale)}${stale ? ` · ${dollars(q.staleDraftCents)}` : ''}` : '—'],
+      ['Finalized quotes not yet a job', count(pipe.awaitingJob)],
+    ]);
+  }
+
   function renderLeads(leads: Leads) {
     if (leads.status !== 'ok') {
       setText('[data-leads-total]', 'Unavailable');
@@ -171,6 +253,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       }
       if (!response.ok) throw new Error('bad status');
       const data = (await response.json()) as Payload;
+      renderPipeline(data.pipeline);
       renderLeads(data.leads);
       renderGa4(data.ga4);
       document.querySelectorAll('[data-link]').forEach((el) => {
@@ -216,7 +299,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .an-link:hover,.an-link:focus-visible{border-color:var(--accent)}
   .an-link span{color:var(--ink-soft);font-size:var(--step--1)}
   .an-status{color:var(--ink-soft);font-size:var(--step--1)}
-  @media(max-width:900px){.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .an-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+  @media(max-width:900px){.an-stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.an-hero{align-items:flex-start;flex-direction:column}.an-grid,.an-links{grid-template-columns:1fr}}
   @media(max-width:420px){.an-stats{grid-template-columns:1fr}}
 </style>

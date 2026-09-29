@@ -248,6 +248,13 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Nextdoor:** guides carry a plain "Share on Nextdoor" link using Nextdoor's Share Plugin (`nextdoor.com/sharekit/`; no script, no application, nothing sent until clicked, so no privacy-policy change). Mark runs no Nextdoor ads, so the Conversions API (needs approval from Nextdoor and an ads account plus pixel ID) was not built. The Publishing API is approval-based and "primarily for advertising partners"; apply via Nextdoor's Publishing API form only if posting to Mark's business page from the site becomes worth pursuing.
 - **Still to do outside the repo:** the GA4 service-account setup (Google Cloud + GA4 property access + two Cloudflare variables), assigned to Cowork.
 
+### 2026-09-29 — Analytics: requests-to-revenue pipeline
+
+- `/internal/analytics` now opens with **Requests to revenue** (last 90 days), counted from D1 with no setup: estimate requests, quotes written (+ $ quoted), quotes signed (+ $ signed, by `signed_at`), jobs (non-cancelled) and completed, and $ collected (`job_payments` on jobs created in the window). Rates: quotes per request, signed per quote, median days quote→signature, average signed quote. *Needs attention*: draft quotes older than 14 days (all-time backlog, with $) and finalized quotes with no job (exact SQL `NOT EXISTS`).
+- Logic lives in `functions/internal/_lib/pipeline-summary.mjs` (pure, integer cents). The endpoint returns aggregates only (no names/ids) and fails soft per table: no `jobs` table → jobs unknown; no `job_payments` → collected unknown (not $0).
+- **Limit, stated on the page:** leads and quotes are not linked in D1, so stages are independent windowed counts, not a traced cohort; lead-source → revenue attribution is impossible until a `lead_id` is stored on quotes. That is the next step if Mark wants "which source makes money".
+- Tests: `scripts/test-analytics-pipeline.mjs` (real SQLite via `scripts/_lib/d1-sqlite.mjs`), run by `npm run test:analytics`.
+
 ## Outstanding
 
 | | |

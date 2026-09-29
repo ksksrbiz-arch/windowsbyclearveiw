@@ -1,0 +1,93 @@
+// Pure aggregation of the sales pipeline for the internal Analytics page:
+// estimate requests -> quotes -> signed quotes -> jobs -> money collected.
+// Deterministic: it counts rows and sums integer cents. No network, no AI.
+//
+// Leads and quotes are not linked in D1 (see functions/api/_data/schema.sql),
+// so stage counts are independent windowed counts, not a traced cohort. The
+// page labels them that way; rates are "per request in the same window".
+
+const DAY = 24 * 60 * 60 * 1000;
+const STALE_DRAFT_DAYS = 14;
+
+const cents = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+};
+
+const inWindow = (value, cutoff, now) => {
+  const t = Date.parse(value);
+  return Number.isFinite(t) && t >= cutoff && t <= now + DAY ? t : null;
+};
+
+const rate = (part, whole) => (whole > 0 ? Math.round((part / whole) * 1000) / 10 : null);
+
+function median(values) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const m = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  return Math.round(m * 10) / 10;
+}
+
+export function summarizePipeline({ leads, quotes, jobs, awaitingJob = null } = {}, { now = Date.now(), days = 90 } = {}) {
+  const cutoff = now - days * DAY;
+  const staleBefore = now - STALE_DRAFT_DAYS * DAY;
+
+  const leadCount = Array.isArray(leads)
+    ? leads.filter((row) => inWindow(row?.created_at, cutoff, now) !== null).length
+    : null;
+
+  let quoteStats = null;
+  if (Array.isArray(quotes)) {
+    quoteStats = { created: 0, quotedCents: 0, signed: 0, signedCents: 0, staleDrafts: 0, staleDraftCents: 0 };
+    const daysToSign = [];
+    for (const row of quotes) {
+      const created = Date.parse(row?.created_at);
+      const status = String(row?.status || '');
+      // Open drafts are an all-time backlog, not a windowed count.
+      if (status === 'draft' && Number.isFinite(created) && created < staleBefore) {
+        quoteStats.staleDrafts += 1;
+        quoteStats.staleDraftCents += cents(row?.total_cents);
+      }
+      if (inWindow(row?.created_at, cutoff, now) !== null) {
+        quoteStats.created += 1;
+        quoteStats.quotedCents += cents(row?.total_cents);
+      }
+      const signedAt = inWindow(row?.signed_at, cutoff, now);
+      if (signedAt !== null) {
+        quoteStats.signed += 1;
+        quoteStats.signedCents += cents(row?.total_cents);
+        if (Number.isFinite(created) && signedAt >= created) daysToSign.push((signedAt - created) / DAY);
+      }
+    }
+    quoteStats.medianDaysToSign = median(daysToSign);
+  }
+
+  let jobStats = null;
+  if (Array.isArray(jobs)) {
+    jobStats = { created: 0, completed: 0, collectedCents: 0, paymentsKnown: jobs.every((row) => row?.paid_cents !== undefined) };
+    for (const row of jobs) {
+      if (String(row?.status || '') === 'cancelled') continue;
+      if (inWindow(row?.created_at, cutoff, now) !== null) {
+        jobStats.created += 1;
+        jobStats.collectedCents += cents(row?.paid_cents);
+      }
+      if (inWindow(row?.completed_at, cutoff, now) !== null) jobStats.completed += 1;
+    }
+    if (!jobStats.paymentsKnown) jobStats.collectedCents = null;
+  }
+
+  return {
+    days,
+    staleDraftDays: STALE_DRAFT_DAYS,
+    leads: leadCount,
+    quotes: quoteStats,
+    jobs: jobStats,
+    // All-time count of finalized quotes with no job yet (exact, from SQL).
+    awaitingJob: Number.isInteger(awaitingJob) && awaitingJob >= 0 ? awaitingJob : null,
+    rates: {
+      quotesPerLead: quoteStats && leadCount !== null ? rate(quoteStats.created, leadCount) : null,
+      signedPerQuote: quoteStats ? rate(quoteStats.signed, quoteStats.created) : null,
+    },
+  };
+}
