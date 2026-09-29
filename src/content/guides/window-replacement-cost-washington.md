@@ -8,11 +8,11 @@ updated: 2026-08-30
 order: 4
 faq:
   - question: How much does one window cost in Washington?
-    answer: Public 2026 guides often put a typical installed vinyl unit in the mid hundreds to low thousands, depending on size, glass, and whether the job is insert or full-frame. A measure beats any average.
+    answer: Public 2026 guides often put a typical installed vinyl unit in the mid hundreds to low thousands, depending on size, glass, and how much work the opening needs. A measure beats any average.
   - question: Is there still a federal tax credit for windows?
     answer: The Section 25C energy-efficient home improvement credit ended for property placed in service after December 31, 2025. Do not count on it for a 2026 install. Some Washington utilities still offer window rebates. Those change by fuel type and U-factor, so we check your utility at estimate time.
   - question: Why is a whole-house price so wide?
-    answer: Ten small inserts in a ranch is a different job from fifteen full-frame units on a two-story with custom sizes. Count, method, material, and access swing the total more than the brand name on the glass.
+    answer: Ten small windows in a ranch is a different job from fifteen larger units on a two-story with custom sizes and openings that need work. Count, scope, material, and access swing the total more than the brand name on the glass.
 heroImage: ../../assets/work/gray-side-slider.jpg
 heroImageAlt: Side elevation of a gray lap-siding house with a new white slider and upper windows, showing the finished scale of a replacement project.
 heroImageCredit: Clearview job photo — finished side elevation
@@ -26,7 +26,7 @@ Short answer: published 2026 industry data puts a standard vinyl replacement win
 
 Four things move the bid:
 
-1. **Method.** [Insert vs full-frame](/guides/full-frame-vs-insert) changes labor and finish work more than most product upgrades.
+1. **Scope.** [What each opening needs](/guides/what-your-openings-need) changes labor and finish work more than most product upgrades.
 2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either, a step up in the window line itself — Cascade to Milgard — adds cost per opening for the same install labour.
 3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or code.
 4. **Access.** A first-floor slider is not a third-story picture window over a roof.
@@ -35,7 +35,7 @@ Permits, if the city requires them for the scope, sit on top of that.
 
 ## Ranges, not quotes
 
-That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once method and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and anything full-frame push well past a "typical opening" number built around a standard vinyl insert.
+That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once scope and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and openings that need extra work push well past a "typical opening" number built around a standard vinyl window in a sound opening.
 
 Treat all of it as a starting point. Your openings, your trim, and your method will move the number — that is what a measure is for.
 
@@ -58,7 +58,7 @@ The federal 25C window credit is over for new 2026 installs. Some utilities in W
 
 The single biggest cause of "why is this quote double the other one" is not markup — it's scope. Before comparing numbers, check that both bids include the same:
 
-- **Method per opening.** An insert quote and a full-frame quote for the same window are not the same job, even at the same price.
+- **Approach per opening.** Two quotes for the same window are not the same job if they assume different work at the opening, even at the same price.
 - **Glass package.** Double-pane Low-E and triple-pane are not interchangeable line items.
 - **Haul-away and disposal.** Some bids quietly exclude it.
 - **Permits, if the scope needs one.** A lower bid that skips a required permit is not actually lower.

@@ -35,7 +35,7 @@ Specifically:
   true whether the underlying figures are regional averages or our own
   pricing.
 - A real number requires a site visit. We measure every opening, identify
-  which ones take an insert and which need full-frame replacement, and puts the
+  the right approach for each one, and put the
   result in writing.
 
 **Do not make a financial decision on the strength of a number from this

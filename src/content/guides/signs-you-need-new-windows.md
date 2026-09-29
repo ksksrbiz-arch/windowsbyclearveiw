@@ -31,7 +31,7 @@ That cloud sits inside the insulated glass. You cannot wipe it off. The seal fai
 
 ## 3. Sashes stick, will not stay open, or will not lock
 
-Paint, swelling, and a frame that is no longer square all show up as hardware that fights you. A tune-up is worth trying once. If the opening itself has moved, a new unit — often a [full-frame replacement](/guides/full-frame-vs-insert) — is cleaner than another round of planing.
+Paint, swelling, and a frame that is no longer square all show up as hardware that fights you. A tune-up is worth trying once. If the opening itself has moved, a new unit, with the opening put right (see [what each opening needs](/guides/what-your-openings-need)), is cleaner than another round of planing.
 
 ## 4. The sill is soft, stained, or peeling
 
@@ -57,4 +57,4 @@ A soft sill left two more winters usually costs more to fix than the window itse
 
 ## What to do with this list
 
-If two or more of these are true in the same room, a measure is worth the time. Bring a photo of the elevation and a rough count. We will tell you whether the frames can stay ([insert](/guides/full-frame-vs-insert)) or whether the opening needs to be rebuilt.
+If two or more of these are true in the same room, a measure is worth the time. Bring a photo of the elevation and a rough count. We will tell you what each opening needs in the written estimate ([how we look at it](/guides/what-your-openings-need)).

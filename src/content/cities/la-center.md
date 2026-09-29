@@ -2,7 +2,7 @@
 name: La Center
 region: Clark County
 title: Window replacement in La Center, WA
-description: Replacement windows for La Center, WA homes and acreage — insert and full-frame installs, measured on site with a written estimate before anything is ordered.
+description: Replacement windows for La Center, WA homes and acreage — measured on site with a written estimate before anything is ordered.
 published: true
 faq:
   - question: Is La Center too small or too far out for a normal quote?
@@ -25,6 +25,6 @@ Same rain as the rest of Clark County, same tired sliders and fogged insulated u
 
 ## What we do here
 
-We measure, order, and install from Vancouver — insert or full-frame depending on what the opening actually needs. New construction? We set nailing-fin units once the openings are ready; see [new construction](/new-construction) for what we ask a builder to have in hand first.
+We measure, order, and install from Vancouver — the approach depends on what each opening actually needs, and we put it in the written estimate. New construction? We set nailing-fin units once the openings are ready; see [new construction](/new-construction) for what we ask a builder to have in hand first.
 
 Nearby: [Ridgefield](/areas/ridgefield) and [Vancouver](/areas/vancouver).

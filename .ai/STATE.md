@@ -70,6 +70,8 @@ Direct production execution of `/ask`, `/internal/copilot`, Lead Analyzer, and t
 
 Public pages must not state or imply who performs each step of the work: no team/staff/office claims, no "one-person" disclaimer, no personal owner name. Describe the process instead. The ICM specialists and internal pages may name the owner. See the 2026-09-27 entry in `HANDOFF.md`.
 
+Public pages also must not name install methods (insert, full-frame, pocket, block frame, nail fin) for existing-home replacement; they say Clearview measures every opening and puts the right approach in the written estimate. Guarded by `npm run test:public-terminology`. See the 2026-09-29 entry in `HANDOFF.md`.
+
 ## Known architectural boundaries
 
 Do not turn `.ai/` into a second database. Working artifacts can document decisions, but committed business state must remain in the application's transactional store.

@@ -25,6 +25,6 @@ Most of what we pull out here is original aluminum or first-generation vinyl wit
 
 ## What we do here
 
-We measure each opening for insert or full-frame, set the unit plumb, and seal it for weather that comes in sideways, not straight down. New construction is common out here too — framing off 117th, 182nd, or toward Hockinson, we set nailing-fin units on a scheduled date so your siding crew isn't standing around waiting on us.
+We measure each opening, tell you the right approach in the written estimate, set the unit plumb, and seal it for weather that comes in sideways, not straight down. New construction is common out here too — framing off 117th, 182nd, or toward Hockinson, we set nailing-fin units on a scheduled date so your siding crew isn't standing around waiting on us.
 
 Nearby: [Battle Ground](/areas/battle-ground), [Vancouver](/areas/vancouver), and [Camas](/areas/camas).

@@ -19,7 +19,7 @@ faq:
   - question: Which brand has the better warranty?
     answer: Both are lifetime warranties on vinyl residential product for the original owner, transferring to a limited term for a later owner. Read the actual document for the line you're buying — the fine print on transferability and labor coverage is where warranties actually differ.
   - question: Can I mix brands on one house?
-    answer: It happens less often than mixing insert and full-frame, but yes — a homeowner upgrading a few street-facing openings to Milgard while the rest of the house takes Cascade is a normal way to control budget.
+    answer: It happens less often than mixing different amounts of work across a house, but yes — a homeowner upgrading a few street-facing openings to Milgard while the rest of the house takes Cascade is a normal way to control budget.
   - question: Does the brand change how the window is installed?
     answer: No. The flashing and sealing standard stays the same either way. The brand changes what's in the opening, not how we set it.
 ---
