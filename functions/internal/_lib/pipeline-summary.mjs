@@ -2,9 +2,12 @@
 // estimate requests -> quotes -> signed quotes -> jobs -> money collected.
 // Deterministic: it counts rows and sums integer cents. No network, no AI.
 //
-// Leads and quotes are not linked in D1 (see functions/api/_data/schema.sql),
-// so stage counts are independent windowed counts, not a traced cohort. The
-// page labels them that way; rates are "per request in the same window".
+// The stage totals are independent windowed counts (a quote counts even when
+// it has no linked inquiry). summarizeSourceRevenue() is the traced view: it
+// only credits quotes whose quotes.lead_id points at an inquiry, and reports
+// how many quotes in the window are still unlinked so coverage is visible.
+
+import { sourceLabel } from './lead-sources.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const STALE_DRAFT_DAYS = 14;
@@ -90,4 +93,43 @@ export function summarizePipeline({ leads, quotes, jobs, awaitingJob = null } = 
       signedPerQuote: quoteStats ? rate(quoteStats.signed, quoteStats.created) : null,
     },
   };
+}
+
+export function summarizeSourceRevenue({ leads, quotes } = {}, { now = Date.now(), days = 90, limit = 8 } = {}) {
+  if (!Array.isArray(quotes)) return null;
+  const cutoff = now - days * DAY;
+  const bySource = new Map();
+  const row = (label) => {
+    if (!bySource.has(label)) bySource.set(label, { label, leads: 0, quotes: 0, signed: 0, signedCents: 0, collectedCents: 0 });
+    return bySource.get(label);
+  };
+  for (const lead of Array.isArray(leads) ? leads : []) {
+    if (inWindow(lead?.created_at, cutoff, now) !== null) row(sourceLabel(lead)).leads += 1;
+  }
+  let linked = 0;
+  let unlinked = 0;
+  let paymentsKnown = true;
+  for (const quote of quotes) {
+    const created = inWindow(quote?.created_at, cutoff, now) !== null;
+    const signed = inWindow(quote?.signed_at, cutoff, now) !== null;
+    if (!created && !signed) continue;
+    if (!quote?.lead_id) {
+      if (created) unlinked += 1;
+      continue;
+    }
+    if (created) linked += 1;
+    const entry = row(sourceLabel(quote));
+    if (created) entry.quotes += 1;
+    if (signed) {
+      entry.signed += 1;
+      entry.signedCents += cents(quote?.total_cents);
+    }
+    if (quote?.paid_cents === undefined) paymentsKnown = false;
+    else entry.collectedCents += cents(quote.paid_cents);
+  }
+  const sources = [...bySource.values()]
+    .sort((a, b) => b.signedCents - a.signedCents || b.quotes - a.quotes || b.leads - a.leads || a.label.localeCompare(b.label))
+    .slice(0, limit)
+    .map((entry) => ({ ...entry, collectedCents: paymentsKnown ? entry.collectedCents : null }));
+  return { linkedQuotes: linked, unlinkedQuotes: unlinked, sources };
 }

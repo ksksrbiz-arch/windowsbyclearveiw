@@ -16,7 +16,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       <div><p class="kicker">Your business</p><h2 id="an-pipe-h">Requests to revenue</h2></div>
       <span class="an-meta" data-pipe-window>—</span>
     </div>
-    <p class="an-note">Counted from your own quotes, jobs and payments. Requests and quotes are not linked records, so each stage is its own count for the period, not the same customers followed through.</p>
+    <p class="an-note">Counted from your own quotes, jobs and payments. These totals count every quote, including ones not linked to a website request, so each stage is its own count for the period, not the same customers followed through. The table below follows only linked quotes.</p>
     <div class="an-stats an-stats-5">
       <article class="an-stat"><span>Estimate requests</span><strong data-pipe="leads">—</strong><small>from the website form</small></article>
       <article class="an-stat"><span>Quotes written</span><strong data-pipe="quotes">—</strong><small data-pipe="quotedValue">—</small></article>
@@ -27,6 +27,16 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div class="an-grid">
       <article class="an-panel"><h3>Rates</h3><div data-list="pipeRates"></div></article>
       <article class="an-panel"><h3>Needs attention</h3><div data-list="pipeAttention"></div></article>
+      <article class="an-panel an-wide">
+        <h3>Which sources bring paying work</h3>
+        <p class="an-note" data-source-coverage>—</p>
+        <div class="an-table-wrap">
+          <table class="an-table">
+            <thead><tr><th scope="col">Source</th><th scope="col">Requests</th><th scope="col">Quotes</th><th scope="col">Signed</th><th scope="col">Signed $</th><th scope="col">Collected</th></tr></thead>
+            <tbody data-source-rows></tbody>
+          </table>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -99,6 +109,11 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     quotes?: { created: number; quotedCents: number; signed: number; signedCents: number; staleDrafts: number; staleDraftCents: number; medianDaysToSign: number | null } | null;
     jobs?: { created: number; completed: number; collectedCents: number | null } | null;
     awaitingJob?: number | null;
+    bySource?: {
+      linkedQuotes: number;
+      unlinkedQuotes: number;
+      sources: { label: string; leads: number; quotes: number; signed: number; signedCents: number; collectedCents: number | null }[];
+    } | null;
     rates?: { quotesPerLead: number | null; signedPerQuote: number | null };
   };
   type Payload = { ga4: Ga4; leads: Leads; pipeline?: Pipeline; links: Record<string, string> };
@@ -224,6 +239,45 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     ]);
   }
 
+  function renderSources(pipe: Pipeline | undefined) {
+    const body = $('[data-source-rows]');
+    if (!(body instanceof HTMLElement)) return;
+    body.replaceChildren();
+    const data = pipe?.status === 'ok' ? pipe.bySource : null;
+    if (!data) {
+      setText('[data-source-coverage]', 'Source data could not be loaded.');
+      return;
+    }
+    const total = data.linkedQuotes + data.unlinkedQuotes;
+    setText(
+      '[data-source-coverage]',
+      total
+        ? `${nf.format(data.linkedQuotes)} of ${nf.format(total)} quotes from this period are linked to a website request. Link the others from each quote's page to credit their source.`
+        : 'No quotes in this period yet.',
+    );
+    if (!data.sources.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 6;
+      td.className = 'an-empty';
+      td.textContent = 'No website requests or linked quotes yet.';
+      tr.append(td);
+      body.append(tr);
+      return;
+    }
+    for (const row of data.sources) {
+      const tr = document.createElement('tr');
+      const cells = [row.label, nf.format(row.leads), nf.format(row.quotes), nf.format(row.signed), dollars(row.signedCents), dollars(row.collectedCents)];
+      cells.forEach((text, i) => {
+        const cell = document.createElement(i === 0 ? 'th' : 'td');
+        if (i === 0) cell.setAttribute('scope', 'row');
+        cell.textContent = text;
+        tr.append(cell);
+      });
+      body.append(tr);
+    }
+  }
+
   function renderLeads(leads: Leads) {
     if (leads.status !== 'ok') {
       setText('[data-leads-total]', 'Unavailable');
@@ -254,6 +308,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       if (!response.ok) throw new Error('bad status');
       const data = (await response.json()) as Payload;
       renderPipeline(data.pipeline);
+      renderSources(data.pipeline);
       renderLeads(data.leads);
       renderGa4(data.ga4);
       document.querySelectorAll('[data-link]').forEach((el) => {
@@ -299,6 +354,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .an-link:hover,.an-link:focus-visible{border-color:var(--accent)}
   .an-link span{color:var(--ink-soft);font-size:var(--step--1)}
   .an-status{color:var(--ink-soft);font-size:var(--step--1)}
+  .an-table-wrap{overflow-x:auto}
+  .an-table{width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
+  :global(.an-table th),:global(.an-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere}
   .an-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
   @media(max-width:900px){.an-stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.an-hero{align-items:flex-start;flex-direction:column}.an-grid,.an-links{grid-template-columns:1fr}}

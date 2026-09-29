@@ -16,6 +16,10 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
   </div>
   <p class="qv-error" data-delete-error hidden role="alert"></p>
   <p class="qv-error" data-job-error hidden role="alert"></p>
+  <section class="qv-lead no-print" data-lead-panel hidden aria-label="Website inquiry">
+    <p class="qv-lead-line" data-lead-line></p>
+    <div class="qv-lead-actions" data-lead-actions></div>
+  </section>
 
   <p data-loading>Loading…</p>
   <p class="qv-error" data-error hidden role="alert"></p>
@@ -157,6 +161,63 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
     const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
+    // Which website inquiry this quote came from. Suggestions are exact
+    // phone/email matches and are only linked when Mark clicks one.
+    async function loadLeadLink(quoteId: string) {
+      const panel = document.querySelector('[data-lead-panel]');
+      const line = document.querySelector('[data-lead-line]');
+      const actions = document.querySelector('[data-lead-actions]');
+      if (!(panel instanceof HTMLElement) || !(line instanceof HTMLElement) || !(actions instanceof HTMLElement)) return;
+      const button = (label: string, onClick: () => void) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-ghost';
+        b.textContent = label;
+        b.addEventListener('click', onClick);
+        return b;
+      };
+      const save = async (leadId: number | null) => {
+        actions.querySelectorAll('button').forEach((b) => { (b as HTMLButtonElement).disabled = true; });
+        try {
+          const r = await fetch('/internal/api/quote-lead', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ quoteId, leadId }),
+          });
+          if (!r.ok) throw new Error();
+        } catch {
+          line.textContent = 'Could not update the inquiry link. Try again.';
+        }
+        loadLeadLink(quoteId);
+      };
+      try {
+        const r = await fetch(`/internal/api/quote-lead?quoteId=${encodeURIComponent(quoteId)}`);
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        actions.replaceChildren();
+        panel.hidden = false;
+        if (data.lead) {
+          const when = data.lead.created_at ? new Date(data.lead.created_at).toLocaleDateString('en-US') : '';
+          line.textContent = `From website inquiry: ${data.lead.name}${data.lead.city ? ` · ${data.lead.city}` : ''}${when ? ` · ${when}` : ''}`;
+          const open = document.createElement('a');
+          open.className = 'btn btn-ghost';
+          open.href = '/internal/leads';
+          open.textContent = 'Leads';
+          actions.append(open, button('Unlink', () => save(null)));
+        } else if (Array.isArray(data.suggestions) && data.suggestions.length) {
+          line.textContent = 'Not linked to a website inquiry. These inquiries have the same phone or email. Link the right one so Analytics can credit its source:';
+          for (const s of data.suggestions) {
+            const when = s.created_at ? new Date(s.created_at).toLocaleDateString('en-US') : '';
+            actions.append(button(`Link ${s.name}${when ? ` (${when})` : ''} · same ${s.matchedOn.join(' + ')}`, () => save(s.id)));
+          }
+        } else {
+          line.textContent = 'Not linked to a website inquiry (no inquiry with the same phone or email).';
+        }
+      } catch {
+        panel.hidden = true;
+      }
+    }
+
     async function load() {
       const response = await fetch(`/internal/api/quotes/${encodeURIComponent(id!)}`);
       if (!response.ok) {
@@ -203,6 +264,8 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
         const el = root.querySelector(selector);
         if (el) el.textContent = value;
       };
+
+      loadLeadLink(quote.id);
 
       set('[data-quote-id]', quote.id);
       set('[data-quote-date]', new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
@@ -513,6 +576,9 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 </script>
 
 <style>
+  .qv-lead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 1rem;padding:.7rem .9rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--1)}
+  .qv-lead-line{margin:0;min-width:0;overflow-wrap:anywhere}
+  .qv-lead-actions{display:flex;flex-wrap:wrap;gap:.4rem}
   .qv-toolbar {
     display: flex;
     justify-content: space-between;

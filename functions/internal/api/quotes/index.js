@@ -1,5 +1,6 @@
 import { TERMS_VERSION, json, parseQuoteBody } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
+import { ensureQuoteLeadColumn, parseLeadId, leadExists } from '../../_lib/lead-links.mjs';
 import { sourceSnapshot } from '../../../_lib/build-plan-rules.mjs';
 
 function newQuoteId() {
@@ -73,6 +74,12 @@ export async function onRequestPost(context) {
   if (parsed.error) return json({ error: parsed.error }, 400);
   const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
+  const lead = parseLeadId(body.leadId);
+  if (lead.error) return json({ error: lead.error }, 400);
+  await ensureQuoteLeadColumn(env.QUOTES_DB);
+  if (lead.leadId && !(await leadExists(env.QUOTES_DB, lead.leadId))) {
+    return json({ error: 'The inquiry this quote was started from no longer exists.' }, 400);
+  }
   const status = 'draft';
   const now = new Date().toISOString();
   const id = newQuoteId();
@@ -83,9 +90,9 @@ export async function onRequestPost(context) {
         id, created_at, updated_at, status,
         customer_name, customer_phone, customer_email, customer_address, customer_city, customer_role, notes,
         subtotal_cents, discount_cents, discount_reason, total_cents,
-        terms_version, signature_method, created_by
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-    ).bind(id, now, now, status, name, phone, email, address, city, role, notes, subtotalCents, discountCents, discountReason, totalCents, TERMS_VERSION, signatureMethod, 'mark'),
+        terms_version, signature_method, created_by, lead_id, lead_linked_at
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    ).bind(id, now, now, status, name, phone, email, address, city, role, notes, subtotalCents, discountCents, discountReason, totalCents, TERMS_VERSION, signatureMethod, 'mark', lead.leadId, lead.leadId ? now : null),
     ...cleanItems.map((item, index) => env.QUOTES_DB.prepare(
       `INSERT INTO quote_items (quote_id, sort_order, label, description, quantity, unit_price_cents, line_total_cents)
        VALUES (?,?,?,?,?,?,?)`,
@@ -93,5 +100,5 @@ export async function onRequestPost(context) {
   ]);
 
   const record = await ensureInvoiceForQuote(env.QUOTES_DB, id);
-  return json({ id, status, totalCents, invoiceId: record?.invoice?.id || `INV-${id.replace(/^Q-/, '')}` }, 201);
+  return json({ id, status, totalCents, leadId: lead.leadId, invoiceId: record?.invoice?.id || `INV-${id.replace(/^Q-/, '')}` }, 201);
 }

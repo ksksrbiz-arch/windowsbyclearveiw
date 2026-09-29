@@ -24,6 +24,7 @@
     "test:analytics": "node scripts/test-analytics.mjs && node --disable-warning=ExperimentalWarning scripts/test-analytics-pipeline.mjs",
     "test:estimate": "node --disable-warning=ExperimentalWarning scripts/test-estimate-endpoint.mjs",
     "test:review-request": "node --disable-warning=ExperimentalWarning scripts/test-review-request.mjs",
+    "test:lead-links": "node --disable-warning=ExperimentalWarning scripts/test-lead-links.mjs",
     "test:quote-to-job": "node --disable-warning=ExperimentalWarning scripts/test-quote-to-job-flow.mjs",
     "find:google-place-id": "node scripts/find-google-place-id.mjs"
   },

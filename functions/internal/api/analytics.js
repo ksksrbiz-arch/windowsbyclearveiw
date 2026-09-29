@@ -11,7 +11,8 @@
 
 import { fetchGa4Summary } from '../_lib/ga4.mjs';
 import { summarizeLeadSources } from '../_lib/lead-sources.mjs';
-import { summarizePipeline } from '../_lib/pipeline-summary.mjs';
+import { summarizePipeline, summarizeSourceRevenue } from '../_lib/pipeline-summary.mjs';
+import { ensureQuoteLeadColumn } from '../_lib/lead-links.mjs';
 
 const MAX_LEAD_ROWS = 2000;
 const MAX_PIPELINE_ROWS = 2000;
@@ -22,11 +23,17 @@ const rows = (statement) => statement.all().then((result) => result.results || [
 
 async function pipelineRows(db, since) {
   if (!db) return { quotes: null, jobs: null, awaitingJob: null };
-  const [quotes, jobsWithPayments, awaiting] = await Promise.all([
+  await ensureQuoteLeadColumn(db).catch(() => {});
+  const quoteWindow = `WHERE q.created_at >= ? OR q.signed_at >= ? OR q.status = 'draft' ORDER BY q.created_at DESC LIMIT ?`;
+  const [quotesTraced, jobsWithPayments, awaiting] = await Promise.all([
+    // Traced: the linked inquiry's first-touch source and money collected on
+    // the quote's job. Aggregated in code; names and ids never leave this file.
     rows(db.prepare(
-      `SELECT created_at, status, total_cents, signed_at FROM quotes
-       WHERE created_at >= ? OR signed_at >= ? OR status = 'draft'
-       ORDER BY created_at DESC LIMIT ?`,
+      `SELECT q.created_at, q.status, q.total_cents, q.signed_at, q.lead_id,
+              l.first_referrer, l.first_utm_source,
+              (SELECT COALESCE(SUM(p.amount_paid_cents), 0) FROM jobs j JOIN job_payments p ON p.job_id = j.id
+               WHERE j.quote_id = q.id AND j.status != 'cancelled') AS paid_cents
+       FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id ${quoteWindow}`,
     ).bind(since, since, MAX_PIPELINE_ROWS)),
     rows(db.prepare(
       `SELECT j.created_at, j.status, j.completed_at, COALESCE(p.amount_paid_cents, 0) AS paid_cents
@@ -39,6 +46,13 @@ async function pipelineRows(db, since) {
        WHERE q.status = 'finalized' AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.quote_id = q.id)`,
     )),
   ]);
+  // jobs / job_payments are created lazily; without them, drop only the money column.
+  const quotes = quotesTraced ?? await rows(db.prepare(
+    `SELECT q.created_at, q.status, q.total_cents, q.signed_at, q.lead_id, l.first_referrer, l.first_utm_source
+     FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id ${quoteWindow}`,
+  ).bind(since, since, MAX_PIPELINE_ROWS)) ?? await rows(db.prepare(
+    `SELECT q.created_at, q.status, q.total_cents, q.signed_at FROM quotes q ${quoteWindow}`,
+  ).bind(since, since, MAX_PIPELINE_ROWS));
   // job_payments is created lazily by the Payments page; without it, still count jobs.
   const jobs = jobsWithPayments ?? await rows(db.prepare(
     `SELECT created_at, status, completed_at FROM jobs
@@ -81,7 +95,11 @@ export async function onRequestGet(context) {
   return json({
     ga4,
     pipeline: pipelineAvailable
-      ? { status: 'ok', ...summarizePipeline({ leads: leadRows, ...pipeline }) }
+      ? {
+          status: 'ok',
+          ...summarizePipeline({ leads: leadRows, ...pipeline }),
+          bySource: summarizeSourceRevenue({ leads: leadRows, quotes: pipeline.quotes }),
+        }
       : { status: 'unavailable' },
     leads: leadRows ? { status: 'ok', ...summarizeLeadSources(leadRows) } : { status: 'unavailable' },
     links: {

@@ -107,7 +107,7 @@ async function get(env) {
 {
   const page = fs.readFileSync('src/pages/internal/analytics.astro', 'utf8');
   assert.ok(/renderPipeline/.test(page) && /data-pipe="collected"/.test(page));
-  assert.ok(/not linked records/.test(page), 'the page says stage counts are not a traced cohort');
+  assert.ok(/not the same customers followed through/.test(page), 'the page says stage totals are not a traced cohort');
   assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML/.test(page));
   pass('the page renders the pipeline with textContent and states its counting limits');
 }
