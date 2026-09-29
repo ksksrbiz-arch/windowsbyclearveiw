@@ -4,7 +4,7 @@
 // calculator. Node loads the .ts file directly (type stripping).
 import assert from 'node:assert/strict';
 import { pricing } from '../src/data/pricing.ts';
-import { PRICING, estimatePrice } from '../functions/ask/_lib/pricing.mjs';
+import { PRICING, estimatePrice, estimateFromToolArgs, estimatePriceToolDeclaration } from '../functions/ask/_lib/pricing.mjs';
 
 const pick = (rows, keys) => rows.map((r) => Object.fromEntries(keys.map((k) => [k, r[k] ?? null])));
 
@@ -57,5 +57,23 @@ const five = estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 5 }] 
 assert.equal(five.lowCents, 485000);
 assert.equal(five.highCents, 1040000);
 assert.equal(estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 1 }], modifierIds: ['nope'] }).error, 'Unknown modifier "nope".');
+
+// The estimate_price tool: what the model is told it can send must actually work.
+const decl = estimatePriceToolDeclaration();
+assert.equal(decl.function.name, 'estimate_price');
+const props = decl.function.parameters.properties;
+assert.deepEqual(props.openings.items.properties.kind.enum, pricing.openings.map((o) => o.id), 'tool opening enum = site openings');
+assert.deepEqual(props.modifiers.items.enum, pricing.modifiers.map((m) => m.id), 'tool modifier enum = site modifiers');
+assert.deepEqual(decl.function.parameters.required, ['openings']);
+const viaTool = estimateFromToolArgs({ openings: [{ kind: 'double-hung', quantity: 5 }] });
+assert.equal(viaTool.range, '$4,850 to $10,400');
+assert.ok(!/insert|full[- ]frame/i.test(JSON.stringify(viaTool)), 'tool output does not name install methods');
+const multi = estimateFromToolArgs({ openings: [{ kind: 'slider', quantity: 2 }, { kind: 'sliding-door', quantity: 1 }], material: 'fiberglass', brand: 'milgard', modifiers: ['trim'] });
+assert.equal(multi.lowCents, siteRange({ lines: [{ openingId: 'slider', quantity: 2 }, { openingId: 'sliding-door', quantity: 1 }], materialId: 'fiberglass', brandId: 'milgard', modifierIds: ['trim'] }).lowCents);
+// Bad or missing input returns an error with a hint, never a made-up price.
+for (const bad of [{}, { openings: [] }, { openings: [{ kind: 'gazebo', quantity: 2 }] }, { openings: [{ kind: 'slider', quantity: 0 }] }, { openings: [{ kind: 'slider', quantity: 1 }], modifiers: ['nope'] }, { openings: [{ kind: 'slider', quantity: 1 }], material: 'wood' }]) {
+  const r = estimateFromToolArgs(bad);
+  assert.ok(r.error && r.hint && !r.range, `expected an error for ${JSON.stringify(bad)}`);
+}
 
 console.log('ask pricing sync: ok');

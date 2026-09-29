@@ -105,3 +105,73 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
     basedOn: 'Clearview\'s own published pricing model (same as /tools/window-replacement-cost-calculator), reviewed ' + PRICING.reviewedAt,
   };
 }
+
+// ---------------------------------------------------------------------------
+// The `estimate_price` tool the Ask model calls. The tool declaration and the
+// adapter live here, next to PRICING, so the enums the model sees can never
+// drift from the table. (The declaration used to describe a coarse
+// openings/home_type/complexity input that estimatePrice() no longer accepts,
+// so every call returned "At least one opening ... is required".)
+
+const dollars = (cents) => `$${(cents / 100).toLocaleString('en-US')}`;
+
+export function estimatePriceToolDeclaration() {
+  return {
+    type: 'function',
+    function: {
+      name: 'estimate_price',
+      description:
+        'Calculate a planning-level Clearview price RANGE from the same model as the site cost calculator. ' +
+        'Use only when the visitor asks what it would cost AND has said what is being replaced (window or door types and how many of each). ' +
+        'If counts are missing, ask for them instead of guessing. The result is a range, never a quote or an exact total.',
+      parameters: {
+        type: 'object',
+        properties: {
+          openings: {
+            type: 'array',
+            description: 'One entry per opening type, with how many of that type.',
+            items: {
+              type: 'object',
+              properties: {
+                kind: { type: 'string', enum: PRICING.openings.map((o) => o.id), description: PRICING.openings.map((o) => `${o.id} = ${o.label}`).join('; ') },
+                quantity: { type: 'integer', minimum: 1, maximum: 100 },
+              },
+              required: ['kind', 'quantity'],
+            },
+          },
+          material: { type: 'string', enum: PRICING.materials.map((m) => m.id), description: 'Defaults to vinyl.' },
+          brand: { type: 'string', enum: PRICING.brands.map((b) => b.id), description: 'Window line. Defaults to cascade.' },
+          modifiers: {
+            type: 'array',
+            description: 'Only conditions the visitor actually mentioned.',
+            items: { type: 'string', enum: PRICING.modifiers.map((m) => m.id), description: PRICING.modifiers.map((m) => `${m.id} = ${m.label}`).join('; ') },
+          },
+        },
+        required: ['openings'],
+      },
+    },
+  };
+}
+
+/** Maps the model's tool arguments onto estimatePrice() and shapes a reply the model can quote. */
+export function estimateFromToolArgs(args = {}) {
+  const openings = Array.isArray(args?.openings) ? args.openings : [];
+  const result = estimatePrice({
+    lines: openings.map((o) => ({ openingId: o?.kind, quantity: o?.quantity })),
+    materialId: args?.material || 'vinyl',
+    brandId: args?.brand || 'cascade',
+    modifierIds: Array.isArray(args?.modifiers) ? args.modifiers : [],
+  });
+  if (result.error) {
+    return { error: result.error, hint: 'Ask the visitor for the missing detail (opening types and counts); do not guess a price.' };
+  }
+  return {
+    range: `${dollars(result.lowCents)} to ${dollars(result.highCents)}`,
+    lowCents: result.lowCents,
+    highCents: result.highCents,
+    scope: result.scope,
+    appliedModifiers: result.appliedModifiers,
+    basedOn: result.basedOn,
+    note: 'Planning range only, not a quote. The written estimate after a free in-home measure sets the real number. Do not describe install methods.',
+  };
+}
