@@ -46,3 +46,4 @@ jobs:
       - run: npm run test:charts
       - run: npm run test:internal-styles
       - run: npm run test:general-jobs
+      - run: npm run test:contact-import

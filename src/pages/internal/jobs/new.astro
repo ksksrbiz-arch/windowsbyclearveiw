@@ -9,6 +9,14 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   <form class="gj-form" data-form novalidate>
     <fieldset class="gj-block">
       <legend>Customer</legend>
+      <div class="gj-import">
+        <div class="gj-import-actions">
+          <button class="btn btn-ghost" type="button" data-contact-pick hidden>Import from contacts</button>
+          <label class="btn btn-ghost gj-file">Import a contact file (.vcf)<input type="file" accept=".vcf,text/vcard,text/x-vcard,text/directory" data-contact-file /></label>
+        </div>
+        <label class="gj-choose" data-contact-choose-wrap hidden>Which contact?<select data-contact-choose></select></label>
+        <p class="gj-help" data-contact-status role="status">Fills the customer details below. Nothing is saved until you save the job. On an iPhone: open the contact, tap Share Contact, choose Save to Files, then pick that file here.</p>
+      </div>
       <div class="gj-grid">
         <label>Name<input type="text" name="customerName" required maxlength="120" autocomplete="name" /></label>
         <label>Phone<input type="tel" inputmode="tel" name="customerPhone" maxlength="40" autocomplete="tel" /></label>
@@ -46,10 +54,82 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
+  import { CONTACT_FIELDS, MAX_VCARD_BYTES, describeContact, fromPickerContact, parseVcards } from '../../../lib/contact-import';
+  import type { ImportedContact } from '../../../lib/contact-import';
+
+  function initContactImport(form: HTMLFormElement) {
+    const pickButton = document.querySelector('[data-contact-pick]') as HTMLButtonElement | null;
+    const fileInput = document.querySelector('[data-contact-file]') as HTMLInputElement | null;
+    const status = document.querySelector('[data-contact-status]') as HTMLElement | null;
+    const chooseWrap = document.querySelector('[data-contact-choose-wrap]') as HTMLElement | null;
+    const choose = document.querySelector('[data-contact-choose]') as HTMLSelectElement | null;
+    if (!status) return;
+    const say = (message: string) => { status.textContent = message; };
+
+    // Replaces all five customer fields, so details from one contact never mix with another's.
+    function apply(contact: ImportedContact) {
+      for (const key of Object.keys(CONTACT_FIELDS) as (keyof ImportedContact)[]) {
+        const input = form.elements.namedItem(CONTACT_FIELDS[key]);
+        if (input instanceof HTMLInputElement) input.value = contact[key];
+      }
+      say(`Filled in ${contact.name || 'the contact'}. Check the details, then save the job.`);
+    }
+
+    // The browser's own contact dialog (for example Chrome on Android). Other browsers use the file route.
+    const contacts = (navigator as any).contacts;
+    if (pickButton && contacts && typeof contacts.select === 'function' && 'ContactsManager' in window) {
+      pickButton.hidden = false;
+      pickButton.addEventListener('click', async () => {
+        try {
+          const wanted = ['name', 'tel', 'email'];
+          if (typeof contacts.getProperties === 'function' && (await contacts.getProperties()).includes('address')) wanted.push('address');
+          const picked = await contacts.select(wanted, { multiple: false });
+          if (!picked || !picked.length) return;
+          const contact = fromPickerContact(picked[0]);
+          if (contact) apply(contact);
+          else say('That contact has no name, phone or email to import.');
+        } catch {
+          say('Could not open your contacts. You can import a contact file instead.');
+        }
+      });
+    }
+
+    fileInput?.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = '';
+      if (chooseWrap) chooseWrap.hidden = true;
+      if (!file) return;
+      if (file.size > MAX_VCARD_BYTES) { say('That file is too large to be a single contact.'); return; }
+      let cards: ImportedContact[] = [];
+      try { cards = parseVcards(await file.text()); } catch { cards = []; }
+      if (!cards.length) { say('No contact found in that file. Choose a contact file that ends in .vcf.'); return; }
+      if (cards.length === 1) { apply(cards[0]); return; }
+      if (!choose || !chooseWrap) { apply(cards[0]); return; }
+      choose.textContent = '';
+      const prompt = document.createElement('option');
+      prompt.value = '';
+      prompt.textContent = `Choose one of ${cards.length} contacts…`;
+      choose.append(prompt);
+      cards.forEach((card, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = describeContact(card);
+        choose.append(option);
+      });
+      chooseWrap.hidden = false;
+      say(`That file has ${cards.length} contacts. Choose the customer.`);
+      choose.onchange = () => {
+        const picked = cards[Number(choose.value)];
+        if (choose.value !== '' && picked) { apply(picked); chooseWrap.hidden = true; }
+      };
+    });
+  }
+
   function initNewGeneralJob() {
     const form = document.querySelector('[data-form]');
     if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
     form.dataset.bound = 'true';
+    initContactImport(form);
     const error = document.querySelector('[data-error]') as HTMLElement | null;
     const submit = document.querySelector('[data-submit]') as HTMLButtonElement | null;
 
@@ -95,7 +175,13 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   .gj-block input,.gj-block textarea{min-height:2.9rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper)}
   .gj-block input:focus,.gj-block textarea:focus{border-color:var(--ink);outline:none}
   .gj-help{margin:0;color:var(--ink-soft);font-size:var(--step--1)}
+  .gj-import{display:grid;gap:.6rem;padding-bottom:var(--space-s);border-bottom:1px solid var(--line)}
+  .gj-import-actions{display:flex;flex-wrap:wrap;gap:var(--space-xs)}
+  .gj-file{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+  .gj-file input{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;border:0;opacity:0;cursor:pointer}
+  .gj-file:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+  .gj-choose select{min-height:2.9rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper)}
   .gj-error{margin:0;color:var(--danger);border-left:3px solid var(--danger);padding-left:.7rem}
   .gj-actions{display:flex;justify-content:flex-end;gap:var(--space-xs)}
-  @media(max-width:620px){.gj-grid{grid-template-columns:1fr}.gj-actions{flex-direction:column-reverse}.gj-actions .btn{width:100%}}
+  @media(max-width:620px){.gj-import-actions .btn{flex:1 1 100%;justify-content:center}.gj-grid{grid-template-columns:1fr}.gj-actions{flex-direction:column-reverse}.gj-actions .btn{width:100%}}
 </style>

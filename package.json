@@ -29,6 +29,7 @@
     "test:google-reviews": "node scripts/test-google-reviews.mjs",
     "test:charts": "node scripts/test-charts.mjs",
     "test:internal-styles": "node scripts/test-internal-runtime-styles.mjs",
+    "test:contact-import": "node scripts/test-contact-import.mjs",
     "test:general-jobs": "node --disable-warning=ExperimentalWarning scripts/test-general-jobs.mjs",
     "test:analytics": "node scripts/test-analytics.mjs && node --disable-warning=ExperimentalWarning scripts/test-analytics-pipeline.mjs",
     "test:estimate": "node --disable-warning=ExperimentalWarning scripts/test-estimate-endpoint.mjs",
