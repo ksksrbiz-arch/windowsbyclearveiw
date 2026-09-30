@@ -68,16 +68,20 @@ export function summarizePipeline({ leads, quotes, jobs, awaitingJob = null } = 
 
   let jobStats = null;
   if (Array.isArray(jobs)) {
-    jobStats = { created: 0, completed: 0, collectedCents: 0, paymentsKnown: jobs.every((row) => row?.paid_cents !== undefined) };
+    jobStats = { created: 0, completed: 0, collectedCents: 0, paymentsKnown: jobs.every((row) => row?.paid_cents !== undefined), otherWork: { created: 0, collectedCents: 0 } };
     for (const row of jobs) {
       if (String(row?.status || '') === 'cancelled') continue;
+      // Jobs Mark added directly (no quote) are not part of the estimate -> quote -> job
+      // funnel, so they stay out of those counts; the money they collect is still money collected.
+      const otherWork = row !== null && typeof row === 'object' && 'quote_id' in row && row.quote_id === null;
       if (inWindow(row?.created_at, cutoff, now) !== null) {
-        jobStats.created += 1;
+        if (otherWork) { jobStats.otherWork.created += 1; jobStats.otherWork.collectedCents += cents(row?.paid_cents); }
+        else jobStats.created += 1;
         jobStats.collectedCents += cents(row?.paid_cents);
       }
-      if (inWindow(row?.completed_at, cutoff, now) !== null) jobStats.completed += 1;
+      if (!otherWork && inWindow(row?.completed_at, cutoff, now) !== null) jobStats.completed += 1;
     }
-    if (!jobStats.paymentsKnown) jobStats.collectedCents = null;
+    if (!jobStats.paymentsKnown) { jobStats.collectedCents = null; jobStats.otherWork.collectedCents = null; }
   }
 
   return {

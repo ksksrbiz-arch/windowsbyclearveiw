@@ -1,0 +1,101 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="New general job">
+  <p class="kicker">Jobs</p>
+  <h1>New general job</h1>
+  <p class="lede">For work that is not a window job: add the customer and the job directly. No quote is created and no Build Plan is needed.</p>
+
+  <form class="gj-form" data-form novalidate>
+    <fieldset class="gj-block">
+      <legend>Customer</legend>
+      <div class="gj-grid">
+        <label>Name<input type="text" name="customerName" required maxlength="120" autocomplete="name" /></label>
+        <label>Phone<input type="tel" inputmode="tel" name="customerPhone" maxlength="40" autocomplete="tel" /></label>
+        <label>Email<input type="email" inputmode="email" name="customerEmail" maxlength="160" autocomplete="email" /></label>
+        <label>City<input type="text" name="customerCity" maxlength="80" /></label>
+      </div>
+      <label>Job address<input type="text" name="customerAddress" maxlength="200" /></label>
+    </fieldset>
+
+    <fieldset class="gj-block">
+      <legend>The work</legend>
+      <div class="gj-grid">
+        <label>Type of work<input type="text" name="workDescription" required maxlength="200" placeholder="e.g. deck rebuild" /></label>
+        <label>Agreed amount ($)<input type="text" inputmode="decimal" name="agreedAmount" required maxlength="14" placeholder="e.g. 4,800" /></label>
+        <label>Contract signed on (optional)<input type="date" name="contractDate" /></label>
+      </div>
+      <p class="gj-help">The signed agreement stays on your own paper. The date is only a note so you can find it later.</p>
+    </fieldset>
+
+    <fieldset class="gj-block">
+      <legend>Schedule (optional)</legend>
+      <div class="gj-grid">
+        <label>Start date<input type="date" name="scheduledDate" /></label>
+        <label>Window / crew note<input type="text" name="scheduledWindow" maxlength="120" placeholder="e.g. 8–10 AM" /></label>
+      </div>
+      <label>Notes<textarea name="notes" rows="3" maxlength="8000" placeholder="Access, gate codes, materials on order, customer requests…"></textarea></label>
+    </fieldset>
+
+    <p class="gj-error" data-error hidden role="alert"></p>
+    <div class="gj-actions">
+      <a class="btn btn-ghost" href="/internal/jobs">Cancel</a>
+      <button class="btn btn-primary" type="submit" data-submit>Save job</button>
+    </div>
+  </form>
+</InternalLayout>
+
+<script>
+  function initNewGeneralJob() {
+    const form = document.querySelector('[data-form]');
+    if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+    const error = document.querySelector('[data-error]') as HTMLElement | null;
+    const submit = document.querySelector('[data-submit]') as HTMLButtonElement | null;
+
+    function showError(message: string) {
+      if (!error) return;
+      error.hidden = !message;
+      error.textContent = message;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!submit || submit.disabled) return;
+      showError('');
+      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+      submit.disabled = true;
+      submit.textContent = 'Saving…';
+      try {
+        const response = await fetch('/internal/api/jobs', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ workType: 'general', ...data }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(Array.isArray(result.errors) ? result.errors.join(' ') : result.error || 'Could not save the job.');
+        location.href = `/internal/jobs/view?id=${encodeURIComponent(result.id)}`;
+      } catch (cause) {
+        showError(cause instanceof Error ? cause.message : 'Could not save the job.');
+        submit.disabled = false;
+        submit.textContent = 'Save job';
+      }
+    });
+  }
+  initNewGeneralJob();
+  document.addEventListener('astro:page-load', initNewGeneralJob);
+</script>
+
+<style>
+  .gj-form{display:grid;gap:var(--space-m);margin-top:var(--space-m);max-width:48rem}
+  .gj-block{margin:0;padding:1.1rem 1.15rem 1.2rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);display:grid;gap:var(--space-s);min-width:0}
+  .gj-block legend{padding:0 .4rem;font-weight:750}
+  .gj-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-s)}
+  .gj-block label{display:grid;gap:.25rem;min-width:0}
+  .gj-block input,.gj-block textarea{min-height:2.9rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper)}
+  .gj-block input:focus,.gj-block textarea:focus{border-color:var(--ink);outline:none}
+  .gj-help{margin:0;color:var(--ink-soft);font-size:var(--step--1)}
+  .gj-error{margin:0;color:var(--danger);border-left:3px solid var(--danger);padding-left:.7rem}
+  .gj-actions{display:flex;justify-content:flex-end;gap:var(--space-xs)}
+  @media(max-width:620px){.gj-grid{grid-template-columns:1fr}.gj-actions{flex-direction:column-reverse}.gj-actions .btn{width:100%}}
+</style>

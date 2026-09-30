@@ -22,7 +22,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       <article class="an-stat"><span>Quotes written</span><strong data-pipe="quotes">—</strong><small data-pipe="quotedValue">—</small></article>
       <article class="an-stat"><span>Quotes signed</span><strong data-pipe="signed">—</strong><small data-pipe="signedValue">—</small></article>
       <article class="an-stat"><span>Jobs</span><strong data-pipe="jobs">—</strong><small><span data-pipe="completed">—</span> completed</small></article>
-      <article class="an-stat"><span>Collected</span><strong data-pipe="collected">—</strong><small>on jobs from this period</small></article>
+      <article class="an-stat"><span>Collected</span><strong data-pipe="collected">—</strong><small data-pipe="collectedNote">on jobs from this period</small></article>
     </div>
     <div class="an-grid">
       <article class="an-panel an-wide"><h3>From request to paid job</h3><div class="an-chart" data-chart="pipeFunnel"></div></article>
@@ -113,7 +113,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     staleDraftDays?: number;
     leads?: number | null;
     quotes?: { created: number; quotedCents: number; signed: number; signedCents: number; staleDrafts: number; staleDraftCents: number; medianDaysToSign: number | null } | null;
-    jobs?: { created: number; completed: number; collectedCents: number | null } | null;
+    jobs?: { created: number; completed: number; collectedCents: number | null; otherWork?: { created: number; collectedCents: number | null } } | null;
     awaitingJob?: number | null;
     bySource?: {
       linkedQuotes: number;
@@ -283,6 +283,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     setText('[data-pipe="jobs"]', count(j?.created));
     setText('[data-pipe="completed"]', count(j?.completed));
     setText('[data-pipe="collected"]', dollars(j?.collectedCents));
+    const other = j?.otherWork;
+    setText('[data-pipe="collectedNote"]', other && other.created > 0 ? `on jobs from this period, incl. ${other.created} non-window job${other.created === 1 ? '' : 's'}` : 'on jobs from this period');
     const stages = [
       { label: 'Requests', value: pipe.leads },
       { label: 'Quotes written', value: q?.created },

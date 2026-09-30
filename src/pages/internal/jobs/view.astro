@@ -48,7 +48,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         </dl>
       </section>
       <section class="panel">
-        <div class="panel-head"><div><p class="kicker">Schedule</p><h2>Installation date</h2></div></div>
+        <div class="panel-head"><div><p class="kicker">Schedule</p><h2 data-schedule-title>Installation date</h2></div></div>
         <div class="schedule-form">
           <label>Date<input type="date" data-date /></label>
           <label>Window / crew note<input type="text" data-window maxlength="120" placeholder="e.g. 8–10 AM / crew A" /></label>
@@ -56,12 +56,27 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       </section>
     </section>
 
-    <section class="panel">
+    <section class="panel general-panel" data-general-panel hidden>
+      <div class="panel-head"><div><p class="kicker">General work</p><h2>Work and agreement</h2></div><strong data-general-total>—</strong></div>
+      <div class="general-form">
+        <label>Type of work<input type="text" data-g-desc maxlength="200" /></label>
+        <label>Agreed amount ($)<input type="text" inputmode="decimal" data-g-amount maxlength="14" /></label>
+        <label>Contract signed on<input type="date" data-g-contract /></label>
+        <label>Customer name<input type="text" data-g-name maxlength="120" /></label>
+        <label>Phone<input type="tel" inputmode="tel" data-g-phone maxlength="40" /></label>
+        <label>Email<input type="email" inputmode="email" data-g-email maxlength="160" /></label>
+        <label>City<input type="text" data-g-city maxlength="80" /></label>
+        <label>Job address<input type="text" data-g-address maxlength="200" /></label>
+      </div>
+      <p class="muted general-help">No quote or Build Plan exists for this job, and the signed agreement is on your own paper. Edits save with the Save changes button below.</p>
+    </section>
+
+    <section class="panel" data-window-only>
       <div class="panel-head"><div><p class="kicker">Scope</p><h2>Quoted work</h2></div><strong data-total>—</strong></div>
       <div class="scope-list" data-items></div>
     </section>
 
-    <section class="build-panel panel">
+    <section class="build-panel panel" data-window-only>
       <div class="panel-head">
         <div><p class="kicker">Production</p><h2>Verified build plan</h2><p class="muted" data-plan-meta>Snapshot from the finalized quote.</p></div>
         <div class="build-actions">
@@ -118,6 +133,10 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     install_notes: string | null;
     closeout_notes: string | null;
     completed_at: string | null;
+    work_type?: string | null;
+    work_description?: string | null;
+    agreed_cents?: number | null;
+    contract_date?: string | null;
   };
   type Item = { label: string; quantity: number; line_total_cents: number };
 
@@ -248,7 +267,27 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       host.innerHTML = items.length ? items.map((item) => `
         <div class="scope-row"><span><strong>${esc(item.label)}</strong><small>Qty ${Number(item.quantity) || 0}</small></span><strong>${money(Number(item.line_total_cents) || 0)}</strong></div>`).join('') : '<p class="muted">No line items were attached to the quote.</p>';
 
-      renderPlan(plan, version, knowledge, attachedAt);
+      const general = job.work_type === 'general';
+      document.querySelectorAll('[data-window-only]').forEach((element) => { (element as HTMLElement).hidden = general; });
+      q('[data-general-panel]').hidden = !general;
+      if (general) {
+        for (const selector of ['[data-closeout-link]', '[data-closeout-panel-link]', '[data-field-link]', '[data-quote-link]']) q(selector).hidden = true;
+        setText('[data-subtitle]', [job.work_description, job.customer_city].filter(Boolean).join(' · ') || job.id);
+        setText('[data-closeout-help]', 'Final walkthrough and any punch-list notes. Set the status to Completed when the work is done.');
+        const agreedCents = Number(job.agreed_cents) || 0;
+        setText('[data-general-total]', agreedCents % 100 === 0 ? money(agreedCents) : `$${(agreedCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+        setText('[data-schedule-title]', 'Start date');
+        q('[data-g-desc]').value = job.work_description || '';
+        q('[data-g-amount]').value = job.agreed_cents ? String((Number(job.agreed_cents) / 100).toFixed(2)).replace(/\.00$/, '') : '';
+        q('[data-g-contract]').value = job.contract_date || '';
+        q('[data-g-name]').value = job.customer_name || '';
+        q('[data-g-phone]').value = job.customer_phone || '';
+        q('[data-g-email]').value = job.customer_email || '';
+        q('[data-g-city]').value = job.customer_city || '';
+        q('[data-g-address]').value = job.customer_address || '';
+      } else {
+        renderPlan(plan, version, knowledge, attachedAt);
+      }
       workspace.hidden = false;
     }
 
@@ -298,6 +337,16 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
           method: 'PATCH',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
+            ...(job.work_type === 'general' ? {
+              workDescription: q('[data-g-desc]').value,
+              agreedAmount: q('[data-g-amount]').value,
+              contractDate: q('[data-g-contract]').value,
+              customerName: q('[data-g-name]').value,
+              customerPhone: q('[data-g-phone]').value,
+              customerEmail: q('[data-g-email]').value,
+              customerCity: q('[data-g-city]').value,
+              customerAddress: q('[data-g-address]').value
+            } : {}),
             status: q('[data-status]').value,
             scheduledDate: q('[data-date]').value,
             scheduledWindow: q('[data-window]').value,
@@ -334,8 +383,10 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   .panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised);overflow:hidden}
   .status-card{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);padding:var(--space-m);margin-bottom:var(--space-m)}
   .status-card>div{display:grid;gap:.2rem}.status-card>div>strong{font-size:var(--step-1)}.status-card small{color:var(--ink-soft)}
-  .status-card label,.schedule-form label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:650}
-  .status-card select,.schedule-form input,textarea{border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);padding:.6rem;font:inherit;min-height:44px}
+  .status-card label,.schedule-form label,.general-form label{display:grid;gap:.35rem;font-size:var(--step--1);font-weight:650}
+  .status-card select,.schedule-form input,.general-form input,textarea{border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);padding:.6rem;font:inherit;min-height:44px}
+  .general-panel{margin-bottom:var(--space-m)}.general-form{padding:var(--space-m);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-s)}.general-form label{min-width:0}.general-help{margin:0;padding:0 var(--space-m) var(--space-m);font-size:var(--step--1)}
+  @media(max-width:620px){.general-form{grid-template-columns:1fr}}
   .detail-grid,.notes-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-m);margin-bottom:var(--space-m)}
   .panel-head{padding:var(--space-m);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:end;gap:var(--space-s)}
   .panel-head h2{margin:.12rem 0 0;font-size:var(--step-1)}

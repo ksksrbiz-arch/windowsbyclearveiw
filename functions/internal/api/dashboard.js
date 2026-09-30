@@ -1,4 +1,5 @@
 import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
+import { ensureGeneralJobColumns } from '../_lib/general-jobs.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -56,6 +57,7 @@ export function pacificDayRange(now = new Date()) {
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureTaskSchema(env.QUOTES_DB);
+  await ensureGeneralJobColumns(env.QUOTES_DB).catch((error) => console.error('general-job-columns-failed', error));
   await syncQuoteFollowUps(env.QUOTES_DB).catch((error) => console.error('quote-follow-up-sync-failed', error));
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const now = new Date().toISOString();
@@ -74,7 +76,7 @@ export async function onRequestGet(context) {
         (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open' AND due_at >= ? AND due_at < ?) AS tasks_today,
         (SELECT COUNT(*) FROM follow_up_tasks WHERE status = 'open' AND due_at IS NOT NULL AND due_at < ?) AS tasks_overdue,
         (SELECT COUNT(*) FROM jobs WHERE status NOT IN ('completed','cancelled')) AS active_jobs,
-        (SELECT COALESCE(SUM(CASE WHEN j.status NOT IN ('completed','cancelled') THEN COALESCE(q.total_cents,0) ELSE 0 END),0) FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id) AS active_job_value_cents
+        (SELECT COALESCE(SUM(CASE WHEN j.status NOT IN ('completed','cancelled') THEN COALESCE(q.total_cents,j.agreed_cents,0) ELSE 0 END),0) FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id) AS active_job_value_cents
     `).bind(weekAgo, today.start, today.end, now).first(),
     env.QUOTES_DB.prepare(`SELECT id, created_at, name, phone, email, city, role FROM leads ORDER BY created_at DESC LIMIT 6`).all(),
     env.QUOTES_DB.prepare(`SELECT id, created_at, status, customer_name, customer_city, total_cents FROM quotes ORDER BY created_at DESC LIMIT 6`).all(),
@@ -97,7 +99,7 @@ export async function onRequestGet(context) {
       LIMIT 8
     `).all(),
     env.QUOTES_DB.prepare(`
-      SELECT j.id, j.status, j.scheduled_date, j.scheduled_window, j.customer_name, j.customer_city, q.total_cents
+      SELECT j.id, j.status, j.scheduled_date, j.scheduled_window, j.customer_name, j.customer_city, COALESCE(q.total_cents, j.agreed_cents) AS total_cents
       FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id
       WHERE j.status <> 'completed' AND j.status <> 'cancelled'
       ORDER BY CASE WHEN j.scheduled_date IS NULL THEN 1 ELSE 0 END, j.scheduled_date ASC, j.created_at DESC

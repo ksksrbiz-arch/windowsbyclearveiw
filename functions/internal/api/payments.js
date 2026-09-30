@@ -1,4 +1,5 @@
 import { ensureInvoiceSchema } from '../_lib/invoices.mjs';
+import { ensureGeneralJobColumns } from '../_lib/general-jobs.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -46,6 +47,7 @@ async function ensureSchema(db) {
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_job_payments_job ON job_payments(job_id)`),
   ]);
+  await ensureGeneralJobColumns(db);
 }
 
 async function ensurePayment(db, jobId) {
@@ -69,7 +71,7 @@ export async function onRequestGet(context) {
   const jobId = url.searchParams.get('jobId');
 
   if (jobId) {
-    const job = await env.QUOTES_DB.prepare(`SELECT j.*, q.total_cents FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id WHERE j.id = ?`).bind(jobId).first();
+    const job = await env.QUOTES_DB.prepare(`SELECT j.*, COALESCE(q.total_cents, j.agreed_cents) AS total_cents FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id WHERE j.id = ?`).bind(jobId).first();
     if (!job) return json({ error: 'Job not found.' }, 404);
     const payment = await ensurePayment(env.QUOTES_DB, jobId);
     return json({ job, payment: buildRecord(job, payment) });
@@ -77,7 +79,7 @@ export async function onRequestGet(context) {
 
   const result = await env.QUOTES_DB.prepare(`
     SELECT j.id, j.status AS job_status, j.scheduled_date, j.customer_name, j.customer_city,
-           q.total_cents, p.id AS payment_id, p.amount_paid_cents, p.payment_method, p.notes, p.updated_at AS payment_updated_at
+           COALESCE(q.total_cents, j.agreed_cents) AS total_cents, p.id AS payment_id, p.amount_paid_cents, p.payment_method, p.notes, p.updated_at AS payment_updated_at
     FROM jobs j
     LEFT JOIN quotes q ON q.id = j.quote_id
     LEFT JOIN job_payments p ON p.job_id = j.id
@@ -101,7 +103,7 @@ export async function onRequestPatch(context) {
   const jobId = new URL(context.request.url).searchParams.get('jobId');
   if (!jobId) return json({ error: 'jobId is required.' }, 400);
 
-  const job = await env.QUOTES_DB.prepare(`SELECT j.*, q.total_cents FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id WHERE j.id = ?`).bind(jobId).first();
+  const job = await env.QUOTES_DB.prepare(`SELECT j.*, COALESCE(q.total_cents, j.agreed_cents) AS total_cents FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id WHERE j.id = ?`).bind(jobId).first();
   if (!job) return json({ error: 'Job not found.' }, 404);
   if (job.status === 'cancelled') return json({ error: 'Cancelled jobs cannot receive payment records.' }, 409);
 
