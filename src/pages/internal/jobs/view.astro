@@ -98,11 +98,11 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     <section class="notes-grid">
       <section class="panel note-panel">
         <div class="panel-head"><div><p class="kicker">Project notes</p><h2>Customer / site</h2></div></div>
-        <textarea data-notes rows="7" maxlength="8000" placeholder="Access, trim, rot, special instructions, customer requests…"></textarea>
+        <textarea data-notes aria-label="Customer and site notes" rows="7" maxlength="8000" placeholder="Access, trim, rot, special instructions, customer requests…"></textarea>
       </section>
       <section class="panel note-panel">
         <div class="panel-head"><div><p class="kicker">Installation</p><h2>Crew notes</h2></div></div>
-        <textarea data-install-notes rows="7" maxlength="8000" placeholder="Arrival, removal, install conditions, materials used, issues…"></textarea>
+        <textarea data-install-notes aria-label="Crew notes" rows="7" maxlength="8000" placeholder="Arrival, removal, install conditions, materials used, issues…"></textarea>
       </section>
     </section>
 
@@ -111,7 +111,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         <div><p class="kicker">Closeout</p><h2>Project completion</h2><p class="muted" data-closeout-help>Use the dedicated closeout flow for final release.</p></div>
         <a class="btn btn-primary" data-closeout-panel-link href="#" hidden>Open dedicated closeout</a>
       </div>
-      <textarea data-closeout-notes rows="5" maxlength="8000" placeholder="Final walkthrough, punch-list items, customer sign-off notes, warranty handoff…"></textarea>
+      <textarea data-closeout-notes aria-label="Closeout notes" rows="5" maxlength="8000" placeholder="Final walkthrough, punch-list items, customer sign-off notes, warranty handoff…"></textarea>
       <div class="save-row"><span class="save-state" data-save-state>Ready</span><button class="btn btn-primary" type="button" data-save>Save changes</button></div>
     </section>
   </div>

@@ -18,6 +18,8 @@ const navItems = [
   { href: '/internal/tools', label: 'Tools' },
   { href: '/internal/ask-logs', label: 'Ask' },
 ];
+// The build reports this page as "/internal/jobs/field.html", so an exact string match never matched.
+const isFieldMode = /^\/internal\/jobs\/field(\.html)?\/?$/.test(pathname);
 const isActive = (href: string) => href === '/internal/' ? pathname === href : pathname.startsWith(href);
 const mobilePrimary = navItems.filter((item) => ['/internal/today', '/internal/follow-up', '/internal/quotes', '/internal/jobs'].includes(item.href));
 const mobileMoreItems = navItems.filter((item) => ['/internal/', '/internal/leads', '/internal/invoices', '/internal/schedule', '/internal/payments', '/internal/analytics', '/internal/tools', '/internal/ask-logs'].includes(item.href));
@@ -34,7 +36,7 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   </head>
-  <body class:list={['internal', { 'field-mode': pathname === '/internal/jobs/field' }]}>
+  <body class:list={['internal', { 'field-mode': isFieldMode }]}>
     <header class="internal-header">
       <div class="internal-header-inner">
         <a class="internal-brand" href="/internal/" aria-label="Clearview Command Center">Clearview <span>Command Center</span></a>
@@ -227,6 +229,22 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
       :global(.internal .list-pages button:hover:not(:disabled)){border-color:var(--line-strong);background:var(--accent-wash)}
       :global(.internal .list-pages button:disabled){opacity:.45;cursor:default}
       :global(.internal .list-pages span){color:var(--ink-soft);font-size:var(--step--2);text-align:center}
+
+      /* Touch targets: 44 px minimum on phones and any touch screen (Mark works from a truck and a job site).
+         Compact desktop sizing is untouched. */
+      @media(max-width:680px),(pointer:coarse){
+        :global(.internal .btn-small),
+        :global(.internal :is(.cc-row-actions,.today-task-meta,.task-actions,.row-right,.list-pages) :is(a,button)){display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;min-width:2.75rem}
+        :global(.internal :is(.snapshot-card,.summary-card,.panel-head,.quote-command,.invoice-command,.opening-row) a:not(.btn)),
+        :global(.internal :is(.qv-back,.panel-link,.photo-link,.customer-link,.text-button)){display:inline-flex;align-items:center;min-height:2.75rem}
+        :global(.internal summary){min-height:2.75rem;display:flex;align-items:center}
+        :global(.internal select){min-height:2.75rem}
+        :global(.internal :is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),textarea)){min-height:2.75rem}
+        :global(.internal [data-source-link]){display:inline-flex;align-items:center;min-height:2.75rem}
+        :global(.field-mode button){min-width:2.75rem}
+        :global(.field-mode .gate-check){display:flex;align-items:center;gap:.6rem;min-height:3rem}
+        :global(.field-mode :is(input:not([type=checkbox]):not([type=radio]),textarea,select)){min-height:3rem}
+      }
 
       @media(max-width:700px){
         :global(.internal .task-row),:global(.internal .lead-row){grid-template-columns:auto minmax(0,1fr) auto}

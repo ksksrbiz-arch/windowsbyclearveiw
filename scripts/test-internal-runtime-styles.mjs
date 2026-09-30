@@ -71,4 +71,15 @@ for (const file of pages(root)) {
 }
 assert.deepEqual(problems, [], `Wrap these selectors in :global(...):\n${problems.join('\n')}`);
 assert.ok(checked > 15, 'expected to scan the internal pages');
+// The layout gives only the Field page the field-mode class (it hides the shared bottom nav, which
+// would sit on top of the crew's own Previous/Next bar). The build reports that page as
+// "/internal/jobs/field.html", and an exact-string comparison once silently never matched. This reads
+// the built HTML, so it only runs when a build exists (CI runs it after `npm run build`).
+import { existsSync } from 'node:fs';
+const built = (path) => fileURLToPath(new URL(`../dist/internal/${path}`, import.meta.url));
+if (existsSync(built('jobs/field.html'))) {
+  const bodyClass = (path) => /<body class="([^"]*)"/.exec(readFileSync(built(path), 'utf8'))?.[1] ?? '';
+  assert.ok(bodyClass('jobs/field.html').split(' ').includes('field-mode'), 'the Field page body has the field-mode class');
+  for (const other of ['jobs/view.html', 'today.html', 'quotes/view.html']) assert.ok(!bodyClass(other).split(' ').includes('field-mode'), `${other} must not have field-mode`);
+} else console.log('internal runtime styles: no build found, skipped the field-mode check');
 console.log(`internal runtime styles: ok (${checked} pages)`);
