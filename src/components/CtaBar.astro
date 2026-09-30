@@ -6,12 +6,15 @@ interface Props {
   heading?: string;
   body?: string;
   showToolLink?: boolean;
+  /** Secondary route for visitors who are not ready to book: the /ask consultant. */
+  showAskLink?: boolean;
 }
 
 const {
   heading = 'Get your free estimate.',
   body = 'We measure the glass, sills, and trim in person, then give you a number in writing — not a guess from a photo.',
   showToolLink = true,
+  showAskLink = true,
 } = Astro.props;
 ---
 <section class="cta-band">
@@ -23,6 +26,9 @@ const {
       <p>{body}</p>
       {showToolLink && <p class="cta-tool-link">
         <a href="/tools/window-replacement-cost-calculator">Need a rough number first? Use the free cost estimator <span aria-hidden="true">→</span></a>
+      </p>}
+      {showAskLink && <p class="cta-tool-link">
+        <a href="/ask">Questions first? Ask the window consultant <span aria-hidden="true">→</span></a>
       </p>}
     </div>
     <div class="cta-actions">

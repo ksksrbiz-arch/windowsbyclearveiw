@@ -23,3 +23,35 @@ html:has(.ask-page),body:has(.ask-page){overflow:hidden}
    the document taller than the viewport and let the app scroll. */
 html body:not(.internal){padding-bottom:0}}
 @media(max-width:420px){.ask-identity span{display:none}.ask-head-actions button:first-of-type{display:none}.ask-msg{max-width:94%}.ask-welcome h1{font-size:1.42rem}.ask-welcome>p{max-width:310px}.ask-project-toggle small{font-size:.59rem}}
+
+/* ── Hand-off to a person ─────────────────────────────────────────────────
+   The two actions in the "Ready to price the project?" bar and the call-back
+   dialog (see src/scripts/ask-callback.ts). Written out long-hand; everything
+   above is the original compact chat UI. */
+.ask-handoff .ask-handoff-actions{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.ask-handoff-secondary{white-space:nowrap;border:1px solid var(--line-strong);background:var(--paper-raised);color:var(--ink);border-radius:999px;padding:.45rem .65rem;font:inherit;font-size:.65rem;font-weight:600;cursor:pointer}
+.ask-handoff-secondary:hover{border-color:var(--ink)}
+@media(max-width:700px){
+  .ask-handoff{flex-wrap:wrap}
+  .ask-handoff .ask-handoff-actions{width:100%;justify-content:flex-end}
+}
+
+.ask-callback{width:min(30rem,calc(100% - 1.5rem));max-height:calc(100dvh - 1.5rem);padding:0;border:1px solid var(--line-strong);border-radius:var(--radius-lg);background:var(--paper-raised);color:var(--ink);box-shadow:var(--shadow-lg,0 20px 50px rgb(0 0 0 / .25));overflow:auto}
+.ask-callback::backdrop{background:rgb(0 0 0 / .5)}
+.ask-callback-form,.ask-callback-success{display:grid;gap:var(--space-s);padding:var(--space-m)}
+.ask-callback-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-s)}
+.ask-callback-head h2,.ask-callback-success h2{margin:0;font-size:var(--step-1)}
+.ask-callback-x{border:0;background:transparent;color:var(--ink-soft);font-size:1.5rem;line-height:1;padding:.25rem .5rem;border-radius:.5rem;cursor:pointer}
+.ask-callback-x:hover{background:var(--paper-sunk)}
+.ask-callback .hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+.ask-callback label{display:grid;gap:var(--space-3xs);font-weight:500;font-size:var(--step--1)}
+.ask-callback input,.ask-callback textarea{width:100%;border:0;border-bottom:1px solid var(--line-strong);background:transparent;color:inherit;font:inherit;font-size:var(--step-0);font-weight:400;padding:.6rem 0;border-radius:0}
+.ask-callback textarea{resize:vertical;min-height:6rem}
+.ask-callback input:focus,.ask-callback textarea:focus{outline:none;border-bottom-color:var(--accent);box-shadow:0 1px 0 0 var(--accent)}
+.ask-callback [aria-invalid='true']{border-bottom-color:var(--danger)}
+.ask-callback-hint{font-weight:400;color:var(--ink-soft);font-size:var(--step--2)}
+.ask-callback .field-error{font-weight:500;color:var(--danger);font-size:var(--step--2)}
+.ask-callback .form-status{margin:0;color:var(--danger);font-size:var(--step--1)}
+.ask-callback .form-status:empty{display:none}
+.ask-callback-fine{margin:0;font-size:var(--step--2);line-height:1.55;color:var(--ink-faint)}
+.ask-callback-success[hidden],.ask-callback-form[hidden]{display:none}
