@@ -39,7 +39,7 @@ Western Washington rain finds the weak corner of a window. Soft wood at the sill
 
 ## 5. One room never matches the rest of the house
 
-Old single-pane and tired aluminum frames create cold glass. The furnace runs, the thermostat is happy, and the chair by the window is not. That is a comfort problem first. Energy savings come along with it.
+Old single-pane and aluminum frames create cold glass. The furnace runs, the thermostat is happy, and the chair by the window is not. That is a comfort problem first. Energy savings come along with it.
 
 ## 6. The bill went up and nothing else changed
 
