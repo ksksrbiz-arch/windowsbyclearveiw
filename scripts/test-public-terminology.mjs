@@ -17,6 +17,7 @@ const banned = [
   [/\b(?:the|your|chosen|each|per) methods?\b|\bmethod per opening/i, 'install method'],
   [/block[- ]frame|block and fin|nail(?:ing)?[- ]fin(?! window| unit| set)/i, 'method jargon'],
   [/\btired\b/i, 'tired (say old)'],
+  [/doing business as|\bd\/b\/a\b/i, 'DBA claim (no DBA is filed)'],
   [/\bone[- ]day (?:job|swap|install)|\busable (?:the )?same day|leaves? the rooms? usable/i, 'job-timing / room-state promise'],
 ];
 // Nailing-fin is fine on new-construction copy; this list keeps the rule narrow.

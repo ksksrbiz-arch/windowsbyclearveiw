@@ -23,6 +23,7 @@ Owner direction, 2026-09-30. Business facts here come from the owner; do not ext
   "block and fin", "pocket" install). Say "we measure every opening and tell you the right approach
   in the written estimate."
 - Say "old", not "tired", for windows.
+- The company has no DBA on file. Never write "doing business as" or "d/b/a"; use the legal name Clearview Windows & Trim LLC.
 - No personal names in public copy; company voice ("we"). No claims about team size.
 - Never promise how long a job takes or what state the room is left in. No "one-day job", "same day",
   or "leave the room usable" (owner direction, 2026-09-30: timing depends on the specifics of each job).
