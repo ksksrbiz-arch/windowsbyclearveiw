@@ -34,7 +34,7 @@ Before we measure, it helps to know:
 
 We do not decide from a photo of the glass. At each opening we check:
 
-- The sill and stool with a probe, not just an eye
+- The sill, with a probe and not just by eye
 - Whether the sash still closes square
 - How the exterior cladding meets the old casing
 - Whether you want the same sightlines or a different window style
@@ -48,11 +48,11 @@ Any of these changes the scope, and we would rather find them at the measure tha
 - **Visible gap or daylight at a corner.** The opening is no longer square enough to seal a new window against.
 - **Aluminum frames with heavy pitting or corrosion.** Common on 1970s-80s Vancouver-area homes.
 
-A wet Washington wall often needs the opening opened up and put right, not just a new window in front of the damage.
+A wet wall often needs the opening opened up and repaired, not just a new window placed over the damage.
 
 ## What the written estimate covers
 
-The estimate lists the approach for each opening, not one price that hides a worse job. If two openings in the same house need different work, the estimate says so and prices them separately.
+The estimate lists the approach for each opening instead of one price that could hide a bigger job. If two openings in the same house need different work, the estimate says so and prices them separately.
 
 ## What this means for cost and time
 

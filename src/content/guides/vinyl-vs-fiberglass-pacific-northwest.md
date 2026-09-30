@@ -27,41 +27,41 @@ faq:
 
 Short answer: for a standard-size Washington window, vinyl is the workhorse — durable, moisture-proof, and the lower-cost choice, and it's what Clearview installs on most jobs. Fiberglass costs more but moves less with temperature and holds its shape better across a wide span, which is why it's worth the upcharge on large sliders, big picture windows, or darker exterior colors. Neither one rots or rusts in this climate; the real decision is about frame stiffness and thermal movement, not moisture resistance.
 
-## Why the Pacific Northwest even makes this a question
+## Why the Pacific Northwest climate matters
 
-This region isn't extreme heat or cold. It's nine wet months, three dry ones, and daily-to-seasonal swings — moderate next to a desert or continental climate, but constant. That matters less for whether a frame material survives here (both do) and more for how it moves and how it's finished. A material that expands and contracts a lot with every swing stresses its seals over years of that cycling. A material that holds paint matters more somewhere people repaint trim than somewhere siding just gets pressure-washed. Vinyl and fiberglass answer those questions differently.
+This region does not have extreme heat or cold. It has nine wet months, three dry ones, and steady swings in temperature that are moderate next to a desert or continental climate but constant. That matters less for whether a frame material survives here (both do) and more for how it moves and how it's finished. A material that expands and contracts a lot with every swing stresses its seals over years of that cycling. Whether a material holds paint matters more where people repaint their trim. Vinyl and fiberglass answer those questions differently.
 
 ## Thermal movement: the real technical difference
 
-This is the material-science core of the choice. Vinyl (PVC) has a significantly higher coefficient of thermal expansion than fiberglass — published comparisons put vinyl's expansion rate at roughly three to eight times fiberglass's, depending on the specific formulations compared. Fiberglass expands and contracts at a rate much closer to glass itself, which is a large part of why a fiberglass frame keeps a tighter, more consistent seal against the glass unit over decades of temperature swings.
+This is the main technical difference between the two. Vinyl (PVC) has a significantly higher coefficient of thermal expansion than fiberglass — published comparisons put vinyl's expansion rate at roughly three to eight times fiberglass's, depending on the specific formulations compared. Fiberglass expands and contracts at a rate much closer to glass itself, which is a large part of why a fiberglass frame keeps a tighter, more consistent seal against the glass unit over decades of temperature swings.
 
-For a standard-size window, that difference is close to academic — the frame is short enough that the total movement is small regardless of material. It gets real on wide spans: a large slider or picture window has more linear frame to expand and contract, so the material with less movement holds its shape and seal better across the width. That is the actual engineering reason fiberglass gets recommended for big openings, not a marketing line.
+For a standard-size window, that difference is close to academic — the frame is short enough that the total movement is small regardless of material. It gets real on wide spans: a large slider or picture window has more linear frame to expand and contract, so the material with less movement holds its shape and seal better across the width. That is the engineering reason fiberglass is recommended for big openings.
 
-## Moisture and rot: both handle it, differently
+## Moisture and rot
 
-Neither material rots. Vinyl is a solid plastic — water doesn't soak into it or feed decay the way it does in wood. Fiberglass is a glass-fiber-reinforced resin — same story, no organic material for moisture to break down. Both are a real upgrade over the wood-frame windows common in older Vancouver-area homes, where a wet sill eventually means soft wood, not just cosmetic weathering.
+Neither material rots. Vinyl is a solid plastic — water doesn't soak into it or feed decay the way it does in wood. Fiberglass is a glass-fiber-reinforced resin — same story, no organic material for moisture to break down. Both are a real upgrade over wood-frame windows, where a wet sill eventually means soft wood.
 
-What actually causes a wet-climate failure with either material isn't the frame — it's bad flashing or a failed sealed glass unit letting water into the wall behind the frame. That's a technique problem, not a vinyl-versus-fiberglass one. See [why Washington windows fog](/guides/fogged-windows) for the glass-seal side of that, and [what each opening needs](/guides/what-your-openings-need) for a compromised opening.
+In a wet climate, failures with either material usually come from bad flashing or a failed glass seal letting water into the wall behind the frame, not from the frame itself. That is an installation problem, not a vinyl-versus-fiberglass one. See [why Washington windows fog](/guides/fogged-windows) for the glass-seal side of that, and [what each opening needs](/guides/what-your-openings-need) for a compromised opening.
 
 ## Stiffness and size
 
-Fiberglass is a stiffer material than vinyl at a given wall thickness, which is the other half of why it suits wider spans — less sag and flex under its own weight and wind load, in addition to less thermal movement. Vinyl frames handle standard window and door sizes fine; a manufacturer's engineering limits on maximum size for a given vinyl profile exist for a reason, and pushing an oversized opening into vinyl can mean a visibly flexing sash or a harder-to-seal unit. Fiberglass has more headroom before that becomes a concern.
+Fiberglass is a stiffer material than vinyl at a given wall thickness, which is the other half of why it suits wider spans — less sag and flex under its own weight and wind load, in addition to less thermal movement. Vinyl frames handle standard window and door sizes fine; manufacturers set maximum sizes for each vinyl profile, and going past them can mean a sash that visibly flexes or a window that is harder to seal. Fiberglass has more headroom before that becomes a concern.
 
 ## Color and finish
 
-Vinyl's exterior color is baked into the material at manufacture — white, tan, and a handful of standard darker colors are common, but repainting a vinyl frame later is not a reliable long-term fix; the surface isn't built to hold paint the way a finished material is. Fiberglass takes paint well, which is part of why it's the more common choice when a homeowner wants a specific dark color, a color match to trim, or the option to repaint down the road without replacing the window.
+Vinyl's exterior color is part of the material. White, tan, and a few standard darker colors are common, but repainting a vinyl frame later is not a reliable long-term fix because the surface is not built to hold paint. Fiberglass takes paint well, which is part of why it's the more common choice when a homeowner wants a specific dark color, a color match to trim, or the option to repaint down the road without replacing the window.
 
-Dark vinyl in direct sun also runs hotter than a light color, and heat plus a higher expansion rate compounds the movement issue above — another reason dark colors and fiberglass often go together on Washington jobs, especially on south- and west-facing elevations that see the most sun.
+Dark vinyl in direct sun also runs hotter than a light color, and heat combined with a higher expansion rate adds to the movement issue above. That is another reason dark colors and fiberglass often go together, especially on south- and west-facing walls.
 
 ## Cost
 
 Fiberglass costs more — plan on roughly 30 to 40% more than a comparable vinyl unit installed, reflecting the frame's manufacturing cost, not a markup for the name. On a standard-size opening where the durability difference barely shows up, that premium is hard to justify on function alone. On a wide slider, a large picture window, or a run of matching dark-colored windows across a street-facing elevation, it buys real, measurable stability. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how material choice fits into a full quote.
 
-## How to actually decide
+## How to decide
 
 - **Standard-size window, light or standard color, typical budget:** vinyl does the job and costs less. It's the default for a reason.
 - **Wide slider or picture window, especially over roughly 6 feet in a single span:** fiberglass's stiffness and lower thermal movement earn their cost.
 - **You want a dark exterior color, or want the option to repaint later:** fiberglass takes finish better.
-- **Budget is the deciding factor and the openings are unremarkable sizes:** vinyl, without apology.
+- **Budget is the deciding factor and the openings are unremarkable sizes:** vinyl is the right choice.
 
-This is not a durability contest either material loses in Washington's climate — both handle the wet-dry cycling fine over a normal service life. It's a question of movement, stiffness, and finish on the specific openings in front of you, which is exactly what a measure is for.
+Neither material fails in Washington's climate; both handle the wet-dry cycling over a normal service life. The choice comes down to movement, stiffness, and finish on your specific openings, which is what a measure is for.

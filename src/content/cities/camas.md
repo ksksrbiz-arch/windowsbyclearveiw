@@ -13,18 +13,18 @@ faq:
     answer: Yes. See new construction for the opening schedule and rough-opening details we work from on a build.
 ---
 
-Camas is an old mill town with a real downtown core, plus newer growth pushing north and east toward Lacamas Lake. Two different housing pictures, one city.
+Camas is an old mill town with a real downtown core, plus newer growth pushing north and east toward Lacamas Lake. The housing is very different in each part of the city.
 
 ## Housing in Camas
 
-Downtown and the streets around it carry original early-1900s construction — settled frames, older sash, sills that have taken a century of Camas rain. North and east Camas is the opposite: recent subdivision construction, generally solid windows, with the occasional builder-grade unit worth a second look.
+Downtown and the streets around it carry original early-1900s construction: settled frames, older sashes, and sills that have taken a century of Camas rain. North and east Camas is the opposite, with recent subdivisions, generally solid windows, and the occasional builder-grade window worth a second look.
 
 ## What tends to go wrong
 
-In the old mill-town core, it's frame condition more than glass — a sill or jamb that's moved enough over the decades that a new window won't sit right without more work at the opening (see [what each opening needs](/guides/what-your-openings-need)). In the newer subdivisions, problems are rarer and smaller: an early seal failure, or hardware that never worked quite right out of the box.
+In the old mill-town core, the problem is usually the frame more than the glass. A sill or jamb may have moved enough over the decades that a new window will not sit right without more work at the opening (see [what each opening needs](/guides/what-your-openings-need)). In the newer subdivisions, problems are rarer and smaller: an early seal failure, or hardware that never worked quite right.
 
 ## What we do here
 
-We replace old downtown-era units and set new-construction windows on the builds still going up toward Lacamas Lake. A Camas job gets a written estimate after we see the openings, and the same flashing and finish standard as the rest of Clark County.
+We replace older downtown windows and set new-construction windows on the builds still going up toward Lacamas Lake. A Camas job gets a written estimate after we see the openings, and the same flashing and finish standard as the rest of Clark County.
 
 Nearby: [Washougal](/areas/washougal) and [Vancouver](/areas/vancouver).

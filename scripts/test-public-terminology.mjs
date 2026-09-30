@@ -17,6 +17,7 @@ const banned = [
   [/\b(?:the|your|chosen|each|per) methods?\b|\bmethod per opening/i, 'install method'],
   [/block[- ]frame|block and fin|nail(?:ing)?[- ]fin(?! window| unit| set)/i, 'method jargon'],
   [/\btired\b/i, 'tired (say old)'],
+  [/\bone[- ]day (?:job|swap|install)|\busable (?:the )?same day|leaves? the rooms? usable/i, 'job-timing / room-state promise'],
 ];
 // Nailing-fin is fine on new-construction copy; this list keeps the rule narrow.
 const allowFiles = new Set(['functions/ask/api/chat.js']); // system prompt states the rule itself

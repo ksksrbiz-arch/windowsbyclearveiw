@@ -13,18 +13,18 @@ faq:
     answer: Yes. See new construction for the opening schedule and rough-opening details we work from.
 ---
 
-Battle Ground is north-county — ranches, two-stories, and openings that have leaked through more than one winter. Mostly suburban construction from the last few decades, not an old town core.
+Battle Ground is in north Clark County: ranches, two-stories, and openings that have leaked through more than one winter. Most of the housing is suburban construction from the last few decades, not an old town core.
 
 ## Housing in Battle Ground
 
-Newer than Vancouver or Camas overall, but "newer" here still means 1970s and '80s aluminum sliders nobody ever upgraded, plus a steady run of houses from the 2000s growth years.
+Battle Ground is newer than Vancouver or Camas overall, but "newer" here still includes 1970s and '80s aluminum sliders that were never upgraded, plus a steady run of houses from the 2000s growth years.
 
 ## What tends to go wrong
 
-Aluminum-frame sliders from the older subdivisions are the most common tear-out — cold to the touch, hard to operate, no real seal left. In the newer houses, it's usually condensation or a foggy pane on a unit that's only 15–20 years old. That's a failed seal, not a house problem.
+Aluminum-frame sliders from the older subdivisions are the most common replacement. They are cold to the touch, hard to operate, and have no real seal left. In newer houses, the usual problem is condensation or a foggy pane on a window that is only 15 to 20 years old. That is a failed seal, not a problem with the house.
 
 ## What we do here
 
-We check the opening first, then tell you the right approach in the written estimate based on what's actually there — not the neighborhood's age. See [what each opening needs](/guides/what-your-openings-need) for how we look at it. The same written estimate process applies. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
+We check the opening first, then put the right approach in the written estimate based on what is actually there, not the neighborhood's age. See [what each opening needs](/guides/what-your-openings-need) for how we look at it. Yacolt and Brush Prairie jobs are quoted the same way if the drive makes sense.
 
 Nearby: [Brush Prairie](/areas/brush-prairie) and [Vancouver](/areas/vancouver).

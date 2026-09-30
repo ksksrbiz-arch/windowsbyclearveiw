@@ -24,17 +24,17 @@ faq:
     answer: No. The flashing and sealing standard stays the same either way. The brand changes what's in the opening, not how we set it.
 ---
 
-Short answer: Cascade and Milgard are both legitimate Pacific Northwest window manufacturers, and Clearview installs both. Cascade is the standard window on most jobs — solid, vinyl, built in Washington. Milgard is the step up: more product lines, more glass and hardware options, a higher price per opening for the same install labor. Neither is "the good one." They're two price-to-feature points. The right pick depends on the opening and the budget, not brand loyalty.
+Short answer: Cascade and Milgard are both legitimate Pacific Northwest window manufacturers, and Clearview installs both. Cascade is the standard window on most jobs — solid, vinyl, built in Washington. Milgard is the step up: more product lines, more glass and hardware options, a higher price per opening for the same install labor. Neither is the better brand. They are two price-and-feature points. The right pick depends on the opening and the budget, not brand loyalty.
 
 ## Where each one comes from
 
-Cascade Windows is a Pacific Northwest manufacturer headquartered in Centralia, Washington. It builds vinyl windows with fusion-welded frames, sold mainly through the regional dealer network Clearview is part of. It is not a big-box brand — it is built for contractors in this climate.
+Cascade Windows is a Pacific Northwest manufacturer headquartered in Centralia, Washington. It builds vinyl windows with fusion-welded frames, sold mainly through the regional dealer network Clearview is part of. It is not a big-box brand; it is built for contractors working in this climate.
 
-Milgard is a larger, longer-established West Coast manufacturer with a much wider retail and dealer footprint, and a bigger product lineup spanning entry-level vinyl through fiberglass and aluminum lines. It is a name more homeowners already recognize walking into the measure.
+Milgard is a larger, longer-established West Coast manufacturer with a much wider retail and dealer footprint, and a bigger product lineup spanning entry-level vinyl through fiberglass and aluminum lines. More homeowners already recognize the Milgard name when we come to measure.
 
 Neither company publishes numbers that let you rank them on a single scale. What actually differs is which product tier you are buying within each lineup, and what that tier includes.
 
-## Product lines: what "Cascade" or "Milgard" actually means
+## Product lines: what each brand name covers
 
 Neither brand is one window — each is a family of lines at different price points, and comparing brand-to-brand only makes sense once you know which tier is on the quote.
 
@@ -48,7 +48,7 @@ If a quote just says "Cascade" or "Milgard" with no line name, ask which one. Th
 
 Both brands build insulated glass units with Low-E coatings tuned for a heating climate, and both publish NFRC-rated U-factors and solar heat gain coefficients (SHGC) per product line. Typical whole-unit U-factors for a good double-pane vinyl line from either brand land in the same general range — roughly 0.27 to 0.33 depending on frame style, grid pattern, and gas fill. A top-tier line with better glass can push lower than that; an entry line runs higher.
 
-That range overlaps enough between brands that the brand name alone does not tell you the glass performance. What tells you is the U-factor and SHGC printed on the NFRC label for the specific unit being quoted — and Clearview will show you that label before you sign, not just the brand name.
+That range overlaps enough between brands that the brand name alone does not tell you the glass performance. What tells you is the U-factor and SHGC on the NFRC label for the specific window being quoted, and we will show you that label before you sign.
 
 ## Warranty: both are lifetime, read the fine print anyway
 
@@ -62,11 +62,11 @@ That manufacturer warranty is separate from Clearview's install warranty — the
 
 On Clearview's own pricing, Cascade is the baseline window — no added charge over the base installed price for a standard vinyl opening. Milgard adds roughly $100 per window opening on top of that same install, for the upgraded product. That gap is per window, not per house — it does not apply to doors, since the brand choice here is a window-line decision, not a door one. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how that fits into a full quote.
 
-## How to actually decide
+## How to decide
 
 - **Standard opening, standard budget, no special requirement:** Cascade is the reasonable default, and it's what most Clearview jobs run.
 - **Street-facing elevation where color, grid, or hardware options matter more:** Milgard's wider line-up gives you more to choose from.
 - **A specific U-factor or SHGC target, maybe for a rebate program:** ask for the NFRC number on the exact line quoted, from either brand, rather than assuming the pricier brand automatically clears the bar.
 - **Budget is the constraint and the opening is unremarkable:** Cascade does the job without the upcharge.
 
-None of that is a brand recommendation in the abstract. It's a set of questions worth asking before the quote gets written, whichever name ends up on it.
+None of this is a general brand recommendation. It is a set of questions to ask before the quote is written, whichever brand ends up on it.
