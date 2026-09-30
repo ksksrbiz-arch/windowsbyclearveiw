@@ -28,6 +28,7 @@
     "test:ai-surfaces": "node scripts/test-ai-surfaces.mjs",
     "test:google-reviews": "node scripts/test-google-reviews.mjs",
     "test:charts": "node scripts/test-charts.mjs",
+    "test:internal-styles": "node scripts/test-internal-runtime-styles.mjs",
     "test:analytics": "node scripts/test-analytics.mjs && node --disable-warning=ExperimentalWarning scripts/test-analytics-pipeline.mjs",
     "test:estimate": "node --disable-warning=ExperimentalWarning scripts/test-estimate-endpoint.mjs",
     "test:review-request": "node --disable-warning=ExperimentalWarning scripts/test-review-request.mjs",

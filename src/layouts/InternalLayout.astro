@@ -216,6 +216,18 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
       :global(.internal .insight-row){display:flex;justify-content:space-between;gap:var(--space-m);padding:.75rem 0;border-bottom:1px solid var(--line)}
       :global(.internal .insight-row:last-child){border-bottom:0}
 
+      /* Controls inherit the Command Center typeface (browsers default buttons to system fonts). */
+      :global(:where(.internal) :where(button, input, select, textarea)){font-family:inherit}
+      /* The site-wide input rule is width:100% for text fields; a radio or checkbox must keep its own size or its label is squeezed into a narrow column. */
+      :global(.internal input[type=radio]),:global(.internal input[type=checkbox]){width:auto;flex:none;padding:0;accent-color:var(--accent)}
+      :global(.internal .choice){display:inline-flex;align-items:center;gap:.45rem;min-height:2.75rem;white-space:nowrap}
+      /* Paging controls under the quote, job and follow-up lists. */
+      :global(.internal .list-pages){display:flex;align-items:center;justify-content:space-between;gap:var(--space-s);padding:.7rem var(--space-s);border-top:1px solid var(--line)}
+      :global(.internal .list-pages button){min-height:2.6rem;padding:.4rem 1rem;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:inherit;font-size:var(--step--2);font-weight:700;cursor:pointer}
+      :global(.internal .list-pages button:hover:not(:disabled)){border-color:var(--line-strong);background:var(--accent-wash)}
+      :global(.internal .list-pages button:disabled){opacity:.45;cursor:default}
+      :global(.internal .list-pages span){color:var(--ink-soft);font-size:var(--step--2);text-align:center}
+
       @media(max-width:700px){
         :global(.internal .task-row),:global(.internal .lead-row){grid-template-columns:auto minmax(0,1fr) auto}
         :global(.internal .row){grid-template-columns:minmax(0,1fr)}
