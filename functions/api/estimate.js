@@ -1,4 +1,5 @@
 import { sendLeadAlert } from '../_lib/lead-alert.mjs';
+import { takeRateLimit, verifyTurnstile } from '../_lib/abuse-guard.mjs';
 
 const MAX = {
   name: 120,
@@ -9,6 +10,8 @@ const MAX = {
   notes: 2000,
 };
 const MAX_BODY_BYTES = 64 * 1024;
+// Per visitor: generous for a household (a retry, a second window list) and tight for a script.
+export const ESTIMATE_RATE_LIMIT = { bucket: 'estimate', limit: 6, windowSeconds: 3600 };
 const RECEIPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const TO = 'owner@windowsbyclearveiw.com';
@@ -309,6 +312,23 @@ export async function onRequestPost(context) {
 
   if (clean(form.get('company'), 80)) {
     return asJson ? json({ ok: true }) : redirect(request, '/estimate/sent');
+  }
+
+  const limited = await takeRateLimit(context.env, request, ESTIMATE_RATE_LIMIT);
+  if (limited.limited) {
+    return asJson
+      ? new Response(JSON.stringify({ error: 'Too many requests from this connection. Please call us instead.' }), {
+          status: 429,
+          headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'retry-after': String(limited.retryAfterSeconds) },
+        })
+      : redirect(request, '/estimate/problem');
+  }
+
+  const human = await verifyTurnstile(context.env, form.get('cf-turnstile-response'), request);
+  if (!human.ok) {
+    return asJson
+      ? json({ error: 'Please complete the security check above the button, or call us instead.' }, 403)
+      : redirect(request, '/estimate/problem');
   }
 
   const lead = {

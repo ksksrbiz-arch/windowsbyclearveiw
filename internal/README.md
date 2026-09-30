@@ -38,6 +38,25 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## Spam and abuse protection (Turnstile and rate limits)
+
+The public lead form (`/api/estimate`) and the Ask assistant (`/ask/api/chat`, `/ask/api/handoff`)
+are open to the internet. Two layers protect them, both in `functions/_lib/abuse-guard.mjs`:
+
+1. **Rate limit, always on.** Per visitor (a hash of the IP, never the IP itself), kept in D1
+   table `rate_limits`: estimate form 6 per hour; Ask chat 60 per hour; Ask handoff 10 per hour.
+   Over the limit the visitor is told to call. If D1 is unavailable the limit steps aside
+   rather than block anyone.
+2. **Cloudflare Turnstile, off until configured.** One-time setup (free):
+   Cloudflare dashboard → Turnstile → Add widget for `windowsbyclearview.com` (Managed mode).
+   Put the **Site key** in `src/data/site.ts` (`turnstileSiteKey`; public by design) and add the
+   **Secret key** as the Pages secret `TURNSTILE_SECRET_KEY` (Production and Preview), then
+   redeploy. Until both exist nothing changes. After that the form shows the check, and a
+   request without a valid token is refused. If Cloudflare's verifier cannot be reached the
+   lead is let through (a lost lead costs more than one bot message).
+
+Mark should still see the real leads: test by sending one estimate request after enabling.
+
 ## Job photo storage (Cloudflare R2)
 
 Photos Mark takes on his phone (Photos tool, `/internal/tools/photos`) are saved on the

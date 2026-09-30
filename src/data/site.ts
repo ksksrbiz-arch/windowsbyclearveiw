@@ -51,6 +51,12 @@ export const site = {
     { name: 'La Center', region: 'WA', state: 'Washington' },
     { name: 'Woodland', region: 'WA', state: 'Washington' },
   ],
+  /**
+   * Cloudflare Turnstile site key for the estimate form (public by design, unlike the secret key).
+   * Empty means the widget is not rendered and the server does not require a token. Set it here
+   * together with TURNSTILE_SECRET_KEY in the Pages dashboard; see internal/README.md.
+   */
+  turnstileSiteKey: '',
   lniNumber: 'CLEARVW74601',
   /**
    * Commercial general liability insurance, from the ACORD 25 certificate on

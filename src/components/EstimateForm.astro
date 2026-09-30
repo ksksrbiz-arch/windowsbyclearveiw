@@ -11,10 +11,12 @@ import '../styles/estimate-form.css';
   <label>Email <span class="field-hint">optional, for a written copy</span><input name="email" type="email" autocomplete="email" inputmode="email" maxlength="160" aria-describedby="field-error-email" /><span class="field-error" id="field-error-email" data-field-error="email" hidden></span></label>
   <label>City<input name="city" type="text" required autocomplete="address-level2" autocapitalize="words" maxlength="80" aria-describedby="field-error-city" /><span class="field-error" id="field-error-city" data-field-error="city" hidden></span></label>
   <label>Project notes <span class="field-hint">optional, but it saves a round of back-and-forth</span><span class="field-hint field-hint-prefilled" data-notes-prefilled-hint hidden>Project details carried over from the consultant — edit as needed</span><textarea name="notes" rows="4" maxlength="2000" placeholder="Roughly how many windows, which rooms, and anything you have already noticed — fogged glass, drafts, a sill that feels soft."></textarea></label>
+  {site.turnstileSiteKey && <div class="turnstile-slot" data-turnstile data-sitekey={site.turnstileSiteKey}></div>}
   <button class="btn btn-primary" type="submit" data-submit>Send estimate request</button><p class="form-status" data-status role="alert"></p>
   <p class="fine-print">We use this to call you back about the work — no lists, no resale, no follow-up sequence. We will not text you unless you ask us to. See the <a href="/legal/privacy">privacy policy</a>; submitting this form is a request for contact, not a contract (<a href="/legal/terms">terms</a>).</p>
 </form>
 <div class="form-success" data-success hidden><p class="kicker">Received</p><h2>We have the request.</h2><p>We will follow up, usually the same day. If you would rather talk now, call <a href={telHref()}>{site.phoneDisplay}</a>.</p></div>
+{site.turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>}
 <script define:vars={{ phoneDisplay: site.phoneDisplay }}>
 function bindEstimate() {
   const form = document.getElementById('estimate-form');
@@ -60,6 +62,24 @@ function bindEstimate() {
   if (window.history.replaceState && ['home_type', 'openings', 'opening_type', 'concern', 'stage', 'scope', 'role'].some((key) => params.has(key))) {
     window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash}`);
   }
+
+  // Turnstile (only present when a site key is configured). Explicit render so it also works after
+  // client-side navigation. Tokens are single use, so the widget is reset after every failed send.
+  const slot = form.querySelector('[data-turnstile]');
+  let widgetId = null;
+  function renderTurnstile(attempts) {
+    if (!(slot instanceof HTMLElement) || widgetId !== null) return;
+    if (!window.turnstile) {
+      if (attempts < 40) setTimeout(() => renderTurnstile(attempts + 1), 250);
+      else status.textContent = 'The security check did not load. Please call ' + phoneDisplay + ' instead.';
+      return;
+    }
+    widgetId = window.turnstile.render(slot, {
+      sitekey: slot.dataset.sitekey,
+      'error-callback': () => { status.textContent = 'The security check could not load. Please call ' + phoneDisplay + ' instead.'; },
+    });
+  }
+  renderTurnstile(0);
 
   const button = form.querySelector('[data-submit]');
   const idleLabel = button instanceof HTMLButtonElement ? button.textContent : '';
@@ -120,6 +140,7 @@ function bindEstimate() {
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
       try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form_js' }); } catch {}
     } catch (error) {
+      try { if (widgetId !== null && window.turnstile) window.turnstile.reset(widgetId); } catch {}
       status.textContent = error instanceof Error ? error.message : 'Could not send. Please call us instead.';
       if (button instanceof HTMLButtonElement) { button.disabled = false; button.textContent = idleLabel || 'Send estimate request'; }
     }
