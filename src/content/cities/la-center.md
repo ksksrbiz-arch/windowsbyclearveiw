@@ -8,7 +8,7 @@ faq:
   - question: Is La Center too small or too far out for a normal quote?
     answer: No — the same measure and written estimate process, handled the same way. Short drive north, not a special trip.
   - question: What's the most common window problem in La Center?
-    answer: Tired sliders and fogged insulated units — the same failure points as the rest of Clark County, since it's the same rain and the same heating season.
+    answer: Old sliders and fogged insulated units — the same failure points as the rest of Clark County, since it's the same rain and the same heating season.
   - question: Do you set windows on new construction here too?
     answer: Yes, once the openings are ready. See new construction for the sequence we follow.
 ---
@@ -21,7 +21,7 @@ No single dominant building era at this size — older in-town houses close to t
 
 ## What tends to go wrong
 
-Same rain as the rest of Clark County, same tired sliders and fogged insulated units — a cloudy pane that never wipes clean is a failed seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). On the older river-adjacent houses, original wood sash and drafty frames show up more often than on the newer acreage builds.
+Same rain as the rest of Clark County, and the same old sliders and fogged insulated units — a cloudy pane that never wipes clean is a failed seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). On the older river-adjacent houses, original wood sash and drafty frames show up more often than on the newer acreage builds.
 
 ## What we do here
 
