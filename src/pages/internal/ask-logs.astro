@@ -22,6 +22,14 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div><strong data-stat-tools></strong><span>used a tool</span></div>
   </div>
 
+  <div class="al-summary" data-funnel hidden aria-label="Where conversations lead, last 30 days">
+    <div><strong data-f="questions"></strong><span>questions asked</span></div>
+    <div><strong data-f="estimate"></strong><span>opened the estimate form</span></div>
+    <div><strong data-f="call"></strong><span>tapped call</span></div>
+    <div><strong data-f="callbackLeads"></strong><span>sent a call-back request</span></div>
+  </div>
+  <p class="al-note" data-funnel-note hidden>Last 30 days. Estimate and call taps count once per visit; call-back requests are leads from this page.</p>
+
   <div class="al-list" data-list hidden></div>
 </InternalLayout>
 
@@ -42,11 +50,30 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       return div.innerHTML;
     }
 
+    function renderFunnel(funnel: Record<string, number> | undefined) {
+      const box = document.querySelector('[data-funnel]');
+      const note = document.querySelector('[data-funnel-note]');
+      if (!(box instanceof HTMLElement) || !funnel) return;
+      const values: Record<string, number> = {
+        questions: funnel.conversations,
+        estimate: funnel.estimate,
+        call: funnel.call,
+        callbackLeads: funnel.callbackLeads,
+      };
+      for (const [key, value] of Object.entries(values)) {
+        const el = box.querySelector(`[data-f="${key}"]`);
+        if (el) el.textContent = String(value ?? 0);
+      }
+      box.hidden = false;
+      if (note instanceof HTMLElement) note.hidden = false;
+    }
+
     async function load() {
       try {
         const response = await fetch('/internal/api/ask-logs');
         if (!response.ok) throw new Error();
-        const { logs } = await response.json();
+        const { logs, funnel } = await response.json();
+        renderFunnel(funnel);
 
         if (loading instanceof HTMLElement) loading.hidden = true;
         if (!logs.length) {
@@ -120,6 +147,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 
   .al-summary {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-l);
     margin-bottom: var(--space-l);
     padding-bottom: var(--space-m);
@@ -140,6 +168,12 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     color: var(--ink-faint);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+
+  .al-note {
+    margin: calc(var(--space-m) * -1) 0 var(--space-l);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
   }
 
   .al-list {

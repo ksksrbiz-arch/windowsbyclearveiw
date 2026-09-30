@@ -5,6 +5,29 @@ function json(data, status = 200) {
   });
 }
 
+/** Where /ask conversations ended up, over the last `days` days. Every query
+ *  is best effort: a table that does not exist yet (nobody has clicked, or no
+ *  call-back lead has arrived) reads as zero rather than failing the page. */
+async function funnel(db, days) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const count = async (sql) => {
+    try {
+      const row = await db.prepare(sql).bind(since).first();
+      return Number(row?.n) || 0;
+    } catch {
+      return 0;
+    }
+  };
+  const [conversations, estimate, call, callbackOpen, callbackLeads] = await Promise.all([
+    count('SELECT COUNT(*) AS n FROM ask_logs WHERE created_at >= ?'),
+    count("SELECT COUNT(*) AS n FROM ask_handoffs WHERE kind = 'estimate' AND created_at >= ?"),
+    count("SELECT COUNT(*) AS n FROM ask_handoffs WHERE kind = 'call' AND created_at >= ?"),
+    count("SELECT COUNT(*) AS n FROM ask_handoffs WHERE kind = 'callback_open' AND created_at >= ?"),
+    count("SELECT COUNT(*) AS n FROM leads WHERE role = 'Ask assistant' AND created_at >= ?"),
+  ]);
+  return { days, conversations, estimate, call, callbackOpen, callbackLeads };
+}
+
 /** Recent /ask activity, for /internal/ask-logs — this route is only
  *  reachable at all through the /internal/* auth middleware. */
 export async function onRequestGet(context) {
@@ -13,5 +36,5 @@ export async function onRequestGet(context) {
     `SELECT id, created_at, question, answer, model_used, tools_used, sources, match_count, refused
      FROM ask_logs ORDER BY created_at DESC LIMIT 200`,
   ).all();
-  return json({ logs: results });
+  return json({ logs: results, funnel: await funnel(env.QUOTES_DB, 30) });
 }
