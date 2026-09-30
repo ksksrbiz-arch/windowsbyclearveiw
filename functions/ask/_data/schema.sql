@@ -1,9 +1,9 @@
 -- Lives in the same D1 database as the internal quoting tool (QUOTES_DB) —
 -- reusing that binding rather than provisioning a second database and a
--- second dashboard binding for one small table. Holds raw visitor
--- questions verbatim (whatever they typed, which could include their own
--- name or number if they choose to type it) for /internal visibility into
--- real /ask traffic — not for external sharing.
+-- second dashboard binding for one small table. Records activity metadata
+-- only (model, tools, guide sources, match count, refused). The question and
+-- answer columns are written as "[redacted]" by functions/ask/api/chat.js, so
+-- no visitor words are stored.
 CREATE TABLE IF NOT EXISTS ask_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at TEXT NOT NULL,

@@ -1,9 +1,9 @@
 ---
 title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-09-29
+updated: 2026-09-30
 order: 1
-summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list.
+summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list. The /ask consultant sends what you type to an AI service (Groq or Google) to write its answers, analyzes any photo you attach on Cloudflare, and keeps no copy of your messages or photos. If you ask it for a call back, that request is handled like an estimate request.
 ---
 
 Clearview Windows, operated by Clearview Windows & Trim LLC ("Clearview", "we",
@@ -23,6 +23,14 @@ where it says we do not collect something, we do not collect it.
 - An email address (optional)
 - Whether you are a homeowner or a builder / GC
 - Any project notes you write
+
+**From a call-back request on /ask.** The website consultant at [/ask](/ask)
+can also send us a call-back request. It asks for the same fields (name,
+phone number, city, and an optional email), plus a notes box that is filled
+in with the project details you chose and the questions you typed to the
+consultant. You can edit or clear that text before sending, and nothing is
+sent until you press the button. We store and handle it the same way as an
+estimate request, and it is marked as coming from the consultant.
 
 Nothing else on the site asks you for personal information.
 
@@ -75,9 +83,43 @@ tracking protection, some or all of this pixel will not load at all.
 **We do not collect** heatmaps, session recordings, mouse or scroll tracking,
 or location beyond the city you type in.
 
+## The website consultant (/ask)
+
+The consultant at [/ask](/ask) answers questions about windows using an AI
+model. Here is what happens to what you type.
+
+- **Your messages.** Each message you send is sent to an AI service to write
+  the reply, along with the project details you pick and your last several
+  messages and replies in the same chat. We use Groq, or Google (Gemini) if
+  Groq is not available. Google also receives your message so it can be
+  matched against our guides. These companies process it under their own
+  privacy policies, which we do not control.
+- **Photos.** If you attach a photo, your browser shrinks it and a vision
+  model run by Cloudflare (Workers AI) describes what is visible. We do not
+  keep the photo. A short text description of it goes to the AI service along
+  with your message.
+- **Web searches.** For general questions the consultant may search the web
+  through DuckDuckGo, using a search phrase the AI writes from your question.
+  DuckDuckGo sees that phrase and the address of our server, not yours.
+- **What we keep.** We do not keep a copy of your messages, the replies, or
+  your photos. For each message we record only the time, which AI service
+  answered, which tools it used, which guides it drew on, and whether it could
+  answer. None of the words from your conversation are stored. The chat
+  itself lives only on the page in your browser; reloading it or choosing New
+  chat clears it.
+- **Counting hand-offs.** When you go from the consultant to the estimate
+  form, tap the call button, or open the call-back form, we add one to a count
+  in our database. It records only which of those it was and the time,
+  nothing about you. These counts can also be sent to Google Analytics as
+  aggregate events, like the ones described above.
+
+Please do not type your phone number or address into the chat. Use the
+call-back form or the [estimate form](/estimate) for that, so it goes only to
+us.
+
 ## If you request an estimate: your visit history
 
-When you submit the estimate form, your browser also sends us a short record
+When you submit the estimate form or a call-back request from /ask, your browser also sends us a short record
 of how you found the site and which pages you looked at first. Specifically:
 
 - **A random ID for your browser**, generated the first time you visit and
@@ -89,9 +131,9 @@ of how you found the site and which pages you looked at first. Specifically:
 - **The pages you visited in this browsing session** (up to 25), each with
   its path, title, and the time you viewed it.
 
-This never leaves your browser unless you submit the estimate form — there is
-no background tracking beacon, and nothing is sent to us if you just browse
-the site and leave. If you do submit the form, this visit history is stored
+This never leaves your browser unless you submit the estimate form or a
+call-back request — there is no background tracking beacon, and nothing is
+sent to us if you just browse the site and leave. If you do submit one, this visit history is stored
 alongside your name, phone number, and the other fields you typed, in the
 database described below, so the person who calls you back has context on
 what you were looking at. It is never used for advertising, never sold or
@@ -116,7 +158,8 @@ The site also uses a few more items in your browser's `localStorage` and
 `clearview:first_touch` (how you first arrived), and `clearview:visits` (the
 pages viewed in your current browsing session, cleared when you close the
 tab). None of these are cookies, and none are sent anywhere in the
-background — they only reach us if you submit the estimate form.
+background — they only reach us if you submit the estimate form or a
+call-back request.
 
 ## Requests your browser makes to other companies
 
@@ -134,8 +177,9 @@ lead-submission signals to `facebook.com`.
 
 ## Who else sees your estimate request
 
-Your submitted fields — name, phone, city, and the rest — are handled by
-exactly three companies, each doing one job:
+Your submitted fields — name, phone, city, and the rest, whether they come
+from the estimate form or the call-back form on /ask — are handled by exactly
+three companies, each doing one job:
 
 | Company | What they do | What they see |
 | --- | --- | --- |
@@ -150,6 +194,10 @@ that a submission occurred.
 
 If you gave an email address, Resend also sends you a short confirmation that
 we received the request.
+
+We also get a notification on our phone when a request arrives. It goes
+through ntfy, a free notification service, and says only that someone asked
+for an estimate. It contains none of your information.
 
 If we install windows for you, once the job is finished and you have signed
 off on it, we may ask one time for a Google review. We ask either by email,
@@ -192,6 +240,10 @@ record in the database described above. We keep both for active and recent
 jobs so we can honour what we agreed to. If you ask us to delete your
 information and you are not a current customer with an open job, we will
 delete the correspondence and the database record.
+
+The records described under the website consultant, such as the time and kind
+of each answer and the hand-off counts, contain nothing about you personally,
+so we keep them for as long as they are useful.
 
 Washington law requires a contractor to retain certain records relating to work
 actually performed. Where that applies, we keep only what the law requires and
