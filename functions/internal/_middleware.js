@@ -1,4 +1,5 @@
 import { readCookie, verifySessionToken } from './_lib/session.mjs';
+import { accessConfig, verifyAccessJwt } from './_lib/access.mjs';
 
 // Paths under /internal/ that must stay reachable without a session, or
 // nobody could ever log in (and the login form itself would redirect to
@@ -28,8 +29,15 @@ export async function onRequest(context) {
     return withPrivacyHeaders(await next());
   }
 
+  // Cloudflare Access (optional): a verified Access identity is a sign-in. Once Access is proven,
+  // ACCESS_REQUIRED=1 retires the shared password entirely.
+  const access = accessConfig(env);
+  if (access && (await verifyAccessJwt(request.headers.get('cf-access-jwt-assertion'), access))) {
+    return withPrivacyHeaders(await next());
+  }
+
   const token = readCookie(request, 'cv_session');
-  const valid = await verifySessionToken(token, env.INTERNAL_SESSION_SECRET);
+  const valid = !access?.required && (await verifySessionToken(token, env.INTERNAL_SESSION_SECRET));
 
   if (!valid) {
     const redirect = new URL('/internal/login', url);

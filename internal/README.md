@@ -38,6 +38,35 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## Cloudflare Access sign-in (optional; replaces the shared password)
+
+Today the Command Center has one shared password. Cloudflare Access (Zero Trust, free for small
+teams; confirm the current limit on the plan page) puts a real login in front of `/internal`:
+each person signs in with their own email (one-time code or Google), it can require MFA, every
+sign-in is logged, and removing a person cuts them off at once.
+
+The code side is built and **off until configured** (`functions/internal/_lib/access.mjs`). When
+on, a request that carries a valid, correctly signed Access token counts as signed in. The
+shared password keeps working alongside it, so turning this on cannot lock anyone out.
+
+Owner steps (Cloudflare dashboard → Zero Trust; it asks you to pick a team name the first time):
+
+1. Access → Applications → **Add → Self-hosted**. Domain `windowsbyclearview.com`, path
+   **`internal`** (covers everything under `/internal`). Do **not** protect the whole site:
+   customers must still reach `/sign`, `/api/estimate` and the public pages.
+2. Policy: **Allow**, include the emails of the people who should get in (Mark, Keith). Login
+   method: one-time PIN is enough. Set **session duration to 1 month** so Mark's phone is not
+   asked to sign in again every day (photo uploads queue on the phone and retry if a session lapses).
+3. Open the application and copy its **Application Audience (AUD) tag**.
+4. Pages → Settings → Environment variables (Production): `ACCESS_TEAM_DOMAIN` = your team name
+   (the part before `.cloudflareaccess.com`) and `ACCESS_AUD` = the AUD tag. Redeploy.
+5. Test on Mark's phone and on a computer: sign in through the Access screen, confirm the
+   dashboard, a photo upload and a quote all work.
+6. Only after that works for everyone: set `ACCESS_REQUIRED` = `1` and redeploy. The shared
+   password is then refused everywhere, including on the `*.pages.dev` address (which Access
+   does not cover), and `INTERNAL_PASSWORD` can be deleted later. Setting `ACCESS_REQUIRED`
+   without the team and AUD values is ignored, so it cannot lock anyone out by itself.
+
 ## Nightly backup and morning nudge (companion Worker)
 
 Pages Functions cannot run on a schedule, so scheduled work lives in a small separate Worker,
