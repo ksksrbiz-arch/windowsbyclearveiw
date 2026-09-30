@@ -20,35 +20,35 @@ heroImageFocus: 50% 50%
 secondaryDiagram: cost-build-up
 ---
 
-Short answer: published 2026 industry data puts a standard vinyl replacement window in Washington at roughly **$600 to $1,300 installed per opening**, with Seattle-area labor toward the top of that band. That is a regional average, not a quote — the number that actually matters is the one that follows a measure of your openings. This page is here so that number is not a surprise.
+Short answer: published 2026 industry data puts a standard vinyl replacement window in Washington at roughly **$600 to $1,300 installed per opening**, with Seattle-area labor toward the top of that band. That is a regional average, not a quote. The number that matters is the one we give you after measuring your openings. This page is here so that number is not a surprise.
 
-## What you are actually paying for
+## What you are paying for
 
 Four things move the bid:
 
 1. **Scope.** [What each opening needs](/guides/what-your-openings-need) changes labor and finish work more than most product upgrades.
-2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either, a step up in the window line itself — Cascade to Milgard — adds cost per opening for the same install labour.
-3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or code.
-4. **Access.** A first-floor slider is not a third-story picture window over a roof.
+2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either material, moving up a window line, such as from Cascade to Milgard, adds cost per opening for the same installation labor.
+3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or are required by code.
+4. **Access.** A first-floor slider is a very different job from a third-story picture window over a roof.
 
 Permits, if the city requires them for the scope, sit on top of that.
 
 ## Ranges, not quotes
 
-That per-opening figure is a starting orientation, not a ceiling. A small handful of windows can land in the low thousands once scope and access are added in. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and openings that need extra work push well past a "typical opening" number built around a standard vinyl window in a sound opening.
+That per-opening figure is a starting point, not a ceiling. A handful of windows can land in the low thousands once scope and access are added. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and openings that need extra work cost well above a typical opening built around a standard vinyl window in a sound opening.
 
-Treat all of it as a starting point. Your openings, your trim, and the work each opening needs will move the number — that is what a measure is for.
+Your openings, your trim, and the work each opening needs will move the number, which is what a measure is for.
 
 ## How to think about value
 
-Replacement is not a utility-bill gadget. The usual reasons it pays are mixed:
+Replacement is not just about the utility bill. The usual reasons it pays off are mixed:
 
-- Rooms you can sit in during January
+- Rooms that are comfortable to sit in during winter
 - Glass you can see through
 - A dry sill instead of a slow leak
-- Less work for the heating system on a long gray season
+- Less work for the heating system over a long gray winter
 
-If someone promises a two-year payback from energy alone, ask them to show the math for *your* existing glass. Single-pane to a modern unit is a different story than already-decent double-pane.
+If someone promises a two-year payback from energy alone, ask them to show the math for *your* existing glass. Going from single-pane glass to a modern window is a different story from going from already-decent double-pane.
 
 ## Rebates in 2026
 
@@ -56,14 +56,14 @@ The federal 25C window credit is over for new 2026 installs. Some utilities in W
 
 ## Comparing two bids that don't match
 
-The single biggest cause of "why is this quote double the other one" is not markup — it's scope. Before comparing numbers, check that both bids include the same:
+The most common reason one quote is double another is not markup. It is scope. Before comparing numbers, check that both bids include the same:
 
 - **Approach per opening.** Two quotes for the same window are not the same job if they assume different work at the opening, even at the same price.
 - **Glass package.** Double-pane Low-E and triple-pane are not interchangeable line items.
-- **Haul-away and disposal.** Some bids quietly exclude it.
+- **Haul-away and disposal.** Some bids leave it out.
 - **Permits, if the scope needs one.** A lower bid that skips a required permit is not actually lower.
 
-Ask each bidder to write the approach and glass spec per opening, not just a total. That is the only way two numbers become comparable.
+Ask each bidder to list the approach and the glass for each opening, not just a total. That is the only way to compare two numbers.
 
 ## What an estimate from us includes
 
@@ -73,4 +73,4 @@ Ask each bidder to write the approach and glass spec per opening, not just a tot
 - Lead time
 - Anything we will *not* do (hidden rot, paint, etc.)
 
-You do not need a perfect window count to start. A few elevation photos and a walkthrough get us there.
+You do not need an exact window count to start. A few photos of each side of the house and a walkthrough are enough.

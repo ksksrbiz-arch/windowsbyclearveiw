@@ -13,18 +13,18 @@ faq:
     answer: Yes — off 117th, 182nd, and out toward Hockinson are common jobs. See new construction for what we need from the builder before we schedule.
 ---
 
-Brush Prairie is unincorporated — no city government of its own — which is a lot of why it still reads as acreage and older ranches, not a platted downtown.
+Brush Prairie is unincorporated, with no city government of its own, which is part of why it still looks like acreage and older ranches rather than a platted downtown.
 
 ## Housing in Brush Prairie
 
-Older ranch houses on bigger lots make up most of the established housing, with new construction filling in off 117th, 182nd, and out toward Hockinson. No single dominant era — a mix of decades on lots big enough that the neighbors don't set the tone.
+Older ranch houses on bigger lots make up most of the established housing, with new construction filling in off 117th, 182nd, and out toward Hockinson. There is no single dominant era, just a mix of decades on lots big enough that the neighbors do not set the tone.
 
 ## What tends to go wrong
 
-Most of what we pull out here is original aluminum or first-generation vinyl with failed seals. Rural lots take more wind and more driven rain than a tucked-in city street, so a flashing detail that was already marginal fails faster than it would in town.
+Most of what we remove here is original aluminum or first-generation vinyl with failed seals. Rural lots take more wind and more driven rain than a tucked-in city street, so a flashing detail that was already marginal fails faster than it would in town.
 
 ## What we do here
 
-We measure each opening, tell you the right approach in the written estimate, set the unit plumb, and seal it for weather that comes in sideways, not straight down. New construction is common out here too — framing off 117th, 182nd, or toward Hockinson, we set nailing-fin units on a scheduled date so your siding crew isn't standing around waiting on us.
+We measure each opening, put the right approach in the written estimate, set the window level, and seal it for weather that comes in sideways. New construction is common out here too. For framing off 117th, 182nd, or toward Hockinson, we set windows on a scheduled date so your siding crew is not waiting on us.
 
 Nearby: [Battle Ground](/areas/battle-ground), [Vancouver](/areas/vancouver), and [Camas](/areas/camas).

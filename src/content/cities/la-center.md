@@ -13,18 +13,18 @@ faq:
     answer: Yes, once the openings are ready. See new construction for the sequence we follow.
 ---
 
-La Center is a short drive north of Vancouver, on the East Fork Lewis River. Small and tight-knit — most jobs come word of mouth as much as a phone call.
+La Center is a short drive north of Vancouver, on the East Fork Lewis River. It is a small town, and many jobs come from word of mouth as much as a phone call.
 
 ## Housing in La Center
 
-No single dominant building era at this size — older in-town houses close to the river sit alongside newer acreage homes on the outskirts, without the large subdivisions that drive growth in Ridgefield or Battle Ground.
+There is no single dominant building era at this size. Older in-town houses close to the river sit alongside newer acreage homes on the outskirts, without the large subdivisions that drive growth in Ridgefield or Battle Ground.
 
 ## What tends to go wrong
 
-Same rain as the rest of Clark County, and the same old sliders and fogged insulated units — a cloudy pane that never wipes clean is a failed seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). On the older river-adjacent houses, original wood sash and drafty frames show up more often than on the newer acreage builds.
+It is the same rain as the rest of Clark County, and the same old sliders and fogged insulated glass. A cloudy pane that never wipes clean is a failed seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). On the older river-adjacent houses, original wood sashes and drafty frames show up more often than on the newer acreage builds.
 
 ## What we do here
 
-We measure, order, and install from Vancouver — the approach depends on what each opening actually needs, and we put it in the written estimate. New construction? We set nailing-fin units once the openings are ready; see [new construction](/new-construction) for what we ask a builder to have in hand first.
+We measure, order, and install from Vancouver. The approach depends on what each opening needs, and we put it in the written estimate. New construction? We set windows once the openings are ready; see [new construction](/new-construction) for what we ask a builder to have ready first.
 
 Nearby: [Ridgefield](/areas/ridgefield) and [Vancouver](/areas/vancouver).

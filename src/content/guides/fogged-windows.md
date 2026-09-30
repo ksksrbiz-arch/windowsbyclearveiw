@@ -16,11 +16,11 @@ faq:
 diagram: double-pane-glass
 ---
 
-Western Washington's roughly nine wet months and three dry ones a year is why sealed windows here tend to fog sooner than they would in a steadier climate. Not all "foggy windows" are the same job, though. One kind is a failed window. The other is your house telling you it is damp.
+Western Washington has about nine wet months and three dry ones, and that is why sealed windows here tend to fog sooner than in a steadier climate. Not all foggy windows are the same problem. One kind is a failed window. The other is a sign that your house is damp.
 
 ## Fog between the panes
 
-Look at the glass from an angle. If the haze, mineral dots, or film sit *inside* the two panes — where a cloth cannot reach — the insulated glass unit has lost its seal.
+Look at the glass from an angle. If the haze, mineral dots, or film are *inside* the two panes, where a cloth cannot reach, the insulated glass unit has lost its seal.
 
 That seal is what holds the dry air or argon between the panes. Once it fails:
 
@@ -34,11 +34,11 @@ This is common on older double-pane units after years of sun, movement, and Wash
 
 If you can wipe the water off the *inside* of the glass, the window may still be doing its job. Warm indoor air hit cold glass and dropped its water there. Showers, cooking, and a house that does not vent well make it worse, especially on single-pane or metal-frame windows.
 
-That is a humidity and glass-temperature problem. Better fans help. A tighter, warmer replacement unit also helps because the indoor face of the glass stays closer to room temperature.
+That is a humidity and glass-temperature problem. Better fans help. A tighter, warmer replacement window also helps, because the inside face of the glass stays closer to room temperature.
 
 ## What replacement changes
 
-A new insulated unit with a sound spacer and a tight frame does two different things:
+A new insulated glass unit with a sound spacer and a tight frame does two things:
 
 - It removes the failed, cloudy glass
 - It raises the inside glass temperature so everyday winter condensation is less likely
@@ -49,7 +49,7 @@ It will not fix a crawl space that pumps moisture or a bath fan that does not re
 
 A sealed unit's spacer and desiccant are rated for a service life, not forever. Two things in this climate use that life up faster than average:
 
-- **Wet-dry cycling.** Nine wet months and three dry ones put more stress on the seal than a steady climate does — it expands and contracts with every swing.
+- **Wet-dry cycling.** Nine wet months and three dry ones put more stress on the seal than a steady climate does, because it expands and contracts with every swing.
 - **West and south sun exposure.** UV and heat break down the sealant faster on unshaded elevations, which is why one side of a house often fogs first.
 
 None of that means every unit fails on a schedule. A shaded, north-facing window can outlast a sun-battered one by a decade or more.
@@ -60,4 +60,4 @@ None of that means every unit fails on a schedule. A shaded, north-facing window
 2. Note how many openings look like that.
 3. Check the sill for soft wood. Failed glass plus a wet sill means the opening needs more than a new window.
 
-Bring those notes to an estimate. We will tell you which units are done and which can wait.
+Bring those notes to your estimate. We will tell you which units are done and which can wait.
