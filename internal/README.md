@@ -38,6 +38,39 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## Nightly backup and morning nudge (companion Worker)
+
+Pages Functions cannot run on a schedule, so scheduled work lives in a small separate Worker,
+`workers/ops-cron/` (`clearview-ops-cron`). It has no public URL and does two things:
+
+- **Nightly D1 backup** (about 3:15 AM Pacific): every table and row is written as one gzip file
+  `d1/YYYY-MM-DD.json.gz` to the **private** R2 bucket `clearview-db-backups`; the newest 30 are
+  kept. The file is checked after writing, and a failure pushes "Database backup FAILED" to the
+  phone (same ntfy channel as new-lead alerts). D1's own Time Travel still exists; this is the
+  copy we control.
+- **Weekday follow-up nudge** (about 8:30 AM Pacific): one push such as "3 follow-ups to do,
+  1 overdue, 2 due today" that opens the follow-up list. Counts only, no names. Silent when
+  nothing is due.
+
+The bucket `clearview-db-backups` already exists. One-time deploy (needs a Cloudflare login, so
+it is an owner step):
+
+1. `cd workers/ops-cron && npx wrangler deploy` (or Cloudflare dashboard → Workers → Create →
+   connect this GitHub repo, root directory `workers/ops-cron`).
+2. `npx wrangler secret put LEAD_ALERT_NTFY_TOPIC` and paste the same value the Pages project
+   uses. Without it the job still runs; it just cannot push.
+3. Check: dashboard → Workers → `clearview-ops-cron` → Triggers → "Run" the backup cron once,
+   then look for `d1/<today>.json.gz` in the bucket.
+
+**Restoring** (only ever into a new, empty database, never over live data):
+download a backup file, then
+`node scripts/restore-from-backup.mjs backup.json.gz > restore.sql` and
+`npx wrangler d1 execute <new-db> --remote --file restore.sql`. The script only prints SQL.
+Tests prove a backup restores row for row into a fresh database.
+
+Backups contain customer data, so the bucket must stay private (no public URL, no custom
+domain). Cost: a few KB per night, far inside R2's free tier.
+
 ## Spam and abuse protection (Turnstile and rate limits)
 
 The public lead form (`/api/estimate`) and the Ask assistant (`/ask/api/chat`, `/ask/api/handoff`)
