@@ -50,6 +50,8 @@ for (const file of walk(dist)) {
     description: pick(/<meta name="description" content="([^"]*)"/),
     canonical: pick(/<link rel="canonical" href="([^"]*)"/),
     ogUrl: pick(/<meta property="og:url" content="([^"]*)"/),
+    ogImage: pick(/<meta property="og:image" content="([^"]*)"/),
+    twitterImage: pick(/<meta name="twitter:image" content="([^"]*)"/),
     h1: pick(/<h1[^>]*>([\s\S]*?)<\/h1>/).replace(/<[^>]+>/g, '').replace(/\s+/g, ' '),
   });
 }
@@ -64,6 +66,8 @@ for (const p of pages) {
   if (!p.description) problems.push(`${p.path}: missing description`);
   if (p.canonical !== want) problems.push(`${p.path}: canonical is "${p.canonical}", expected "${want}"`);
   if (p.ogUrl !== p.canonical) problems.push(`${p.path}: og:url differs from canonical`);
+  if (!p.ogImage.startsWith('https://ogcdn.net/7d857713-e4f8-4b02-8a8e-5ecb68ada8c5/v1/')) problems.push(`${p.path}: og:image is not using the published OpenGraph.xyz Clearview template`);
+  if (p.twitterImage !== p.ogImage) problems.push(`${p.path}: twitter:image differs from og:image`);
   if (seenTitle.has(p.title)) problems.push(`${p.path}: title duplicates ${seenTitle.get(p.title)}`);
   if (seenDesc.has(p.description)) problems.push(`${p.path}: description duplicates ${seenDesc.get(p.description)}`);
   seenTitle.set(p.title, p.path);
