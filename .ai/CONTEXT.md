@@ -42,7 +42,7 @@ The ICM representation mirrors this lifecycle but never becomes the database of 
 - **Layer 0:** `CLAUDE.md` — identity and global operating contract.
 - **Layer 1:** this file — routing.
 - **Layer 2:** stage `CONTEXT.md` — stage contract and boundaries.
-- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`.
+- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`. Writing or reviewing public copy, guides, or graphics → `references/public-copy-positioning.md`.
 - **Layer 4:** `output/`, records, and application state — current work.
 
 ## Handoff rule
