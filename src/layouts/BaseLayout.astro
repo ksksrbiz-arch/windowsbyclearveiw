@@ -164,9 +164,9 @@ const breadcrumbSchema =
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Same-origin and preloaded, so the face is usually in hand before first
-         paint and the metric-matched fallback absorbs the rest. No preconnect
-         needed: there is no longer a third-party origin to warm up. -->
+    <!-- The page's primary hero image remains same-origin; social previews use
+         the published OpenGraph.xyz CDN template above. Keep this preload
+         focused on the visible page image rather than the remote OG card. -->
     <link
       rel="preload"
       href="/fonts/outfit-latin-var.woff2"
