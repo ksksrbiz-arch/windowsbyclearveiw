@@ -1,9 +1,9 @@
 ---
 title: Terms of use
-description: The terms that apply to using windowsbyclearview.com, including what the cost calculator is and is not.
-updated: 2026-09-27
+description: The terms that apply to using windowsbyclearview.com, including what the cost calculator and the website consultant are and are not.
+updated: 2026-09-30
 order: 2
-summary: Using this site does not hire us, and nothing on it is a quote. A price becomes real when we have measured your openings and put it in writing.
+summary: Using this site does not hire us, and nothing on it is a quote, including answers from the website consultant. A price becomes real when we have measured your openings and put it in writing.
 ---
 
 These terms apply to your use of windowsbyclearview.com, operated by Clearview
@@ -20,8 +20,8 @@ conflict about the work, the signed contract controls.
 
 This is the most important paragraph on this page.
 
-The cost calculator, the ranges it produces, the guides, and every figure
-published anywhere on this site are **general information, not an offer, not a
+The cost calculator, the ranges it produces, the guides, the website consultant's
+answers, and every figure published anywhere on this site are **general information, not an offer, not a
 bid, and not a quote**. They do not create a contract, and we are not bound by
 them.
 
@@ -48,6 +48,27 @@ They are not an inspection of your building and not professional advice about
 your specific situation. Building conditions vary, permit requirements vary by
 jurisdiction, and only someone who has looked at your walls can tell you what
 they need.
+
+## The website consultant (/ask)
+
+The consultant on the /ask page is an AI assistant. Its answers are **general
+guidance, not a quote, not an inspection, and not professional advice** about your
+home.
+
+- **It can be wrong.** It may misread your question or a photo, and it cannot see your
+  walls, frames, or openings. Do not rely on it for decisions about safety, structure,
+  moisture damage, permits, or cost.
+- **It does not make commitments.** Nothing it says is an offer, a price, a schedule, a
+  warranty, or a promise that we will do the work. Only a written estimate or contract
+  from us does that.
+- **A person decides.** A price, a product, and how a window should be installed are
+  confirmed by us after we measure your openings. If an answer and our written estimate
+  differ, the estimate is correct.
+- **Keep private details out of the chat.** Please do not type phone numbers, addresses,
+  or other personal details into it. Use the call-back request or the estimate form, which
+  the [privacy policy](/legal/privacy) explains.
+
+If you want to talk to a person, call us or ask for a call back.
 
 ## Submitting the estimate form
 
