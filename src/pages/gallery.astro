@@ -32,21 +32,21 @@ const groups = [
   {
     id: 'interiors',
     label: 'From inside the room',
-    blurb: 'The side you actually live with.',
+    blurb: 'The view from inside.',
     density: 'is-square',
     photos: allWork.filter((photo) => photo.kind === 'interior'),
   },
   {
     id: 'install-day',
     label: 'Install day',
-    blurb: 'Ladders, openings, and the part most sites leave out.',
+    blurb: 'Photos from install day.',
     density: 'is-dense',
     photos: allWork.filter((photo) => photo.kind === 'process'),
   },
   {
     id: 'new-construction',
     label: 'New construction',
-    blurb: 'Set and flashed, handed back to the builder.',
+    blurb: 'Windows set and flashed, ready for the next trade.',
     density: 'is-large',
     photos: allWork.filter((photo) => photo.kind === 'new construction'),
   },
@@ -67,8 +67,8 @@ const total = allWork.length;
       <p class="kicker">Gallery</p>
       <h1>Real jobs, real photos.</h1>
       <p class="lede">
-        Vinyl replacement in lived-in Washington houses — sliders, double-hungs, and the
-        ladder shots from install day. Every photo here is a job we did. None of it is stock.
+        Replacement windows on Washington homes: sliders, double-hungs, and photos from
+        install day. Every photo here is from one of our jobs.
       </p>
       <p class="gallery-index">
         <span class="gallery-count">{total}</span>

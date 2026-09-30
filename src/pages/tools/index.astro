@@ -42,10 +42,10 @@ const schema = {
   <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
     <div class="wrap">
       <p class="kicker">Tools</p>
-      <h1>Work it out yourself first.</h1>
+      <h1>Plan your project.</h1>
       <p class="lede">
-        Free, no email, nothing sent anywhere. Start with a planning range, then use the answer
-        tools when you have a more specific question. There is no requirement to contact us.
+        These tools are free and need no email. Start with a planning range, then ask the
+        consultant a specific question. You do not have to contact us.
       </p>
     </div>
     <p class="hero-photo-credit">Clearview job photo — sealing a window sill</p>
@@ -70,7 +70,7 @@ const schema = {
         <ul class="tool-facts">
           <li><strong>Free</strong><span>No account, no email</span></li>
           <li><strong>Private</strong><span>Runs in your browser</span></li>
-          <li><strong>Honest</strong><span>Ranges, not one fake number</span></li>
+          <li><strong>Clear</strong><span>A range, not a single figure</span></li>
         </ul>
       </a>
 
@@ -79,7 +79,7 @@ const schema = {
           <span class="next-tool-step">2</span>
           <span>
             <strong>Have a specific question?</strong>
-            <span>Ask the window Q&amp;A for help with styles, fog, materials, or what to measure next.</span>
+            <span>Ask the window consultant about styles, fog, materials, or what to measure next.</span>
           </span>
           <span class="next-tool-arrow" aria-hidden="true">→</span>
         </a>
@@ -93,15 +93,12 @@ const schema = {
         </a>
       </div>
 
-      <p class="fine-print tool-note">
-        More tools are on the way. We would rather ship one that works than several that do not.
-      </p>
     </div>
   </section>
 
   <CtaBar
     heading="Worked it out? Get it measured."
-    body="The calculator gets the order of magnitude right. Only a measure gets your number right."
+    body="The calculator gives you a planning range. A measure gives you your actual number."
   />
 </BaseLayout>
 
@@ -254,10 +251,6 @@ const schema = {
   .next-tool:hover .next-tool-arrow,
   .next-tool:focus-visible .next-tool-arrow {
     transform: translateX(0.25rem);
-  }
-
-  .tool-note {
-    margin-top: var(--space-m);
   }
 
   @media (max-width: 900px) {

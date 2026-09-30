@@ -33,6 +33,8 @@ const goodReports = {
     { rows: [row(['last7'], [2]), row(['last28'], [7])] },
     { rows: [row(['/replacement'], [90]), row(['/'], [70]), row(['/x\u0000\n' + 'y'.repeat(500)], [3])] },
     { rows: [row(['Organic Search'], [120]), row(['Direct'], [60])] },
+    // Out of order on purpose, with one malformed date and one junk number.
+    { rows: [row(['20260903'], [5, 4]), row(['20260901'], [3, 2]), row(['not-a-date'], [9, 9]), row(['20260902'], ['junk', 1])] },
   ],
 };
 
@@ -96,14 +98,20 @@ function mockFetch({ tokenOk = true, reportsOk = true, reports = goodReports } =
   assert.equal(reportCall.url, `https://analyticsdata.googleapis.com/v1beta/properties/${PROPERTY}:batchRunReports`);
   assert.equal(reportCall.init.headers.authorization, 'Bearer tok-abc');
   const body = JSON.parse(reportCall.init.body);
-  assert.equal(body.requests.length, 4);
+  assert.equal(body.requests.length, 5);
+  assert.ok(body.requests.length <= 5, 'GA4 allows at most five reports per batch');
   assert.equal(body.requests[1].dimensionFilter.filter.stringFilter.value, 'generate_lead');
   assert.deepEqual(result.last7, { users: 40, sessions: 55, pageViews: 130, leadEvents: 2 });
   assert.deepEqual(result.last28, { users: 150, sessions: 210, pageViews: 520, leadEvents: 7 });
   assert.equal(result.topPages[0].label, '/replacement');
   assert.equal(result.channels[0].value, 120);
   assert.ok(result.topPages.every((p) => p.label.length <= 120 && !/[\u0000-\u001f]/.test(p.label)), 'labels are bounded and control-free');
-  assert.ok(buildRequests().every((r) => !r.limit || r.limit <= 8), 'row counts are bounded');
+  assert.ok(buildRequests().every((r) => !r.limit || r.limit <= 31), 'row counts are bounded');
+  assert.deepEqual(result.daily, [
+    { date: '2026-09-01', sessions: 3, users: 2 },
+    { date: '2026-09-02', sessions: 0, users: 1 },
+    { date: '2026-09-03', sessions: 5, users: 4 },
+  ]);
   pass('GA4 reports are requested for the right property and normalized to bounded, clean numbers and labels');
 }
 
@@ -123,6 +131,16 @@ function mockFetch({ tokenOk = true, reportsOk = true, reports = goodReports } =
     assert.ok(!JSON.stringify(result).includes(EMAIL) && !JSON.stringify(result).includes('PRIVATE KEY'));
   }
   pass('API, token, network and shape failures degrade to "unavailable" without echoing keys or upstream bodies');
+}
+
+{
+  // A payload from before the daily report existed still works; the page just has no trend chart.
+  resetGa4TokenCacheForTests();
+  const legacy = { reports: goodReports.reports.slice(0, 4) };
+  const result = await fetchGa4Summary(env, { fetchImpl: mockFetch({ reports: legacy }).impl, now: 6_000_000 });
+  assert.equal(result.status, 'ok');
+  assert.deepEqual(result.daily, []);
+  pass('a GA4 response without the daily report still normalizes (empty trend)');
 }
 
 {

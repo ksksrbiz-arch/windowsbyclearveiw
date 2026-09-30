@@ -28,16 +28,16 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
   <section class="page-hero">
     <div class="wrap">
       <p class="kicker">Reviews</p>
-      <h1>Neighbors first, ratings second.</h1>
+      <h1>Customer reviews</h1>
       <p
         class="lede"
         data-lede-google="Real reviews from real customers, pulled live from our Google Business Profile."
       >
         {reviews.length > 0
-          ? 'Quotes from Clark County customers, republished with their permission.'
+          ? 'Quotes from Clark County customers, shared with their permission.'
           : hasGoogle
-            ? 'Real customers, real names, and nothing we wrote ourselves.'
-            : 'We would rather show an empty page than borrowed praise.'}
+            ? 'Real customers, in their own words.'
+            : 'Reviews will appear here as customers leave them.'}
       </p>
     </div>
   </section>
@@ -78,10 +78,9 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
               <>
                 <h2>{googleHeading}</h2>
                 <p class="lede">
-                  {site.shortName} is a locally owned installation company. Google shows{' '}
-                  {google.count === 1 ? 'one review' : `${google.count} reviews`} on our Business
-                  Profile, averaging {google.rating.toFixed(1)} stars. Anyone can read it there,
-                  and leave one of their own.
+                  Google shows {google.count === 1 ? 'one review' : `${google.count} reviews`} on
+                  our Business Profile, averaging {google.rating.toFixed(1)} stars. You can read
+                  {google.count === 1 ? ' it' : ' them'} there and leave one of your own.
                 </p>
                 {site.social.google && (
                   <p>
@@ -91,23 +90,16 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
                   </p>
                 )}
                 <p>
-                  We show the rating and link to the source instead of retyping anyone’s words.
-                  A fabricated testimonial is not just tacky — since 2024 it is against federal
-                  rules — so this page only carries what real customers actually wrote.
+                  We show the rating and link to the source instead of retyping anyone’s words,
+                  so this page only carries what real customers actually wrote.
                 </p>
               </>
             ) : (
               <>
-                <h2>Nothing here yet, and that is on purpose.</h2>
+                <h2>No reviews yet.</h2>
                 <p class="lede">
-                  {site.shortName} is a locally owned installation company. Rather than fill the
-                  page with invented quotes, we left it empty until real customers put their names
-                  to something.
-                </p>
-                <p>
-                  A fabricated testimonial is not just tacky — since 2024 it is against federal
-                  rules. Plenty of contractor sites carry five glowing reviews written the week the
-                  domain was registered. This one will carry none until they are real.
+                  We only publish reviews from real customers, with their permission, so this
+                  page stays empty until they arrive.
                 </p>
               </>
             )}
@@ -128,7 +120,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
       <div class="wrap split" data-reveal>
         <div>
           <p class="rule-label">Already worked with us?</p>
-          <h2>{hasGoogle ? 'We would rather have more real ones.' : 'We would rather have one real one.'}</h2>
+          <h2>Leave us a review.</h2>
           <ul class="plain-list">
             <li>Tell us you are happy to be quoted here</li>
             {site.social.facebook && (
@@ -162,9 +154,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
         <div>
           <p class="rule-label">In the meantime</p>
           <p>
-            <a href="/gallery">The gallery</a> is all real jobs — our own photos, our own
-            openings, no stock. It is the closest thing to proof this site can honestly offer
-            today.
+            <a href="/gallery">The gallery</a> shows our own jobs, in our own photos.
           </p>
         </div>
       </div>

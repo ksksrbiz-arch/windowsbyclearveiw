@@ -240,4 +240,14 @@ const post = (handler, body, env) =>
   checks++;
 }
 
+// The privacy policy must describe what this feature does (the policy says it is
+// written against the code, so a new data flow cannot ship without it).
+{
+  const privacy = read('src/content/legal/privacy.md');
+  for (const phrase of ['## The website consultant (/ask)', 'call-back request', 'Groq', 'Workers AI', 'DuckDuckGo', 'do not keep a copy of your messages']) {
+    assert.ok(privacy.includes(phrase), `privacy policy does not mention: ${phrase}`);
+  }
+  checks++;
+}
+
 console.log(`ask hand-off: ok (${checks} groups)`);

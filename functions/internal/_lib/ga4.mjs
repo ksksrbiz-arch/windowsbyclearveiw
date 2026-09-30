@@ -17,6 +17,7 @@ const SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
 const DATA_API = 'https://analyticsdata.googleapis.com/v1beta/properties';
 const LEAD_EVENT = 'generate_lead';
 const MAX_ROWS = 8;
+const MAX_DAYS = 31;
 const MAX_TEXT = 120;
 
 let tokenCache = { key: '', token: '', expiresAt: 0 };
@@ -122,6 +123,14 @@ export function buildRequests() {
       orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
       limit: MAX_ROWS,
     },
+    // Day by day, for the trend chart. GA4 allows five requests per batch; this is the fifth.
+    {
+      dateRanges: [RANGES[1]],
+      dimensions: [{ name: 'date' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      orderBys: [{ dimension: { dimensionName: 'date' } }],
+      limit: MAX_DAYS,
+    },
   ];
 }
 
@@ -148,6 +157,21 @@ function totalsByRange(report, metricCount) {
     });
   }
   return out;
+}
+
+// GA4 reports a day as YYYYMMDD; the page wants ISO dates.
+function dailyRows(report) {
+  const out = [];
+  for (const row of (report?.rows || []).slice(0, MAX_DAYS)) {
+    const raw = String(row?.dimensionValues?.[0]?.value ?? '');
+    if (!/^\d{8}$/.test(raw)) continue;
+    out.push({
+      date: `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`,
+      sessions: cleanNumber(row?.metricValues?.[0]?.value),
+      users: cleanNumber(row?.metricValues?.[1]?.value),
+    });
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function topRows(report) {
@@ -177,6 +201,8 @@ export function normalizeReports(payload) {
     },
     topPages: topRows(reports[2]),
     channels: topRows(reports[3]),
+    // Older payloads without the daily report still normalize; the page just skips the trend chart.
+    daily: dailyRows(reports[4]),
   };
 }
 
