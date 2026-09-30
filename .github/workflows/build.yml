@@ -43,3 +43,4 @@ jobs:
       - run: npm run build
       - run: npm run test:seo
       - run: npm run test:form-patterns
+      - run: npm run test:charts

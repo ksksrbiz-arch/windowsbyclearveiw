@@ -25,11 +25,13 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       <article class="an-stat"><span>Collected</span><strong data-pipe="collected">—</strong><small>on jobs from this period</small></article>
     </div>
     <div class="an-grid">
+      <article class="an-panel an-wide"><h3>From request to paid job</h3><div class="an-chart" data-chart="pipeFunnel"></div></article>
       <article class="an-panel"><h3>Rates</h3><div data-list="pipeRates"></div></article>
       <article class="an-panel"><h3>Needs attention</h3><div data-list="pipeAttention"></div></article>
       <article class="an-panel an-wide">
         <h3>Which sources bring paying work</h3>
         <p class="an-note" data-source-coverage>—</p>
+        <div class="an-chart" data-chart="sourceSigned"></div>
         <div class="an-table-wrap">
           <table class="an-table">
             <thead><tr><th scope="col">Source</th><th scope="col">Requests</th><th scope="col">Quotes</th><th scope="col">Signed</th><th scope="col">Signed $</th><th scope="col">Collected</th></tr></thead>
@@ -47,9 +49,9 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
     <p class="an-note">Counted from the requests in your own database (first visit source), so it works without any analytics account.</p>
     <div class="an-grid">
-      <article class="an-panel"><h3>Source</h3><div data-list="leadSources"></div></article>
-      <article class="an-panel"><h3>First page visited</h3><div data-list="leadLanding"></div></article>
-      <article class="an-panel an-wide"><h3>Requests per week</h3><div data-list="leadWeekly"></div></article>
+      <article class="an-panel"><h3>Source</h3><div class="an-chart" data-chart="leadSources"></div></article>
+      <article class="an-panel"><h3>First page visited</h3><div class="an-chart" data-chart="leadLanding"></div></article>
+      <article class="an-panel an-wide"><h3>Requests per week</h3><div class="an-chart" data-chart="leadWeekly"></div></article>
     </div>
   </section>
 
@@ -67,8 +69,9 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
     <p class="an-note" data-ga4-window hidden>Visitors, sessions and page views cover the last 28 days unless noted.</p>
     <div class="an-grid" data-ga4-lists hidden>
-      <article class="an-panel"><h3>Where sessions come from</h3><div data-list="channels"></div></article>
-      <article class="an-panel"><h3>Most viewed pages</h3><div data-list="topPages"></div></article>
+      <article class="an-panel an-wide"><h3>Sessions and visitors per day</h3><div class="an-chart" data-chart="ga4Daily"></div></article>
+      <article class="an-panel"><h3>Where sessions come from</h3><div class="an-chart" data-chart="channels"></div></article>
+      <article class="an-panel"><h3>Most viewed pages</h3><div class="an-chart" data-chart="topPages"></div></article>
     </div>
   </section>
 
@@ -85,6 +88,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   <p class="an-status" data-status role="status">Loading analytics…</p>
 </InternalLayout>
 <script>
+  import { barChart, columnChart, donutChart, funnelChart, lineChart } from '../../lib/charts';
+
   type Row = { label: string; value: number };
   type Ga4 = {
     status: 'ok' | 'unconfigured' | 'unavailable';
@@ -92,6 +97,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     last28?: Record<string, number>;
     topPages?: Row[];
     channels?: Row[];
+    daily?: { date: string; sessions: number; users: number }[];
   };
   type Leads = {
     status: 'ok' | 'unavailable';
@@ -124,32 +130,59 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   const count = (value: number | null | undefined) => (typeof value === 'number' ? nf.format(value) : '—');
   const $ = (selector: string) => document.querySelector(selector);
 
-  function renderList(name: string, rows: Row[] | undefined, empty: string) {
-    const host = $(`[data-list="${name}"]`);
-    if (!(host instanceof HTMLElement)) return;
-    host.replaceChildren();
-    if (!rows || rows.length === 0) {
-      const p = document.createElement('p');
-      p.className = 'an-empty';
-      p.textContent = empty;
-      host.append(p);
-      return;
-    }
-    const max = Math.max(...rows.map((row) => row.value), 1);
-    for (const row of rows) {
-      const item = document.createElement('div');
-      item.className = 'an-row';
-      const label = document.createElement('span');
-      label.className = 'an-row-label';
-      label.textContent = row.label;
-      const value = document.createElement('strong');
-      value.textContent = nf.format(row.value);
-      const bar = document.createElement('i');
-      bar.style.width = `${Math.max(2, Math.round((row.value / max) * 100))}%`;
-      item.append(label, value, bar);
-      host.append(item);
-    }
+  /**
+   * Charts are drawn at the width their box actually has, so text stays readable
+   * on a phone, and redrawn when that width changes. Each chart registers a
+   * builder here; `paint()` runs them all.
+   */
+  type ChartJob = { build: (width: number) => string; empty: string };
+  const jobs = new Map<string, ChartJob>();
+  const widths = new Map<string, number>();
+
+  // SVG from our own builders is parsed and imported as nodes; nothing is assigned as HTML.
+  function mountSvg(host: HTMLElement, markup: string): boolean {
+    const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
+    const root = doc.documentElement;
+    if (!root || root.nodeName !== 'svg' || doc.querySelector('parsererror')) return false;
+    host.replaceChildren(document.importNode(root, true));
+    return true;
   }
+
+  function paintOne(name: string, job: ChartJob) {
+    const host = $(`[data-chart="${name}"]`);
+    if (!(host instanceof HTMLElement)) return;
+    const width = Math.floor(host.clientWidth || host.parentElement?.clientWidth || 320);
+    widths.set(name, width);
+    const markup = job.build(width);
+    if (markup && mountSvg(host, markup)) return;
+    const p = document.createElement('p');
+    p.className = 'an-empty';
+    p.textContent = job.empty;
+    host.replaceChildren(p);
+  }
+
+  function setChart(name: string, job: ChartJob) {
+    jobs.set(name, job);
+    paintOne(name, job);
+  }
+
+  function clearChart(name: string, message: string) {
+    setChart(name, { build: () => '', empty: message });
+  }
+
+  let repaintQueued = false;
+  function repaintOnResize() {
+    if (repaintQueued) return;
+    repaintQueued = true;
+    requestAnimationFrame(() => {
+      repaintQueued = false;
+      for (const [name, job] of jobs) {
+        const host = $(`[data-chart="${name}"]`);
+        if (host instanceof HTMLElement && Math.abs(host.clientWidth - (widths.get(name) ?? 0)) > 8) paintOne(name, job);
+      }
+    });
+  }
+  window.addEventListener('resize', repaintOnResize, { passive: true });
 
   function setText(selector: string, text: string) {
     const el = $(selector);
@@ -175,8 +208,28 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
         setText(`[data-stat="${key}28"]`, nf.format(ga4.last28[key] ?? 0));
         setText(`[data-stat="${key}7"]`, nf.format(ga4.last7[key] ?? 0));
       }
-      renderList('channels', ga4.channels, 'No sessions recorded yet.');
-      renderList('topPages', ga4.topPages, 'No page views recorded yet.');
+      const daily = ga4.daily ?? [];
+      const shortDay = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      setChart('ga4Daily', {
+        build: (width) =>
+          lineChart(
+            [
+              { name: 'Sessions', values: daily.map((d) => d.sessions) },
+              { name: 'Visitors', values: daily.map((d) => d.users) },
+            ],
+            daily.map((d) => shortDay(d.date)),
+            { width, title: 'Sessions and visitors per day, last 28 days' },
+          ),
+        empty: 'No daily traffic recorded yet.',
+      });
+      setChart('channels', {
+        build: (width) => donutChart(ga4.channels, { width, title: 'Sessions by channel, last 28 days', centerLabel: 'sessions' }),
+        empty: 'No sessions recorded yet.',
+      });
+      setChart('topPages', {
+        build: (width) => barChart(ga4.topPages, { width, title: 'Most viewed pages, last 28 days' }),
+        empty: 'No page views recorded yet.',
+      });
       return;
     }
     show('[data-ga4-message]', true);
@@ -215,6 +268,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       });
       renderTextList('pipeRates', [['Business data could not be loaded.', '']]);
       renderTextList('pipeAttention', []);
+      clearChart('pipeFunnel', 'Business data could not be loaded.');
       return;
     }
     const q = pipe.quotes;
@@ -229,6 +283,16 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     setText('[data-pipe="jobs"]', count(j?.created));
     setText('[data-pipe="completed"]', count(j?.completed));
     setText('[data-pipe="collected"]', dollars(j?.collectedCents));
+    const stages = [
+      { label: 'Requests', value: pipe.leads },
+      { label: 'Quotes written', value: q?.created },
+      { label: 'Quotes signed', value: q?.signed },
+      { label: 'Jobs', value: j?.created },
+    ].filter((stage): stage is { label: string; value: number } => typeof stage.value === 'number');
+    setChart('pipeFunnel', {
+      build: (width) => (stages.some((stage) => stage.value > 0) ? funnelChart(stages, { width, title: `Requests to jobs, last ${pipe.days ?? 90} days` }) : ''),
+      empty: 'Nothing to chart yet in this period.',
+    });
     const avgSigned = q && q.signed > 0 ? dollars(Math.round(q.signedCents / q.signed)) : '—';
     renderTextList('pipeRates', [
       ['Quotes written per estimate request', pct(pipe.rates?.quotesPerLead)],
@@ -250,8 +314,14 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     const data = pipe?.status === 'ok' ? pipe.bySource : null;
     if (!data) {
       setText('[data-source-coverage]', 'Source data could not be loaded.');
+      clearChart('sourceSigned', 'Source data could not be loaded.');
       return;
     }
+    const signedRows = data.sources.filter((row) => row.signedCents > 0).map((row) => ({ label: row.label, value: row.signedCents }));
+    setChart('sourceSigned', {
+      build: (width) => barChart(signedRows, { width, title: 'Signed quote value by source', format: dollars }),
+      empty: 'No signed quotes are linked to a source yet.',
+    });
     const total = data.linkedQuotes + data.unlinkedQuotes;
     setText(
       '[data-source-coverage]',
@@ -285,20 +355,25 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   function renderLeads(leads: Leads) {
     if (leads.status !== 'ok') {
       setText('[data-leads-total]', 'Unavailable');
-      renderList('leadSources', [], 'Lead data could not be loaded.');
-      renderList('leadLanding', [], 'Lead data could not be loaded.');
-      renderList('leadWeekly', [], 'Lead data could not be loaded.');
+      for (const name of ['leadSources', 'leadLanding', 'leadWeekly']) clearChart(name, 'Lead data could not be loaded.');
       return;
     }
     const total = leads.total ?? 0;
     setText('[data-leads-total]', `${nf.format(total)} in the last ${leads.days ?? 90} days`);
-    renderList('leadSources', leads.sources, 'No estimate requests yet.');
-    renderList('leadLanding', leads.landingPages, 'No estimate requests yet.');
-    renderList(
-      'leadWeekly',
-      (leads.weekly ?? []).map((week) => ({ label: `Week of ${week.weekOf}`, value: week.value })),
-      'No estimate requests yet.',
-    );
+    const weekLabel = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const weekly = (leads.weekly ?? []).map((week) => ({ label: weekLabel(week.weekOf), value: week.value }));
+    setChart('leadSources', {
+      build: (width) => donutChart(leads.sources, { width, title: 'Estimate requests by source', centerLabel: 'requests' }),
+      empty: 'No estimate requests yet.',
+    });
+    setChart('leadLanding', {
+      build: (width) => barChart(leads.landingPages, { width, title: 'Estimate requests by first page visited' }),
+      empty: 'No estimate requests yet.',
+    });
+    setChart('leadWeekly', {
+      build: (width) => (weekly.some((week) => week.value > 0) ? columnChart(weekly, { width, title: 'Estimate requests per week (week starting)' }) : ''),
+      empty: 'No estimate requests yet.',
+    });
   }
 
   async function load() {
@@ -348,6 +423,26 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   :global(.an-row strong){font-variant-numeric:tabular-nums}
   :global(.an-row i){position:absolute;left:0;bottom:.3rem;height:3px;border-radius:2px;background:var(--accent);opacity:.55}
   :global(.an-empty){margin:0;color:var(--ink-soft);font-size:var(--step--1)}
+  /* Charts are built by script (see src/lib/charts.ts), so these must be global. */
+  :global(.an-chart){min-width:0}
+  :global(svg.ch){--ch-1:var(--accent);--ch-2:#3a3d42;--ch-3:#b7791f;--ch-4:#2b6cb0;--ch-5:#b83280;--ch-6:#8a8d93;display:block;width:100%;height:auto;overflow:visible;font-family:inherit}
+  :global(.ch-label){font-size:12px;fill:var(--ink)}
+  :global(.ch-axis){font-size:11px;fill:var(--ink-soft)}
+  :global(.ch-value){font-size:12px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
+  :global(.ch-center){font-size:20px;font-weight:700;fill:var(--ink);font-variant-numeric:tabular-nums}
+  :global(.ch-barvalue){font-size:12px;font-weight:700;fill:var(--ink);font-variant-numeric:tabular-nums;paint-order:stroke;stroke:var(--paper-raised);stroke-width:3px;stroke-linejoin:round}
+  :global(.ch-grid){stroke:var(--line);stroke-width:1}
+  :global(.ch-track){fill:var(--paper-sunk)}
+  :global(.ch-zero){fill:var(--line-strong)}
+  :global(.ch-bar){fill:var(--c,var(--ch-1))}
+  :global(.ch-f0){opacity:.55}:global(.ch-f1){opacity:.7}:global(.ch-f2){opacity:.85}:global(.ch-f3){opacity:1}
+  :global(.ch-s0){--c:var(--ch-1)}:global(.ch-s1){--c:var(--ch-2)}:global(.ch-s2){--c:var(--ch-3)}:global(.ch-s3){--c:var(--ch-4)}:global(.ch-s4){--c:var(--ch-5)}:global(.ch-s5){--c:var(--ch-6)}
+  :global(.ch-line){stroke:var(--c);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  :global(.ch-area){fill:var(--c);opacity:.12}
+  :global(.ch-arc){stroke:var(--c)}
+  :global(.ch-swatch),:global(.ch-dot){fill:var(--c)}
+  :global(.ch-hit){fill:transparent}
+  :global(.ch-hit:hover){fill:rgb(0 0 0 / .05)}
   .an-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:var(--space-xs)}
   .an-stat{display:grid;gap:.25rem;padding:1rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}
   .an-stat>span{font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
@@ -359,9 +454,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .an-link span{color:var(--ink-soft);font-size:var(--step--1)}
   .an-status{color:var(--ink-soft);font-size:var(--step--1)}
   .an-table-wrap{overflow-x:auto}
-  .an-table{width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
+  /* Keep the source column readable on a phone; the wrapper scrolls sideways instead of crushing it. */
+  .an-table{min-width:32rem;width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
   :global(.an-table th),:global(.an-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
-  :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere}
+  :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere;min-width:7rem}
   .an-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
   @media(max-width:900px){.an-stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.an-hero{align-items:flex-start;flex-direction:column}.an-grid,.an-links{grid-template-columns:minmax(0,1fr)}}
