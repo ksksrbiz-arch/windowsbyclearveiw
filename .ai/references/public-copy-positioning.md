@@ -24,6 +24,9 @@ Owner direction, 2026-09-30. Business facts here come from the owner; do not ext
   in the written estimate."
 - Say "old", not "tired", for windows.
 - No personal names in public copy; company voice ("we"). No claims about team size.
+- Never promise how long a job takes or what state the room is left in. No "one-day job", "same day",
+  or "leave the room usable" (owner direction, 2026-09-30: timing depends on the specifics of each job).
+  Saying we haul away debris is fine. Lead times are fine when tied to the manufacturer.
 
 ## Graphics
 
