@@ -3,9 +3,6 @@ import { getImage, Image } from 'astro:assets';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
-import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
-import oldWindowReplacementDesktop from '../assets/guides/old-window-replacement-desktop.png';
-import oldWindowReplacementMobile from '../assets/guides/old-window-replacement-mobile.png';
 import WorkCard from '../components/WorkCard.astro';
 import { replacementWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
@@ -86,19 +83,6 @@ const spec = [
       </p>
     </div>
     <p class="hero-photo-credit">Clearview job photo — completed replacement elevation</p>
-  </section>
-
-  <section class="section section-sunk">
-    <div class="wrap" data-reveal>
-      <p class="rule-label">See the change</p>
-      <CanvaGuideEmbed
-        desktopSrc={oldWindowReplacementDesktop}
-        mobileSrc={oldWindowReplacementMobile}
-        alt="Before-and-after infographic comparing an older window assembly with a modern ClearView replacement."
-        title="Old window to ClearView replacement"
-        description="A visual before-and-after comparison of an older window assembly and a modern replacement."
-      />
-    </div>
   </section>
 
   <section class="section">
