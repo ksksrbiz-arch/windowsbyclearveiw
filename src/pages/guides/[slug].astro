@@ -6,7 +6,6 @@ import CtaBar from '../../components/CtaBar.astro';
 import OpeningScope from '../../components/diagrams/OpeningScope.astro';
 import FlashingOrder from '../../components/diagrams/FlashingOrder.astro';
 import CanvaGuideEmbed from '../../components/CanvaGuideEmbed.astro';
-import windowAnatomyGraphic from '../../assets/guides/window-anatomy.png';
 import doublePaneGlassDesktop from '../../assets/guides/double-pane-glass-desktop.png';
 import doublePaneGlassMobile from '../../assets/guides/double-pane-glass-mobile.png';
 import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
@@ -42,12 +41,6 @@ const diagramNotes = {
     title: 'Follow the water path, not the product names.',
     body: 'Start with the installation photo, then use the numbered notes to see how the bottom, sides, top, and wall weather barrier work together.',
     answer: 'The objective is controlled drainage: water moves down through the exterior layers and leaves the wall assembly instead of turning inward.',
-  },
-  'window-anatomy': {
-    eyebrow: 'Window anatomy',
-    title: 'Start with the physical pieces.',
-    body: 'A modern replacement window is a system of a few major components. Seeing them first makes the rest of the guide easier to follow.',
-    answer: 'Frame, sash, insulated glass, spacer, weather seal, and hardware each have a distinct job.',
   },
   'double-pane-glass': {
     eyebrow: 'Glass construction',
@@ -109,8 +102,7 @@ const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram]
 
 // These diagram types already wrap a full photo (see PhotoGuide.astro), so
 // showing the guide's own heroImage right after them would duplicate the
-// section. The illustration-style diagrams below (window-anatomy,
-// double-pane-glass, vinyl-vs-fiberglass) are
+// section. The illustration-style diagrams below (double-pane-glass, vinyl-vs-fiberglass) are
 // graphics, not photos, so pairing them with a real job photo is intentional.
 const photoBasedDiagrams = ['opening-scope', 'flashing-order', 'signs-checklist'];
 const diagramIsPhotoBased = guide.data.diagram ? photoBasedDiagrams.includes(guide.data.diagram) : false;
@@ -184,16 +176,6 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
             <OpeningScope heading={null} />
           )}
           {guide.data.diagram === 'flashing-order' && <FlashingOrder />}
-          {guide.data.diagram === 'window-anatomy' && (
-            <CanvaGuideEmbed
-              desktopSrc={windowAnatomyGraphic}
-              mobileSrc={windowAnatomyGraphic}
-              desktopMaxWidth="760px"
-              alt="Window anatomy infographic labeling the main parts of a modern replacement window."
-              title="Window anatomy"
-              description="A clear visual guide to the main parts of a modern replacement window."
-            />
-          )}
           {guide.data.diagram === 'double-pane-glass' && (
             <CanvaGuideEmbed
               desktopSrc={doublePaneGlassDesktop}
