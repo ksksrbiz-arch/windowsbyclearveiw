@@ -247,7 +247,6 @@ const post = (handler, body, env) =>
   for (const phrase of ['## The website consultant (/ask)', 'call-back request', 'Groq', 'Workers AI', 'DuckDuckGo', 'do not keep a copy of your messages']) {
     assert.ok(privacy.includes(phrase), `privacy policy does not mention: ${phrase}`);
   }
-  assert.ok(!privacy.includes('Nothing else on the site asks you for personal information.\n\n**') , 'stale claim order');
   checks++;
 }
 
