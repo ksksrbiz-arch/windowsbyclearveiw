@@ -1,5 +1,5 @@
 import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
-import { ensureGeneralJobColumns } from '../_lib/general-jobs.mjs';
+import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -57,7 +57,7 @@ export function pacificDayRange(now = new Date()) {
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureTaskSchema(env.QUOTES_DB);
-  await ensureGeneralJobColumns(env.QUOTES_DB).catch((error) => console.error('general-job-columns-failed', error));
+  await ensureJobsSchema(env.QUOTES_DB);
   await syncQuoteFollowUps(env.QUOTES_DB).catch((error) => console.error('quote-follow-up-sync-failed', error));
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const now = new Date().toISOString();
