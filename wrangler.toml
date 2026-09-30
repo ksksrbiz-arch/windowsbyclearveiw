@@ -19,6 +19,13 @@ database_name = "clearveiw-quotes"
 database_id = "4700b6f7-c3d8-46c9-9b19-17cf34accb84"
 preview_database_id = "4700b6f7-c3d8-46c9-9b19-17cf34accb84"
 
+# Job photo backup (functions/internal/api/job-photos.js). Local simulation only, like the D1
+# binding above: production reads its bindings from the Pages dashboard (see internal/README.md,
+# "Job photo storage"). Without this binding the photo endpoint answers "not connected yet".
+[[r2_buckets]]
+binding = "JOB_PHOTOS"
+bucket_name = "clearview-job-photos"
+
 # Workers AI, for the /ask photo-analysis feature (functions/ask/_lib/vision.mjs).
 # Free up to 10,000 Neurons/day, no billing setup required. Also needs adding in
 # the Cloudflare Pages dashboard for production — see internal/README.md.
