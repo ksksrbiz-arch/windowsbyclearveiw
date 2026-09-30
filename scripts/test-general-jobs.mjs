@@ -230,4 +230,20 @@ let jobId;
   pass('deploy order: old jobs table gains the columns from any entry point; missing table handled');
 }
 
+// ── Day one: a brand-new database has no jobs table until something creates it ──
+{
+  const fresh = freshEnv();
+  assert.equal(fresh.QUOTES_DB.raw.prepare(`SELECT COUNT(*) AS n FROM sqlite_master WHERE name = 'jobs'`).get().n, 0, 'precondition: no jobs table');
+  // Whichever page Mark opens first must work, not just the jobs page.
+  const dash = await call(dashboardApi.onRequestGet, fresh, { path: '/internal/api/dashboard' });
+  assert.equal(dash.status, 200, 'the dashboard loads on a brand-new database');
+  assert.deepEqual([dash.body.recentJobs, dash.body.recentLeads, dash.body.recentQuotes, dash.body.tasks], [[], [], [], []]);
+  assert.equal(Number(dash.body.counts.active_jobs), 0);
+  const other = freshEnv();
+  assert.equal((await call(paymentsApi.onRequestGet, other, { path: '/internal/api/payments' })).status, 200, 'Payments loads on a brand-new database');
+  const third = freshEnv();
+  assert.equal((await call(jobsApi.onRequestGet, third, { path: '/internal/api/jobs' })).status, 200, 'the jobs list loads on a brand-new database');
+  pass('day one: dashboard, Payments and Jobs all load on a brand-new database in any order');
+}
+
 console.log('General jobs checks passed.');

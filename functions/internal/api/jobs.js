@@ -1,19 +1,15 @@
 import { assertJobEligible } from '../../_lib/build-plan-state.mjs';
 import { lintPlan, sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
-import { ensureGeneralJobColumns, isGeneralJob, validateGeneralJobUpdate, validateNewGeneralJob } from '../_lib/general-jobs.mjs';
+import { isGeneralJob, validateGeneralJobUpdate, validateNewGeneralJob } from '../_lib/general-jobs.mjs';
+import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
 
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});}
-async function ensureSchema(db){await db.batch([
-  db.prepare(`CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,quote_id TEXT UNIQUE,status TEXT NOT NULL DEFAULT 'ready',scheduled_date TEXT,scheduled_window TEXT,customer_name TEXT NOT NULL,customer_phone TEXT,customer_email TEXT,customer_address TEXT,customer_city TEXT,notes TEXT,install_notes TEXT,closeout_notes TEXT,completed_at TEXT,created_by TEXT NOT NULL DEFAULT 'mark')`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_jobs_scheduled_date ON jobs(scheduled_date)`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at DESC)`),
-  db.prepare(`CREATE INDEX IF NOT EXISTS idx_jobs_quote_id ON jobs(quote_id)`),
+async function ensureSchema(db){await ensureJobsSchema(db);await db.batch([
   db.prepare(`CREATE TABLE IF NOT EXISTS job_build_plan_events (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL,quote_id TEXT,plan_version INTEGER,knowledge_version TEXT,event_type TEXT NOT NULL,created_at TEXT NOT NULL,created_by TEXT NOT NULL DEFAULT 'mark',notes TEXT)`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_job_build_plan_events_job ON job_build_plan_events(job_id,created_at DESC)`),
   db.prepare(`CREATE TABLE IF NOT EXISTS job_closeouts (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL UNIQUE,walkthrough_confirmed INTEGER NOT NULL DEFAULT 0,warranty_handoff_confirmed INTEGER NOT NULL DEFAULT 0,balance_confirmed INTEGER NOT NULL DEFAULT 0,signoff_name TEXT NOT NULL DEFAULT '',signoff_notes TEXT NOT NULL DEFAULT '',finalized_at TEXT,updated_at TEXT NOT NULL,updated_by TEXT NOT NULL DEFAULT 'mark')`),
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_job_closeouts_job ON job_closeouts(job_id)`),
-]);for(const sql of [`ALTER TABLE jobs ADD COLUMN build_plan_json TEXT`,`ALTER TABLE jobs ADD COLUMN build_plan_version INTEGER`,`ALTER TABLE jobs ADD COLUMN build_plan_knowledge_version TEXT`,`ALTER TABLE jobs ADD COLUMN build_plan_attached_at TEXT`,`ALTER TABLE jobs ADD COLUMN build_plan_attached_by TEXT`]){try{await db.prepare(sql).run();}catch{}}await ensureGeneralJobColumns(db);}
+]);}
 function makeId(){return `J-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;}
 function parsePlan(row){if(!row?.build_plan_json)return null;try{return JSON.parse(row.build_plan_json);}catch{return null;}}
 function sameSource(a,b){return JSON.stringify(a||[])===JSON.stringify(b||[]);}

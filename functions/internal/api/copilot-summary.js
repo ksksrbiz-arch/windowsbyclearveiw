@@ -1,4 +1,5 @@
 import { specialistPrompt } from '../../ask/_lib/icm-specialists.mjs';
+import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
 import { BUSINESS_FACTS } from '../../ask/_lib/facts.mjs';
 
 const MAX_BODY_BYTES = 32 * 1024;
@@ -23,7 +24,7 @@ export async function onRequestPost({request,env}) {
   if(!sameOrigin(request))return json({error:'Cross-origin requests are not allowed.'},403);
   const raw=await request.arrayBuffer();if(raw.byteLength>MAX_BODY_BYTES)return json({error:'Request is too large.'},413);
   let body;try{body=JSON.parse(new TextDecoder().decode(raw))}catch{return json({error:'Invalid JSON.'},400)}
-  const db=env.QUOTES_DB;if(!db)return json({error:'Dashboard data is temporarily unavailable.'},503);
+  const db=env.QUOTES_DB;if(!db)return json({error:'Dashboard data is temporarily unavailable.'},503);await ensureJobsSchema(db);
   const snapshot=await db.prepare(`SELECT (SELECT COUNT(*) FROM leads WHERE created_at >= datetime('now','-7 day')) AS new_leads,(SELECT COUNT(*) FROM quotes WHERE status='draft') AS draft_quotes,(SELECT COUNT(*) FROM quotes WHERE status='finalized') AS finalized_quotes,(SELECT COUNT(*) FROM follow_up_tasks WHERE status='open') AS open_tasks,(SELECT COUNT(*) FROM follow_up_tasks WHERE status='open' AND due_at < datetime('now')) AS overdue_tasks,(SELECT COUNT(*) FROM jobs WHERE status NOT IN ('completed','cancelled')) AS active_jobs`).first();
   const [tasks,leads,jobs]=await Promise.all([db.prepare(`SELECT t.title,t.due_at,l.name AS lead_name,l.city AS lead_city FROM follow_up_tasks t LEFT JOIN leads l ON l.id=t.lead_id WHERE t.status='open' ORDER BY CASE WHEN t.due_at IS NULL THEN 1 ELSE 0 END,t.due_at LIMIT 8`).all(),db.prepare(`SELECT id,name,city,role,created_at FROM leads ORDER BY created_at DESC LIMIT 8`).all(),db.prepare(`SELECT id,status,scheduled_date,customer_name,customer_city FROM jobs WHERE status NOT IN ('completed','cancelled') ORDER BY CASE WHEN scheduled_date IS NULL THEN 1 ELSE 0 END,scheduled_date LIMIT 8`).all()]);
   const data={snapshot:snapshot||{},open_tasks:tasks.results||[],recent_leads:leads.results||[],active_jobs:jobs.results||[]};

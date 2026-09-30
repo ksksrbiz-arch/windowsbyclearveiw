@@ -1,5 +1,5 @@
 import { ensureInvoiceSchema } from '../_lib/invoices.mjs';
-import { ensureGeneralJobColumns } from '../_lib/general-jobs.mjs';
+import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -47,7 +47,7 @@ async function ensureSchema(db) {
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_job_payments_job ON job_payments(job_id)`),
   ]);
-  await ensureGeneralJobColumns(db);
+  await ensureJobsSchema(db);
 }
 
 async function ensurePayment(db, jobId) {
