@@ -35,20 +35,20 @@ const schema = {
 
 const offers = [
   {
-    title: 'Measured at the opening',
-    text: 'Nobody can size a window from a photo. We measure every opening in person and check the condition of what is already there.',
+    title: 'Measured in person',
+    text: 'A window cannot be sized from a photo. We measure every opening on site and check the condition of what is already there.',
   },
   {
-    title: 'The right approach, in writing',
-    text: 'We measure every opening and tell you the right approach in the written estimate, opening by opening, before anything is ordered.',
+    title: 'A written recommendation',
+    text: 'The estimate covers each opening separately, so you know what is being done and what it costs before anything is ordered.',
   },
   {
-    title: 'Interior trim and exterior look',
-    text: 'Keeping your existing trim and siding, or changing the exterior trim, sightline, or window style: tell us which you want and we quote it.',
+    title: 'Trim and exterior look',
+    text: 'Keep your existing trim and siding, or change the exterior trim, sightline, or window style. Tell us which you want and we quote it.',
   },
   {
-    title: 'Damage found is damage explained',
-    text: 'If an opening turns out to have rot or has moved out of square, we tell you what it changes in the scope and the price.',
+    title: 'Problems are explained',
+    text: 'If an opening has rot or is out of square, we tell you how it changes the scope and the price.',
   },
 ];
 
@@ -74,8 +74,8 @@ const spec = [
       <p class="kicker">Services</p>
       <h1>Window replacement in Vancouver, WA</h1>
       <p class="lede">
-        Old, leaky, or single-pane units out. The right replacement in the same opening —
-        without wrecking the siding or the interior finish.
+        Replacement windows for Vancouver and Clark County homes. We measure every opening in
+        person and give you a written estimate before anything is ordered.
       </p>
       <p class="hero-note">
         Framing a new build or an addition instead? See <a href="/new-construction">new construction window installs</a>.
@@ -88,10 +88,10 @@ const spec = [
   <section class="section">
     <div class="wrap" data-reveal>
       <p class="rule-label">What we can do for you</p>
-      <h2>Tell us what you need. We spec every opening.</h2>
+      <h2>Tell us what you need. We measure every opening.</h2>
       <p class="lede">
-        You do not need to work out how it gets done. We measure, look at each opening, and write
-        down exactly what we recommend for it before we put a number on it.
+        We measure each opening, look at what is already there, and put our recommendation for it
+        in writing before we give you a price.
       </p>
 
       <div class="offer">
@@ -114,8 +114,7 @@ const spec = [
       <p class="rule-label">Frame materials</p>
       <h2>Vinyl vs. fiberglass.</h2>
       <p class="lede">
-        Two common frame materials, shown at the same scale so you can see the construction
-        difference before we get into the cost and sizing tradeoffs.
+        Two common frame materials, shown side by side at the same scale.
       </p>
       <figure class="replacement-material-graphic">
         <Image
@@ -137,14 +136,13 @@ const spec = [
     <div class="wrap split" data-reveal>
       <div>
         <p class="rule-label">What we install</p>
-        <h2>Ordinary materials, measured properly.</h2>
+        <h2>Vinyl and fiberglass windows, measured properly.</h2>
         <p>
-          There is no secret window. The difference between a good replacement and a bad one
-          is almost entirely in how the opening is measured, prepared, and flashed.
+          A good replacement comes down to how the opening is measured, prepared, and flashed.
         </p>
         <p class="fine-print">
-          Ask which manufacturer a quote is written around, and why. We will tell you what
-          we are ordering and what it costs before anything goes on paper.
+          We tell you which manufacturer and window we are ordering, and what it costs, before
+          anything is ordered.
         </p>
         <p class="section-link">
           <a href="/window-features">Vinyl vs fiberglass, Cascade vs Milgard, and every style — in detail</a>
@@ -166,8 +164,8 @@ const spec = [
 
   <section class="section section-sunk">
     <div class="wrap is-wide" data-reveal>
-      <p class="rule-label">Replacement work</p>
-      <h2>Clark County openings, finished.</h2>
+      <p class="rule-label">Our work</p>
+      <h2>Finished replacement jobs.</h2>
       <div class="work-grid">
         {replacementWork.slice(0, 6).map((photo) => (
           <WorkCard
@@ -183,8 +181,8 @@ const spec = [
   </section>
 
   <CtaBar
-    heading="Get every opening spec'd, then the price."
-    body="We measure every opening, tell you the right approach for each one, and write it down in the estimate."
+    heading="Get a written estimate."
+    body="We measure every opening in person and write up the approach and the price for each one before anything is ordered."
   />
 </BaseLayout>
 
