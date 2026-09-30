@@ -37,7 +37,7 @@ async function pipelineRows(db, since) {
        FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id ${quoteWindow}`,
     ).bind(since, since)),
     rows(db.prepare(
-      `SELECT j.created_at, j.status, j.completed_at, COALESCE(p.amount_paid_cents, 0) AS paid_cents
+      `SELECT j.created_at, j.status, j.completed_at, j.quote_id, COALESCE(p.amount_paid_cents, 0) AS paid_cents
        FROM jobs j LEFT JOIN job_payments p ON p.job_id = j.id
        WHERE j.created_at >= ? OR j.completed_at >= ?
        ORDER BY j.created_at DESC`,
@@ -56,7 +56,7 @@ async function pipelineRows(db, since) {
   ).bind(since, since));
   // job_payments is created lazily by the Payments page; without it, still count jobs.
   const jobs = jobsWithPayments ?? await rows(db.prepare(
-    `SELECT created_at, status, completed_at FROM jobs
+    `SELECT created_at, status, completed_at, quote_id FROM jobs
      WHERE created_at >= ? OR completed_at >= ? ORDER BY created_at DESC`,
   ).bind(since, since));
   return { quotes, jobs, awaitingJob: awaiting ? Number(awaiting[0]?.n) || 0 : null };

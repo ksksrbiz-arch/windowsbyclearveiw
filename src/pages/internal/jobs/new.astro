@@ -1,0 +1,187 @@
+---
+import InternalLayout from '../../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="New general job">
+  <p class="kicker">Jobs</p>
+  <h1>New general job</h1>
+  <p class="lede">For work that is not a window job: add the customer and the job directly. No quote is created and no Build Plan is needed.</p>
+
+  <form class="gj-form" data-form novalidate>
+    <fieldset class="gj-block">
+      <legend>Customer</legend>
+      <div class="gj-import">
+        <div class="gj-import-actions">
+          <button class="btn btn-ghost" type="button" data-contact-pick hidden>Import from contacts</button>
+          <label class="btn btn-ghost gj-file">Import a contact file (.vcf)<input type="file" accept=".vcf,text/vcard,text/x-vcard,text/directory" data-contact-file /></label>
+        </div>
+        <label class="gj-choose" data-contact-choose-wrap hidden>Which contact?<select data-contact-choose></select></label>
+        <p class="gj-help" data-contact-status role="status">Fills the customer details below. Nothing is saved until you save the job. On an iPhone: open the contact, tap Share Contact, choose Save to Files, then pick that file here.</p>
+      </div>
+      <div class="gj-grid">
+        <label>Name<input type="text" name="customerName" required maxlength="120" autocomplete="name" /></label>
+        <label>Phone<input type="tel" inputmode="tel" name="customerPhone" maxlength="40" autocomplete="tel" /></label>
+        <label>Email<input type="email" inputmode="email" name="customerEmail" maxlength="160" autocomplete="email" /></label>
+        <label>City<input type="text" name="customerCity" maxlength="80" /></label>
+      </div>
+      <label>Job address<input type="text" name="customerAddress" maxlength="200" /></label>
+    </fieldset>
+
+    <fieldset class="gj-block">
+      <legend>The work</legend>
+      <div class="gj-grid">
+        <label>Type of work<input type="text" name="workDescription" required maxlength="200" placeholder="e.g. deck rebuild" /></label>
+        <label>Agreed amount ($)<input type="text" inputmode="decimal" name="agreedAmount" required maxlength="14" placeholder="e.g. 4,800" /></label>
+        <label>Contract signed on (optional)<input type="date" name="contractDate" /></label>
+      </div>
+      <p class="gj-help">The signed agreement stays on your own paper. The date is only a note so you can find it later.</p>
+    </fieldset>
+
+    <fieldset class="gj-block">
+      <legend>Schedule (optional)</legend>
+      <div class="gj-grid">
+        <label>Start date<input type="date" name="scheduledDate" /></label>
+        <label>Window / crew note<input type="text" name="scheduledWindow" maxlength="120" placeholder="e.g. 8–10 AM" /></label>
+      </div>
+      <label>Notes<textarea name="notes" rows="3" maxlength="8000" placeholder="Access, gate codes, materials on order, customer requests…"></textarea></label>
+    </fieldset>
+
+    <p class="gj-error" data-error hidden role="alert"></p>
+    <div class="gj-actions">
+      <a class="btn btn-ghost" href="/internal/jobs">Cancel</a>
+      <button class="btn btn-primary" type="submit" data-submit>Save job</button>
+    </div>
+  </form>
+</InternalLayout>
+
+<script>
+  import { CONTACT_FIELDS, MAX_VCARD_BYTES, describeContact, fromPickerContact, parseVcards } from '../../../lib/contact-import';
+  import type { ImportedContact } from '../../../lib/contact-import';
+
+  function initContactImport(form: HTMLFormElement) {
+    const pickButton = document.querySelector('[data-contact-pick]') as HTMLButtonElement | null;
+    const fileInput = document.querySelector('[data-contact-file]') as HTMLInputElement | null;
+    const status = document.querySelector('[data-contact-status]') as HTMLElement | null;
+    const chooseWrap = document.querySelector('[data-contact-choose-wrap]') as HTMLElement | null;
+    const choose = document.querySelector('[data-contact-choose]') as HTMLSelectElement | null;
+    if (!status) return;
+    const say = (message: string) => { status.textContent = message; };
+
+    // Replaces all five customer fields, so details from one contact never mix with another's.
+    function apply(contact: ImportedContact) {
+      for (const key of Object.keys(CONTACT_FIELDS) as (keyof ImportedContact)[]) {
+        const input = form.elements.namedItem(CONTACT_FIELDS[key]);
+        if (input instanceof HTMLInputElement) input.value = contact[key];
+      }
+      say(`Filled in ${contact.name || 'the contact'}. Check the details, then save the job.`);
+    }
+
+    // The browser's own contact dialog (for example Chrome on Android). Other browsers use the file route.
+    const contacts = (navigator as any).contacts;
+    if (pickButton && contacts && typeof contacts.select === 'function' && 'ContactsManager' in window) {
+      pickButton.hidden = false;
+      pickButton.addEventListener('click', async () => {
+        try {
+          const wanted = ['name', 'tel', 'email'];
+          if (typeof contacts.getProperties === 'function' && (await contacts.getProperties()).includes('address')) wanted.push('address');
+          const picked = await contacts.select(wanted, { multiple: false });
+          if (!picked || !picked.length) return;
+          const contact = fromPickerContact(picked[0]);
+          if (contact) apply(contact);
+          else say('That contact has no name, phone or email to import.');
+        } catch {
+          say('Could not open your contacts. You can import a contact file instead.');
+        }
+      });
+    }
+
+    fileInput?.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = '';
+      if (chooseWrap) chooseWrap.hidden = true;
+      if (!file) return;
+      if (file.size > MAX_VCARD_BYTES) { say('That file is too large to be a single contact.'); return; }
+      let cards: ImportedContact[] = [];
+      try { cards = parseVcards(await file.text()); } catch { cards = []; }
+      if (!cards.length) { say('No contact found in that file. Choose a contact file that ends in .vcf.'); return; }
+      if (cards.length === 1) { apply(cards[0]); return; }
+      if (!choose || !chooseWrap) { apply(cards[0]); return; }
+      choose.textContent = '';
+      const prompt = document.createElement('option');
+      prompt.value = '';
+      prompt.textContent = `Choose one of ${cards.length} contacts…`;
+      choose.append(prompt);
+      cards.forEach((card, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = describeContact(card);
+        choose.append(option);
+      });
+      chooseWrap.hidden = false;
+      say(`That file has ${cards.length} contacts. Choose the customer.`);
+      choose.onchange = () => {
+        const picked = cards[Number(choose.value)];
+        if (choose.value !== '' && picked) { apply(picked); chooseWrap.hidden = true; }
+      };
+    });
+  }
+
+  function initNewGeneralJob() {
+    const form = document.querySelector('[data-form]');
+    if (!(form instanceof HTMLFormElement) || form.dataset.bound === 'true') return;
+    form.dataset.bound = 'true';
+    initContactImport(form);
+    const error = document.querySelector('[data-error]') as HTMLElement | null;
+    const submit = document.querySelector('[data-submit]') as HTMLButtonElement | null;
+
+    function showError(message: string) {
+      if (!error) return;
+      error.hidden = !message;
+      error.textContent = message;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!submit || submit.disabled) return;
+      showError('');
+      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+      submit.disabled = true;
+      submit.textContent = 'Saving…';
+      try {
+        const response = await fetch('/internal/api/jobs', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ workType: 'general', ...data }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(Array.isArray(result.errors) ? result.errors.join(' ') : result.error || 'Could not save the job.');
+        location.href = `/internal/jobs/view?id=${encodeURIComponent(result.id)}`;
+      } catch (cause) {
+        showError(cause instanceof Error ? cause.message : 'Could not save the job.');
+        submit.disabled = false;
+        submit.textContent = 'Save job';
+      }
+    });
+  }
+  initNewGeneralJob();
+  document.addEventListener('astro:page-load', initNewGeneralJob);
+</script>
+
+<style>
+  .gj-form{display:grid;gap:var(--space-m);margin-top:var(--space-m);max-width:48rem}
+  .gj-block{margin:0;padding:1.1rem 1.15rem 1.2rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);display:grid;gap:var(--space-s);min-width:0}
+  .gj-block legend{padding:0 .4rem;font-weight:750}
+  .gj-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-s)}
+  .gj-block label{display:grid;gap:.25rem;min-width:0}
+  .gj-block input,.gj-block textarea{min-height:2.9rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper)}
+  .gj-block input:focus,.gj-block textarea:focus{border-color:var(--ink);outline:none}
+  .gj-help{margin:0;color:var(--ink-soft);font-size:var(--step--1)}
+  .gj-import{display:grid;gap:.6rem;padding-bottom:var(--space-s);border-bottom:1px solid var(--line)}
+  .gj-import-actions{display:flex;flex-wrap:wrap;gap:var(--space-xs)}
+  .gj-file{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+  .gj-file input{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;border:0;opacity:0;cursor:pointer}
+  .gj-file:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+  .gj-choose select{min-height:2.9rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper)}
+  .gj-error{margin:0;color:var(--danger);border-left:3px solid var(--danger);padding-left:.7rem}
+  .gj-actions{display:flex;justify-content:flex-end;gap:var(--space-xs)}
+  @media(max-width:620px){.gj-import-actions .btn{flex:1 1 100%;justify-content:center}.gj-grid{grid-template-columns:1fr}.gj-actions{flex-direction:column-reverse}.gj-actions .btn{width:100%}}
+</style>
