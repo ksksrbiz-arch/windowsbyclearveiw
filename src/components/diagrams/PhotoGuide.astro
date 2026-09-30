@@ -68,7 +68,9 @@ const clearviewPhoto = type === 'flashing'
     ? findWork('blue-ladder')
     : type === 'symptoms'
       ? findWork('bedroom-view')
-      : null;
+      : type === 'cost'
+        ? findWork('caulk-gun-interior-sill')
+        : null;
 const isClearviewPhoto = Boolean(clearviewPhoto?.image);
 ---
 <figure class="photo-guide">

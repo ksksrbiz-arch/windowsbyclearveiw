@@ -14,19 +14,19 @@ const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp
 const steps = [
   {
     name: 'Walkthrough',
-    text: 'We look at the openings, the trim, and what you want to change. You get a written estimate, not a surprise on install day.',
+    text: 'We look at the openings, the trim, and what you want to change. You get a written estimate before anything is ordered.',
   },
   {
     name: 'Measure and order',
-    text: 'Each opening is measured to the approach in your written estimate. Windows are ordered to those sizes. Lead times vary by manufacturer.',
+    text: 'We measure each opening and order the windows to those sizes. Lead times vary by manufacturer.',
   },
   {
     name: 'Install',
-    text: 'Old units come out. New units go in plumb and flashed. Finishes close up to match the house.',
+    text: 'The old windows come out and the new ones are installed level and flashed. Trim and finishes are closed up to match the house.',
   },
   {
-    name: 'Walk the job',
-    text: 'We operate every sash with you, haul debris, and leave the rooms usable.',
+    name: 'Final walkthrough',
+    text: 'We open and close every window with you, haul away the debris, and leave the rooms usable.',
   },
 ];
 
@@ -44,7 +44,7 @@ const schema = {
 ---
 <BaseLayout
   title="How installation works"
-  description="From first measure to final sweep: the Clearview Windows installation process for Clark County homeowners."
+  description="From first measure to final walkthrough: how Clearview Windows installs replacement windows for Clark County homeowners."
   path="/process"
   crumbs={[{ name: 'Process', href: '/process' }]}
   schema={schema}
@@ -54,7 +54,7 @@ const schema = {
       <p class="kicker">Process</p>
       <h1>How window installation works.</h1>
       <p class="lede">
-        Four steps, in this order, on every job — so nothing on install day is a surprise.
+        Four steps on every job, so you know what to expect on install day.
       </p>
     </div>
     <p class="hero-photo-credit">Clearview job photo — installer setting a replacement window</p>
@@ -62,18 +62,18 @@ const schema = {
 
   <section class="section">
     <div class="wrap is-narrow" data-reveal>
-      <p class="rule-label">In this order, every job</p>
+      <p class="rule-label">Every job, in this order</p>
       <ol class="steps process-steps">
         {steps.map((step) => (
           <li><strong>{step.name}.</strong> {step.text}</li>
         ))}
       </ol>
       <p class="notice">
-        Permits depend on the city and whether the opening changes. We handle that
-        conversation before work starts.
+        Permits depend on the city and whether the opening changes. We talk through
+        permits with you before work starts.
       </p>
       <p class="section-link">
-        <a href="/window-features">What we order at step two — materials, brands, and glass</a>
+        <a href="/window-features">Materials, brands, and glass we offer</a>
       </p>
     </div>
   </section>
@@ -81,7 +81,7 @@ const schema = {
   <section class="section section-sunk">
     <div class="wrap is-wide" data-reveal>
       <p class="rule-label">Install day</p>
-      <h2>What that actually looks like.</h2>
+      <h2>What install day looks like.</h2>
       <div class="work-grid">
         {processWork.map((photo) => (
           <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} />
@@ -91,8 +91,8 @@ const schema = {
   </section>
 
   <CtaBar
-    heading="Start at step one."
-    body="A walkthrough costs nothing and ends with a written estimate you can hold anyone else to."
+    heading="Book a free in-home measure."
+    body="The walkthrough is free and ends with a written estimate."
   />
 </BaseLayout>
 
