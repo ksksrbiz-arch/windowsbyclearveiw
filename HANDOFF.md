@@ -243,6 +243,11 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
 - **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
 
+### 2026-09-30 — Command Center: first-run dashboard, shorter phone screens
+
+- The test records were cleared from production, so Mark's first view is an empty dashboard. It now opens with a "Nothing here yet / Add your first customer" panel (New general job, New window quote) whenever there are no leads, quotes, jobs or follow-ups; it stays hidden otherwise and never flashes for a busy account (starts `hidden`). Guard: `npm run test:dashboard-first-run` (in CI).
+- The "Workflow / Move a project forward" explainer blocks on the dashboard and Today are hidden on phones (static text, no data); still shown on desktop.
+
 ### 2026-09-30 — Command Center: phone touch targets, Field mode nav, labels
 
 - **Audit method:** a script measured every visible interactive element on every `/internal` page at 390 px with touch enabled (the seeded-data setup from the audit below), flagging targets under 40 px and inputs/buttons with no accessible name.

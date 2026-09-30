@@ -45,6 +45,7 @@ jobs:
       - run: npm run test:form-patterns
       - run: npm run test:charts
       - run: npm run test:internal-styles
+      - run: npm run test:dashboard-first-run
       - run: npm run test:field-photo-db
       - run: npm run test:general-jobs
       - run: npm run test:contact-import
