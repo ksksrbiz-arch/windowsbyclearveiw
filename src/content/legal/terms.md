@@ -7,7 +7,7 @@ summary: Using this site does not hire us, and nothing on it is a quote. A price
 ---
 
 These terms apply to your use of windowsbyclearview.com, operated by Clearview
-Windows & Trim LLC, doing business as Clearview Windows ("Clearview", "we",
+Windows & Trim LLC ("Clearview", "we",
 "us"), a Washington limited liability company based in Vancouver, Washington.
 By using the site you agree to them. If you do not, please do not use the
 site.
@@ -123,6 +123,6 @@ and the version published here is the one that applies.
 
 ## Contact
 
-- Clearview Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
+- Clearview Windows & Trim LLC, Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801

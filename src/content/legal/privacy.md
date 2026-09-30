@@ -230,6 +230,6 @@ Material changes will be reflected here before they take effect.
 
 ## Contact
 
-- Clearview Windows & Trim LLC (d/b/a Clearview Windows), Vancouver, Washington
+- Clearview Windows & Trim LLC, Vancouver, Washington
 - [owner@windowsbyclearveiw.com](mailto:owner@windowsbyclearveiw.com)
 - (564) 208-0801
