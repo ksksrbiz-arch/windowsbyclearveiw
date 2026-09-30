@@ -693,7 +693,28 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
   .qv-toolbar-actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: var(--space-xs);
+  }
+
+  /* Buttons are added by script (invoice actions), so the descendant rule must be global. On a phone
+     the toolbar stacks under the back link and the buttons share two columns instead of running off screen. */
+  @media (max-width: 620px) {
+    .qv-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .qv-toolbar-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :global(.qv-toolbar-actions .btn) {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
   .qv-danger {

@@ -20,7 +20,7 @@ const layout = read('src/layouts/InternalLayout.astro');
 for (const token of [
   'One opening at a time', 'data-measure="width"', 'data-exception',
   'data-add-material', 'data-save-evidence', 'Photograph', 'Complete',
-  'indexedDB.open',
+  'openPhotoDb',
 ]) assert.match(field, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
 // Gate failures must surface the server-provided human-readable message.
@@ -31,9 +31,11 @@ assert.match(field, /d\.error/);
 assert.doesNotMatch(field, /PHOTO_EVIDENCE_REQUIRED|OPEN_EXCEPTION/);
 
 // Photo capture must be tied to job/opening/stage and survive normal reloads on-device.
-for (const token of ['jobId', 'openingIndex', 'stage', 'before', 'during', 'after', 'issue', 'indexedDB']) {
+for (const token of ['jobId', 'openingIndex', 'stage', 'before', 'during', 'after', 'issue', 'openPhotoDb']) {
   assert.match(photos, new RegExp(token));
 }
+// Both pages open the on-device photo store through one shared helper (see test-field-photo-db.mjs).
+assert.match(read('src/lib/field-photo-db.ts'), /indexedDB\.open/);
 
 // Server gates remain authoritative; browser state cannot bypass them.
 for (const token of ['FIELD_GATE_SEQUENCE', 'FIELD_MEASUREMENTS_REQUIRED', 'PHOTO_EVIDENCE_REQUIRED', 'OPENING_INCOMPLETE', 'OPEN_EXCEPTION', 'job_opening_evidence']) {
