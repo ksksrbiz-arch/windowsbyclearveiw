@@ -29,6 +29,7 @@ variables — D1 needs a real binding, and this stays separate from
 | --- | --- | --- |
 | `QUOTES_DB` | D1 database | `clearview-quotes` (`4700b6f7-c3d8-46c9-9b19-17cf34accb84`) |
 | `INTERNAL_PASSWORD` | Secret | The one password Mark keeps on his phone |
+| `JOB_PHOTOS` | R2 bucket | `clearview-job-photos` (optional until set up; see "Job photo storage" below) |
 | `INTERNAL_SESSION_SECRET` | Secret | A long random string — signs the login session cookie. Generate once with `openssl rand -hex 32` and never rotate it casually; rotating it logs everyone out |
 
 Set these for **Production**, and again for **Preview** if you want to test
@@ -36,6 +37,48 @@ the tool on preview deploys. The committed `wrangler.toml` in the repo root
 is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
+
+## Job photo storage (Cloudflare R2)
+
+Photos Mark takes on his phone (Photos tool, `/internal/tools/photos`) are saved on the
+phone first and then backed up to a **private R2 bucket**, so a lost, reset or full phone no
+longer loses the job record, and the same photos show up on any device he signs in on.
+Nothing is public: the bucket has no public URL, and every photo is served through
+`/internal/api/job-photos`, which needs the Command Center login.
+
+**Until the steps below are done, nothing breaks.** The Photos page says "Not connected yet",
+photos stay on the phone exactly as before, and they upload on their own (oldest first) the
+first time the phone is online after storage is connected.
+
+One-time setup, in the Cloudflare dashboard:
+
+1. **Enable R2** for the account (R2 object storage → get started). Cloudflare may ask for a
+   payment method; the free tier below is expected to cover this use.
+2. **Create a bucket** named `clearview-job-photos` (leave public access off).
+3. Pages → this project → **Settings → Bindings → Add → R2 bucket**: variable name
+   **`JOB_PHOTOS`**, bucket `clearview-job-photos`. Add it for **Production** (and **Preview**
+   if you test on preview deploys), then **redeploy** so the binding takes effect.
+
+Design notes:
+
+- **What is stored.** The phone shrinks each photo to at most 2000 px on the long edge (JPEG,
+  roughly 0.3 to 1.5 MB instead of 5 to 12 MB) before uploading and keeps the original on the
+  phone. The server accepts only JPEG, PNG and WebP, decided from the file's own bytes, up to
+  8 MB. Objects live at `jobs/<job id>/<photo id>.<ext>` (ids made by the server, never the file
+  name); one row per photo in the D1 table `job_photos` (created on first use) holds the job,
+  opening, stage, note and the phone's own photo id.
+- **Retries are safe.** The phone sends its own photo id with every upload, and the server
+  returns the existing photo instead of storing a second copy.
+- **Deleting.** Deleting a photo that is backed up removes it from the phone and from R2. "Clear
+  this phone's photos for this job" only frees phone storage; cloud copies are kept.
+- **Cost (Cloudflare's published R2 pricing, checked 2026-09-30).** Free each month: 10 GB of
+  storage, 1 million writes, 10 million reads; above that $0.015 per GB-month, and no charge for
+  downloads. At about 1 MB per photo the free storage holds several thousand photos.
+- **What this does not do yet.** The server-side Photograph gate in Field mode still trusts the
+  photo counts the phone reports; it does not yet count the photos stored in R2. Photos taken on
+  a second phone do show in the Photos tool, but Field mode's own photo counts are read from the
+  phone you are holding.
+- **Local development.** `wrangler pages dev dist --r2 JOB_PHOTOS` simulates the bucket on disk.
 
 ## Analytics (internal `/internal/analytics` page)
 
