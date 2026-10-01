@@ -4,6 +4,13 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Internal API audit fixes (unit 9)
+
+- `payments.js`: `amountPaidCents` of `""`, `null`, `true`, `[]` no longer coerces to 0/1 and rewrites the payment record; refused with 400.
+- `jobs.js` PATCH: `scheduledDate` must be a real `YYYY-MM-DD` (was free text, truncated to 10 chars).
+- `quotes/[id].js` PATCH: digital-signature UPDATE bound 4 values to 5 placeholders (signing on Mark's device could not finalize); fixed, test in `test-quote-to-job-flow.mjs`. Signing UPDATE is also conditional on `status = 'draft'` so two concurrent signatures cannot both finalize.
+- `tasks.js` POST: `leadId` null/blank/0 stores NULL (was `Number(null) = 0`). Regression asserts in `scripts/test-general-jobs.mjs`.
+
 ## 2026-10-01 — Guide share sheet
 
 - `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`. The per-guide "Share on Nextdoor" link was removed (owner, 2026-10-01); Nextdoor stays in the header/footer business links only. No data is sent anywhere until the visitor picks a target.

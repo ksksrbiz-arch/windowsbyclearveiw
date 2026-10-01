@@ -65,6 +65,21 @@ const makeJob = (env, quoteId) => call(jobs.onRequestPost, env, { method: 'POST'
   assert(again.status === 200 && again.body.existing === true && again.body.id === job.body.id, 'job creation is idempotent per quote');
 }
 
+// 1b. Digital signature on Mark's device binds every placeholder and finalizes once.
+{
+  const env = freshEnv();
+  const id = await createQuote(env);
+  env.QUOTES_DB.raw.prepare(`UPDATE quotes SET signature_method = 'digital' WHERE id = ?`).run(id);
+  await saveGeneratedPlan(env, id);
+  await transition(env, id, 'submit-review');
+  await transition(env, id, 'approve');
+  const digital = () => call(quoteById.onRequestPatch, env, { method: 'PATCH', params: { id }, body: { signatureSvg: '<svg/>', signatureName: 'Pat Doe' } });
+  assert((await digital()).status === 200, 'digital signature finalizes the quote');
+  const row = env.QUOTES_DB.raw.prepare('SELECT status, signature_name, signed_at, updated_at FROM quotes WHERE id = ?').get(id);
+  assert(row.status === 'finalized' && row.signature_name === 'Pat Doe' && row.signed_at && row.updated_at, 'digital signature columns are all written');
+  assert((await digital()).status === 409, 'a second signature is refused');
+}
+
 // 2. Quote list must not flag a freshly approved, unchanged plan as stale.
 {
   const env = freshEnv();
