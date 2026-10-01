@@ -33,12 +33,15 @@ export async function onRequestGet(context) {
   const limit = 200;
   const offset = (page - 1) * limit;
   const where = leadId ? 'WHERE t.lead_id = ?' : '';
+  // quote_id is added lazily by the follow-up sync; if that failed, still list the queue without it.
+  const columns = await env.QUOTES_DB.prepare('PRAGMA table_info(follow_up_tasks)').all();
+  const hasQuoteId = (columns.results || []).some((column) => column.name === 'quote_id');
   const statement = env.QUOTES_DB.prepare(`
-    SELECT t.*, COALESCE(l.name, q.customer_name) AS lead_name, COALESCE(l.phone, q.customer_phone) AS lead_phone,
-           COALESCE(l.email, q.customer_email) AS lead_email, COALESCE(l.city, q.customer_city) AS lead_city
+    SELECT t.*, ${hasQuoteId ? 'COALESCE(l.name, q.customer_name)' : 'l.name'} AS lead_name, ${hasQuoteId ? 'COALESCE(l.phone, q.customer_phone)' : 'l.phone'} AS lead_phone,
+           ${hasQuoteId ? 'COALESCE(l.email, q.customer_email)' : 'l.email'} AS lead_email, ${hasQuoteId ? 'COALESCE(l.city, q.customer_city)' : 'l.city'} AS lead_city
     FROM follow_up_tasks t
     LEFT JOIN leads l ON l.id = t.lead_id
-    LEFT JOIN quotes q ON q.id = t.quote_id
+    ${hasQuoteId ? 'LEFT JOIN quotes q ON q.id = t.quote_id' : ''}
     ${where}
     ORDER BY CASE WHEN t.status = 'open' THEN 0 ELSE 1 END, COALESCE(t.due_at, '9999-12-31T23:59:59Z') ASC, t.created_at DESC
     LIMIT ? OFFSET ?
