@@ -34,7 +34,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     q('[data-plan-link]').href=`/internal/quotes/build-plan?quoteId=${encodeURIComponent(quoteId)}`;
     const state=q('[data-state]'),title=q('[data-state-title]'),copy=q('[data-state-copy]'),checks=q('[data-checks]'),history=q('[data-history]'),warning=q('[data-warning]'),gate=q('[data-gate-summary]'),version=q('[data-version]');
     const buttons=[...document.querySelectorAll('[data-action]')];
-    const esc=(value)=>{const d=document.createElement('div');d.textContent=String(value??'');return d.innerHTML;};
+    const esc=(value)=>{const d=document.createElement('div');d.textContent=String(value??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');};
     let busy=false;
     const load=async()=>{if(busy)return;busy=true;warning.hidden=true;try{const [s,p]=await Promise.all([fetch(`/internal/api/build-plan-state?quoteId=${encodeURIComponent(quoteId)}`,{headers:{'cache-control':'no-cache'}}),fetch(`/internal/api/build-plan?quoteId=${encodeURIComponent(quoteId)}`,{headers:{'cache-control':'no-cache'}})]);const sd=await s.json().catch(()=>({})),pd=await p.json().catch(()=>({}));if(!s.ok)throw new Error(sd.error||'Build Plan state unavailable.');if(!p.ok)throw new Error(pd.error||'Build Plan unavailable.');
       q('[data-subtitle]').textContent=`Quote ${quoteId} · ${pd.quote?.customer_name||'Customer'}`;state.textContent=String(sd.status||'draft').replace('-', ' ');state.dataset.status=sd.status||'draft';version.textContent=`v${sd.version||pd.plan?.version||'—'}`;

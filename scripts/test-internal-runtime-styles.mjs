@@ -71,6 +71,15 @@ for (const file of pages(root)) {
 }
 assert.deepEqual(problems, [], `Wrap these selectors in :global(...):\n${problems.join('\n')}`);
 assert.ok(checked > 15, 'expected to scan the internal pages');
+// Escape helpers built on textContent -> innerHTML leave quotes untouched, which lets customer data
+// break out of value="..." / href="..." attributes. Every such helper must also escape quotes.
+const unsafeEsc = [];
+// TODO: ask-logs, tools/* still use the quote-unsafe helper (outside the Today..Payments unit).
+for (const file of pages(root).filter((f) => !/ask-logs|[\\/]tools[\\/]/.test(f))) {
+  const src = readFileSync(file, 'utf8');
+  for (const m of src.matchAll(/textContent\s*=\s*[^;]*;\s*return\s+\w+\.innerHTML(?!\.replace\()/g)) unsafeEsc.push(file.slice(root.length + 1));
+}
+assert.deepEqual(unsafeEsc, [], `escape helpers must also escape quotes:\n${unsafeEsc.join('\n')}`);
 // The layout gives only the Field page the field-mode class (it hides the shared bottom nav, which
 // would sit on top of the crew's own Previous/Next bar). The build reports that page as
 // "/internal/jobs/field.html", and an exact-string comparison once silently never matched. This reads

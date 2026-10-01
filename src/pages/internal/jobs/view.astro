@@ -166,7 +166,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const esc = (value: unknown) => {
       const element = document.createElement('div');
       element.textContent = String(value ?? '');
-      return element.innerHTML;
+      return element.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     };
     const statusLabel = (status: string) => status === 'in-progress' ? 'In progress' : status.charAt(0).toUpperCase() + status.slice(1);
 

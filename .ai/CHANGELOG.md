@@ -4,6 +4,10 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Internal UI escape helpers escape quotes
+
+- Internal pages' `esc`/`escapeHtml` helpers (textContent to innerHTML) did not escape `"` or `'`, so customer/plan text interpolated into `value="..."` / `href="..."` attributes could break out of the attribute. They now escape quotes too; `scripts/test-internal-runtime-styles.mjs` asserts it.
+
 ## 2026-10-01 — Guide share sheet
 
 - `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`. The per-guide "Share on Nextdoor" link was removed (owner, 2026-10-01); Nextdoor stays in the header/footer business links only. No data is sent anywhere until the visitor picks a target.
