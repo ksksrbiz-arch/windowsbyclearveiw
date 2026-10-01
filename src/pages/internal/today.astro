@@ -53,7 +53,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   function initToday(){
     const root=document.querySelector('main'); if(!(root instanceof HTMLElement)||root.dataset.bound==='true')return; root.dataset.bound='true';
     function q<T extends Element>(s:string){return root.querySelector(s) as T|null};
-    const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML};
+    const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;')};
     const date=(v:string|null)=>{if(!v)return 'No due date';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})};
     const jobDate=(v:string|null)=>{if(!v)return 'Not scheduled';const d=new Date(`${v}T12:00:00`);return Number.isNaN(d.getTime())?v:d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})};
     const money=(c:number|null)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
