@@ -4,6 +4,10 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Editing a draft revokes its unsigned signing links
+
+- `functions/internal/api/quotes/[id].js` PUT: any edit to a draft quote now revokes that quote's unsigned customer signing links in the same batch as the update, so a customer cannot sign totals they never saw. The response includes `signLinkRevoked`. Sending a new link still requires the Build Plan to be re-approved (existing `BUILD_PLAN_STALE` gate). Covered by `npm run test:quote-signing` (owner approved the change, 2026-10-01).
+
 ## 2026-10-01 — Audit round 2: ask-logs parsing, tasks list without quote_id
 
 - `src/pages/internal/ask-logs.astro`: `tools_used` / `sources` are parsed defensively, so one malformed row no longer blanks the whole list.

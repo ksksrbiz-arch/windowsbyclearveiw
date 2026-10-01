@@ -10,6 +10,7 @@ import * as buildPlan from '../functions/internal/api/build-plan.js';
 import * as planState from '../functions/internal/api/build-plan-state.js';
 import * as share from '../functions/internal/api/quote-share.js';
 import * as sign from '../functions/api/quote-sign.js';
+import * as quoteById from '../functions/internal/api/quotes/[id].js';
 
 process.removeAllListeners('warning');
 const pass = (message) => console.log(`PASS: ${message}`);
@@ -253,6 +254,39 @@ const submit = (env, body) => call(sign.onRequest, env, { method: 'POST', path: 
   assert.ok(panel.length > 0 && !/innerHTML/.test(panel), 'the internal panel uses textContent');
   assert.ok(!/quote-share/.test(middleware.match(/PUBLIC_PATHS[^;]*/)?.[0] || ''), 'link management stays behind the login');
   pass('the public page and internal panel are wired safely');
+}
+
+// Editing a draft revokes unsigned customer links, so nobody signs totals they never saw.
+{
+  const env = freshEnv();
+  const id = await approvedQuote(env);
+  const sent = await call(share.onRequestPost, env, { method: 'POST', body: { quoteId: id } });
+  const oldToken = tokenOf(sent.body.url);
+  assert.equal((await view(env, oldToken)).body.quote.totalCents, 180000);
+
+  const edit = await quoteById.onRequestPut({
+    request: new Request(`${ORIGIN}/internal/api/quotes/${id}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ customer, items: [{ label: 'Milgard vinyl slider, full-frame', quantity: 2, unitPriceCents: 95000 }], signatureMethod: 'digital' }),
+    }),
+    env,
+    params: { id },
+  });
+  const edited = await edit.json();
+  assert.equal(edit.status, 200);
+  assert.equal(edited.signLinkRevoked, true, 'the editor is told the old link was revoked');
+
+  const stale = await view(env, oldToken);
+  assert.equal(stale.status, 410, 'the old link no longer opens the edited quote');
+  const staleSign = await submit(env, { t: oldToken, name: customer.name, strokes, consent: true });
+  assert.equal(staleSign.status, 410, 'a fully valid signing request on the revoked link is refused');
+  assert.equal(env.QUOTES_DB.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 0);
+
+  const fresh = await call(share.onRequestPost, env, { method: 'POST', body: { quoteId: id } });
+  assert.equal(fresh.status, 409, 'a new link needs the Build Plan re-approved first');
+  assert.equal(fresh.body.code, 'BUILD_PLAN_STALE');
+  pass('editing a draft revokes unsigned signing links');
 }
 
 console.log('Quote signing checks passed.');

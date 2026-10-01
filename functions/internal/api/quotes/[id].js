@@ -1,6 +1,7 @@
 import { json, clean, parseQuoteBody } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
 import { requireApprovedBuildPlan } from '../../_lib/quote-gates.mjs';
+import { ensureSigningSchema } from '../../_lib/quote-signing.mjs';
 
 export async function onRequestGet(context) {
   const { env, params } = context;
@@ -36,7 +37,17 @@ export async function onRequestPut(context) {
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
   const now = new Date().toISOString();
 
+  // A customer link is only valid for the numbers it was sent with: any edit to the draft
+  // revokes unsigned links in the same batch, so nobody can sign totals they never saw.
+  await ensureSigningSchema(env.QUOTES_DB);
+  const activeLinks = await env.QUOTES_DB.prepare(
+    'SELECT COUNT(*) AS n FROM quote_sign_links WHERE quote_id = ? AND revoked_at IS NULL AND signed_at IS NULL',
+  ).bind(id).first();
+
   await env.QUOTES_DB.batch([
+    env.QUOTES_DB.prepare(
+      `UPDATE quote_sign_links SET revoked_at = ? WHERE quote_id = ? AND revoked_at IS NULL AND signed_at IS NULL`,
+    ).bind(now, id),
     env.QUOTES_DB.prepare(
       `UPDATE quotes SET updated_at = ?, customer_name = ?, customer_phone = ?, customer_email = ?, customer_address = ?,
         customer_city = ?, customer_role = ?, notes = ?, subtotal_cents = ?, discount_cents = ?,
@@ -50,7 +61,7 @@ export async function onRequestPut(context) {
   ]);
 
   await ensureInvoiceForQuote(env.QUOTES_DB, id);
-  return json({ id, totalCents });
+  return json({ id, totalCents, signLinkRevoked: Number(activeLinks?.n || 0) > 0 });
 }
 
 export async function onRequestDelete(context) {
