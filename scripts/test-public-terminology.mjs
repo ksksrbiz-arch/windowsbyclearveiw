@@ -59,4 +59,9 @@ assert.ok(/^\/guides\/full-frame-vs-insert \/guides\/what-your-openings-need 301
 const estimator = readFileSync(join(root, 'src/components/CostEstimator.astro'), 'utf8');
 assert.ok(!/est-method/.test(estimator), 'calculator has no method picker');
 
+// Public marketing pages take the phone number from src/data/site.ts, never hardcode it.
+for (const f of ['src/pages/areas/index.astro', 'src/pages/areas/[slug].astro']) {
+  assert.ok(!/\(564\) 208-0801/.test(readFileSync(join(root, f), 'utf8')), `${f} must use site.phone, not a hardcoded number`);
+}
+
 console.log('public terminology: ok');

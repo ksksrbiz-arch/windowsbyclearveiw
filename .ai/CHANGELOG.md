@@ -10,6 +10,9 @@ Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2
 - `prefers-reduced-motion` freezes the fields at their resting positions and hides the glint; print hides the whole layer. `--dur-ambient` is deliberately not in the reduced-motion duration zeroing (a 0s infinite loop would spin), so the component switches its own animations off.
 - Measured, not assumed: worst-case hero text contrast over a full 30s cycle was 6.10:1 (small meta line, brightest pixel under it); no horizontal overflow at 390px. Not applied to other `.page-hero` pages — opt-in per page.
 
+## 2026-10-01 - Public pages audit
+
+- `/areas` meta description now takes the phone from `site.phone` instead of a hardcoded number; regression assertion in `scripts/test-public-terminology.mjs`.
 ## 2026-10-01 — Unit 10 audit fixes
 
 - `workers/ops-cron/src/backup.mjs`: blob columns are base64-encoded in chunks; spreading a large blob into `String.fromCharCode` overflowed the stack and would have failed the nightly backup.
