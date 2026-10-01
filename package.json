@@ -34,6 +34,8 @@
     "test:dashboard-first-run": "node scripts/test-dashboard-first-run.mjs",
     "test:job-photos": "node --disable-warning=ExperimentalWarning scripts/test-job-photos.mjs",
     "test:photo-sync": "node scripts/test-photo-sync.mjs",
+    "eval:retrieval": "node scripts/eval-retrieval.mjs",
+    "test:embeddings": "node --disable-warning=ExperimentalWarning scripts/test-embeddings-gateway.mjs",
     "test:access": "node --disable-warning=ExperimentalWarning scripts/test-access.mjs",
     "test:ops-cron": "node --disable-warning=ExperimentalWarning scripts/test-ops-cron.mjs",
     "test:abuse-guard": "node --disable-warning=ExperimentalWarning scripts/test-abuse-guard.mjs",

@@ -31,7 +31,7 @@ export async function onRequestGet(context) {
 
   if (env.GEMINI_API_KEY) {
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${env.GEMINI_API_KEY}`);
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models', { headers: { 'x-goog-api-key': env.GEMINI_API_KEY } });
       const data = await res.json();
       out.gemini = res.ok
         ? (data.models || []).map((m) => ({ name: m.name, methods: m.supportedGenerationMethods }))

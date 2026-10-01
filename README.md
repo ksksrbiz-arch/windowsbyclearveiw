@@ -256,7 +256,7 @@ The photo itself is not persisted by the current implementation. Missing Workers
 
 Guide retrieval is generated at build/development time rather than fetched live on every request.
 
-`scripts/build-guides-index.mjs` reads published guides, splits them into `##` sections, embeds them with Gemini's `gemini-embedding-001`, and writes the committed index at:
+`scripts/build-guides-index.mjs` reads published guides, splits them into `##` sections, embeds them (default: Cloudflare Workers AI `@cf/baai/bge-m3`; Gemini `gemini-embedding-001` is still supported), and writes the committed index at:
 
 ```text
 functions/ask/_data/guides-index.json
@@ -265,8 +265,14 @@ functions/ask/_data/guides-index.json
 Regenerate after meaningful guide changes:
 
 ```bash
-GEMINI_API_KEY=... node scripts/build-guides-index.mjs
+CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... npm run build:guides-index   # token needs "Workers AI - Read"
 ```
+
+The index records the model that built it and `/ask` embeds each question with that same model, so
+the two can never disagree. Switching models is a deliberate step: build the new index to a
+separate file, compare it with `npm run eval:retrieval` (hit rates, score ranges, suggested
+`minScore`; see `functions/ask/_lib/embeddings.mjs`), set that model's `minScore`, then commit.
+`npm run build:guides-index -- --dry-run` lists the chunks without any network call.
 
 ### Ask observability
 
@@ -318,7 +324,9 @@ Configure these in Cloudflare Pages → **Settings → Bindings/Environment** as
 | `QUOTES_DB` | D1 | Leads, quotes, invoices, internal state, Ask logs |
 | `INTERNAL_PASSWORD` | Secret | Internal login password |
 | `INTERNAL_SESSION_SECRET` | Secret | Signs the internal session cookie |
-| `AI` | Workers AI binding | `/ask` photo analysis |
+| `AI` | Workers AI binding | `/ask` photo analysis, and guide-search embeddings once the index is built with `@cf/baai/bge-m3` |
+| `AI_GATEWAY_URL` | Environment variable (optional) | Routes Groq/Gemini calls through Cloudflare AI Gateway (see `internal/README.md`) |
+| `AI_GATEWAY_TOKEN` | Secret (optional) | Only if the gateway has authentication turned on |
 | `RESEND_API_KEY` | Secret/environment variable | Email delivery |
 
 The root `wrangler.toml` is for local development and does not configure the real production Pages bindings.
@@ -405,7 +413,7 @@ npx wrangler deploy
 For guide-content changes that affect Ask retrieval:
 
 ```bash
-GEMINI_API_KEY=... npm run build:guides-index
+CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... npm run build:guides-index
 git add functions/ask/_data/guides-index.json
 git commit -m "docs: refresh Ask guide index"
 ```

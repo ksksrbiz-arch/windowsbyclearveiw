@@ -1,3 +1,4 @@
+import { groqChat, geminiGenerate } from '../../_lib/ai-gateway.mjs';
 import { specialistPrompt } from '../../ask/_lib/icm-specialists.mjs';
 import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
 import { BUSINESS_FACTS } from '../../ask/_lib/facts.mjs';
@@ -13,10 +14,10 @@ function sameOrigin(request) { const origin=request.headers.get('origin'); if(!o
 function cleanText(value) { return String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, MAX_OUTPUT_CHARS); }
 async function provider(env, system, user) {
   if (env.GROQ_API_KEY) {
-    try { const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{authorization:`Bearer ${env.GROQ_API_KEY}`,'content-type':'application/json'},body:JSON.stringify({model:'openai/gpt-oss-120b',temperature:.2,max_tokens:MAX_OUTPUT_TOKENS,messages:[{role:'system',content:system},{role:'user',content:user}]}),signal:AbortSignal.timeout(15000)}); if(r.ok){const d=await r.json();const text=cleanText(d?.choices?.[0]?.message?.content);if(text)return {text,provider:'groq'}} } catch {}
+    try { const r=await groqChat(env,{model:'openai/gpt-oss-120b',temperature:.2,max_tokens:MAX_OUTPUT_TOKENS,messages:[{role:'system',content:system},{role:'user',content:user}]},{feature:'copilot-summary',signal:AbortSignal.timeout(15000)}); if(r.ok){const d=await r.json();const text=cleanText(d?.choices?.[0]?.message?.content);if(text)return {text,provider:'groq'}} } catch {}
   }
   if (env.GEMINI_API_KEY) {
-    try { const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:.2,maxOutputTokens:MAX_OUTPUT_TOKENS}}),signal:AbortSignal.timeout(15000)});if(r.ok){const d=await r.json();const text=cleanText(d?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join(' '));if(text)return {text,provider:'gemini'}} } catch {}
+    try { const r=await geminiGenerate(env,'gemini-3.6-flash',{systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:.2,maxOutputTokens:MAX_OUTPUT_TOKENS}},{feature:'copilot-summary',signal:AbortSignal.timeout(15000)});if(r.ok){const d=await r.json();const text=cleanText(d?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join(' '));if(text)return {text,provider:'gemini'}} } catch {}
   }
   return null;
 }

@@ -20,7 +20,9 @@ export function cosineSimilarity(a, b) {
  * off-topic questions are pulling in irrelevant guide text.
  */
 export function topMatches(queryEmbedding, chunks, k = 4, minScore = 0.5) {
+  // A vector of another length came from another model; comparing them would be noise, so skip it.
   return chunks
+    .filter((chunk) => Array.isArray(chunk.embedding) && chunk.embedding.length === queryEmbedding.length)
     .map((chunk) => ({ ...chunk, score: cosineSimilarity(queryEmbedding, chunk.embedding) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, k)
