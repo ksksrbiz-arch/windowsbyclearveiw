@@ -138,6 +138,10 @@
   --dur-fast: 140ms;
   --dur: 260ms;
   --dur-slow: 640ms;
+  /* Base period for ambient loops (hero backdrops). Not in the reduced-motion
+     zeroing below: a 0s infinite loop would spin, so those components switch
+     their animation off in their own reduced-motion block instead. */
+  --dur-ambient: 30s;
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 

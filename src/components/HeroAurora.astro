@@ -1,0 +1,166 @@
+---
+// Ambient backdrop for the guide heroes: three slow colour fields drifting
+// behind the copy, a faint window-mullion grid, and an occasional glint that
+// crosses like light moving over glass. Decorative only — it sits behind the
+// hero content and carries no information.
+//
+// The host hero must be `position: relative` and lift its own content above
+// this layer (`position: relative; z-index: 1`). The fields use the same two
+// accents as `.page-hero` (teal pines, clay cedar), so a guide still reads as
+// part of the site rather than a one-off.
+interface Props {
+  /** `dark` for the black `.page-hero` band, `light` for paper heroes. */
+  tone?: 'dark' | 'light';
+}
+
+const { tone = 'dark' } = Astro.props;
+---
+<div class:list={['hero-aurora', `is-${tone}`]} aria-hidden="true">
+  <span class="aurora-field aurora-a"></span>
+  <span class="aurora-field aurora-b"></span>
+  <span class="aurora-field aurora-c"></span>
+  <span class="aurora-mullions"></span>
+  <span class="aurora-glint"></span>
+</div>
+
+<style>
+  .hero-aurora {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    contain: paint;
+    pointer-events: none;
+  }
+
+  .hero-aurora.is-dark {
+    --aurora-1: color-mix(in srgb, var(--accent-bright) 36%, transparent);
+    --aurora-2: color-mix(in srgb, var(--accent-2) 25%, transparent);
+    --aurora-3: color-mix(in srgb, var(--accent) 34%, transparent);
+    --aurora-line: color-mix(in srgb, var(--on-dark) 6%, transparent);
+    --aurora-glint: color-mix(in srgb, var(--on-dark) 6%, transparent);
+  }
+
+  /* On paper the fields are pulled back and masked off the copy column: the
+     small grey labels (--ink-soft) were checked against plain paper, and any
+     tint under them costs contrast they cannot spare. */
+  .hero-aurora.is-light {
+    --aurora-1: color-mix(in srgb, var(--accent) 17%, transparent);
+    --aurora-2: color-mix(in srgb, var(--accent-2) 15%, transparent);
+    --aurora-3: color-mix(in srgb, var(--accent-bright) 12%, transparent);
+    --aurora-line: color-mix(in srgb, var(--ink) 5%, transparent);
+    --aurora-glint: color-mix(in srgb, var(--paper-raised) 38%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent 18%, #000 62%);
+    mask-image: linear-gradient(90deg, transparent 18%, #000 62%);
+  }
+
+  /* Each field is a soft elliptical radial, moved with transform only so the
+     drift stays on the compositor and never repaints. The three periods
+     (1x, 1.3x, 0.9x of --dur-ambient) don't line up, so the composition keeps
+     changing instead of visibly looping. */
+  .aurora-field {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+  }
+
+  .aurora-a {
+    top: -55%;
+    right: -14%;
+    width: 64%;
+    height: 200%;
+    background: radial-gradient(closest-side, var(--aurora-1), transparent);
+    animation: aurora-drift-a var(--dur-ambient) ease-in-out infinite;
+  }
+
+  .aurora-b {
+    bottom: -80%;
+    left: -12%;
+    width: 54%;
+    height: 180%;
+    background: radial-gradient(closest-side, var(--aurora-2), transparent);
+    animation: aurora-drift-b calc(var(--dur-ambient) * 1.3) ease-in-out infinite;
+  }
+
+  .aurora-c {
+    top: -30%;
+    left: 34%;
+    width: 38%;
+    height: 150%;
+    background: radial-gradient(closest-side, var(--aurora-3), transparent);
+    animation: aurora-drift-c calc(var(--dur-ambient) * 0.9) ease-in-out infinite;
+  }
+
+  @keyframes aurora-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33% { transform: translate3d(-12%, 9%, 0) scale(1.14); }
+    66% { transform: translate3d(6%, -7%, 0) scale(0.92); }
+  }
+
+  @keyframes aurora-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    40% { transform: translate3d(14%, -10%, 0) scale(1.12); }
+    75% { transform: translate3d(-5%, 6%, 0) scale(0.94); }
+  }
+
+  @keyframes aurora-drift-c {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(0.96); }
+    50% { transform: translate3d(-16%, 12%, 0) scale(1.1); }
+  }
+
+  /* Window-pane grid. Static, and faded out toward the copy so it reads as a
+     texture in the far corner rather than a pattern under the headline. */
+  .aurora-mullions {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--aurora-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--aurora-line) 1px, transparent 1px);
+    background-size: clamp(4.5rem, 9vw, 7rem) clamp(4.5rem, 9vw, 7rem);
+    background-position: 100% 0;
+    -webkit-mask-image: radial-gradient(60% 130% at 96% 0%, #000, transparent 72%);
+    mask-image: radial-gradient(60% 130% at 96% 0%, #000, transparent 72%);
+  }
+
+  /* One narrow skewed band that sweeps across, then rests for most of the
+     cycle: off-screen from 45% onward, so the hero is still most of the time. */
+  .aurora-glint {
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    left: -30%;
+    width: 22%;
+    /* Extra stops ease the profile; a plain triangle shows a crease at its peak. */
+    background: linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, var(--aurora-glint) 25%, transparent) 24%,
+      var(--aurora-glint) 50%,
+      color-mix(in srgb, var(--aurora-glint) 25%, transparent) 76%,
+      transparent
+    );
+    transform: translate3d(0, 0, 0) skewX(-18deg);
+    animation: aurora-glint calc(var(--dur-ambient) * 0.65) var(--ease) infinite;
+    will-change: transform;
+  }
+
+  @keyframes aurora-glint {
+    0% { transform: translate3d(0, 0, 0) skewX(-18deg); }
+    45%, 100% { transform: translate3d(720%, 0, 0) skewX(-18deg); }
+  }
+
+  /* Reduced motion keeps the composed still frame — the fields at their
+     resting positions — and drops the glint, which has no resting state. */
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-field { animation: none; will-change: auto; }
+    .aurora-glint { display: none; }
+  }
+
+  @media (max-width: 700px) {
+    .aurora-mullions { opacity: 0.7; }
+  }
+
+  @media print {
+    .hero-aurora { display: none; }
+  }
+</style>
