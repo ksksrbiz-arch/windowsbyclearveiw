@@ -8,6 +8,9 @@ Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2
 - `/ask/api/*` rate-limit bucket lookup ignores a trailing slash (was `''`, which skipped the limit).
 - `/ask/api/chat` returns 400 for `null`/array JSON bodies instead of throwing; Groq tool-call arguments that parse to non-objects are treated as invalid.
 - Regression assertions in `scripts/test-ask-security.mjs`.
+## 2026-10-01 — Signature points must be numbers
+
+- `quote-signing.mjs` `renderSignatureSvg`: stroke points are now required to be JSON numbers; previously `null`, `""` or `true` were coerced to 0 and accepted. Regression assertion in `scripts/test-quote-signing.mjs`.
 
 ## 2026-10-01 — Guide share sheet
 
