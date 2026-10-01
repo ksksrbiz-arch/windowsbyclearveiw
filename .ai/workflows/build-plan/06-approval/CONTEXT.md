@@ -23,3 +23,7 @@ Only an explicit application-level approval may make a Build Plan eligible to be
 ## Stop conditions
 
 Any quality blocker remains, quote is stale, approval is absent, the reviewed plan version does not match the current quote source snapshot, or the approved plan has been edited without reopening.
+
+## Completion
+
+Done when `approval.json` records state, reviewer, timestamp and reviewed plan version, and the application (not the AI) performed the transition. Checked by: `npm run test:build-plan-state`, `npm run test:build-plan-integration` and `npm run test:quote-to-job`. A human reviewer signs off; generated confidence never does.

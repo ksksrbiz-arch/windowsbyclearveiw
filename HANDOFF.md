@@ -46,7 +46,7 @@ Clearview now has an **ICM (Interpretable Context Methodology) control-plane lay
 
 ### Context layers
 
-- Layer 0 — `CLAUDE.md`: global identity/operating contract.
+- Layer 0 — `CLAUDE.md`: root router and non-negotiables (routing only, ≤80 lines).
 - Layer 1 — `.ai/CONTEXT.md`: router; points to the smallest relevant context.
 - Layer 2 — workflow/specialist `CONTEXT.md`: the contract for the current job.
 - Layer 3 — references/authorities: stable knowledge and source material.
@@ -242,6 +242,17 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Privacy policy** discloses the Meta pixel (delivered through the existing GTM container `GTM-WGCFVHQM`, no inline pixel code). The estimate form's JS success path now pushes the same `generate_lead` dataLayer event the no-JS `/estimate/sent` page does.
 - **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
 - **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
+
+### 2026-10-01 — ICM aligned to the owner's standard layout (folder stays `.ai/`)
+
+- **Root `CLAUDE.md` is now a 53-line router** (cap 80) with a Task | Load | Do not load table and an exclusion rule. The ten non-negotiables are kept; the ICM rules and Ask routing detail moved to `.ai/references/icm-rules.md` and `.ai/references/ask-routing.md`. Domain/mail spelling, no-invented-facts and human-approval rules are unchanged.
+- **Every contract now has a Completion section** (Build Plan stages and workflow, all nine specialists). Stop conditions stay as Clearview's addition.
+- **Five new workflows** under `.ai/workflows/`: `public-copy-sweep`, `lead-to-quote`, `job-closeout`, `analytics-events`, `deploy-check`, each with a load/exclusion table and grounded in existing code; anything the repo does not record is written as `VERIFY`, not guessed.
+- **`.ai/STATE.md` is a snapshot again**; dated feature detail moved verbatim to `.ai/CHANGELOG.md`.
+- **Tests:** `npm run test:icm-structure` (router ≤80 lines, references ≤200, contract sections, tables, every named path and `npm run` script exists, business-critical rules survive) and `npm run test:all` (runs `build.yml` in order locally). Full suite: 37/37 pass, including `npm run build`.
+- **GitHub Actions cannot run (billing issue, owner, 2026-10-01).** Local runs are the gate; Pages previews are the independent build signal. `build.yml` already includes the new test for when billing is fixed.
+- **Decision:** the folder stays `.ai/` (maps to `context/` in the owner's standard layout) because the router, specialist loader, tests and docs depend on it.
+- **Open:** the copy sweep's reviewed / not-reviewed inventory has not been run yet (step 1 of `.ai/workflows/public-copy-sweep/`). `README.md` records a 2026-09-30 plain-language pass over most pages; the remainder is unlisted.
 
 ### 2026-10-01 — AI Gateway routing and model-aware guide embeddings (items 5 and 6 of the Cloudflare review)
 

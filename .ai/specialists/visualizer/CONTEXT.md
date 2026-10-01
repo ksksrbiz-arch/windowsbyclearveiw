@@ -43,3 +43,7 @@ VERIFY items
 ## Status
 
 Contract established now; homeowner-facing visualization remains deferred until the underlying internal AI platform and evidence boundaries are mature.
+
+## Completion
+
+Done when the output follows the Required output shape, every conclusion is tagged `KNOWN` / `INFERRED` / `VERIFY`, nothing under Never appears, and no business state was changed. Checked by: `npm run test:ai-surfaces`.

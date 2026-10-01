@@ -11,3 +11,7 @@ Clearview-specific claims come only from approved business facts and site knowle
 
 ## Never
 Make legal claims, invent credentials/reviews, promise outcomes, or turn general guidance into a firm quote.
+
+## Completion
+
+Done when the answer follows the Output shape, claims are separated into known and uncertain, and nothing under Never appears. Checked by: `npm run test:icm` (route and contract completeness), `npm run test:ask-security`.

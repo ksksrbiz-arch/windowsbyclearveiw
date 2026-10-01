@@ -15,3 +15,7 @@ Create a stable opening ID/number for every quoted opening. Record product/type,
 ## Stop conditions
 
 Opening count conflicts with quote quantity; dimensions are treated as measured when they are not; or installation method is guessed from an ambiguous product label.
+
+## Completion
+
+Done when `openings.json` has one record per quoted opening, the count matches the quote quantity (or the conflict is surfaced as `VERIFY`), and no dimension is labelled measured unless it was. Checked by: `npm run eval:build-plan`.

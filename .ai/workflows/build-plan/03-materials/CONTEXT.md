@@ -21,3 +21,7 @@ Never invent quantities for site-dependent consumables or product-specific hardw
 ## Stop conditions
 
 A requested item requires an exact product specification that is not available, or a quantity would be fabricated rather than derived.
+
+## Completion
+
+Done when `materials.json` separates BUY / LOAD / VERIFY, every quantity is derived from the quote or marked `VERIFY`, and each product-specific item cites a source. Checked by: `npm run eval:build-plan` and the quality lint in `functions/_lib/build-plan-rules.mjs`.

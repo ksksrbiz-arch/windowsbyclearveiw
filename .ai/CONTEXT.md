@@ -19,6 +19,11 @@ It does not replace application code or D1.
 | Need | Route |
 |---|---|
 | Scope a quote into an executable field plan | `workflows/build-plan/` |
+| Take a website inquiry to a signed quote | `workflows/lead-to-quote/` |
+| Finish, sign off and close a job | `workflows/job-closeout/` |
+| Review or write customer-facing copy and graphics | `workflows/public-copy-sweep/` |
+| Add or verify a GA4/GTM/Meta event | `workflows/analytics-events/` |
+| Ship a change, or touch domain/mail | `workflows/deploy-check/` |
 | Diagnose a window symptom/photo | `specialists/diagnostician/` |
 | Calculate or explain project pricing | `specialists/estimator/` |
 | Review installation logic | `specialists/installation-reviewer/` |
@@ -31,6 +36,18 @@ It does not replace application code or D1.
 
 The internal routes are opt-in through the authenticated internal surface. Public `/ask` remains limited to its public specialist set.
 
+## Load and exclusion table
+
+| Route | Load | Do not load |
+|---|---|---|
+| Any workflow | its `CONTEXT.md`, then only the references it names | other workflows, specialists |
+| Any specialist | its `CONTEXT.md` | workflows, `CHANGELOG.md` |
+| Architecture change | `STATE.md`, `RULES.md`, `references/icm-rules.md` | `CHANGELOG.md`, old handoff entries |
+| Current state | `STATE.md`, `WORKING.md` | `CHANGELOG.md` |
+| History / "why" | `CHANGELOG.md`, `HANDOFF.md` | everything else |
+
+Exclusion rule: a file not named in the route's Load column is opened only when the task proves it is needed.
+
 ## Business lifecycle
 
 `Lead → Estimate → Quote → Build Plan → Job → Installation → QC → Closeout`
@@ -42,7 +59,7 @@ The ICM representation mirrors this lifecycle but never becomes the database of 
 - **Layer 0:** `CLAUDE.md` — identity and global operating contract.
 - **Layer 1:** this file — routing.
 - **Layer 2:** stage `CONTEXT.md` — stage contract and boundaries.
-- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`. Writing or reviewing public copy, guides, or graphics → `references/public-copy-positioning.md`.
+- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`. Changing Ask routing → `references/ask-routing.md`. Editing any context file → `references/icm-rules.md`. Writing or reviewing public copy, guides, or graphics → `references/public-copy-positioning.md`.
 - **Layer 4:** `output/`, records, and application state — current work.
 
 ## Handoff rule

@@ -40,3 +40,7 @@ next useful action when applicable
 - provide firm pricing outside the deterministic pricing service;
 - make legal/engineering determinations;
 - bypass the deterministic ICM router with an AI intent classifier.
+
+## Completion
+
+Done when the output follows the Required output shape, every conclusion is tagged `KNOWN` / `INFERRED` / `VERIFY`, nothing under Never appears, and no business state was changed. Checked by: `npm run test:ai-surfaces`.

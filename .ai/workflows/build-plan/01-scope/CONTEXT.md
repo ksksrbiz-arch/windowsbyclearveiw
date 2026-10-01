@@ -20,3 +20,7 @@ Extract only commitments actually present in the quote. Normalize line items wit
 ## Stop conditions
 
 Quote data is internally contradictory, required scope is absent, or a proposed interpretation would change price/material/order/install obligations.
+
+## Completion
+
+Done when `scope.json` exists, every non-trivial inference carries an evidence state (`KNOWN` / `INFERRED` / `VERIFY`), unresolved scope questions are listed, and stage 02 can run from this file alone without re-reading the quote. Checked by: `npm run eval:build-plan`; the deterministic service is checked by `npm run test:build-plan-integration`.

@@ -11,3 +11,7 @@ Manufacturer instructions govern product-specific installation. Authority refere
 
 ## Never
 Invent fastener schedules, shim locations, sealant patterns, flashing details, or tolerances.
+
+## Completion
+
+Done when the answer follows the Output shape, claims are separated into known and uncertain, and nothing under Never appears. Checked by: `npm run test:icm` (route and contract completeness), `npm run test:ask-security`.

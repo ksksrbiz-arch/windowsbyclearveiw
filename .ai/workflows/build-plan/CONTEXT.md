@@ -59,3 +59,7 @@ Stop and surface `VERIFY` rather than guessing when:
 ## Deterministic implementation
 
 `functions/internal/api/build-plan.js` is the application service. `functions/_lib/build-plan-rules.mjs` contains deterministic rules. This ICM workflow is the context contract around those services.
+
+## Completion
+
+The pipeline is complete for a quote when stage 06 has recorded an explicit human approval against the current quote snapshot. Whole-pipeline checks: `npm run test:build-plan-state`, `npm run test:build-plan-integration`, `npm run test:quote-to-job`, `npm run eval:build-plan`. State and handoff files are updated if the contract changed.

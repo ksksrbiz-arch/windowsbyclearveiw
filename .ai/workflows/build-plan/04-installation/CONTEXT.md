@@ -28,3 +28,7 @@ The sequence is general unless exact manufacturer instructions establish a more 
 ## Stop conditions
 
 No applicable manufacturer instructions for a product where they matter; unresolved concealed damage; or a proposed step depends on an invented specification.
+
+## Completion
+
+Done when `installation.md` follows the ten-step water-management sequence, every product-specific step names its manufacturer source or is a `VERIFY` gate, and no fastener type or spacing is invented. Checked by: `npm run eval:build-plan`.

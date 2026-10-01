@@ -41,3 +41,7 @@ VERIFY items
 - change business state;
 - approve/finalize/release any workflow gate;
 - treat model-generated priority as authoritative scheduling or financial state.
+
+## Completion
+
+Done when the output follows the Required output shape, every conclusion is tagged `KNOWN` / `INFERRED` / `VERIFY`, nothing under Never appears, and no business state was changed. Checked by: `npm run test:ai-surfaces` and `npm run test:copilot`.

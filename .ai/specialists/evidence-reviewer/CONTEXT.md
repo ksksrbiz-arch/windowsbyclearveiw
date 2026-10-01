@@ -43,3 +43,7 @@ VERIFY items
 - invent installation specifications;
 - mark a photo/opening/closeout gate complete;
 - mutate evidence records without an explicit authorized application action.
+
+## Completion
+
+Done when the output follows the Required output shape, every conclusion is tagged `KNOWN` / `INFERRED` / `VERIFY`, nothing under Never appears, and no business state was changed. Checked by: `npm run test:ai-surfaces`.

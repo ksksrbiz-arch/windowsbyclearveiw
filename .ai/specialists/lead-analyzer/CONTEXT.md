@@ -48,3 +48,7 @@ confidence/evidence notes
 ## Handoff
 
 The analyzer returns an inspectable analysis to the internal application. Any persistence or business action is performed by deterministic application services after authorization.
+
+## Completion
+
+Done when the output follows the Required output shape, every conclusion is tagged `KNOWN` / `INFERRED` / `VERIFY`, nothing under Never appears, and no business state was changed. Checked by: `npm run test:ai-surfaces`.

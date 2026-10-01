@@ -11,3 +11,7 @@ Use explicit user observations, image observations, retrieved technical referenc
 
 ## Never
 Invent a diagnosis, promise a repair, or turn uncertainty into a product recommendation without sufficient evidence.
+
+## Completion
+
+Done when the answer follows the Output shape, claims are separated into known and uncertain, and nothing under Never appears. Checked by: `npm run test:icm` (route and contract completeness), `npm run test:ask-security`.

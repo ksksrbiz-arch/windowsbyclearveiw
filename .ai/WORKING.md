@@ -8,6 +8,8 @@ This file is Layer 4: current implementation work. It is intentionally separate 
 
 ### Completed
 
+- 2026-10-01 ICM alignment: router-only `CLAUDE.md`, Completion sections everywhere, five new workflows, `STATE.md`/`CHANGELOG.md` split, `test:icm-structure`, `test:all`.
+
 - Root operating contract in `CLAUDE.md`.
 - ICM router/context model in `.ai/CONTEXT.md`.
 - Stable operating rules in `.ai/RULES.md`.
@@ -37,3 +39,8 @@ The next code changes should make routing and stage transitions explicit without
 - Mutable transactional records that belong in D1.
 - Product-specific installation facts that have not been verified from authoritative documentation.
 - Prompts copied verbatim from runtime code merely to make the filesystem look complete.
+
+## Open
+
+- Run step 1 of `workflows/public-copy-sweep/` (inventory customer-facing pages: reviewed vs not reviewed) and record the result here.
+- GitHub Actions is blocked by a billing issue; use `npm run test:all` locally.
