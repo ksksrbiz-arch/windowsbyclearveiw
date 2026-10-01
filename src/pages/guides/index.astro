@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
+import HeroAurora from '../../components/HeroAurora.astro';
 
 const guides = (await getCollection('guides', ({ data }) => data.published)).sort(
   (a, b) => a.data.order - b.data.order,
@@ -33,6 +34,7 @@ const startHere = [
   crumbs={[{ name: 'Guides', href: '/guides' }]}
 >
   <section class="guide-hero">
+    <HeroAurora tone="light" />
     <div class="wrap guide-hero-grid">
       <div class="guide-hero-copy">
         <p class="kicker">Guides / homeowner reference</p>

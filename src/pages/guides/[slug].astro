@@ -12,6 +12,7 @@ import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
+import HeroAurora from '../../components/HeroAurora.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -129,6 +130,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
   schema={schema}
 >
   <section class="page-hero article-hero">
+    <HeroAurora />
     <div class="wrap is-narrow">
       <p class="kicker">{guide.data.kicker}</p>
       <h1>{guide.data.title}</h1>
@@ -299,6 +301,20 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
 
 <style>
   .article-hero h1 { max-width: 20ch; }
+
+  /* The backdrop is absolutely positioned, so it would paint over the copy
+     unless the copy is lifted above it. Bottom-aligned with a floor on the
+     height so a short title still gets a hero's worth of presence. */
+  .article-hero {
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(23rem, 44vh, 31rem);
+  }
+
+  .article-hero > .wrap {
+    position: relative;
+    z-index: 1;
+  }
 
   .article-tools {
     display: flex;

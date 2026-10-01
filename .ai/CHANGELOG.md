@@ -4,6 +4,12 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Animated guide heroes
+
+- New `src/components/HeroAurora.astro`: a decorative, `aria-hidden` backdrop for the guide heroes — three slow teal/clay colour fields (transform-only drift, periods 1x/1.3x/0.9x of the new `--dur-ambient` token so the loop never visibly repeats), a faint window-mullion grid, and a soft glint that sweeps across then rests. `tone="dark"` is used on the guide article hero (`src/pages/guides/[slug].astro`, which also gets a min-height and bottom-aligned copy); `tone="light"` on the guides index hero (`src/pages/guides/index.astro`), pulled back and masked off the copy column so the grey labels keep their contrast.
+- `prefers-reduced-motion` freezes the fields at their resting positions and hides the glint; print hides the whole layer. `--dur-ambient` is deliberately not in the reduced-motion duration zeroing (a 0s infinite loop would spin), so the component switches its own animations off.
+- Measured, not assumed: worst-case hero text contrast over a full 30s cycle was 6.10:1 (small meta line, brightest pixel under it); no horizontal overflow at 390px. Not applied to other `.page-hero` pages — opt-in per page.
+
 ## 2026-10-01 — Guide share sheet
 
 - `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`. The per-guide "Share on Nextdoor" link was removed (owner, 2026-10-01); Nextdoor stays in the header/footer business links only. No data is sent anywhere until the visitor picks a target.
