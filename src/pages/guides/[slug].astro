@@ -12,7 +12,6 @@ import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
-import NextdoorIcon from '../../components/icons/NextdoorIcon.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -93,10 +92,6 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
-// Nextdoor's Share Plugin is a plain link (no script, no application needed);
-// nothing is sent to Nextdoor until someone clicks it.
-const nextdoorShareUrl = `https://nextdoor.com/sharekit/?source=windowsbyclearview&body=${encodeURIComponent(`${guide.data.title} ${site.url}/guides/${guide.id}`)}`;
-
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
 
@@ -141,10 +136,9 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
       <div class="article-tools" aria-label="Guide actions">
         <a href="/guides">All guides</a>
         <a href="/ask">Ask a question</a>
-        <a class="share-nextdoor" href={nextdoorShareUrl} target="_blank" rel="noopener noreferrer">
-          <NextdoorIcon class="share-nextdoor-icon" />
-          Share on Nextdoor
-        </a>
+        <button type="button" class="share-native" hidden data-share-title={guide.data.title} data-share-url={`${site.url}/guides/${guide.id}`}>
+          Share
+        </button>
       </div>
       <p class="article-meta">
         <span>Written by <a href="/about">{site.shortName}</a></span>
@@ -284,6 +278,25 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
   <CtaBar />
 </BaseLayout>
 
+<script>
+  // Opens the device share sheet (Web Share API). Where it is unavailable the
+  // button stays hidden.
+  const shareButton = document.querySelector<HTMLButtonElement>('.share-native');
+  if (shareButton && typeof navigator.share === 'function') {
+    shareButton.hidden = false;
+    shareButton.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: shareButton.dataset.shareTitle ?? document.title,
+          url: shareButton.dataset.shareUrl ?? location.href,
+        });
+      } catch {
+        // Dismissing the sheet rejects with AbortError; nothing to do.
+      }
+    });
+  }
+</script>
+
 <style>
   .article-hero h1 { max-width: 20ch; }
 
@@ -294,8 +307,12 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
     margin: var(--space-m) 0 0;
   }
 
-  .article-tools a {
+  .article-tools a,
+  .article-tools .share-native {
     display: inline-flex;
+    font-family: inherit;
+    background: transparent;
+    cursor: pointer;
     align-items: center;
     min-height: 2.4rem;
     padding: 0.45rem 0.8rem;
@@ -309,10 +326,12 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
     transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
   }
 
-  .article-tools .share-nextdoor-icon { width: 1rem; height: 1rem; margin-right: 0.45rem; flex: none; }
+  .article-tools .share-native[hidden] { display: none; }
 
   .article-tools a:hover,
-  .article-tools a:focus-visible {
+  .article-tools a:focus-visible,
+  .article-tools .share-native:hover,
+  .article-tools .share-native:focus-visible {
     background: color-mix(in srgb, var(--on-dark) 9%, transparent);
     border-color: var(--on-dark-soft);
   }
