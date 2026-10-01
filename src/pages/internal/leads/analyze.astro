@@ -20,7 +20,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   function initLeadAnalyzer(){
     const list=document.querySelector('[data-list]');const analyze=document.querySelector('[data-analyze]');const status=document.querySelector('[data-status]');const result=document.querySelector('[data-result]');const answer=document.querySelector('[data-answer]');const all=document.querySelector('[data-select-all]');
     if(!(list instanceof HTMLElement)||!(analyze instanceof HTMLButtonElement)||!(status instanceof HTMLElement)||!(result instanceof HTMLElement)||!(answer instanceof HTMLElement)||!(all instanceof HTMLInputElement)||list.dataset.bound==='true')return;list.dataset.bound='true';
-    const esc=(v)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML};
+    const esc=(v)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;')};
     let leads=[];
     const update=()=>{const selected=list.querySelectorAll('input[data-lead]:checked').length;analyze.disabled=!selected;all.checked=leads.length>0&&selected===leads.length};
     const render=()=>{list.innerHTML=leads.map(l=>`<label class="la-card"><input type="checkbox" data-lead value="${esc(l.id)}"/><span><strong>${esc(l.name||'Unnamed lead')}</strong><small>${esc([l.city,l.role].filter(Boolean).join(' · ')||'Estimate request')} · ${esc(new Date(l.created_at).toLocaleDateString())}</small>${l.notes?`<em>${esc(l.notes)}</em>`:''}</span></label>`).join('')||'<p>No leads available.</p>';list.querySelectorAll('input[data-lead]').forEach(x=>x.addEventListener('change',update));update()};
