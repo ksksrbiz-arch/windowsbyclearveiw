@@ -20,4 +20,10 @@ assert.match(chat, /MAX_HISTORY_MESSAGES=10/);
 assert.match(chat, /slice\(0,MAX_MESSAGE_LENGTH\)/);
 assert.match(chat, /cleanHistory\(body\.history\)/);
 
+// Trailing slash must not dodge the per-route rate limit; null/array bodies and
+// null tool arguments must be rejected cleanly instead of throwing.
+assert.match(middleware, /pathname\.split\('\/'\)\.filter\(Boolean\)\.pop\(\)/);
+assert.match(chat, /Body must be a JSON object/);
+assert.match(chat, /args must be an object/);
+
 console.log('Ask API security audit: PASS');
