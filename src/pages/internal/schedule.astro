@@ -17,7 +17,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     const grid=document.querySelector('[data-grid]');if(!(grid instanceof HTMLElement)||grid.dataset.bound==='true')return;grid.dataset.bound='true';
     const range=document.querySelector('[data-range]');const status=document.querySelector('[data-status]');const empty=document.querySelector('[data-empty]');let jobs:Job[]=[];let anchor=new Date();
     const startOfWeek=(d:Date)=>{const x=new Date(d);const day=x.getDay();const delta=day===0?-6:1-day;x.setHours(12,0,0,0);x.setDate(x.getDate()+delta);return x;};
-    const dayKey=(d:Date)=>d.toISOString().slice(0,10);const esc=(v:unknown)=>{const x=document.createElement('div');x.textContent=String(v??'');return x.innerHTML;};const label=(d:Date)=>d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const dayKey=(d:Date)=>d.toISOString().slice(0,10);const esc=(v:unknown)=>{const x=document.createElement('div');x.textContent=String(v??'');return x.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');};const label=(d:Date)=>d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     function render(){
       const monday=startOfWeek(anchor);const days=[...Array(7)].map((_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
       if(range)range.textContent=`${days[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
