@@ -279,8 +279,8 @@ const submit = (env, body) => call(sign.onRequest, env, { method: 'POST', path: 
 
   const stale = await view(env, oldToken);
   assert.equal(stale.status, 410, 'the old link no longer opens the edited quote');
-  const staleSign = await submit(env, { token: oldToken, strokes, termsVersion: 'x' });
-  assert.ok(staleSign.status >= 400, 'and cannot be signed');
+  const staleSign = await submit(env, { t: oldToken, name: customer.name, strokes, consent: true });
+  assert.equal(staleSign.status, 410, 'a fully valid signing request on the revoked link is refused');
   assert.equal(env.QUOTES_DB.raw.prepare(`SELECT COUNT(*) AS n FROM quote_sign_links WHERE signed_at IS NOT NULL`).get().n, 0);
 
   const fresh = await call(share.onRequestPost, env, { method: 'POST', body: { quoteId: id } });
