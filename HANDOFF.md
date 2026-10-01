@@ -243,6 +243,11 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
 - **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
 
+### 2026-10-01 — Turnstile site key wired
+
+- The owner created the Turnstile widget and supplied its public site key; it is now `turnstileSiteKey` in `src/data/site.ts`, so the widget renders on `/estimate` (verified in the built page). The Cloudflare "existing widget" flow (`turnstile/spin/prompt.md`) retrieves the secret with Wrangler ≥ 4.109 using an owner-confirmed manifest; this session has no Cloudflare login (`wrangler whoami`: not authenticated), so the secret was **not** retrieved or stored and the widget's allowed domains were **not** checked.
+- **Enforcement is still off.** Server-side checking starts only when `TURNSTILE_SECRET_KEY` is set as a Pages secret (steps in `internal/README.md`). Validation pending: with the secret set, one real submission should succeed and a replayed token should be refused. Also confirm the widget lists `windowsbyclearview.com`.
+
 ### 2026-09-30 — Cloudflare Access sign-in for /internal (built, off until configured)
 
 - **Why:** the Command Center used one shared password (no MFA, no per-person log, cannot revoke one person). From the Cloudflare services review, #2.

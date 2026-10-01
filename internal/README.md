@@ -109,13 +109,16 @@ are open to the internet. Two layers protect them, both in `functions/_lib/abuse
    table `rate_limits`: estimate form 6 per hour; Ask chat 60 per hour; Ask handoff 10 per hour.
    Over the limit the visitor is told to call. If D1 is unavailable the limit steps aside
    rather than block anyone.
-2. **Cloudflare Turnstile, off until configured.** One-time setup (free):
-   Cloudflare dashboard → Turnstile → Add widget for `windowsbyclearview.com` (Managed mode).
-   Put the **Site key** in `src/data/site.ts` (`turnstileSiteKey`; public by design) and add the
-   **Secret key** as the Pages secret `TURNSTILE_SECRET_KEY` (Production and Preview), then
-   redeploy. Until both exist nothing changes. After that the form shows the check, and a
-   request without a valid token is refused. If Cloudflare's verifier cannot be reached the
-   lead is let through (a lost lead costs more than one bot message).
+2. **Cloudflare Turnstile.** The widget exists and its public **site key** is committed in
+   `src/data/site.ts` (`turnstileSiteKey`), so the check now shows on the estimate form. The
+   server only *requires* a token once the **secret key** is added as the Pages secret
+   `TURNSTILE_SECRET_KEY` (Production and Preview), then redeploy. Until then the widget is
+   cosmetic and nothing is refused. Add it with
+   `npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name <pages-project>` (paste the
+   secret when asked; do not put it in chat or the repo) or in the dashboard under Settings →
+   Variables and Secrets. The widget's allowed hostnames must include `windowsbyclearview.com`
+   (and `www.` if used), or the check fails on the live site. If Cloudflare's verifier cannot be
+   reached the lead is let through (a lost lead costs more than one bot message).
 
 Mark should still see the real leads: test by sending one estimate request after enabling.
 
