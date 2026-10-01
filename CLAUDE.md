@@ -30,6 +30,7 @@ Mission: a trustworthy operating system for Clearview Windows & Trim LLC, not me
 | New Command Center feature | `.ai/references/command-center-gap-analysis.md` | specialists |
 | AI feature (provider, budget, tools) | `.ai/AI-OPERATING-CONTRACT.md`, `.ai/RULES.md` | workflows |
 | What is the current state? | `.ai/STATE.md`, `.ai/WORKING.md` | `CHANGELOG.md` (history only) |
+| Why ICM is shaped this way (method background) | `.ai/references/icm-method-notes.md` | workflows, specialists |
 | Why was X built this way? | `.ai/CHANGELOG.md`, `HANDOFF.md`, `docs/ICM-IMPLEMENTATION.md` | everything else |
 
 Exclusion rule: if a file is not in the row's Load column, do not read it speculatively. Open it only when

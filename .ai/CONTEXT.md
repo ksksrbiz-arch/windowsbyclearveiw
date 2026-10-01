@@ -59,7 +59,7 @@ The ICM representation mirrors this lifecycle but never becomes the database of 
 - **Layer 0:** `CLAUDE.md` — identity and global operating contract.
 - **Layer 1:** this file — routing.
 - **Layer 2:** stage `CONTEXT.md` — stage contract and boundaries.
-- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`. Changing Ask routing → `references/ask-routing.md`. Editing any context file → `references/icm-rules.md`. Writing or reviewing public copy, guides, or graphics → `references/public-copy-positioning.md`.
+- **Layer 3:** `references/` — stable domain knowledge and authorities. Scoping a new Command Center feature → `references/command-center-gap-analysis.md`. Changing Ask routing → `references/ask-routing.md`. Editing any context file → `references/icm-rules.md`. Why the structure is shaped this way → `references/icm-method-notes.md`. Writing or reviewing public copy, guides, or graphics → `references/public-copy-positioning.md`.
 - **Layer 4:** `output/`, records, and application state — current work.
 
 ## Handoff rule
