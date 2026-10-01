@@ -11,6 +11,7 @@ import {
 import { summarizePipeline } from '../functions/internal/_lib/pipeline-summary.mjs';
 import * as jobsApi from '../functions/internal/api/jobs.js';
 import * as paymentsApi from '../functions/internal/api/payments.js';
+import * as tasksApi from '../functions/internal/api/tasks.js';
 import * as dashboardApi from '../functions/internal/api/dashboard.js';
 import * as analyticsApi from '../functions/internal/api/analytics.js';
 
@@ -178,6 +179,19 @@ let jobId;
   const raise = await call(jobsApi.onRequestPatch, env, { method: 'PATCH', path: `/internal/api/jobs?id=${id}`, body: { agreedAmount: '2500' } });
   assert.equal(raise.status, 200);
   assert.equal((await call(paymentsApi.onRequestGet, env, { path: `/internal/api/payments?jobId=${id}` })).body.payment.status, 'partial', 'raising the price reopens the balance');
+  // Non-numeric amounts must not coerce to 0/1 and silently rewrite the payment record.
+  const before = (await call(paymentsApi.onRequestGet, env, { path: `/internal/api/payments?jobId=${id}` })).body.payment.amount_paid_cents;
+  for (const bad of ['', '  ', null, true, [], {}]) assert.equal((await pay(bad)).status, 400, `amountPaidCents ${JSON.stringify(bad)} is refused`);
+  assert.equal((await call(paymentsApi.onRequestGet, env, { path: `/internal/api/payments?jobId=${id}` })).body.payment.amount_paid_cents, before, 'refused amounts leave the record untouched');
+  // A schedule date must be a real date, not free text.
+  const badDate = await call(jobsApi.onRequestPatch, env, { method: 'PATCH', path: `/internal/api/jobs?id=${id}`, body: { scheduledDate: 'tomorrow' } });
+  assert.equal(badDate.status, 400);
+  assert.equal((await call(jobsApi.onRequestPatch, env, { method: 'PATCH', path: `/internal/api/jobs?id=${id}`, body: { scheduledDate: '2026-02-31' } })).status, 400);
+  assert.equal((await call(jobsApi.onRequestPatch, env, { method: 'PATCH', path: `/internal/api/jobs?id=${id}`, body: { scheduledDate: '2026-11-03' } })).status, 200);
+  // A task with no lead stores NULL, not lead 0.
+  const task = await call(tasksApi.onRequestPost, env, { method: 'POST', path: '/internal/api/tasks', body: { title: 'Call back', leadId: null } });
+  assert.equal(task.status, 201);
+  assert.equal(env.QUOTES_DB.raw.prepare('SELECT lead_id FROM follow_up_tasks WHERE id = ?').get(task.body.id).lead_id, null);
   pass('payments: total is the agreed amount, overpayment refused, agreed amount cannot drop below paid');
 }
 

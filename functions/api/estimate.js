@@ -82,10 +82,16 @@ function escapeHtmlAttr(value) {
     .replace(/'/g, '&#39;');
 }
 
+function mailtoAddress(email) {
+  return encodeURIComponent(String(email || '')).replace(/%40/g, '@');
+}
+
 function emailButtonHtml(name, email) {
   if (!email) return '';
   const safeName = escapeHtmlAttr(name || 'them');
-  const safeEmail = escapeHtmlAttr(email);
+  // The local part may legally contain ? & = (see the email check below); percent-encode
+  // them so they cannot become mailto header fields such as cc= or bcc=.
+  const safeEmail = escapeHtmlAttr(mailtoAddress(email));
   return `<tr>
                     <td style="padding-bottom:12px;">
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">

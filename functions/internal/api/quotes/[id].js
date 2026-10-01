@@ -84,9 +84,11 @@ export async function onRequestPatch(context) {
     if (!signatureName) return json({ error: 'Enter the name of the person who signed.' }, 400);
     const gate = await requireApprovedBuildPlan(env.QUOTES_DB, id);
     if (gate) return json({ error: gate.error, code: gate.code }, 409);
-    await env.QUOTES_DB.prepare(
-      `UPDATE quotes SET signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ?`,
+    // Conditional on still being a draft so two taps/devices can never both "win" the signature.
+    const signed = await env.QUOTES_DB.prepare(
+      `UPDATE quotes SET signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ? AND status = 'draft'`,
     ).bind(signatureName, now, now, id).run();
+    if (signed?.meta?.changes === 0) return json({ error: 'This quote is not awaiting a signature.' }, 409);
     await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true });
     return json({ ok: true, signedAt: now });
   }
@@ -98,9 +100,10 @@ export async function onRequestPatch(context) {
   const gate = await requireApprovedBuildPlan(env.QUOTES_DB, id);
   if (gate) return json({ error: gate.error, code: gate.code }, 409);
 
-  await env.QUOTES_DB.prepare(
-    `UPDATE quotes SET signature_svg = ?, signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ?`,
-  ).bind(signatureSvg, signatureName, now, id).run();
+  const signed = await env.QUOTES_DB.prepare(
+    `UPDATE quotes SET signature_svg = ?, signature_name = ?, signed_at = ?, status = 'finalized', updated_at = ? WHERE id = ? AND status = 'draft'`,
+  ).bind(signatureSvg, signatureName, now, now, id).run();
+  if (signed?.meta?.changes === 0) return json({ error: 'This quote is not awaiting a signature.' }, 409);
   await ensureInvoiceForQuote(env.QUOTES_DB, id, { finalize: true });
   return json({ ok: true, signedAt: now });
 }
