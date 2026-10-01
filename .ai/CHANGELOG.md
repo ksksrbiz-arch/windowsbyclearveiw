@@ -4,6 +4,10 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Guide share sheet
+
+- `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`; the existing "Share on Nextdoor" link stays as the no-JS / unsupported-browser fallback. No data is sent anywhere until the visitor picks a target.
+
 ## 2026-10-01 — ICM alignment pass
 
 - Root `CLAUDE.md` reduced to a routing-only file with load/exclusion tables; Ask routing and ICM rules moved to `.ai/references/ask-routing.md` and `.ai/references/icm-rules.md`.

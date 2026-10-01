@@ -141,6 +141,9 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
       <div class="article-tools" aria-label="Guide actions">
         <a href="/guides">All guides</a>
         <a href="/ask">Ask a question</a>
+        <button type="button" class="share-native" hidden data-share-title={guide.data.title} data-share-url={`${site.url}/guides/${guide.id}`}>
+          Share
+        </button>
         <a class="share-nextdoor" href={nextdoorShareUrl} target="_blank" rel="noopener noreferrer">
           <NextdoorIcon class="share-nextdoor-icon" />
           Share on Nextdoor
@@ -284,6 +287,25 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
   <CtaBar />
 </BaseLayout>
 
+<script>
+  // Opens the device share sheet (Web Share API). Where it is unavailable the
+  // button stays hidden and the plain Nextdoor link remains the fallback.
+  const shareButton = document.querySelector<HTMLButtonElement>('.share-native');
+  if (shareButton && typeof navigator.share === 'function') {
+    shareButton.hidden = false;
+    shareButton.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: shareButton.dataset.shareTitle ?? document.title,
+          url: shareButton.dataset.shareUrl ?? location.href,
+        });
+      } catch {
+        // Dismissing the sheet rejects with AbortError; nothing to do.
+      }
+    });
+  }
+</script>
+
 <style>
   .article-hero h1 { max-width: 20ch; }
 
@@ -294,8 +316,12 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
     margin: var(--space-m) 0 0;
   }
 
-  .article-tools a {
+  .article-tools a,
+  .article-tools .share-native {
     display: inline-flex;
+    font-family: inherit;
+    background: transparent;
+    cursor: pointer;
     align-items: center;
     min-height: 2.4rem;
     padding: 0.45rem 0.8rem;
@@ -311,8 +337,12 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
 
   .article-tools .share-nextdoor-icon { width: 1rem; height: 1rem; margin-right: 0.45rem; flex: none; }
 
+  .article-tools .share-native[hidden] { display: none; }
+
   .article-tools a:hover,
-  .article-tools a:focus-visible {
+  .article-tools a:focus-visible,
+  .article-tools .share-native:hover,
+  .article-tools .share-native:focus-visible {
     background: color-mix(in srgb, var(--on-dark) 9%, transparent);
     border-color: var(--on-dark-soft);
   }
