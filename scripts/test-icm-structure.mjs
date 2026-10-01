@@ -52,8 +52,8 @@ for (const f of workflowContracts) {
   const text = read(f);
   for (const [re, name] of required) check(re.test(text), `${f} is missing "## ${name}"`);
 }
-// Top-level workflows (not stages) also carry a load/exclusion table.
-for (const f of workflowContracts.filter((p) => p.split('/').length === 4 && !/\/build-plan\//.test(p))) {
+// Every top-level workflow (including build-plan; not its stages) carries a load/exclusion table.
+for (const f of workflowContracts.filter((p) => p.split('/').length === 4)) {
   check(/\| Load \| Do not load \|/.test(read(f)), `${f} needs a "Load | Do not load" table`);
 }
 

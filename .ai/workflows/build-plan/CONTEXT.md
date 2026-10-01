@@ -10,6 +10,15 @@ Turn an approved quote's known scope into a field-executable installation plan w
 
 Each stage has one job and emits an inspectable handoff for the next stage.
 
+## Load / exclude
+
+| Load | Do not load |
+|---|---|
+| The `CONTEXT.md` of the stage being worked (`01-scope` … `06-approval`) and the output of the stage before it | Contracts of stages further away than the adjacent one |
+| `.ai/RULES.md` (uncertainty protocol, installation safety, human gate) | `.ai/specialists/` and `.ai/references/public-copy-positioning.md` |
+| `functions/_lib/build-plan-rules.mjs`, `functions/internal/api/build-plan.js` when changing the service | Other workflows, `CHANGELOG.md` |
+| `.ai/workflows/build-plan/EXAMPLES.md` when changing a safety-critical rule | |
+
 ## Inputs
 
 - Quote and quote items from D1.
