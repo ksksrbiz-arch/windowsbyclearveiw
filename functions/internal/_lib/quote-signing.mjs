@@ -78,8 +78,8 @@ export function renderSignatureSvg(strokes) {
     for (let i = 0; i < stroke.length; i += 1) {
       const point = stroke[i];
       if (!Array.isArray(point) || point.length !== 2) return { error: 'Invalid signature.' };
-      const [x, y] = point.map(Number);
-      if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x > PAD.width || y > PAD.height) {
+      const [x, y] = point;
+      if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x > PAD.width || y > PAD.height) {
         return { error: 'Invalid signature.' };
       }
       parts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`);
