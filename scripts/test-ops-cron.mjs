@@ -160,4 +160,12 @@ await ok(() => {
   assert.equal(backupKey(new Date('2026-01-02T03:04:05Z')), 'd1/2026-01-02.json.gz');
 });
 
+await ok(async () => {
+  // A large blob must not overflow the call stack when base64-encoded for the dump.
+  const rows = [{ data: new Uint8Array(300_000).fill(65) }];
+  const fake = { prepare: (sql) => ({ all: async () => ({ results: sql.includes('FROM sqlite_master') ? (sql.includes('name, sql') ? [{ name: 'b', sql: 'CREATE TABLE b (data BLOB)' }] : []) : rows }) }) };
+  const dump = await dumpDatabase(fake);
+  assert.equal(dump.tables.b.rows[0].data.$base64.length, Math.ceil(300_000 / 3) * 4, 'large blobs encode');
+});
+
 console.log(`ops cron: ok (${groups} groups)`);
