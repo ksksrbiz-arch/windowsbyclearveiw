@@ -50,6 +50,16 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       return div.innerHTML;
     }
 
+    // One malformed row must not blank the whole list.
+    function parseList(raw: unknown): any[] {
+      try {
+        const value = JSON.parse(typeof raw === 'string' && raw ? raw : '[]');
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
     function renderFunnel(funnel: Record<string, number> | undefined) {
       const box = document.querySelector('[data-funnel]');
       const note = document.querySelector('[data-funnel-note]');
@@ -84,7 +94,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
         if (summary instanceof HTMLElement) {
           summary.hidden = false;
           const refused = logs.filter((l: any) => l.refused).length;
-          const withTools = logs.filter((l: any) => JSON.parse(l.tools_used || '[]').length > 0).length;
+          const withTools = logs.filter((l: any) => parseList(l.tools_used).length > 0).length;
           const set = (sel: string, v: string) => { const el = summary.querySelector(sel); if (el) el.textContent = v; };
           set('[data-stat-total]', String(logs.length));
           set('[data-stat-refused]', String(refused));
@@ -95,8 +105,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
           list.hidden = false;
           list.innerHTML = '';
           for (const l of logs) {
-            const tools = JSON.parse(l.tools_used || '[]');
-            const sources = JSON.parse(l.sources || '[]');
+            const tools = parseList(l.tools_used);
+            const sources = parseList(l.sources);
             const date = new Date(l.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
             const card = document.createElement('article');
@@ -110,7 +120,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
               </div>
               <p class="al-question">${escapeHtml(l.question)}</p>
               <p class="al-answer">${escapeHtml(l.answer)}</p>
-              ${sources.length ? `<p class="al-sources">Sources: ${sources.map((s: any) => escapeHtml(s.title)).join(', ')}</p>` : ''}
+              ${sources.length ? `<p class="al-sources">Sources: ${sources.map((s: any) => escapeHtml(s?.title)).join(', ')}</p>` : ''}
             `;
             list.append(card);
           }

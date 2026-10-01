@@ -4,6 +4,11 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Audit round 2: ask-logs parsing, tasks list without quote_id
+
+- `src/pages/internal/ask-logs.astro`: `tools_used` / `sources` are parsed defensively, so one malformed row no longer blanks the whole list.
+- `functions/internal/api/tasks.js` GET: if the lazy follow-up sync fails and `follow_up_tasks.quote_id` is missing, the queue still lists (without the quote join) instead of returning 500. No regression test: the sync re-adds the column on the same request, so the failure path is not reproducible in the harness.
+
 ## 2026-10-01 — Animated guide heroes
 
 - New `src/components/HeroAurora.astro`: a decorative, `aria-hidden` backdrop for the guide heroes — three slow teal/clay colour fields (transform-only drift, periods 1x/1.3x/0.9x of the new `--dur-ambient` token so the loop never visibly repeats), a faint window-mullion grid, and a soft glint that sweeps across then rests. `tone="dark"` is used on the guide article hero (`src/pages/guides/[slug].astro`, which also gets a min-height and bottom-aligned copy); `tone="light"` on the guides index hero (`src/pages/guides/index.astro`), pulled back and masked off the copy column so the grey labels keep their contrast.
