@@ -4,6 +4,10 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 — Lead capture audit fixes
+
+- `functions/api/estimate.js`: the alert email's "Email <name>" mailto button now percent-encodes the address (a legal local part such as `a?cc=b` could otherwise add mailto header fields). Regression test in `scripts/test-estimate-endpoint.mjs`.
+- `src/components/EstimateForm.astro`: after a JS submit succeeds the success panel receives focus so screen-reader and keyboard users are not left on a hidden button.
 ## 2026-10-01 — Internal API audit fixes (unit 9)
 
 - `payments.js`: `amountPaidCents` of `""`, `null`, `true`, `[]` no longer coerces to 0/1 and rewrites the payment record; refused with 400.

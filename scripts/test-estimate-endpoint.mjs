@@ -66,6 +66,16 @@ const base = { name: 'Pat Doe', phone: '(360) 555-0100', city: 'Camas', email: '
   assert(sent.length === 2 && sent[1].to[0] === 'pat@example.com', 'first submission sends Mark notification and customer receipt');
 }
 
+// 1b. Email local parts may contain ? & = ; the mailto button must not turn them into header fields.
+{
+  sent.length = 0;
+  const env = { QUOTES_DB: fakeDb(), RESEND_API_KEY: 'test' };
+  const { status } = await submit(env, { ...base, email: 'a?cc=b@example.com' });
+  assert(status === 200, 'unusual but valid email is accepted');
+  const button = sent[0].template.variables.EMAIL_BUTTON_HTML;
+  assert(button.includes('mailto:a%3Fcc%3Db@example.com') && !button.includes('mailto:a?cc'), 'mailto href percent-encodes ? and =');
+}
+
 // 2. A repeat submission for the same address within 24h still notifies Mark
 //    but does not mail the address again.
 {
