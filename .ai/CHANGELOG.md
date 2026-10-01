@@ -10,6 +10,16 @@ Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2
 - `jobs.js` PATCH: `scheduledDate` must be a real `YYYY-MM-DD` (was free text, truncated to 10 chars).
 - `quotes/[id].js` PATCH: digital-signature UPDATE bound 4 values to 5 placeholders (signing on Mark's device could not finalize); fixed, test in `test-quote-to-job-flow.mjs`. Signing UPDATE is also conditional on `status = 'draft'` so two concurrent signatures cannot both finalize.
 - `tasks.js` POST: `leadId` null/blank/0 stores NULL (was `Number(null) = 0`). Regression asserts in `scripts/test-general-jobs.mjs`.
+## 2026-10-01 — Internal UI escape helpers escape quotes
+
+- Internal pages' `esc`/`escapeHtml` helpers (textContent to innerHTML) did not escape `"` or `'`, so customer/plan text interpolated into `value="..."` / `href="..."` attributes could break out of the attribute. They now escape quotes too; `scripts/test-internal-runtime-styles.mjs` asserts it.
+## 2026-10-01 - /ask audit fixes
+- `/ask/api/*` rate-limit bucket lookup ignores a trailing slash (was `''`, which skipped the limit).
+- `/ask/api/chat` returns 400 for `null`/array JSON bodies instead of throwing; Groq tool-call arguments that parse to non-objects are treated as invalid.
+- Regression assertions in `scripts/test-ask-security.mjs`.
+## 2026-10-01 — Signature points must be numbers
+
+- `quote-signing.mjs` `renderSignatureSvg`: stroke points are now required to be JSON numbers; previously `null`, `""` or `true` were coerced to 0 and accepted. Regression assertion in `scripts/test-quote-signing.mjs`.
 
 ## 2026-10-01 — Guide share sheet
 
