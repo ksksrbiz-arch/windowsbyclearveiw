@@ -12,7 +12,6 @@ import FrameMaterials from '../../components/diagrams/FrameMaterials.astro';
 import SignsChecklist from '../../components/diagrams/SignsChecklist.astro';
 import EstimateBuildUp from '../../components/diagrams/EstimateBuildUp.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
-import NextdoorIcon from '../../components/icons/NextdoorIcon.astro';
 import { site } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -93,10 +92,6 @@ const updated = guide.data.updated.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
-// Nextdoor's Share Plugin is a plain link (no script, no application needed);
-// nothing is sent to Nextdoor until someone clicks it.
-const nextdoorShareUrl = `https://nextdoor.com/sharekit/?source=windowsbyclearview&body=${encodeURIComponent(`${guide.data.title} ${site.url}/guides/${guide.id}`)}`;
-
 const minutes = Math.max(1, Math.round(guide.body.split(/\s+/).length / 200));
 const currentDiagramNote = guide.data.diagram ? diagramNotes[guide.data.diagram] : null;
 
@@ -144,10 +139,6 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
         <button type="button" class="share-native" hidden data-share-title={guide.data.title} data-share-url={`${site.url}/guides/${guide.id}`}>
           Share
         </button>
-        <a class="share-nextdoor" href={nextdoorShareUrl} target="_blank" rel="noopener noreferrer">
-          <NextdoorIcon class="share-nextdoor-icon" />
-          Share on Nextdoor
-        </a>
       </div>
       <p class="article-meta">
         <span>Written by <a href="/about">{site.shortName}</a></span>
@@ -289,7 +280,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
 
 <script>
   // Opens the device share sheet (Web Share API). Where it is unavailable the
-  // button stays hidden and the plain Nextdoor link remains the fallback.
+  // button stays hidden.
   const shareButton = document.querySelector<HTMLButtonElement>('.share-native');
   if (shareButton && typeof navigator.share === 'function') {
     shareButton.hidden = false;
@@ -334,8 +325,6 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
     text-transform: uppercase;
     transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
   }
-
-  .article-tools .share-nextdoor-icon { width: 1rem; height: 1rem; margin-right: 0.45rem; flex: none; }
 
   .article-tools .share-native[hidden] { display: none; }
 

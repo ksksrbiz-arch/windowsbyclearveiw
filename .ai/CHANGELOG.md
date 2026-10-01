@@ -6,7 +6,7 @@ Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2
 
 ## 2026-10-01 — Guide share sheet
 
-- `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`; the existing "Share on Nextdoor" link stays as the no-JS / unsupported-browser fallback. No data is sent anywhere until the visitor picks a target.
+- `src/pages/guides/[slug].astro`: added a **Share** button that opens the device share sheet (Web Share API: title + canonical guide URL). It is hidden until the browser supports `navigator.share`. The per-guide "Share on Nextdoor" link was removed (owner, 2026-10-01); Nextdoor stays in the header/footer business links only. No data is sent anywhere until the visitor picks a target.
 
 ## 2026-10-01 — ICM alignment pass
 
