@@ -39,7 +39,7 @@ Use the existing provider architecture unless a measured requirement justifies c
 
 - Groq is the primary `/ask` generation path.
 - Gemini is the existing fallback/native function-calling path.
-- Gemini `gemini-embedding-001` already powers the guide RAG index.
+- Guide RAG embeddings: the index file names its model; `functions/ask/_lib/embeddings.mjs` embeds queries with that same model (Gemini `gemini-embedding-001` today; Workers AI `@cf/baai/bge-m3` is the supported replacement). Provider calls go through `functions/_lib/ai-gateway.mjs` (optional Cloudflare AI Gateway, payload logging off).
 - Workers AI vision already powers bounded photo description through the `AI` binding.
 
 New features should reuse these paths rather than introducing duplicate model infrastructure.

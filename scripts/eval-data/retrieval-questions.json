@@ -1,0 +1,37 @@
+{
+  "note": "Questions a homeowner might ask, each with the guide(s) that should be retrieved. 'offTopic' questions should retrieve nothing worth citing. Add real /ask questions here over time; every edit changes the benchmark, so re-run before comparing indexes.",
+  "onTopic": [
+    { "q": "What is the difference between Cascade and Milgard windows?", "slugs": ["cascade-vs-milgard"] },
+    { "q": "Which brand has the better warranty, Cascade or Milgard?", "slugs": ["cascade-vs-milgard"] },
+    { "q": "Where are Milgard windows made?", "slugs": ["cascade-vs-milgard"] },
+    { "q": "How do I read the U-factor on a window label?", "slugs": ["cascade-vs-milgard"] },
+    { "q": "There is cloudy haze between the two panes of my window, what does that mean?", "slugs": ["fogged-windows", "signs-you-need-new-windows"] },
+    { "q": "Why does my window have condensation on the inside of the room?", "slugs": ["fogged-windows"] },
+    { "q": "Why do windows fog up so often in Washington?", "slugs": ["fogged-windows"] },
+    { "q": "Is a foggy window something I can fix without replacing it?", "slugs": ["fogged-windows"] },
+    { "q": "How do I know if it is time to replace my windows?", "slugs": ["signs-you-need-new-windows"] },
+    { "q": "My window sticks and will not stay open, is that a sign it needs replacing?", "slugs": ["signs-you-need-new-windows"] },
+    { "q": "The wood under my window sill is soft and peeling.", "slugs": ["signs-you-need-new-windows", "what-your-openings-need"] },
+    { "q": "My energy bill went up but nothing else changed, could it be the windows?", "slugs": ["signs-you-need-new-windows"] },
+    { "q": "Should I choose vinyl or fiberglass windows in the Pacific Northwest?", "slugs": ["vinyl-vs-fiberglass-pacific-northwest"] },
+    { "q": "Do vinyl windows expand and contract with temperature?", "slugs": ["vinyl-vs-fiberglass-pacific-northwest"] },
+    { "q": "Which window frame material handles moisture and rot better?", "slugs": ["vinyl-vs-fiberglass-pacific-northwest"] },
+    { "q": "Can fiberglass windows be painted any color?", "slugs": ["vinyl-vs-fiberglass-pacific-northwest"] },
+    { "q": "What do you check on site before replacing an opening?", "slugs": ["what-your-openings-need"] },
+    { "q": "What does the written estimate cover for each opening?", "slugs": ["what-your-openings-need", "window-replacement-cost-washington"] },
+    { "q": "What signs show that a window opening needs extra repair work?", "slugs": ["what-your-openings-need"] },
+    { "q": "How much does window replacement cost in Washington?", "slugs": ["window-replacement-cost-washington"] },
+    { "q": "What am I actually paying for in a window replacement quote?", "slugs": ["window-replacement-cost-washington"] },
+    { "q": "Are there rebates for replacement windows this year?", "slugs": ["window-replacement-cost-washington"] },
+    { "q": "How do I compare two window bids that look different?", "slugs": ["window-replacement-cost-washington"] },
+    { "q": "Is a more expensive window actually better value?", "slugs": ["window-replacement-cost-washington"] }
+  ],
+  "offTopic": [
+    "What is the capital of France?",
+    "Write me a poem about the ocean.",
+    "How do I bake sourdough bread?",
+    "Who won the football game last night?",
+    "What is your phone number?",
+    "Can you recommend a good plumber?"
+  ]
+}

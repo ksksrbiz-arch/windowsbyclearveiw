@@ -28,7 +28,7 @@ The architecture must extend the existing ICM/RAG/Ask foundation rather than rec
 The following are existing capabilities and are **not greenfield work**:
 
 - `/ask` already uses Groq as the primary model and Gemini as fallback.
-- Gemini `gemini-embedding-001` already powers the committed guide RAG index.
+- The committed guide RAG index is built with the model named inside it (Gemini `gemini-embedding-001` today); `functions/ask/_lib/embeddings.mjs` also supports Workers AI `@cf/baai/bge-m3`.
 - Workers AI vision analysis already exists in `functions/ask/_lib/vision.mjs` using the `AI` binding and `llama-3.2-11b-vision-instruct`.
 - The vision path already follows the describe/observe-don't-diagnose boundary and does not turn photographs into measurements or authoritative scope.
 - `functions/ask/_lib/icm-router.mjs` performs deterministic specialist routing and now isolates internal-only routes from public `/ask`.

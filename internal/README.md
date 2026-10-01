@@ -38,6 +38,37 @@ is **local-dev only** — it lets `wrangler d1 execute --local` and
 `wrangler pages dev` simulate the database on disk. It is never read by the
 real Cloudflare Pages build.
 
+## AI Gateway for Groq and Gemini (optional)
+
+Cloudflare AI Gateway sits between this site and Groq/Gemini and adds, in the Cloudflare
+dashboard (AI → AI Gateway), request counts, token and cost totals, latency, errors, and
+optional spending/rate limits. It is **off until `AI_GATEWAY_URL` is set**; nothing changes before that.
+
+What the code guarantees (`functions/_lib/ai-gateway.mjs`, covered by `npm run test:embeddings`):
+
+- **Customer text is not stored by the gateway.** Every call sends `cf-aig-collect-log-payload: false`,
+  so only metadata (tokens, cost, status, duration, which feature) is logged. This matches the
+  Ask log, which deliberately keeps no question text. Do not turn payload logging on at the
+  gateway level without a decision to change that.
+- **The gateway can never take Ask down.** If it is unreachable, misconfigured (401/403/404) or
+  down (502/503/504) the same request goes straight to the provider.
+- **No answer caching.** Ask answers depend on the conversation, photos and live pricing.
+- **Provider keys travel in headers**, never in a URL (so they cannot land in a URL log).
+- Covers Ask chat plus the internal lead analyzer, copilot and copilot summary (tagged by
+  feature in the gateway log). Groq and Gemini fallback between providers is the app's own and is unchanged.
+
+One-time setup (owner, free):
+
+1. Cloudflare dashboard → AI → AI Gateway → **Create gateway** (name it `clearview`). Leave
+   caching off. Leave "Authenticated gateway" off unless you also set `AI_GATEWAY_TOKEN`.
+2. Copy the gateway's base URL, which looks like
+   `https://gateway.ai.cloudflare.com/v1/<account id>/clearview`.
+3. Pages → Settings → Environment variables (Production): `AI_GATEWAY_URL` = that URL. Redeploy.
+4. Ask one question on `/ask`, then check the gateway's Logs tab shows a request with status 200
+   and no prompt text. (Not tested against the real gateway yet: the Gemini path
+   `/google-ai-studio/v1beta/...` follows Cloudflare's docs pattern; if the first Gemini request
+   shows an error in the gateway, Ask still answers through the direct fallback.)
+
 ## Cloudflare Access sign-in (optional; replaces the shared password)
 
 Today the Command Center has one shared password. Cloudflare Access (Zero Trust, free for small

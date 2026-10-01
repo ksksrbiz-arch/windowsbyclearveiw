@@ -1,3 +1,4 @@
+import { groqChat, geminiGenerate } from '../../_lib/ai-gateway.mjs';
 import { routeAsk, routeSummary } from '../../ask/_lib/icm-router.mjs';
 import { specialistPrompt } from '../../ask/_lib/icm-specialists.mjs';
 import { BUSINESS_FACTS } from '../../ask/_lib/facts.mjs';
@@ -54,12 +55,7 @@ async function callGroq(env, messages) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { authorization: `Bearer ${env.GROQ_API_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'openai/gpt-oss-120b', messages, temperature: 0.2, max_tokens: MAX_OUTPUT_TOKENS }),
-      signal: controller.signal,
-    });
+    const response = await groqChat(env, { model: 'openai/gpt-oss-120b', messages, temperature: 0.2, max_tokens: MAX_OUTPUT_TOKENS }, { feature: 'copilot', signal: controller.signal });
     if (!response.ok) return null;
     const data = await response.json();
     return cleanText(data?.choices?.[0]?.message?.content, 7000) || null;
@@ -78,12 +74,7 @@ async function callGemini(env, messages) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents, generationConfig: { temperature: 0.2, maxOutputTokens: MAX_OUTPUT_TOKENS } }),
-      signal: controller.signal,
-    });
+    const response = await geminiGenerate(env, 'gemini-3.6-flash', { systemInstruction: { parts: [{ text: system }] }, contents, generationConfig: { temperature: 0.2, maxOutputTokens: MAX_OUTPUT_TOKENS } }, { feature: 'copilot', signal: controller.signal });
     if (!response.ok) return null;
     const data = await response.json();
     return cleanText(data?.candidates?.[0]?.content?.parts?.map((p) => p?.text || '').join(' '), 7000) || null;
