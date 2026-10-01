@@ -7,6 +7,31 @@ Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2
 ## 2026-10-01 - Public pages audit
 
 - `/areas` meta description now takes the phone from `site.phone` instead of a hardcoded number; regression assertion in `scripts/test-public-terminology.mjs`.
+## 2026-10-01 — Unit 10 audit fixes
+
+- `workers/ops-cron/src/backup.mjs`: blob columns are base64-encoded in chunks; spreading a large blob into `String.fromCharCode` overflowed the stack and would have failed the nightly backup.
+- `src/pages/internal/tools/measurements.astro` and `photos.astro`: `esc()` now escapes quotes, since values are interpolated into HTML attributes (a room name containing `"` broke the field).
+- Regression assertions in `scripts/test-ops-cron.mjs`, `scripts/test-recent-fixes.mjs`.
+## 2026-10-01 — Lead capture audit fixes
+
+- `functions/api/estimate.js`: the alert email's "Email <name>" mailto button now percent-encodes the address (a legal local part such as `a?cc=b` could otherwise add mailto header fields). Regression test in `scripts/test-estimate-endpoint.mjs`.
+- `src/components/EstimateForm.astro`: after a JS submit succeeds the success panel receives focus so screen-reader and keyboard users are not left on a hidden button.
+## 2026-10-01 — Internal API audit fixes (unit 9)
+
+- `payments.js`: `amountPaidCents` of `""`, `null`, `true`, `[]` no longer coerces to 0/1 and rewrites the payment record; refused with 400.
+- `jobs.js` PATCH: `scheduledDate` must be a real `YYYY-MM-DD` (was free text, truncated to 10 chars).
+- `quotes/[id].js` PATCH: digital-signature UPDATE bound 4 values to 5 placeholders (signing on Mark's device could not finalize); fixed, test in `test-quote-to-job-flow.mjs`. Signing UPDATE is also conditional on `status = 'draft'` so two concurrent signatures cannot both finalize.
+- `tasks.js` POST: `leadId` null/blank/0 stores NULL (was `Number(null) = 0`). Regression asserts in `scripts/test-general-jobs.mjs`.
+## 2026-10-01 — Internal UI escape helpers escape quotes
+
+- Internal pages' `esc`/`escapeHtml` helpers (textContent to innerHTML) did not escape `"` or `'`, so customer/plan text interpolated into `value="..."` / `href="..."` attributes could break out of the attribute. They now escape quotes too; `scripts/test-internal-runtime-styles.mjs` asserts it.
+## 2026-10-01 - /ask audit fixes
+- `/ask/api/*` rate-limit bucket lookup ignores a trailing slash (was `''`, which skipped the limit).
+- `/ask/api/chat` returns 400 for `null`/array JSON bodies instead of throwing; Groq tool-call arguments that parse to non-objects are treated as invalid.
+- Regression assertions in `scripts/test-ask-security.mjs`.
+## 2026-10-01 — Signature points must be numbers
+
+- `quote-signing.mjs` `renderSignatureSvg`: stroke points are now required to be JSON numbers; previously `null`, `""` or `true` were coerced to 0 and accepted. Regression assertion in `scripts/test-quote-signing.mjs`.
 
 ## 2026-10-01 — Guide share sheet
 

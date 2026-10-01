@@ -42,6 +42,7 @@ assert(/clearview-photo-backup/.test(photos) && /dataUrl/.test(photos) && /data-
 assert(/data-save-error/.test(measurements) && /Not saved — export this worksheet now/.test(measurements), 'measurement storage failure is visible instead of silently losing changes');
 assert(/data-import-trigger/.test(measurements) && /clearview-measurements/.test(measurements) && /Backup restored/.test(measurements), 'measurement backup can be exported and restored');
 assert(/field\.addEventListener\('input'/.test(measurements), 'measurement dimensions and quantities recalculate during typing');
+assert([measurements, read('src/pages/internal/tools/photos.astro')].every((src) => src.includes("&quot;") && src.includes("&#39;")), 'worksheet and photo esc() helpers escape quotes (values are interpolated into HTML attributes)');
 assert(/LIMIT \? OFFSET \?/.test(jobsApi) && /totalPages/.test(jobsApi) && /data-page-next/.test(jobList), 'job history has API and UI pagination');
 assert(/LIMIT \? OFFSET \?/.test(quoteApi) && /totalPages/.test(quoteApi) && /data-page-next/.test(quoteList), 'quote history has API and UI pagination');
 assert(/LIMIT \? OFFSET \?/.test(tasksApi) && /totalPages/.test(tasksApi) && /data-page-next/.test(followUp), 'follow-up history has API and UI pagination');

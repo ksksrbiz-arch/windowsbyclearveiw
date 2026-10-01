@@ -36,14 +36,21 @@ export async function dumpDatabase(db, now = new Date()) {
   return dump;
 }
 
+// Chunked: spreading a large blob into String.fromCharCode overflows the call stack.
+function toBase64(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray ? bytes.subarray(i, i + 0x8000) : bytes.slice(i, i + 0x8000));
+  return btoa(binary);
+}
+
 function encodeRow(row) {
   const out = {};
   for (const [key, value] of Object.entries(row)) {
     if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
       const bytes = value instanceof ArrayBuffer ? new Uint8Array(value) : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-      out[key] = { $base64: btoa(String.fromCharCode(...bytes)) };
+      out[key] = { $base64: toBase64(bytes) };
     } else if (Array.isArray(value)) {
-      out[key] = { $base64: btoa(String.fromCharCode(...value)) };
+      out[key] = { $base64: toBase64(Uint8Array.from(value)) };
     } else out[key] = value;
   }
   return out;

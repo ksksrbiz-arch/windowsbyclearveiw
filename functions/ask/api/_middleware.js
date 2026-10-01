@@ -66,7 +66,7 @@ export async function onRequest(context) {
     return json({ error: 'Send the request as JSON.' }, 415);
   }
 
-  const route = new URL(request.url).pathname.split('/').pop();
+  const route = new URL(request.url).pathname.split('/').filter(Boolean).pop();
   const rule = RATE_LIMITS[route];
   if (rule) {
     const limited = await takeRateLimit(context.env, request, rule);

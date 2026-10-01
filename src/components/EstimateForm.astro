@@ -137,6 +137,8 @@ function bindEstimate() {
       }
       form.hidden = true;
       success.hidden = false;
+      success.setAttribute('tabindex', '-1');
+      success.focus({ preventScroll: true });
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
       try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form_js' }); } catch {}
     } catch (error) {

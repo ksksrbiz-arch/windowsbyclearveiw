@@ -114,7 +114,11 @@ export async function onRequestPatch(context) {
   const current = await ensurePayment(env.QUOTES_DB, jobId);
   let amountPaid = current.amount_paid_cents;
   if (body.amountPaidCents !== undefined) {
-    amountPaid = Number(body.amountPaidCents);
+    // Number('') / Number(null) / Number(true) coerce to 0 or 1 and would silently wipe or
+    // rewrite a payment record; only a real number or numeric string is an amount.
+    const raw = body.amountPaidCents;
+    const numeric = typeof raw === 'number' || (typeof raw === 'string' && raw.trim() !== '');
+    amountPaid = numeric ? Number(raw) : NaN;
     if (!Number.isFinite(amountPaid) || amountPaid < 0 || amountPaid > total) {
       return json({ error: `Amount paid must be between $0 and ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(total / 100)}.` }, 400);
     }

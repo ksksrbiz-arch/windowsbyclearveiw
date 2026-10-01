@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
   try { body = await request.json(); } catch { return json({ error: 'Invalid JSON.' }, 400); }
   const title = typeof body.title === 'string' ? body.title.trim().slice(0, 240) : '';
   if (!title) return json({ error: 'Task title is required.' }, 400);
-  const leadId = Number.isInteger(Number(body.leadId)) ? Number(body.leadId) : null;
+  const leadId = body.leadId !== null && body.leadId !== '' && body.leadId !== undefined && Number.isInteger(Number(body.leadId)) && Number(body.leadId) > 0 ? Number(body.leadId) : null;
   const dueAt = typeof body.dueAt === 'string' ? body.dueAt.trim().slice(0, 40) || null : null;
   const notes = typeof body.notes === 'string' ? body.notes.slice(0, 4000) : null;
   const now = new Date().toISOString();
