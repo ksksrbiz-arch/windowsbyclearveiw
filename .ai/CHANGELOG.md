@@ -4,6 +4,9 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-01 - Public pages audit
+
+- `/areas` meta description now takes the phone from `site.phone` instead of a hardcoded number; regression assertion in `scripts/test-public-terminology.mjs`.
 ## 2026-10-01 — Unit 10 audit fixes
 
 - `workers/ops-cron/src/backup.mjs`: blob columns are base64-encoded in chunks; spreading a large blob into `String.fromCharCode` overflowed the stack and would have failed the nightly backup.
