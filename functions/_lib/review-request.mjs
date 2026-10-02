@@ -2,13 +2,13 @@
 // Clearview's own Google Business Profile and a short, fixed ask. It never
 // drafts, suggests, or pre-fills review text (see HANDOFF rule 1).
 
-// Kept in sync with src/data/site.ts `social.google` by hand. Functions in
-// this repo do not import from src/ (see functions/internal/_lib/quotes.mjs).
-const PROFILE_SHARE_URL = 'https://share.google/cdPgOCHSjkwMazSOC';
+// Kept in sync with src/data/site.ts `social.googleReview` by hand. Functions
+// in this repo do not import from src/ (see functions/internal/_lib/quotes.mjs).
+const PROFILE_REVIEW_URL = 'https://g.page/r/CdAXBksDnJO1EBM/review';
 const PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{10,200}$/;
 
 // Best link first: an explicit override, then Google's direct "write a review"
-// form when the pinned Place ID is configured, then the profile share link.
+// form when the pinned Place ID is configured, then the profile's own "Ask for reviews" link.
 export function reviewUrl(env) {
   const override = String(env?.GOOGLE_REVIEW_URL || '').trim();
   if (/^https:\/\/[^\s"'<>]+$/.test(override)) return override;
@@ -16,7 +16,7 @@ export function reviewUrl(env) {
   if (PLACE_ID_PATTERN.test(placeId)) {
     return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
   }
-  return PROFILE_SHARE_URL;
+  return PROFILE_REVIEW_URL;
 }
 
 function firstName(name) {

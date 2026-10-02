@@ -97,6 +97,11 @@ export const site = {
     // facebook does above — set this and all three light up on their own,
     // nothing else to wire.
     google: 'https://share.google/cdPgOCHSjkwMazSOC',
+    // Google's direct "write a review" link for the same profile (from the
+    // profile's own "Ask for reviews" button, supplied by Keith 2026-10-02).
+    // Used only where the visitor is being asked to leave a review; the share
+    // link above stays for "see the profile" links and the JsonLd sameAs entry.
+    googleReview: 'https://g.page/r/CdAXBksDnJO1EBM/review',
     // Canonical Nextdoor business page (stripped of the utm_campaign/
     // share_action_id tracking params on the personal share link Keith sent —
     // those track one specific share action, not the business page itself).
