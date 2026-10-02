@@ -13,11 +13,10 @@ assert.equal(PRICING.rounding, pricing.displayRounding, 'rounding matches the si
 assert.deepEqual(pick(PRICING.openings, ['id', 'label', 'low', 'high', 'isDoor']), pick(pricing.openings, ['id', 'label', 'low', 'high', 'isDoor']), 'openings match the site');
 assert.deepEqual(pick(PRICING.materials, ['id', 'label', 'multiplier']), pick(pricing.materials, ['id', 'label', 'multiplier']), 'materials match the site');
 assert.deepEqual(pick(PRICING.brands, ['id', 'label', 'low', 'high']), pick(pricing.brands, ['id', 'label', 'low', 'high']), 'brands match the site');
-assert.deepEqual(PRICING.fullFrame, { low: pricing.fullFrame.low, high: pricing.fullFrame.high }, 'frame-work add-on matches the site');
+assert.equal(PRICING.fullFrame, undefined, 'Ask carries no frame-work allowance: the range is base prices plus ticked modifiers');
 assert.deepEqual(pick(PRICING.modifiers, ['id', 'label', 'perOpening', 'low', 'high']), pick(pricing.modifiers, ['id', 'label', 'perOpening', 'low', 'high']), 'modifiers match the site');
 
 // Independent restatement of the calculator formula (CostEstimator.astro render()).
-const SHARE = 0.34;
 function siteRange({ lines, materialId = 'vinyl', brandId = 'cascade', modifierIds = [] }) {
   const material = pricing.materials.find((m) => m.id === materialId);
   const brand = pricing.brands.find((b) => b.id === brandId);
@@ -30,7 +29,6 @@ function siteRange({ lines, materialId = 'vinyl', brandId = 'cascade', modifierI
     if (!o.isDoor) windows += quantity;
   }
   low += brand.low * windows; high += brand.high * windows;
-  low += pricing.fullFrame.low * total * SHARE; high += pricing.fullFrame.high * total * SHARE;
   for (const id of modifierIds) {
     const m = pricing.modifiers.find((x) => x.id === id);
     const units = m.perOpening ? total : 1;
@@ -52,10 +50,14 @@ for (const s of scenarios) {
   assert.equal(got.lowCents, want.lowCents, `low mismatch for ${JSON.stringify(s)}`);
   assert.equal(got.highCents, want.highCents, `high mismatch for ${JSON.stringify(s)}`);
 }
-// Known value, worked by hand: 5 double-hung vinyl = 700*5 + 680*5*.34 .. 1400*5 + 1700*5*.34 = 4,656..9,890 -> $4,650..$9,900.
+// Known value, worked by hand: 5 double-hung vinyl = 700*5 .. 1400*5 = $3,500..$7,000 (base prices only, no allowance).
 const five = estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 5 }] });
-assert.equal(five.lowCents, 465000);
-assert.equal(five.highCents, 990000);
+assert.equal(five.lowCents, 350000);
+assert.equal(five.highCents, 700000);
+// One slider: exactly the owner's base table, $600..$1,400.
+const one = estimatePrice({ lines: [{ openingId: 'slider', quantity: 1 }] });
+assert.equal(one.lowCents, 60000);
+assert.equal(one.highCents, 140000);
 assert.equal(estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 1 }], modifierIds: ['nope'] }).error, 'Unknown modifier "nope".');
 
 // The estimate_price tool: what the model is told it can send must actually work.
@@ -66,7 +68,7 @@ assert.deepEqual(props.openings.items.properties.kind.enum, pricing.openings.map
 assert.deepEqual(props.modifiers.items.enum, pricing.modifiers.map((m) => m.id), 'tool modifier enum = site modifiers');
 assert.deepEqual(decl.function.parameters.required, ['openings']);
 const viaTool = estimateFromToolArgs({ openings: [{ kind: 'double-hung', quantity: 5 }] });
-assert.equal(viaTool.range, '$4,650 to $9,900');
+assert.equal(viaTool.range, '$3,500 to $7,000');
 assert.ok(!/insert|full[- ]frame/i.test(JSON.stringify(viaTool)), 'tool output does not name install methods');
 const multi = estimateFromToolArgs({ openings: [{ kind: 'slider', quantity: 2 }, { kind: 'sliding-door', quantity: 1 }], material: 'fiberglass', brand: 'milgard', modifiers: ['trim'] });
 assert.equal(multi.lowCents, siteRange({ lines: [{ openingId: 'slider', quantity: 2 }, { openingId: 'sliding-door', quantity: 1 }], materialId: 'fiberglass', brandId: 'milgard', modifierIds: ['trim'] }).lowCents);

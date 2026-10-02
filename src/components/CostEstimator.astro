@@ -31,7 +31,6 @@ const model = {
   openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high, isDoor: !!o.isDoor })),
   materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
   brands: pricing.brands.map((b) => ({ id: b.id, label: b.label, low: b.low, high: b.high })),
-  fullFrame: { low: pricing.fullFrame.low, high: pricing.fullFrame.high },
   modifiers: pricing.modifiers.map((m) => ({
     id: m.id,
     label: m.label,
@@ -179,7 +178,6 @@ const model = {
     openings: OpeningRow[];
     materials: { id: string; label: string; multiplier: number }[];
     brands: BrandRow[];
-    fullFrame: { low: number; high: number };
     modifiers: ModifierRow[];
   };
 
@@ -214,10 +212,6 @@ const model = {
       [...root.querySelectorAll<HTMLInputElement>('input[name="est-modifier"]:checked')].map(
         (el) => el.value,
       );
-
-    // Share of openings assumed to need the extra frame-level work priced in
-    // `model.fullFrame`. Mirrors the 'mixed' assumption the old method picker used.
-    const FRAME_WORK_SHARE = 0.34;
 
     function render() {
       const picked = model.openings
@@ -271,11 +265,9 @@ const model = {
         low += brand.low * windowCount;
         high += brand.high * windowCount;
 
-        // One range for every house: assumes roughly a third of the openings
-        // need the extra frame-level work priced in `fullFrame`. The measure
-        // sorts out which ones.
-        low += model.fullFrame.low * total * FRAME_WORK_SHARE;
-        high += model.fullFrame.high * total * FRAME_WORK_SHARE;
+        // Owner direction (2026-10-02): the range is the base opening prices plus
+        // whatever the visitor ticks below. No allowance for extra work is added;
+        // the note under the range says extra work is priced at the measure.
 
         for (const id of mods) {
           const modifier = model.modifiers.find((m) => m.id === id);
@@ -291,7 +283,7 @@ const model = {
       // --- what moves the number -----------------------------------------
       const notes: string[] = [];
       notes.push(
-        'This range allows for about a third of the openings needing more work than the rest. The measure sorts out which ones.',
+        'These are base prices for standard openings. If the measure finds extra work, such as damage at the opening, the written estimate says so before anything is ordered.',
       );
       if (material.id !== 'vinyl') {
         notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);

@@ -135,9 +135,11 @@ export function validatePricing(doc, now = new Date()) {
   }
 
   // --- full frame ----------------------------------------------------------
-  if (!doc.fullFrame) {
-    problems.push('fullFrame is missing');
-  } else {
+  // Optional: the public calculator no longer adds a frame-work allowance (owner
+  // direction, 2026-10-02), so the page it ships carries no `fullFrame`. When a
+  // document does include one (the internal quote builder uses it), it is still
+  // range-checked.
+  if (doc.fullFrame) {
     checkRange('fullFrame', doc.fullFrame.low, doc.fullFrame.high, LIMITS.fullFrame, LIMITS.fullFrame, problems);
     if (doc.fullFrame.high === 0) {
       problems.push('fullFrame has no price — full-frame jobs would quote the same as inserts');

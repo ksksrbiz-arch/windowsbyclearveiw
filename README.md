@@ -146,6 +146,8 @@ To move from regional published averages to Clearview's own reviewed pricing:
 
 Zero-value opening types are hidden rather than treated as free.
 
+The calculator's range (and the Ask assistant's) is the base opening prices times the material multiplier, plus the Milgard upcharge on windows, plus whatever modifiers the visitor ticks. It adds no allowance for extra work: that is stated as a note and priced at the measure. `pricing.fullFrame` is used only by the internal quote builder.
+
 ### Pricing worker
 
 `workers/pricing/` is a separate Cloudflare Worker backed by KV. It validates pricing rather than attempting to scrape or invent market prices.
