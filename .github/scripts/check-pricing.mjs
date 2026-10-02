@@ -12,10 +12,16 @@
 import fs from 'node:fs';
 import { validatePricing } from '../../shared/pricing-schema.mjs';
 
-const PAGE = 'dist/tools/window-replacement-cost-calculator/index.html';
+// astro.config.mjs builds with `format: 'file'`, so the page is `<route>.html`; the
+// directory form is kept as a fallback in case that setting ever changes.
+const CANDIDATES = [
+  'dist/tools/window-replacement-cost-calculator.html',
+  'dist/tools/window-replacement-cost-calculator/index.html',
+];
+const PAGE = CANDIDATES.find((path) => fs.existsSync(path));
 
-if (!fs.existsSync(PAGE)) {
-  console.log(`::error::${PAGE} not found — did the build run?`);
+if (!PAGE) {
+  console.log(`::error::Calculator page not found (looked for ${CANDIDATES.join(' or ')}) — did the build run?`);
   process.exit(1);
 }
 
@@ -52,7 +58,7 @@ const doc = {
   openings: model.openings,
   materials: model.materials,
   brands: model.brands,
-  fullFrame: model.fullFrame,
+  fullFrame: model.fullFrame, // absent from the shipped model since 2026-10-02; optional in the schema
   modifiers: model.modifiers,
 };
 

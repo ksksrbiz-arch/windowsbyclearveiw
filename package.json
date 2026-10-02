@@ -43,6 +43,7 @@
     "test:ops-cron": "node --disable-warning=ExperimentalWarning scripts/test-ops-cron.mjs",
     "test:abuse-guard": "node --disable-warning=ExperimentalWarning scripts/test-abuse-guard.mjs",
     "test:general-jobs": "node --disable-warning=ExperimentalWarning scripts/test-general-jobs.mjs",
+    "test:pricing-health": "node .github/scripts/check-pricing.mjs",
     "test:permit-leads": "node scripts/test-permit-leads.mjs",
     "test:analytics": "node scripts/test-analytics.mjs && node --disable-warning=ExperimentalWarning scripts/test-analytics-pipeline.mjs",
     "test:estimate": "node --disable-warning=ExperimentalWarning scripts/test-estimate-endpoint.mjs",
