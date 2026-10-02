@@ -1,5 +1,6 @@
 ---
 title: Vinyl vs fiberglass in the Pacific Northwest
+seoTitle: Vinyl vs fiberglass in the Northwest
 description: How vinyl and fiberglass window frames actually perform in a wet, mild Washington climate — expansion, moisture, cost, and when each one is the right call.
 kicker: Guide
 topic: Product

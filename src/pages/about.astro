@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
 import { pricingIsRegionalAverage } from '../data/pricing';
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import { findWork } from '../data/work';
 
 const pricesAreAverages = pricingIsRegionalAverage();
@@ -24,7 +24,7 @@ const schema = {
 // claims about the people doing the work, so showing the crew actually
 // setting a window is more useful than an illustrative rendering.
 const heroPhoto = findWork('cabin-gable-install-crew')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 ---
 <BaseLayout
   title="About Clearview Windows | Vancouver, WA Window Installers"

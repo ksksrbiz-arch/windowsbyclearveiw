@@ -1,5 +1,6 @@
 ---
-import { getImage, Image } from 'astro:assets';
+import { Image } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
@@ -15,7 +16,7 @@ const ogPhoto = findWork('stone-craftsman')!;
 // Use a real Clearview interior here too, so the page opens with an actual
 // window rather than an AI-generated product macro.
 const heroPhoto = findWork('new-unit-interior')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 
 const materials = pricing.materials;
 const brands = pricing.brands;
@@ -33,7 +34,7 @@ const stylePhotos = [
 ---
 <BaseLayout
   title="Window features"
-  description="What's actually in a Clearview window: vinyl or fiberglass, Cascade or Milgard, the glass package, and every style we install in Vancouver, WA and Clark County."
+  description="What's in a Clearview window: vinyl or fiberglass, Cascade or Milgard, the glass package, and every style we install in Vancouver, WA and Clark County."
   path="/window-features"
   crumbs={[{ name: 'Window features', href: '/window-features' }]}
   ogImageSrc={ogPhoto.image}
@@ -86,6 +87,7 @@ const stylePhotos = [
             src={vinylFiberglassGraphic}
             alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
             widths={[760, 1140, 1580]}
+width={1580}
             sizes="(max-width: 800px) 100vw, 1100px"
             quality={82}
             loading="lazy"
@@ -114,6 +116,7 @@ const stylePhotos = [
       <p class="fine-print">
         The installation is done to the same standard either way; the window in the opening is
         different. We tell you which one a quote is based on, and why, before anything is ordered.
+        <a href="/guides/cascade-vs-milgard">Cascade vs Milgard: where each is made, what each costs, and when the step up is worth it.</a>
       </p>
     </div>
   </section>

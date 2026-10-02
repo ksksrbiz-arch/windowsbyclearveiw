@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../../lib/hero-bg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import WorkCard from '../../components/WorkCard.astro';
@@ -92,7 +92,7 @@ const schema = {
 // Same real job photo the areas index uses. It is not tagged to any town, so
 // the credit line says so rather than implying it was shot in this city.
 const heroPhoto = findWork('tan-two-story')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 ---
 <BaseLayout
   title={city.data.title}

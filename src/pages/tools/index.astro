@@ -1,5 +1,5 @@
 ---
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../../lib/hero-bg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { pricingIsUsable } from '../../data/pricing';
@@ -9,7 +9,7 @@ import { findWork } from '../../data/work';
 const showMoney = pricingIsUsable();
 
 const heroPhoto = findWork('caulk-gun-interior-sill')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 
 // Must match the title the calculator page itself gives that URL (see
 // window-replacement-cost-calculator.astro) or the listing and the page it

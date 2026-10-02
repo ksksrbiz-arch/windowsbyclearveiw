@@ -1,5 +1,6 @@
 ---
-import { getImage, Image } from 'astro:assets';
+import { Image } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
@@ -15,7 +16,7 @@ const ogPhoto = doorWork[0];
 
 // Full-bleed hero background, cropped from the same real elevation as the
 // gallery below (see the "Real installs" section) rather than AI imagery.
-const heroBg = await getImage({ src: doorWork[0].image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(doorWork[0].image);
 
 // The estimator already prices sliding patio doors as their own opening type
 // (doors are not brand-specific — see pricing.ts) — reuse that single source
@@ -141,7 +142,7 @@ const schema = {
 ---
 <BaseLayout
   title="Sliding glass door installation"
-  description="Sliding glass patio door installation in Vancouver, WA and Clark County: configurations, replacement vs. new opening, sizing, and what install day looks like."
+  description="Sliding glass patio door installation in Vancouver, WA and Clark County: configurations, replacement vs. new opening, sizing, and install day."
   path="/sliding-glass-doors"
   crumbs={[{ name: 'Sliding glass doors', href: '/sliding-glass-doors' }]}
   ogImageSrc={ogPhoto.image}
@@ -184,7 +185,8 @@ const schema = {
         ))}
       </div>
       <p class="fine-print">
-        Vinyl and fiberglass frames, from the same Cascade and Milgard lines we use for windows.
+        Vinyl and fiberglass frames, from the same Cascade and Milgard lines we use for windows
+        (<a href="/guides/cascade-vs-milgard">how the two lines compare</a>).
         Door pricing is not broken out by brand; see the range below.
       </p>
     </div>

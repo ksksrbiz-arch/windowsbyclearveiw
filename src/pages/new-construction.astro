@@ -1,5 +1,5 @@
 ---
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
@@ -11,7 +11,7 @@ const ogPhoto = findWork('new-build-sheathed-garage')!;
 
 // Full-bleed hero background: a real new-construction job.
 const heroPhoto = findWork('new-build-tan-corner')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 
 // Mirrors the numbered list below exactly — if the sequence changes, this
 // must change with it, or the markup and the schema will say different
@@ -100,7 +100,7 @@ const projectInquiryMailto = site.email
   : '/estimate?role=builder';
 ---
 <BaseLayout
-  title="New construction windows for builders and GCs"
+  title="New construction windows for builders"
   description="New-construction window installation for Clark County builders. Send plans or a window schedule for project pricing and lead time."
   path="/new-construction"
   crumbs={[{ name: 'New construction', href: '/new-construction' }]}

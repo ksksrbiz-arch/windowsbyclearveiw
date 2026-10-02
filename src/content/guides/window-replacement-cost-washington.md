@@ -27,7 +27,7 @@ Short answer: published 2026 industry data puts a standard vinyl replacement win
 Four things move the bid:
 
 1. **Scope.** [What each opening needs](/guides/what-your-openings-need) changes labor and finish work more than most product upgrades.
-2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either material, moving up a window line, such as from Cascade to Milgard, adds cost per opening for the same installation labor.
+2. **Material and line.** Vinyl is the Washington workhorse. Fiberglass costs more and can be the right call on larger or darker-colored units. Within either material, moving up a window line, such as from [Cascade to Milgard](/guides/cascade-vs-milgard), adds cost per opening for the same installation labor.
 3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or are required by code.
 4. **Access.** A first-floor slider is a very different job from a third-story picture window over a roof.
 

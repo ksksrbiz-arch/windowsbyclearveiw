@@ -117,7 +117,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
   .slice(0, 8);
 ---
 <BaseLayout
-  title={guide.data.title}
+  title={guide.data.seoTitle ?? guide.data.title}
   description={guide.data.description}
   path={`/guides/${guide.id}`}
   {...(guide.data.heroImage
@@ -198,6 +198,7 @@ const pageHeadings = [...guide.body.matchAll(/^##\s+(.+)$/gm)]
             src={guide.data.heroImage}
             alt={guide.data.heroImageAlt ?? ''}
             widths={[480, 760, 1140]}
+width={1140}
             sizes="(max-width: 800px) 100vw, 760px"
             format="webp"
             quality={72}
