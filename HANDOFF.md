@@ -418,7 +418,7 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 
 | | |
 | --- | --- |
-| **Oversize/custom-shape pricing** | `src/data/pricing.ts` now carries Mark's own installed pricing (reviewed 2026-09-26) except the oversize/custom-shape modifier, which is still a regional average. |
+| **Oversize/custom-shape pricing** | `src/data/pricing.ts` carries Mark's own installed pricing (reduced 15% across the board on 2026-10-02 by owner direction; reviewed 2026-10-02) except the oversize/custom-shape modifier, which is still a regional average (also cut 15% for consistency, so it is no longer the published average). Keep `functions/ask/_lib/pricing.mjs` in sync (`npm run test:ask-pricing`). |
 | **Canonical-domain mailbox** | Provision and test before changing production mail defaults. |
 | **`ADMIN_TOKEN`** | Optional; worker pricing writes remain closed while unset. |
 | **Google Business Profile** | Exists as of 2026-09-26 ("Clearview windows and trim LLC", managed by Keith, 5.0 / 1 review). Still needs name/category/service-area disambiguation from `clearviewpdx.com` (see 2026-09-16 audit follow-up above). Reviews feed built, waiting on the Places API key + Place ID. |
