@@ -4,6 +4,12 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Window opening prices set to owner's table
+
+- `src/data/pricing.ts` and `functions/ask/_lib/pricing.mjs`: the seven window openings set to the owner's figures — Slider $600–$1,400, Double-hung $700–$1,400, Single-hung $700–$1,400, Picture/fixed $600–$1,500, Casement $700–$1,500, Awning $800–$1,500, Bay or bow $800–$1,500 (i.e. the pre-15%-cut values).
+- Deliberately unchanged (not in the owner's table, still at the 15%-reduced values): sliding patio door $1,530–$2,380, French door $2,550–$4,250, Milgard upcharge $85, frame-work allowance $680–$1,700, and the add-on modifiers. VERIFY with the owner whether these should also go back.
+- `scripts/test-ask-pricing-sync.mjs` hand-worked check updated (5 double-hung vinyl: $4,650 to $9,900).
+
 ## 2026-10-02 — All prices lowered 15% (owner direction)
 
 - `src/data/pricing.ts` and its hand-kept copy `functions/ask/_lib/pricing.mjs`: every dollar figure x 0.85 — openings (e.g. slider $600–$1,400 -> $510–$1,190; sliding patio door $1,800–$2,800 -> $1,530–$2,380; French door $3,000–$5,000 -> $2,550–$4,250), Milgard upcharge $100 -> $85, frame-work allowance $800–$2,000 -> $680–$1,700, and the add-on modifiers ($100–$200 -> $85–$170, $150 -> $128, $450 -> $383, $200 -> $170; zeros stay zero). The fiberglass multiplier (1.4) is not a price and is unchanged. `basis.reviewedAt` set to 2026-10-02.
