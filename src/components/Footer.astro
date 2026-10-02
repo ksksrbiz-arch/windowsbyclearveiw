@@ -18,7 +18,7 @@ const year = new Date().getFullYear();
 // Nextdoor business page, they review or recommend it.
 const socialLinks = [
   ['Follow on Facebook', site.social.facebook, FacebookIcon],
-  ['Review us on Google', site.social.google, GoogleIcon],
+  ['Review us on Google', site.social.googleReview || site.social.google, GoogleIcon],
   ['Find us on Nextdoor', site.social.nextdoor, NextdoorIcon],
   ['Follow on Instagram', site.social.instagram, null],
 ].filter(
