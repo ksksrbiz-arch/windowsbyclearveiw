@@ -4,6 +4,13 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Direct Google review link (supplied by owner)
+
+- `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.
+- Review-asking links now use `googleReview` (falling back to `google`): footer "Review us on Google" and the two "leave a review" links on `/reviews`. Only `href`s changed, no copy.
+- `functions/_lib/review-request.mjs`: fallback is now the direct review link instead of the share link (an explicit `GOOGLE_REVIEW_URL` or a configured `GOOGLE_PLACE_ID` still wins). `scripts/test-review-request.mjs` updated, plus a check that the two copies of the URL stay equal.
+- Open: the link is not yet verified on the live site, and nothing in Cloudflare was changed (no env vars needed for this).
+
 ## 2026-10-02 — Trailing-slash redirect for the old guide; registration line on /about
 
 - `public/_redirects`: added `/guides/full-frame-vs-insert/` -> `/guides/what-your-openings-need` 301. Cloudflare Pages matches the slash form separately, so the existing no-slash rule left `/guides/full-frame-vs-insert/` returning 404 (confirmed with `curl -I` on the live site on 2026-10-02; Ahrefs Site Audit crawl of 2026-10-01 listed it as the site's only 404). Destination kept identical to the existing rule (the topical replacement guide) rather than `/guides`. `scripts/test-public-terminology.mjs` now asserts both forms.
