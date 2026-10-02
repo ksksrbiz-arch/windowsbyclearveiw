@@ -38,6 +38,7 @@
 - **Job photo backup to R2 (2026-09-30), built but not connected.** Until R2 and the `JOB_PHOTOS` binding are set up, the API answers 503 `PHOTO_STORAGE_NOT_CONFIGURED` and phone-only behavior is unchanged. Gap: Field-mode Photograph gate still trusts phone-reported counts. Tests: `npm run test:job-photos`, `test:photo-sync`. Detail: `CHANGELOG.md`.
 - Guide heroes (index + every article) carry an animated, reduced-motion-aware backdrop from `src/components/HeroAurora.astro` (decorative only; ambient period token `--dur-ambient`). Other `.page-hero` pages are unchanged. Detail: `CHANGELOG.md`.
 - Quote follow-up cadence: `functions/internal/_lib/quote-follow-ups.mjs` creates day 2/7/14 reminders for unsigned draft quotes in `follow_up_tasks` (synced on queue reads, unique per step, auto-closed on sign/delete, never contacts customers).
+- Permit leads (2026-10-02): `/internal/analytics` has a Permit leads section reading D1 tables `permit_prospects` / `permit_builders` / `permit_import_meta`, loaded by hand from `npm run build:permit-leads` (public county + L&I data; snapshot in git-ignored `data/permit-leads/`). Research data, not leads; no homeowner phone/email. Refresh and privacy steps: `internal/README.md`. Detail: `CHANGELOG.md`.
 - Customer signing links: `/sign#<token>` + `functions/api/quote-sign.js` (public, token-authorized, stroke-only signatures, same Build Plan + terms gates) managed from `functions/internal/api/quote-share.js`; see `functions/internal/_lib/quote-signing.mjs`.
 
 ## Internal AI boundary

@@ -254,6 +254,12 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Decision:** the folder stays `.ai/` (maps to `context/` in the owner's standard layout) because the router, specialist loader, tests and docs depend on it.
 - **Open:** the copy sweep's reviewed / not-reviewed inventory has not been run yet (step 1 of `.ai/workflows/public-copy-sweep/`). `README.md` records a 2026-09-30 plain-language pass over most pages; the remainder is unlisted.
 
+### 2026-10-02 — Permit leads in Analytics (branch `claude/permit-leads-analytics`)
+
+- **What changed:** builders and homeowner remodel permits from Clark County/Vancouver, enriched from the county assessor and the WA L&I license list, shown in a new section of `/internal/analytics`. Pipeline, privacy rule and limits are in `.ai/CHANGELOG.md` and `internal/README.md` ("Permit leads").
+- **Not live until you load it:** the page shows "not loaded" until `data/permit-leads/permit-leads.sql` is run against the production D1 (`npx wrangler d1 execute QUOTES_DB --remote --file=...`). That file holds owner names and mailing addresses; generate it locally, never commit it.
+- **Open:** decide who contacts which builders (mid-size ones such as New Tradition, NW Elite and Pacific Lifestyle look likelier than Horton, Lennar or Holt) and whether any answer. Only then consider status tracking. Optional: refresh weekly.
+
 ### 2026-10-01 — AI Gateway routing and model-aware guide embeddings (items 5 and 6 of the Cloudflare review)
 
 - **AI Gateway (built, off until `AI_GATEWAY_URL` is set).** `functions/_lib/ai-gateway.mjs` (`groqChat`, `geminiGenerate`) now carries every Groq/Gemini chat call: Ask chat, lead analyzer, copilot, copilot summary. When on, calls go to `gateway.ai.cloudflare.com/v1/<acct>/<gw>/{groq|google-ai-studio}/...` with `cf-aig-collect-log-payload: false` (metadata only: Ask deliberately stores no question text, and the gateway must not become the place it lives), plus a feature tag. Falls back to the provider directly on gateway network failure, 401/403/404, 502/503/504 (never on 429 or a provider 4xx/5xx; never on a timeout). No caching. Gemini keys moved from the `?key=` URL to the `x-goog-api-key` header everywhere (chat, embeddings, models listing), so a key can no longer appear in a URL log. Owner steps: create gateway, set `AI_GATEWAY_URL` (`internal/README.md`, "AI Gateway for Groq and Gemini").

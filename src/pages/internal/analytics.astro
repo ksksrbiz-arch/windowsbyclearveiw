@@ -55,6 +55,48 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
   </section>
 
+  <section class="an-section" aria-labelledby="an-permit-h">
+    <div class="an-head">
+      <div><p class="kicker">Public records</p><h2 id="an-permit-h">Permit leads</h2></div>
+      <span class="an-meta" data-permit-window>—</span>
+    </div>
+    <p class="an-note">Building permits from Clark County and the City of Vancouver, joined to county parcel records and state contractor licenses. This is research, not customers: nothing here is a lead or a quote until you act on it. Contractor matches are by exact name, so check one before you call. Same-size window replacements usually need no permit, so these lists miss most simple replacement jobs.</p>
+    <p class="an-callout" data-permit-message hidden></p>
+    <div class="an-stats" data-permit-stats hidden>
+      <article class="an-stat"><span>New-home permits</span><strong data-permit="newHomes">—</strong><small data-permit="newHomesNote">—</small></article>
+      <article class="an-stat"><span>Builders</span><strong data-permit="builders">—</strong><small data-permit="buildersNote">—</small></article>
+      <article class="an-stat"><span>Remodel and addition permits</span><strong data-permit="remodels">—</strong><small data-permit="remodelsNote">—</small></article>
+      <article class="an-stat"><span>Homes built 2011–2016</span><strong data-permit="young">—</strong><small>among those remodel permits</small></article>
+    </div>
+    <div class="an-grid" data-permit-grid hidden>
+      <article class="an-panel"><h3>New-home permits per month</h3><div class="an-chart" data-chart="permitMonthly"></div></article>
+      <article class="an-panel"><h3>Biggest builders by permits</h3><div class="an-chart" data-chart="permitBuilders"></div></article>
+      <article class="an-panel an-wide">
+        <h3>Builders and lot owners</h3>
+        <p class="an-note">The lot owner is usually the builder or its project company; the permit applicant is often a permit service or engineer. "30 days" and "90 days" count permits issued in that time.</p>
+        <div class="an-table-wrap">
+          <table class="an-table an-table-wide">
+            <thead><tr><th scope="col">Builder</th><th scope="col">Permits</th><th scope="col">30 days</th><th scope="col">90 days</th><th scope="col">Subdivisions</th><th scope="col">State license</th><th scope="col">Phone</th></tr></thead>
+            <tbody data-builder-rows></tbody>
+          </table>
+        </div>
+      </article>
+      <article class="an-panel"><h3>Remodel permits: what fits</h3><div class="an-chart" data-chart="permitSignals"></div></article>
+      <article class="an-panel"><h3>Remodel permits: decade the home was built</h3><div class="an-chart" data-chart="permitDecades"></div></article>
+      <article class="an-panel an-wide">
+        <h3>Remodel and addition list</h3>
+        <p class="an-note">Owner names and mailing addresses come from the county assessor. Use them for mail, not unsolicited calls or texts: Washington restricts those. Best fit first; "fit" counts how many of five signals apply (single-family, owner applied, addition, permit in last 90 days, sold in last 2 years).</p>
+        <button class="btn btn-ghost" type="button" data-homeowners-load>Show the list</button>
+        <div class="an-table-wrap" data-homeowners-wrap hidden>
+          <table class="an-table an-table-wide">
+            <thead><tr><th scope="col">Address</th><th scope="col">Permit</th><th scope="col">Work</th><th scope="col">Built</th><th scope="col">Owner</th><th scope="col">Owner mail</th><th scope="col">Sold</th><th scope="col">Fit</th></tr></thead>
+            <tbody data-homeowner-rows></tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <section class="an-section" aria-labelledby="an-site-h">
     <div class="an-head">
       <div><p class="kicker">Google Analytics</p><h2 id="an-site-h">Site traffic</h2></div>
@@ -121,6 +163,22 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       sources: { label: string; leads: number; quotes: number; signed: number; signedCents: number; collectedCents: number | null }[];
     } | null;
     rates?: { quotesPerLead: number | null; signedPerQuote: number | null };
+  };
+  type PermitBuilder = {
+    name: string; applicants: string[]; permits: number; lots: number; subdivisions: string[]; jurisdictions: string[];
+    lastIssued: string; issued30d: number; issued90d: number;
+    license: { match: string; business: string; number: string; phone: string; address: string; principal: string; status: string; expires: string } | null;
+  };
+  type PermitSummary = {
+    status: 'ok' | 'empty' | 'unavailable';
+    meta?: Record<string, string>;
+    homeowners?: { total: number; signals: { key: string; label: string; value: number }[]; decades: Row[]; absentee: number; built2011to2016: number };
+    newHomes?: { permits: number; entities: number; repeatEntities: number; licenseMatched: number; byMonth: Row[] };
+    builders?: PermitBuilder[];
+  };
+  type HomeownerLead = {
+    id: string; permitDate: string; status: string; workType: string; address: string; yearBuilt: number | null; sqft: number | null;
+    owner: string; ownerMailing: string; absentee: boolean; ownerApplied: boolean; lastSaleDate: string; lastSaleCents: number | null; signals: string[]; score: number;
   };
   type Payload = { ga4: Ga4; leads: Leads; pipeline?: Pipeline; links: Record<string, string> };
 
@@ -378,6 +436,149 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     });
   }
 
+  const shortDate = (iso: string) => (/^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '—');
+  const monthLabel = (ym: string) => (/^\d{4}-\d{2}$/.test(ym) ? new Date(`${ym}-01T12:00:00`).toLocaleDateString('en-US', { month: 'short' }) : ym);
+
+  function appendRow(body: HTMLElement, cells: (string | HTMLElement)[]) {
+    const tr = document.createElement('tr');
+    cells.forEach((value, i) => {
+      const cell = document.createElement(i === 0 ? 'th' : 'td');
+      if (i === 0) cell.setAttribute('scope', 'row');
+      if (typeof value === 'string') cell.textContent = value;
+      else cell.append(value);
+      tr.append(cell);
+    });
+    body.append(tr);
+  }
+
+  // Phone numbers come from a public license record as 10 digits; anything else is shown as plain text, never linked.
+  function phoneCell(raw: string): string | HTMLElement {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 10) return raw || '—';
+    const link = document.createElement('a');
+    link.href = `tel:+1${digits}`;
+    link.textContent = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return link;
+  }
+
+  function renderPermits(permit: PermitSummary | undefined) {
+    const message = $('[data-permit-message]');
+    const hide = () => { show('[data-permit-stats]', false); show('[data-permit-grid]', false); };
+    if (!permit || permit.status !== 'ok' || !permit.homeowners || !permit.newHomes) {
+      hide();
+      show('[data-permit-message]', true);
+      setText('[data-permit-window]', permit?.status === 'empty' ? 'Not loaded' : 'Unavailable');
+      if (message instanceof HTMLElement) {
+        message.textContent = permit?.status === 'empty'
+          ? 'No permit data has been loaded yet. Build it with npm run build:permit-leads, then load the SQL file into the database. See the Permit leads section of internal/README.md.'
+          : 'Permit data could not be loaded. Try Refresh; the rest of this page is unaffected.';
+      }
+      return;
+    }
+    const h = permit.homeowners;
+    const n = permit.newHomes;
+    show('[data-permit-message]', false);
+    show('[data-permit-stats]', true);
+    show('[data-permit-grid]', true);
+    const meta = permit.meta ?? {};
+    setText('[data-permit-window]', `${shortDate(meta.window_start ?? '')} to ${shortDate(meta.window_end ?? '')} · loaded ${shortDate((meta.imported_at ?? '').slice(0, 10))}`);
+    setText('[data-permit="newHomes"]', count(n.permits));
+    setText('[data-permit="newHomesNote"]', `across ${nf.format(n.entities)} lot owners`);
+    setText('[data-permit="builders"]', count(n.repeatEntities));
+    setText('[data-permit="buildersNote"]', `with 2+ permits · ${nf.format(n.licenseMatched)} matched to a state license`);
+    setText('[data-permit="remodels"]', count(h.total));
+    setText('[data-permit="remodelsNote"]', `${nf.format(h.absentee)} where the owner lives elsewhere`);
+    setText('[data-permit="young"]', count(h.built2011to2016));
+    const builders = permit.builders ?? [];
+    setChart('permitMonthly', {
+      build: (width) => (n.byMonth.length ? columnChart(n.byMonth.map((r) => ({ label: monthLabel(r.label), value: r.value })), { width, title: 'New-home permits issued per month' }) : ''),
+      empty: 'No new-home permits in this window.',
+    });
+    setChart('permitBuilders', {
+      build: (width) => barChart(builders.slice(0, 8).map((b) => ({ label: b.name, value: b.permits })), { width, title: 'Builders by new-home permits' }),
+      empty: 'No builders in this window.',
+    });
+    setChart('permitSignals', {
+      build: (width) => barChart(h.signals.map((s) => ({ label: s.label, value: s.value })), { width, title: 'Remodel permits by fit signal' }),
+      empty: 'No remodel permits in this window.',
+    });
+    setChart('permitDecades', {
+      build: (width) => (h.decades.length ? columnChart(h.decades, { width, title: 'Remodel permits by decade the home was built' }) : ''),
+      empty: 'No year-built data.',
+    });
+    const body = $('[data-builder-rows]');
+    if (!(body instanceof HTMLElement)) return;
+    body.replaceChildren();
+    if (!builders.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.className = 'an-empty';
+      td.textContent = 'No builders in this window.';
+      tr.append(td);
+      body.append(tr);
+      return;
+    }
+    for (const b of builders) {
+      const license = b.license;
+      const licenseText = license
+        ? `${license.business} · ${license.number}${license.status && license.status !== 'ACTIVE' ? ` · ${license.status}` : ''}${/verify/.test(license.match) ? ' · name match, verify' : ''}`
+        : 'None found by exact name';
+      appendRow(body, [b.name, nf.format(b.permits), nf.format(b.issued30d), nf.format(b.issued90d), b.subdivisions.join(', ') || '—', licenseText, license ? phoneCell(license.phone) : '—']);
+    }
+  }
+
+  async function loadPermits() {
+    try {
+      const response = await fetch('/internal/api/permit-leads', { headers: { accept: 'application/json' } });
+      if (!response.ok) throw new Error('bad status');
+      renderPermits((await response.json()) as PermitSummary);
+    } catch {
+      renderPermits(undefined);
+    }
+  }
+
+  let homeownersShown = false;
+  async function loadHomeowners() {
+    const button = $('[data-homeowners-load]');
+    const body = $('[data-homeowner-rows]');
+    if (!(button instanceof HTMLButtonElement) || !(body instanceof HTMLElement)) return;
+    if (homeownersShown) {
+      homeownersShown = false;
+      show('[data-homeowners-wrap]', false);
+      button.textContent = 'Show the list';
+      return;
+    }
+    button.disabled = true;
+    try {
+      const response = await fetch('/internal/api/permit-leads?view=homeowners&limit=150', { headers: { accept: 'application/json' } });
+      if (!response.ok) throw new Error('bad status');
+      const rows = ((await response.json()) as { rows?: HomeownerLead[] }).rows ?? [];
+      body.replaceChildren();
+      for (const r of rows) {
+        const mail = r.ownerMailing ? (r.absentee ? `Elsewhere: ${r.ownerMailing}` : 'At the property') : '—';
+        const sold = r.lastSaleDate ? `${shortDate(r.lastSaleDate)}${typeof r.lastSaleCents === 'number' ? ` · ${dollars(r.lastSaleCents)}` : ''}` : '—';
+        appendRow(body, [r.address || '(no address)', shortDate(r.permitDate), r.workType || '—', r.yearBuilt ? String(r.yearBuilt) : '—', `${r.owner || '—'}${r.ownerApplied ? ' (applied)' : ''}`, mail, sold, `${r.score} of 5`]);
+      }
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 8;
+        td.className = 'an-empty';
+        td.textContent = 'No remodel permits loaded.';
+        tr.append(td);
+        body.append(tr);
+      }
+      homeownersShown = true;
+      show('[data-homeowners-wrap]', true);
+      button.textContent = 'Hide the list';
+    } catch {
+      setText('[data-status]', 'Could not load the permit list. Try again.');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   async function load() {
     setText('[data-status]', 'Loading analytics…');
     try {
@@ -392,6 +593,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       renderSources(data.pipeline);
       renderLeads(data.leads);
       renderGa4(data.ga4);
+      void loadPermits();
       document.querySelectorAll('[data-link]').forEach((el) => {
         const href = data.links?.[(el as HTMLElement).dataset.link || ''];
         if (el instanceof HTMLAnchorElement && typeof href === 'string' && /^https:\/\//.test(href)) el.href = href;
@@ -402,6 +604,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     }
   }
 
+  document.querySelector('[data-homeowners-load]')?.addEventListener('click', loadHomeowners);
   document.querySelector('[data-refresh]')?.addEventListener('click', load);
   load();
 </script>
@@ -460,6 +663,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .an-table{min-width:32rem;width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
   :global(.an-table th),:global(.an-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
   :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere;min-width:7rem}
+  .an-table-wide{min-width:54rem}
+  .an-table-wide thead th:nth-child(5),.an-table-wide thead th:nth-child(6){text-align:left}
+  :global(.an-table a){color:inherit;text-decoration:underline}
+  :global(.an-table td:nth-child(5)),:global(.an-table td:nth-child(6)){text-align:left;white-space:normal;min-width:9rem}
   .an-stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
   @media(max-width:900px){.an-stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}.an-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:720px){.an-hero{align-items:flex-start;flex-direction:column}.an-grid,.an-links{grid-template-columns:minmax(0,1fr)}}
