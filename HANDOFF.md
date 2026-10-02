@@ -259,6 +259,13 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Decision:** the folder stays `.ai/` (maps to `context/` in the owner's standard layout) because the router, specialist loader, tests and docs depend on it.
 - **Open:** the copy sweep's reviewed / not-reviewed inventory has not been run yet (step 1 of `.ai/workflows/public-copy-sweep/`). `README.md` records a 2026-09-30 plain-language pass over most pages; the remainder is unlisted.
 
+### 2026-10-02 — Home hero and Homeowners card photo, three photos upscaled (branch `claude/hero-photo-upscale`)
+
+- New owner-supplied photo `gray-lap-siding-triple-hung` is the home hero still/poster/default social image (`heroPhoto`) and the Homeowners card (`replacementTile`). The Builders and Sliding glass doors card photos were replaced with 4K upscales (Higgsfield, 6 credits; 6.3 left). Hero crop retuned to `50% 45%`.
+- `/replacement`, `/window-features` still use `stone-craftsman` directly; swap them too if the owner wants the new photo site-wide.
+- VERIFY with the owner that the windows in the new photo are Clearview installs before naming it as a project; alt/caption are visual-only.
+- Gate: `npm run test:all` (39 steps) passes; viewed at 1440 px and 390 px.
+
 ### 2026-10-02 — Permit leads in Analytics (branch `claude/permit-leads-analytics`)
 
 - **What changed:** builders and homeowner remodel permits from Clark County/Vancouver, enriched from the county assessor and the WA L&I license list, shown in a new section of `/internal/analytics`. Pipeline, privacy rule and limits are in `.ai/CHANGELOG.md` and `internal/README.md` ("Permit leads").
