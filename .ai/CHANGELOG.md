@@ -4,6 +4,12 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Window opening prices set to owner's table
+
+- `src/data/pricing.ts` and `functions/ask/_lib/pricing.mjs`: the seven window openings set to the owner's figures — Slider $600–$1,400, Double-hung $700–$1,400, Single-hung $700–$1,400, Picture/fixed $600–$1,500, Casement $700–$1,500, Awning $800–$1,500, Bay or bow $800–$1,500 (i.e. the pre-15%-cut values).
+- Deliberately unchanged (not in the owner's table, still at the 15%-reduced values): sliding patio door $1,530–$2,380, French door $2,550–$4,250, Milgard upcharge $85, frame-work allowance $680–$1,700, and the add-on modifiers. VERIFY with the owner whether these should also go back.
+- `scripts/test-ask-pricing-sync.mjs` hand-worked check updated (5 double-hung vinyl: $4,650 to $9,900).
+
 ## 2026-10-02 — Direct Google review link (supplied by owner)
 
 - `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.

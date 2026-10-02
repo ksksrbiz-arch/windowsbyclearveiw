@@ -52,10 +52,10 @@ for (const s of scenarios) {
   assert.equal(got.lowCents, want.lowCents, `low mismatch for ${JSON.stringify(s)}`);
   assert.equal(got.highCents, want.highCents, `high mismatch for ${JSON.stringify(s)}`);
 }
-// Known value, worked by hand: 5 double-hung vinyl = 595*5 + 680*5*.34 .. 1190*5 + 1700*5*.34 = 4,131..8,840 -> $4,150..$8,850.
+// Known value, worked by hand: 5 double-hung vinyl = 700*5 + 680*5*.34 .. 1400*5 + 1700*5*.34 = 4,656..9,890 -> $4,650..$9,900.
 const five = estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 5 }] });
-assert.equal(five.lowCents, 415000);
-assert.equal(five.highCents, 885000);
+assert.equal(five.lowCents, 465000);
+assert.equal(five.highCents, 990000);
 assert.equal(estimatePrice({ lines: [{ openingId: 'double-hung', quantity: 1 }], modifierIds: ['nope'] }).error, 'Unknown modifier "nope".');
 
 // The estimate_price tool: what the model is told it can send must actually work.
@@ -66,7 +66,7 @@ assert.deepEqual(props.openings.items.properties.kind.enum, pricing.openings.map
 assert.deepEqual(props.modifiers.items.enum, pricing.modifiers.map((m) => m.id), 'tool modifier enum = site modifiers');
 assert.deepEqual(decl.function.parameters.required, ['openings']);
 const viaTool = estimateFromToolArgs({ openings: [{ kind: 'double-hung', quantity: 5 }] });
-assert.equal(viaTool.range, '$4,150 to $8,850');
+assert.equal(viaTool.range, '$4,650 to $9,900');
 assert.ok(!/insert|full[- ]frame/i.test(JSON.stringify(viaTool)), 'tool output does not name install methods');
 const multi = estimateFromToolArgs({ openings: [{ kind: 'slider', quantity: 2 }, { kind: 'sliding-door', quantity: 1 }], material: 'fiberglass', brand: 'milgard', modifiers: ['trim'] });
 assert.equal(multi.lowCents, siteRange({ lines: [{ openingId: 'slider', quantity: 2 }, { openingId: 'sliding-door', quantity: 1 }], materialId: 'fiberglass', brandId: 'milgard', modifierIds: ['trim'] }).lowCents);
