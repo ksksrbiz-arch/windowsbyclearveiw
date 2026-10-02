@@ -1,5 +1,5 @@
 ---
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
@@ -9,7 +9,7 @@ import { processWork, workKindLabel, findWork } from '../data/work';
 // installation photo, cropped as a hero and backed by the install-day gallery
 // immediately below.
 const heroPhoto = findWork('blue-ladder')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 
 const steps = [
   {

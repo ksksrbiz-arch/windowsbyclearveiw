@@ -30,6 +30,8 @@ const guides = defineCollection({
   schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
+    /** Search-result title when the on-page title would run past ~60 characters with the site suffix. */
+    seoTitle: z.string().optional(),
     kicker: z.string().default('Guide'),
     topic: z.string(),
     published: z.boolean().default(true),

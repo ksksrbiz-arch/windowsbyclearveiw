@@ -1,5 +1,5 @@
 ---
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
 import CtaBar from '../components/CtaBar.astro';
@@ -11,7 +11,7 @@ const ogPhoto = findWork('green-craftsman-upper')!;
 
 // A real job photo for the hero, not stock or AI -- the page's own copy
 // promises exactly that ("None of it is stock"), so the hero has to keep it.
-const heroBg = await getImage({ src: ogPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(ogPhoto.image);
 
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip

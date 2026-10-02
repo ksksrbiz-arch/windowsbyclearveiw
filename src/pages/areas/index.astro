@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { getImage } from 'astro:assets';
+import { getHeroBg } from '../../lib/hero-bg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import { site } from '../../data/site';
@@ -18,7 +18,7 @@ const cities = (await getCollection('cities'))
 // A real finished Clearview job. It is not tagged to a town, so the credit
 // line does not claim one.
 const heroPhoto = findWork('tan-two-story')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 ---
 <BaseLayout
   title="Window Replacement in Clark County, WA"

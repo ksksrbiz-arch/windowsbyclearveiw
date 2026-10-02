@@ -1,5 +1,6 @@
 ---
-import { getImage, Image } from 'astro:assets';
+import { Image } from 'astro:assets';
+import { getHeroBg } from '../lib/hero-bg';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
@@ -16,7 +17,7 @@ const ogPhoto = findWork('vaulted-grids')!;
 // Customer-facing material diagrams live on /window-features and the guides,
 // so this page avoids duplicating the older frame-material schematic.
 const heroPhoto = findWork('stone-craftsman')!;
-const heroBg = await getImage({ src: heroPhoto.image, width: 2400, format: 'webp', quality: 76 });
+const heroBg = await getHeroBg(heroPhoto.image);
 
 const schema = {
   '@context': 'https://schema.org',
@@ -122,6 +123,7 @@ const spec = [
           src={vinylFiberglassGraphic}
           alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
           widths={[760, 1140, 1580]}
+width={1580}
           sizes="(max-width: 800px) 100vw, 1100px"
           quality={82}
           loading="lazy"
@@ -147,6 +149,9 @@ const spec = [
         </p>
         <p class="section-link">
           <a href="/window-features">Vinyl vs fiberglass, Cascade vs Milgard, and every style — in detail</a>
+        </p>
+        <p class="section-link">
+          <a href="/guides/cascade-vs-milgard">Cascade vs Milgard: how the two window lines compare</a>
         </p>
         <p class="section-link">
           <a href="/process">How the install itself runs, step by step</a>

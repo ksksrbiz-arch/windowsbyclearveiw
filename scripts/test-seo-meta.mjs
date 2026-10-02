@@ -5,8 +5,8 @@
 //   (title 50-60, description 130-155) and area H1s carry the city + "window replacement"
 // - the sitemap lists only canonical, trailing-slash-free URLs that exist in the build
 // - _redirects has no self-redirects or slash loops
-// Other pages only need to stay at or under the SERP limits (60 / 155); the four
-// pages that already exceed them are listed in KNOWN_OVER so a new offender fails.
+// Other pages only need to stay at or under the SERP limits (60 / 155); KNOWN_OVER
+// is the (currently empty) allowlist for any page that cannot.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -21,13 +21,9 @@ if (!existsSync(dist)) {
 const ORIGIN = 'https://windowsbyclearview.com';
 const decode = (s) => s.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
-// Follow-up: shorten these. Listed here so new pages cannot join them.
-const KNOWN_OVER = new Set([
-  '/guides/vinyl-vs-fiberglass-pacific-northwest', // title 64
-  '/new-construction', // title 65
-  '/sliding-glass-doors', // description 158
-  '/window-features', // description 160
-]);
+// Pages allowed to exceed the SERP limits. Empty on purpose: the four that did were shortened
+// 2026-10-02, so a new offender should fail rather than be added here.
+const KNOWN_OVER = new Set([]);
 
 function* walk(dir) {
   for (const name of readdirSync(dir)) {

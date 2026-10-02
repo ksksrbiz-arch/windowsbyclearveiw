@@ -28,7 +28,10 @@ const {
   sizes = '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px',
 } = Astro.props;
 
-// 450 is the source width. Astro clamps anything larger, so nothing upscales.
+// Largest tile render. Sources are far wider than this (1200-3000px), so `width`
+// below pins the fallback `src` to 450 too; without it Astro writes the
+// full-size original as `src`, which crawlers fetch even though browsers
+// pick from `srcset`.
 const widths = [240, 340, 450];
 ---
 <figure class="work-card">
@@ -37,6 +40,7 @@ const widths = [240, 340, 450];
       src={image}
       alt={alt}
       widths={widths}
+      width={Math.max(...widths)}
       sizes={sizes}
       format="webp"
       quality={72}
