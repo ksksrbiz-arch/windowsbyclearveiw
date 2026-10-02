@@ -4,6 +4,14 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Estimator and Ask show base prices only (frame-work allowance removed)
+
+- Owner direction: the public calculator showed more than the base table (one slider read $850–$2,000 against $600–$1,400) because it added the frame-work allowance ($680–$1,700) across a third of the openings. That addition is removed from `src/components/CostEstimator.astro` and from the Ask copy `functions/ask/_lib/pricing.mjs` (and its `fullFrame` copy). The range is now the base opening prices x material, plus the Milgard upcharge on windows, plus the modifiers a visitor ticks.
+- The note under the range no longer says it "allows for about a third of the openings needing more work". It now says these are base prices for standard openings and that extra work found at the measure is stated in the written estimate before anything is ordered (existing site wording; no new figures).
+- `pricing.fullFrame` stays in `src/data/pricing.ts` because the internal quote builder (`src/pages/internal/quotes/new.astro`) uses it for the full-frame method; its blurb now says so.
+- `scripts/test-ask-pricing-sync.mjs`: hand-worked checks are now 5 double-hung = $3,500–$7,000 and 1 slider = $600–$1,400. Viewed in a browser: 1 slider shows $600 – $1,400; 1 slider + 4 double-hung shows $3,400 – $7,000.
+- Open (VERIFY, owner): jobs that do need frame work now come in above what the page quoted, by design. Whether doors, the Milgard upcharge and the modifiers should also return to earlier values is still undecided.
+
 ## 2026-10-02 — Homepage "New construction" card shows the page's own hero photo
 
 - `src/pages/index.astro`: the New construction service card now uses `new-build-tan-corner`, the same photo as the `/new-construction` hero, instead of `new-build-sheathed-garage`. One line; `/new-construction`'s social-card image is unchanged. Viewed at 1280 px and 390 px.

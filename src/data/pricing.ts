@@ -172,8 +172,9 @@ export const pricing = {
   fullFrame: {
     label: 'Extra frame-level work',
     blurb:
-      'Applied to a share of openings in the public calculator. Covers openings where the ' +
-      'frame is rotten or out of square — how bad the damage is moves the price.',
+      'Used only by the internal quote builder when that method is chosen. The public ' +
+      'calculator and Ask do not add it (owner direction, 2026-10-02): their range is the base ' +
+      'opening prices plus the modifiers a visitor ticks.',
     low: 680,
     high: 1700,
   },

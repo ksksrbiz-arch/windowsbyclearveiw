@@ -26,7 +26,6 @@ export const PRICING = {
     { id: 'cascade', label: 'Cascade', low: 0, high: 0 },
     { id: 'milgard', label: 'Milgard', low: 85, high: 85 },
   ],
-  fullFrame: { low: 680, high: 1700 },
   modifiers: [
     { id: 'third-story-plus', label: 'Third story or higher', perOpening: true, low: 85, high: 170 },
     { id: 'oversize', label: 'Oversize or custom shapes', perOpening: true, low: 128, high: 383 },
@@ -44,8 +43,8 @@ function round(value, step) {
 /**
  * Same formula as CostEstimator.astro's render(): per-opening range times
  * material multiplier, brand adder on window (not door) openings only,
- * a fixed share of openings (0.34) assumed to need extra frame-level work,
- * then flat modifiers. Returns null on unrecognized ids rather than
+ * then flat modifiers. No allowance for extra work is added (owner direction,
+ * 2026-10-02): the range is the base opening prices plus the chosen modifiers. Returns null on unrecognized ids rather than
  * silently pricing at zero — a wrong id undercounting a job is worse than
  * a tool call that visibly failed.
  */
@@ -81,11 +80,6 @@ export function estimatePrice({ lines, materialId = 'vinyl', brandId = 'cascade'
 
   low += brand.low * windowOpenings;
   high += brand.high * windowOpenings;
-
-  // Same single-range assumption as CostEstimator.astro (FRAME_WORK_SHARE).
-  const FRAME_WORK_SHARE = 0.34;
-  low += PRICING.fullFrame.low * totalOpenings * FRAME_WORK_SHARE;
-  high += PRICING.fullFrame.high * totalOpenings * FRAME_WORK_SHARE;
 
   const appliedModifiers = [];
   for (const id of modifierIds) {
