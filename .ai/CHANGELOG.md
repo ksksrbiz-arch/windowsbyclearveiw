@@ -4,6 +4,13 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Permit leads on the Analytics page (public records)
+
+- New **Permit leads** section in `/internal/analytics`: Clark County + City of Vancouver building permits (last 183 days) joined to county assessor parcels (address, owner, mailing address, year built, size, last sale) and the WA L&I contractor license list (data.wa.gov `m8qx-ubtq`). Two views: **builders** (new-home permits rolled up to the lot owner, because the permit applicant is often a permit service or engineer; exact-name license match with phone, labelled when it is a person-name match) and **homeowner remodel/addition permits** with an equal-weight fit count (single-family, owner applied, addition, permit in last 90 days, sold in last 2 years). Homeowner rows load only when the list is opened.
+- Pipeline: `scripts/build-permit-leads.mjs` (`npm run build:permit-leads`, ~15 s, no credentials) with pure logic in `scripts/permit-leads/lib.mjs` and the network layer in `scripts/permit-leads/fetch.mjs`. Output is a whole-snapshot SQL file in the git-ignored `data/permit-leads/`; loading it is a separate `wrangler d1 execute` step (see `internal/README.md`). Read side: `functions/internal/_lib/permit-leads.mjs` (tables `permit_prospects`, `permit_builders`, `permit_import_meta`, created on first use) and `functions/internal/api/permit-leads.js`. Test: `npm run test:permit-leads`, added to `build.yml`.
+- Decisions and limits: research data, not leads (nothing becomes a lead or quote without a person acting); no homeowner phone or email is ever produced or guessed (WA 2022 telephone-solicitation law; mail is the low-risk channel); future dates are dropped as county typos; same-size window replacements usually need no permit in Vancouver, so this finds new builds and remodels, not most simple replacement jobs. Owner names and mailing addresses are personal data in a public repo, hence the git-ignore.
+- Not built on purpose: status tracking or "convert to lead" (CRM scope). Per the gap analysis the constraint is lead volume, so the first test is whether any of these builders answers; build workflow only after one does.
+
 ## 2026-10-02 — Direct Google review link (supplied by owner)
 
 - `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.

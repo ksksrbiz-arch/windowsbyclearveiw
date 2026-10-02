@@ -239,6 +239,53 @@ The service account can only read analytics (scope `analytics.readonly`). If the
 panel shows "Unavailable" after setup, the usual causes are the account not yet
 added as Viewer, the Data API not enabled, or a wrong property ID.
 
+## Permit leads (Analytics page, public records)
+
+The **Permit leads** section of `/internal/analytics` shows building permits from
+Clark County and the City of Vancouver, joined to county assessor parcels and WA L&I
+contractor licenses. It is research data in three tables (`permit_prospects`,
+`permit_builders`, `permit_import_meta`, created on first use), not leads: nothing in
+them is a customer, quote or job until a person acts on it.
+
+Refresh it (about 15 seconds, no credentials; every source is a public endpoint):
+
+```bash
+npm run build:permit-leads                       # last 183 days -> data/permit-leads/
+npm run build:permit-leads -- --since=2026-04-02 # or an explicit start date
+npx wrangler d1 execute QUOTES_DB --remote --file=data/permit-leads/permit-leads.sql
+```
+
+The SQL file replaces the whole snapshot (it deletes and re-inserts), so run it as
+often as you like. The page shows when the data was loaded and its date window.
+`prospects.csv` and `builders.csv` in the same folder hold the same rows for a
+spreadsheet.
+
+**Privacy.** `data/permit-leads/` is git-ignored because it holds owner names and
+mailing addresses and this repository is public. Never commit it or paste it into
+chat. The list of homeowner rows is a separate request the page only makes when you
+press "Show the list", and both endpoints sit behind the session gate like every
+`/internal` route. Use the owner mailing address for mail. Washington's 2022
+telephone-solicitation law restricts unsolicited calls and texts, and these records
+carry no phone numbers for homeowners (none are guessed).
+
+**What the numbers mean**
+
+- *New-home permits* (case types NHC/SFR, issued): rolled up to the **lot owner**
+  from the parcel record, because the permit applicant is often a permit service or an
+  engineer. A builder row's license is a match on the **exact** business name (lot
+  owner first, then applicant). "None found" is not proof of no license: out-of-state
+  builders often license under another name. A match on a person's name is labelled
+  "name match, verify".
+- *Remodel and addition permits*: "fit" is the count (0 to 5) of equal-weight
+  signals: single-family home, owner applied, addition, permit in the last 90 days,
+  sold in the last 2 years. It is a sort order, not a probability or a price.
+- Same-size window replacements usually need no permit in Vancouver, so permit data
+  finds new builds and remodels, not most simple replacement jobs.
+- Dates after today are dropped as county typos (the data has a few in 2029 and 2039).
+
+Sources: permits and parcels from `gis.clark.wa.gov` (ArcGIS REST), licenses from
+data.wa.gov dataset `m8qx-ubtq`. Tests: `npm run test:permit-leads`.
+
 ## Google reviews feed (public `/reviews` page)
 
 `functions/api/google-reviews.js` serves the pinned Google Business Profile's

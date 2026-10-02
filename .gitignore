@@ -12,6 +12,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# permit-leads snapshots: owner names and mailing addresses, repo is public
+data/permit-leads/
+
 # environment variables
 .env
 .env.production
