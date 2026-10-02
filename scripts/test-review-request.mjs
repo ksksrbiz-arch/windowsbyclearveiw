@@ -1,5 +1,6 @@
 // Behaviour of the post-job Google review request, executed against the real
 // handler and a real SQLite engine.
+import { readFileSync } from 'node:fs';
 import { createD1 } from './_lib/d1-sqlite.mjs';
 import * as jobs from '../functions/internal/api/jobs.js';
 import * as review from '../functions/internal/api/review-request.js';
@@ -44,9 +45,13 @@ const get = (env) => call(review.onRequestGet, env, { path: '/internal/api/revie
 const ask = (env, channel) => call(review.onRequestPost, env, { method: 'POST', body: { jobId: 'J-1', channel } });
 
 // Link selection and content rules.
-assert(reviewUrl({}) === 'https://share.google/cdPgOCHSjkwMazSOC', 'falls back to the Google profile share link');
+assert(reviewUrl({}) === 'https://g.page/r/CdAXBksDnJO1EBM/review', 'falls back to the profile\'s own review link');
 assert(reviewUrl({ GOOGLE_PLACE_ID: 'ChIJabc123XYZ_-' }) === 'https://search.google.com/local/writereview?placeid=ChIJabc123XYZ_-', 'uses the direct write-review form when a Place ID is configured');
-assert(reviewUrl({ GOOGLE_REVIEW_URL: 'javascript:alert(1)' }) === 'https://share.google/cdPgOCHSjkwMazSOC', 'rejects a non-https override');
+// The function keeps its own copy of the link (functions do not import src/); this
+// guards the two copies against drifting apart.
+const siteSource = readFileSync(new URL('../src/data/site.ts', import.meta.url), 'utf8');
+assert(siteSource.includes(`googleReview: '${reviewUrl({})}'`), 'site.ts social.googleReview matches the review-request fallback');
+assert(reviewUrl({ GOOGLE_REVIEW_URL: 'javascript:alert(1)' }) === 'https://g.page/r/CdAXBksDnJO1EBM/review', 'rejects a non-https override');
 const mail = reviewEmail('<b>Pat</b> Doe', 'https://example.com/r');
 assert(!mail.html.includes('<b>Pat</b>') && mail.html.includes('&lt;b&gt;Pat&lt;/b&gt;'), 'customer name is HTML-escaped in the email');
 assert(!/5 stars|five stars|write something like|example review/i.test(mail.text + smsBody('Pat', 'u')), 'message never suggests review content or a rating');
@@ -75,7 +80,7 @@ assert(!/5 stars|five stars|write something like|example review/i.test(mail.text
   assert(state.body.smsHref.startsWith('sms:+13605550100?&body='), 'sms link targets the customer number in E.164');
   const first = await ask(env, 'email');
   assert(first.status === 200 && emails.length === 1 && emails[0].to[0] === 'pat@example.com', 'email is sent to the customer');
-  assert(emails[0].html.includes('https://share.google/cdPgOCHSjkwMazSOC'), 'email links to the Google profile');
+  assert(emails[0].html.includes('https://g.page/r/CdAXBksDnJO1EBM/review'), 'email links to the Google review page');
   const second = await ask(env, 'email');
   const smsAfter = await ask(env, 'sms');
   assert(second.status === 409 && smsAfter.status === 409 && emails.length === 1, 'a job is asked at most once across channels');

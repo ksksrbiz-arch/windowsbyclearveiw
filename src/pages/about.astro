@@ -101,6 +101,20 @@ const heroBg = await getHeroBg(heroPhoto.image);
     </div>
   </section>
 
+  {site.lniNumber && (
+    <section class="section">
+      <div class="wrap is-narrow" data-reveal>
+        <p class="rule-label">Contractor registration</p>
+        <p>
+          {site.legalName} · WA UBI {site.ubiNumber} · L&amp;I {site.lniNumber}.{' '}
+          <a href="https://secure.lni.wa.gov/verify/" target="_blank" rel="noopener noreferrer">
+            Verify registration
+          </a>.
+        </p>
+      </div>
+    </section>
+  )}
+
   <CtaBar
     heading="Ready for a written estimate?"
     body="Call or send a request. A window count and a city are enough to start."

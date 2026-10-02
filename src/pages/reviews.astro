@@ -59,7 +59,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
           {site.social.google && (
             <p class="post-reviews-cta">
               Leave a review of your own on our{' '}
-              <a class="inline-social" href={site.social.google} target="_blank" rel="noopener noreferrer">
+              <a class="inline-social" href={site.social.googleReview || site.social.google} target="_blank" rel="noopener noreferrer">
                 Google Business Profile
               </a>
               .
@@ -138,7 +138,7 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
                   Or leave it on our{' '}
                   <a
                     class="inline-social"
-                    href={site.social.google}
+                    href={site.social.googleReview || site.social.google}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

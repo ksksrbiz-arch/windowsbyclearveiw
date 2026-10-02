@@ -14,3 +14,6 @@
 
 # The old guide moved when we dropped install-method terminology from customer copy (2026-09-29).
 /guides/full-frame-vs-insert /guides/what-your-openings-need 301
+# Cloudflare Pages matches the trailing-slash form separately: without this line
+# /guides/full-frame-vs-insert/ returned a 404 (Ahrefs crawl, 2026-10-01).
+/guides/full-frame-vs-insert/ /guides/what-your-openings-need 301

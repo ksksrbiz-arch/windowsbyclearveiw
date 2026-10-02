@@ -14,6 +14,20 @@ Source: a Screaming Frog desktop crawl (106 URLs) and an OpenSEO audit run the s
 - **Checked and deliberately left alone.** `alt=""` on the header/footer logo mark (74 uses) and on the three home service-tile photos: each sits beside link text that already names it, so empty alt is correct for decorative images; Screaming Frog counts them as missing. The hero photos are CSS backgrounds and cannot carry alt. `/cdn-cgi/l/email-protection` 404 is Cloudflare Email Address Obfuscation (edge-injected, not in the repo); disabling it is a Cloudflare dashboard choice and exposes the address to scrapers. The `/estimate?role=` and `?scope=` variants are already canonicalized and noindexed. `public/logo/icon-mark.png`, `lockup-on-white.png`, `lockup-transparent.png` (1–2 MB) are unreferenced brand masters; not deleted.
 - **Open:** the cost guide's markdown changed (link only). `npm run build:guides-index` needs an embedding credential that was not available, so `/ask` retrieval text for that guide is one link-syntax edit stale; harmless, refresh on the next guide edit.
 
+## 2026-10-02 — Direct Google review link (supplied by owner)
+
+- `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.
+- Review-asking links now use `googleReview` (falling back to `google`): footer "Review us on Google" and the two "leave a review" links on `/reviews`. Only `href`s changed, no copy.
+- `functions/_lib/review-request.mjs`: fallback is now the direct review link instead of the share link (an explicit `GOOGLE_REVIEW_URL` or a configured `GOOGLE_PLACE_ID` still wins). `scripts/test-review-request.mjs` updated, plus a check that the two copies of the URL stay equal.
+- Open: the link is not yet verified on the live site, and nothing in Cloudflare was changed (no env vars needed for this).
+
+## 2026-10-02 — Trailing-slash redirect for the old guide; registration line on /about
+
+- `public/_redirects`: added `/guides/full-frame-vs-insert/` -> `/guides/what-your-openings-need` 301. Cloudflare Pages matches the slash form separately, so the existing no-slash rule left `/guides/full-frame-vs-insert/` returning 404 (confirmed with `curl -I` on the live site on 2026-10-02; Ahrefs Site Audit crawl of 2026-10-01 listed it as the site's only 404). Destination kept identical to the existing rule (the topical replacement guide) rather than `/guides`. `scripts/test-public-terminology.mjs` now asserts both forms.
+- `src/pages/about.astro`: added a "Contractor registration" block (legal name, UBI, L&I number, link to the L&I verify page) in its own section after "How our prices work." It reuses the wording already published on `/new-construction` and reads `site.lniNumber` / `site.ubiNumber`, so no new business fact was introduced and it disappears if `lniNumber` is unset. The same number was already in the footer on every page.
+- Verified locally: `npm run test:all` (37 steps), `npm run build`, built `dist/about.html` contains the line and `dist/_redirects` contains both rules. Not yet verified live (needs deploy; re-check with `curl -I https://windowsbyclearview.com/guides/full-frame-vs-insert/` and expect 301).
+- Open: credential wording still has no formal L&I/attorney sign-off (see README). The `/about` block adds no new wording beyond what `/new-construction` already says.
+
 ## 2026-10-02 — All prices lowered 15% (owner direction)
 
 - `src/data/pricing.ts` and its hand-kept copy `functions/ask/_lib/pricing.mjs`: every dollar figure x 0.85 — openings (e.g. slider $600–$1,400 -> $510–$1,190; sliding patio door $1,800–$2,800 -> $1,530–$2,380; French door $3,000–$5,000 -> $2,550–$4,250), Milgard upcharge $100 -> $85, frame-work allowance $800–$2,000 -> $680–$1,700, and the add-on modifiers ($100–$200 -> $85–$170, $150 -> $128, $450 -> $383, $200 -> $170; zeros stay zero). The fiberglass multiplier (1.4) is not a price and is unchanged. `basis.reviewedAt` set to 2026-10-02.
