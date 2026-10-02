@@ -4,6 +4,10 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Homepage "New construction" card shows the page's own hero photo
+
+- `src/pages/index.astro`: the New construction service card now uses `new-build-tan-corner`, the same photo as the `/new-construction` hero, instead of `new-build-sheathed-garage`. One line; `/new-construction`'s social-card image is unchanged. Viewed at 1280 px and 390 px.
+
 ## 2026-10-02 — Window opening prices set to owner's table
 
 - `src/data/pricing.ts` and `functions/ask/_lib/pricing.mjs`: the seven window openings set to the owner's figures — Slider $600–$1,400, Double-hung $700–$1,400, Single-hung $700–$1,400, Picture/fixed $600–$1,500, Casement $700–$1,500, Awning $800–$1,500, Bay or bow $800–$1,500 (i.e. the pre-15%-cut values).
