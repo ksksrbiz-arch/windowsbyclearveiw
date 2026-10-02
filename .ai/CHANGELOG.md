@@ -4,6 +4,13 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Direct Google review link (supplied by owner)
+
+- `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.
+- Review-asking links now use `googleReview` (falling back to `google`): footer "Review us on Google" and the two "leave a review" links on `/reviews`. Only `href`s changed, no copy.
+- `functions/_lib/review-request.mjs`: fallback is now the direct review link instead of the share link (an explicit `GOOGLE_REVIEW_URL` or a configured `GOOGLE_PLACE_ID` still wins). `scripts/test-review-request.mjs` updated, plus a check that the two copies of the URL stay equal.
+- Open: the link is not yet verified on the live site, and nothing in Cloudflare was changed (no env vars needed for this).
+
 ## 2026-10-02 — Crawl-audit fixes: image weight, titles, descriptions, links to the Cascade vs Milgard guide
 
 Source: a Screaming Frog desktop crawl (106 URLs) and an OpenSEO audit run the same day. Both agreed the site is technically sound; these were the small items.
@@ -13,13 +20,6 @@ Source: a Screaming Frog desktop crawl (106 URLs) and an OpenSEO audit run the s
 - **Links to `/guides/cascade-vs-milgard`** (had 3 inlinks; the "Keep reading" list is the first three guides by `order`, so orders 5 and 6 never appear in it). Added contextual links from `/window-features`, `/replacement`, `/sliding-glass-doors` and the cost guide body. Not changed: the "Keep reading" ordering.
 - **Checked and deliberately left alone.** `alt=""` on the header/footer logo mark (74 uses) and on the three home service-tile photos: each sits beside link text that already names it, so empty alt is correct for decorative images; Screaming Frog counts them as missing. The hero photos are CSS backgrounds and cannot carry alt. `/cdn-cgi/l/email-protection` 404 is Cloudflare Email Address Obfuscation (edge-injected, not in the repo); disabling it is a Cloudflare dashboard choice and exposes the address to scrapers. The `/estimate?role=` and `?scope=` variants are already canonicalized and noindexed. `public/logo/icon-mark.png`, `lockup-on-white.png`, `lockup-transparent.png` (1–2 MB) are unreferenced brand masters; not deleted.
 - **Open:** the cost guide's markdown changed (link only). `npm run build:guides-index` needs an embedding credential that was not available, so `/ask` retrieval text for that guide is one link-syntax edit stale; harmless, refresh on the next guide edit.
-
-## 2026-10-02 — Direct Google review link (supplied by owner)
-
-- `src/data/site.ts`: new `social.googleReview` = the profile's own "Ask for reviews" link (g.page/r/…/review). `social.google` (share link) is unchanged and still drives the header icon, "See it on our Business Profile" link, `GoogleReviews`, and JsonLd `sameAs`.
-- Review-asking links now use `googleReview` (falling back to `google`): footer "Review us on Google" and the two "leave a review" links on `/reviews`. Only `href`s changed, no copy.
-- `functions/_lib/review-request.mjs`: fallback is now the direct review link instead of the share link (an explicit `GOOGLE_REVIEW_URL` or a configured `GOOGLE_PLACE_ID` still wins). `scripts/test-review-request.mjs` updated, plus a check that the two copies of the URL stay equal.
-- Open: the link is not yet verified on the live site, and nothing in Cloudflare was changed (no env vars needed for this).
 
 ## 2026-10-02 — Trailing-slash redirect for the old guide; registration line on /about
 
