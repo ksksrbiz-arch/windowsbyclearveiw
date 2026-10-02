@@ -4,6 +4,13 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — Trailing-slash redirect for the old guide; registration line on /about
+
+- `public/_redirects`: added `/guides/full-frame-vs-insert/` -> `/guides/what-your-openings-need` 301. Cloudflare Pages matches the slash form separately, so the existing no-slash rule left `/guides/full-frame-vs-insert/` returning 404 (confirmed with `curl -I` on the live site on 2026-10-02; Ahrefs Site Audit crawl of 2026-10-01 listed it as the site's only 404). Destination kept identical to the existing rule (the topical replacement guide) rather than `/guides`. `scripts/test-public-terminology.mjs` now asserts both forms.
+- `src/pages/about.astro`: added a "Contractor registration" block (legal name, UBI, L&I number, link to the L&I verify page) in its own section after "How our prices work." It reuses the wording already published on `/new-construction` and reads `site.lniNumber` / `site.ubiNumber`, so no new business fact was introduced and it disappears if `lniNumber` is unset. The same number was already in the footer on every page.
+- Verified locally: `npm run test:all` (37 steps), `npm run build`, built `dist/about.html` contains the line and `dist/_redirects` contains both rules. Not yet verified live (needs deploy; re-check with `curl -I https://windowsbyclearview.com/guides/full-frame-vs-insert/` and expect 301).
+- Open: credential wording still has no formal L&I/attorney sign-off (see README). The `/about` block adds no new wording beyond what `/new-construction` already says.
+
 ## 2026-10-02 — All prices lowered 15% (owner direction)
 
 - `src/data/pricing.ts` and its hand-kept copy `functions/ask/_lib/pricing.mjs`: every dollar figure x 0.85 — openings (e.g. slider $600–$1,400 -> $510–$1,190; sliding patio door $1,800–$2,800 -> $1,530–$2,380; French door $3,000–$5,000 -> $2,550–$4,250), Milgard upcharge $100 -> $85, frame-work allowance $800–$2,000 -> $680–$1,700, and the add-on modifiers ($100–$200 -> $85–$170, $150 -> $128, $450 -> $383, $200 -> $170; zeros stay zero). The fiberglass multiplier (1.4) is not a price and is unchanged. `basis.reviewedAt` set to 2026-10-02.

@@ -54,6 +54,7 @@ assert.ok(/TERMINOLOGY: do not describe or compare install methods/.test(chat), 
 // The old guide URL must redirect, not 404.
 const redirects = readFileSync(join(root, 'public/_redirects'), 'utf8');
 assert.ok(/^\/guides\/full-frame-vs-insert \/guides\/what-your-openings-need 301$/m.test(redirects), 'old guide URL redirects');
+assert.ok(/^\/guides\/full-frame-vs-insert\/ \/guides\/what-your-openings-need 301$/m.test(redirects), 'old guide URL redirects with a trailing slash too');
 
 // The calculator no longer asks for a method.
 const estimator = readFileSync(join(root, 'src/components/CostEstimator.astro'), 'utf8');
