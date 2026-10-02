@@ -4,6 +4,12 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-02 — All prices lowered 15% (owner direction)
+
+- `src/data/pricing.ts` and its hand-kept copy `functions/ask/_lib/pricing.mjs`: every dollar figure x 0.85 — openings (e.g. slider $600–$1,400 -> $510–$1,190; sliding patio door $1,800–$2,800 -> $1,530–$2,380; French door $3,000–$5,000 -> $2,550–$4,250), Milgard upcharge $100 -> $85, frame-work allowance $800–$2,000 -> $680–$1,700, and the add-on modifiers ($100–$200 -> $85–$170, $150 -> $128, $450 -> $383, $200 -> $170; zeros stay zero). The fiberglass multiplier (1.4) is not a price and is unchanged. `basis.reviewedAt` set to 2026-10-02.
+- `scripts/test-ask-pricing-sync.mjs` hand-worked check updated (5 double-hung vinyl: $4,150 to $8,850). The sliding-door page and calculator read from the table, so they follow automatically.
+- Not changed (not Clearview's figures): the regional-average range quoted in the `window-replacement-cost-washington` guide. VERIFY whether it should still say $600–$1,300.
+
 ## 2026-10-01 — Editing a draft revokes its unsigned signing links
 
 - `functions/internal/api/quotes/[id].js` PUT: any edit to a draft quote now revokes that quote's unsigned customer signing links in the same batch as the update, so a customer cannot sign totals they never saw. The response includes `signLinkRevoked`. Sending a new link still requires the Build Plan to be re-approved (existing `BUILD_PLAN_STALE` gate). Covered by `npm run test:quote-signing` (owner approved the change, 2026-10-01).

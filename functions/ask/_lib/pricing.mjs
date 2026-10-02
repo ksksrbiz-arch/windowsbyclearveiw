@@ -5,18 +5,18 @@
 // never produce a number that disagrees with the page a visitor can see
 // right next to it.
 export const PRICING = {
-  reviewedAt: '2026-09-26',
+  reviewedAt: '2026-10-02',
   rounding: 50,
   openings: [
-    { id: 'slider', label: 'Slider', low: 600, high: 1400 },
-    { id: 'double-hung', label: 'Double-hung', low: 700, high: 1400 },
-    { id: 'single-hung', label: 'Single-hung', low: 700, high: 1400 },
-    { id: 'picture', label: 'Picture / fixed', low: 600, high: 1500 },
-    { id: 'casement', label: 'Casement', low: 700, high: 1500 },
-    { id: 'awning', label: 'Awning', low: 800, high: 1500 },
-    { id: 'bay-bow', label: 'Bay or bow', low: 800, high: 1500 },
-    { id: 'sliding-door', label: 'Sliding patio door', low: 1800, high: 2800, isDoor: true },
-    { id: 'french-door', label: 'French door', low: 3000, high: 5000, isDoor: true },
+    { id: 'slider', label: 'Slider', low: 510, high: 1190 },
+    { id: 'double-hung', label: 'Double-hung', low: 595, high: 1190 },
+    { id: 'single-hung', label: 'Single-hung', low: 595, high: 1190 },
+    { id: 'picture', label: 'Picture / fixed', low: 510, high: 1275 },
+    { id: 'casement', label: 'Casement', low: 595, high: 1275 },
+    { id: 'awning', label: 'Awning', low: 680, high: 1275 },
+    { id: 'bay-bow', label: 'Bay or bow', low: 680, high: 1275 },
+    { id: 'sliding-door', label: 'Sliding patio door', low: 1530, high: 2380, isDoor: true },
+    { id: 'french-door', label: 'French door', low: 2550, high: 4250, isDoor: true },
   ],
   materials: [
     { id: 'vinyl', label: 'Vinyl', multiplier: 1 },
@@ -24,16 +24,16 @@ export const PRICING = {
   ],
   brands: [
     { id: 'cascade', label: 'Cascade', low: 0, high: 0 },
-    { id: 'milgard', label: 'Milgard', low: 100, high: 100 },
+    { id: 'milgard', label: 'Milgard', low: 85, high: 85 },
   ],
-  fullFrame: { low: 800, high: 2000 },
+  fullFrame: { low: 680, high: 1700 },
   modifiers: [
-    { id: 'third-story-plus', label: 'Third story or higher', perOpening: true, low: 100, high: 200 },
-    { id: 'oversize', label: 'Oversize or custom shapes', perOpening: true, low: 150, high: 450 },
+    { id: 'third-story-plus', label: 'Third story or higher', perOpening: true, low: 85, high: 170 },
+    { id: 'oversize', label: 'Oversize or custom shapes', perOpening: true, low: 128, high: 383 },
     { id: 'rot-repair', label: 'Suspected rot at the sills', perOpening: false, low: 0, high: 0 },
-    { id: 'trim', label: 'New interior or exterior trim', perOpening: true, low: 150, high: 150 },
-    { id: 'triple-pane', label: 'Triple-pane glass', perOpening: true, low: 200, high: 200 },
-    { id: 'metal-removal', label: 'Removing old metal-frame windows', perOpening: true, low: 150, high: 150 },
+    { id: 'trim', label: 'New interior or exterior trim', perOpening: true, low: 128, high: 128 },
+    { id: 'triple-pane', label: 'Triple-pane glass', perOpening: true, low: 170, high: 170 },
+    { id: 'metal-removal', label: 'Removing old metal-frame windows', perOpening: true, low: 128, high: 128 },
   ],
 };
 
