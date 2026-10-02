@@ -243,12 +243,6 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
 - **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
 
-### 2026-10-02 — Permit leads in Analytics (branch `claude/permit-leads-analytics`)
-
-- **What changed:** builders and homeowner remodel permits from Clark County/Vancouver, enriched from the county assessor and the WA L&I license list, shown in a new section of `/internal/analytics`. Pipeline, privacy rule and limits are in `.ai/CHANGELOG.md` and `internal/README.md` ("Permit leads").
-- **Not live until you load it:** the page shows "not loaded" until `data/permit-leads/permit-leads.sql` is run against the production D1 (`npx wrangler d1 execute QUOTES_DB --remote --file=...`). That file holds owner names and mailing addresses; generate it locally, never commit it.
-- **Open:** decide who contacts which builders (mid-size ones such as New Tradition, NW Elite and Pacific Lifestyle look likelier than Horton, Lennar or Holt) and whether any answer. Only then consider status tracking. Optional: refresh weekly.
-
 ### 2026-10-01 — ICM aligned to the owner's standard layout (folder stays `.ai/`)
 
 - **Root `CLAUDE.md` is now a 53-line router** (cap 80) with a Task | Load | Do not load table and an exclusion rule. The ten non-negotiables are kept; the ICM rules and Ask routing detail moved to `.ai/references/icm-rules.md` and `.ai/references/ask-routing.md`. Domain/mail spelling, no-invented-facts and human-approval rules are unchanged.
@@ -259,6 +253,12 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **GitHub Actions cannot run (billing issue, owner, 2026-10-01).** Local runs are the gate; Pages previews are the independent build signal. `build.yml` already includes the new test for when billing is fixed.
 - **Decision:** the folder stays `.ai/` (maps to `context/` in the owner's standard layout) because the router, specialist loader, tests and docs depend on it.
 - **Open:** the copy sweep's reviewed / not-reviewed inventory has not been run yet (step 1 of `.ai/workflows/public-copy-sweep/`). `README.md` records a 2026-09-30 plain-language pass over most pages; the remainder is unlisted.
+
+### 2026-10-02 — Permit leads in Analytics (branch `claude/permit-leads-analytics`)
+
+- **What changed:** builders and homeowner remodel permits from Clark County/Vancouver, enriched from the county assessor and the WA L&I license list, shown in a new section of `/internal/analytics`. Pipeline, privacy rule and limits are in `.ai/CHANGELOG.md` and `internal/README.md` ("Permit leads").
+- **Not live until you load it:** the page shows "not loaded" until `data/permit-leads/permit-leads.sql` is run against the production D1 (`npx wrangler d1 execute QUOTES_DB --remote --file=...`). That file holds owner names and mailing addresses; generate it locally, never commit it.
+- **Open:** decide who contacts which builders (mid-size ones such as New Tradition, NW Elite and Pacific Lifestyle look likelier than Horton, Lennar or Holt) and whether any answer. Only then consider status tracking. Optional: refresh weekly.
 
 ### 2026-10-01 — AI Gateway routing and model-aware guide embeddings (items 5 and 6 of the Cloudflare review)
 
