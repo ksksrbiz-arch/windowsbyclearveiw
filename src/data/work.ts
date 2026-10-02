@@ -27,6 +27,7 @@ import creamSide from '../assets/work/cream-side.jpg';
 import dormerSet from '../assets/work/dormer-set.jpg';
 import gableArchLadders from '../assets/work/gable-arch-ladders.jpg';
 import graySideSlider from '../assets/work/gray-side-slider.jpg';
+import grayLapSidingTripleHung from '../assets/work/gray-lap-siding-triple-hung.jpg';
 import greenCraftsmanUpper from '../assets/work/green-craftsman-upper.jpg';
 import newUnitInterior from '../assets/work/new-unit-interior.jpg';
 import pinkBungalow from '../assets/work/pink-bungalow.jpg';
@@ -447,6 +448,15 @@ export const workPhotos: WorkPhoto[] = [
     featured: false,
     order: 43,
   },
+  {
+    id: 'gray-lap-siding-triple-hung',
+    image: grayLapSidingTripleHung,
+    alt: 'Looking up at a gray lap-siding house with stone veneer: three white double-hung windows below a pair with an arched top, under a blue sky',
+    caption: 'Double-hung windows on a gray lap-siding elevation',
+    kind: 'after',
+    featured: false,
+    order: 44,
+  },
 ];
 
 const byOrder = (a: WorkPhoto, b: WorkPhoto) => a.order - b.order;
@@ -492,4 +502,4 @@ export function workKindLabel(kind: WorkKind): string {
  * is dark siding under a grey sky and washed out to a near-black smear behind the
  * headline.
  */
-export const heroPhoto = findWork('stone-craftsman') ?? workPhotos[0];
+export const heroPhoto = findWork('gray-lap-siding-triple-hung') ?? workPhotos[0];
