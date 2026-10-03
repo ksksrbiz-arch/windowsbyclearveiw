@@ -6,11 +6,14 @@
  * Tools page card, so module state (the captured install prompt) is shared between them.
  */
 
+import { bannerFor, formatAge, shouldWarm, type BannerState } from '../lib/pwa-logic';
+
+export { formatAge };
 export const SW_URL = '/internal-sw.js';
 // No trailing slash on purpose: Pages serves the Dashboard at /internal (/internal/ redirects to it).
 export const SW_SCOPE = '/internal';
 const WARM_KEY = 'clearview:pwa:warmed';
-const WARM_EVERY_MS = 6 * 60 * 60 * 1000;
+const WARM_ATTEMPT_KEY = 'clearview:pwa:warm-attempt';
 const CLEAR_WAIT_MS = 1500;
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
@@ -72,7 +75,7 @@ function ask<T extends { type: string }>(message: Record<string, unknown>, reply
 /** Remove saved customer data. `all` also drops saved pages and assets (the Tools "reset" button). */
 export async function clearSavedData(scope: 'data' | 'all' = 'data'): Promise<boolean> {
   const reply = await ask<{ type: string }>({ type: 'cv:clear', scope }, 'cv:cleared', CLEAR_WAIT_MS);
-  if (scope === 'all') { try { localStorage.removeItem(WARM_KEY); } catch { /* ignore */ } }
+  if (scope === 'all') { try { localStorage.removeItem(WARM_KEY); localStorage.removeItem(WARM_ATTEMPT_KEY); } catch { /* ignore */ } }
   return reply !== null;
 }
 
@@ -109,24 +112,12 @@ export async function getPwaStatus(): Promise<PwaStatus> {
   };
 }
 
-export function formatAge(ms: number, now = Date.now()): string {
-  const mins = Math.max(0, Math.round((now - ms) / 60000));
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins} min ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours} h ago`;
-  const days = Math.round(hours / 24);
-  return `${days} day${days === 1 ? '' : 's'} ago`;
-}
-
 function banner() {
   const el = document.querySelector<HTMLElement>('[data-pwa-banner]');
   const text = el?.querySelector<HTMLElement>('[data-pwa-banner-text]') || null;
   const action = el?.querySelector<HTMLAnchorElement>('[data-pwa-banner-action]') || null;
   return { el, text, action };
 }
-
-type BannerState = { kind: 'offline' | 'stale' | 'session'; text: string; actionHref?: string; actionLabel?: string };
 
 function showBanner(state: BannerState | null) {
   const { el, text, action } = banner();
@@ -139,8 +130,6 @@ function showBanner(state: BannerState | null) {
   else { action.hidden = true; }
 }
 
-const OFFLINE_TEXT = 'Offline. Saved copies are shown where available. Photos still save to this phone; approvals, quotes and payments need a connection.';
-
 export function initInternalPwa(): void {
   if (started || typeof window === 'undefined') return;
   started = true;
@@ -148,15 +137,7 @@ export function initInternalPwa(): void {
   let sessionExpired = false;
   let staleSince: number | null = null;
 
-  const refreshBanner = () => {
-    if (sessionExpired) {
-      const next = encodeURIComponent(location.pathname + location.search);
-      return showBanner({ kind: 'session', text: 'Your session ended. Sign in again to load live data.', actionHref: `/internal/login?next=${next}`, actionLabel: 'Sign in' });
-    }
-    if (!navigator.onLine) return showBanner({ kind: 'offline', text: OFFLINE_TEXT });
-    if (staleSince !== null) return showBanner({ kind: 'stale', text: `Showing a saved copy from ${formatAge(staleSince)}; the connection is weak. It refreshes when it improves.` });
-    showBanner(null);
-  };
+  const refreshBanner = () => showBanner(bannerFor({ sessionExpired, online: navigator.onLine, staleSince, path: location.pathname + location.search }));
 
   window.addEventListener('online', () => { staleSince = null; refreshBanner(); if (authed) void maybeWarm(); notify(); });
   window.addEventListener('offline', () => { refreshBanner(); notify(); });
@@ -204,9 +185,9 @@ export function initInternalPwa(): void {
 }
 
 async function maybeWarm() {
-  if (!navigator.onLine) return;
-  let last = 0;
-  try { last = Number(localStorage.getItem(WARM_KEY)) || 0; } catch { /* ignore */ }
-  if (Date.now() - last < WARM_EVERY_MS) return;
+  const read = (key: string) => { try { return Number(localStorage.getItem(key)) || 0; } catch { return 0; } };
+  const now = Date.now();
+  if (!shouldWarm({ now, online: navigator.onLine, lastOk: read(WARM_KEY), lastAttempt: read(WARM_ATTEMPT_KEY) })) return;
+  try { localStorage.setItem(WARM_ATTEMPT_KEY, String(now)); } catch { /* ignore */ }
   await warmPages();
 }

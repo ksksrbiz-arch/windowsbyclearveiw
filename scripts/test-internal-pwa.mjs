@@ -39,7 +39,7 @@ function makeWorld({ fetchImpl, setTimeoutImpl } = {}) {
   const stores = new Map();
   const listeners = {};
   const posted = [];
-  const calls = { skipWaiting: 0, claim: 0, fetches: [] };
+  const calls = { skipWaiting: 0, claim: 0, fetches: [], inits: [] };
   const caches = {
     async open(name) { if (!stores.has(name)) stores.set(name, new FakeCache()); return stores.get(name); },
     async keys() { return [...stores.keys()]; },
@@ -51,9 +51,10 @@ function makeWorld({ fetchImpl, setTimeoutImpl } = {}) {
     stores,
     posted,
     calls,
-    async fetch(request) {
+    async fetch(request, init) {
       const url = typeof request === 'string' ? new URL(request, ORIGIN).href : request.url;
       calls.fetches.push(url);
+      calls.inits.push({ url, init });
       if (fetchImpl) return fetchImpl(url, request, world);
       const route = world.routes.get(new URL(url).pathname + new URL(url).search) || world.routes.get(new URL(url).pathname);
       if (!route) return new Response('not found', { status: 404 });
@@ -98,6 +99,9 @@ const json = (obj, init = {}) => new Response(JSON.stringify(obj), { status: 200
 function flagged(response, props) { for (const [k, v] of Object.entries(props)) Object.defineProperty(response, k, { value: v }); return response; }
 const loginBounce = () => flagged(html('<html>login</html>'), { redirected: true, url: `${ORIGIN}/internal/login?next=%2Finternal%2Ftoday` });
 const offline = () => { throw new TypeError('Failed to fetch'); };
+// What fetch(..., { redirect: 'manual' }) returns when the server redirects: our login page, or Cloudflare Access on another origin.
+const dataSize = (w) => (w.stores.get('cv-data-v1') ? w.stores.get('cv-data-v1').map.size : 0);
+const accessRedirect = () => flagged(new Response(null, { status: 200 }), { type: 'opaqueredirect' });
 const routeWarmData = (w) => { for (const path of w.read('WARM_DATA')) if (!w.routes.has(path)) w.routes.set(path, () => json({})); };
 
 async function ready(world) {
@@ -141,9 +145,36 @@ await test('only the allowlisted read endpoints are intercepted; writes, other o
     '/api/estimate', '/api/quote-sign', '/ask/api/chat',
   ];
   for (const path of untouched) assert.equal(await w.request(path), null, `${path} must pass straight through`);
-  for (const method of ['POST', 'PATCH', 'PUT', 'DELETE']) assert.equal(await w.request('/internal/api/jobs?id=J1', { method }), null, `${method} is never intercepted or queued`);
+  // Writes to the allowlisted endpoints are handled only to word a dead connection; writes anywhere else are untouched.
+  for (const method of ['POST', 'PATCH', 'PUT', 'DELETE']) {
+    assert.notEqual(await w.request('/internal/api/jobs?id=J1', { method }), null, `${method} wording wrapper`);
+    for (const path of ['/internal/api/quotes/Q1', '/internal/api/invoices/I1', '/internal/api/job-photos?jobId=J1', '/internal/api/quote-share', '/internal/api/payments', '/internal/api/logout', '/internal/api/login']) {
+      assert.equal(await w.request(path, { method }), null, `${method} ${path} must pass straight through`);
+    }
+  }
   assert.equal(await w.request('/internal/api/dashboard', { origin: 'https://evil.example' }), null);
-  assert.equal(await w.request('/internal/api/job-checklist?id=1', { method: 'PATCH' }), null);
+});
+
+await test('writes: a real answer passes through untouched and nothing is saved or queued', async () => {
+  const w = await ready(makeWorld());
+  w.routes.set('/internal/api/job-checklist?id=7', () => json({ error: 'locked' }, { status: 409 }));
+  const response = await w.request('/internal/api/job-checklist?id=7', { method: 'PATCH' });
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, 'locked');
+  assert.ok(!w.stores.has('cv-data-v1') || (await w.stores.get('cv-data-v1')).map.size === 0);
+  assert.equal(w.calls.fetches.filter((u) => u.includes('job-checklist')).length, 1, 'sent once, never replayed');
+});
+
+await test('writes: a dead connection becomes a readable 503 that says it was not confirmed saved', async () => {
+  const w = await ready(makeWorld());
+  w.routes.set('/internal/api/job-checklist?id=7', offline);
+  const response = await w.request('/internal/api/job-checklist?id=7', { method: 'PATCH' });
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.equal(body.offline, true);
+  assert.match(body.error, /could not be confirmed as saved/);
+  assert.match(body.error, /Nothing was queued/);
+  assert.equal(w.calls.fetches.filter((u) => u.includes('job-checklist')).length, 1, 'not retried');
 });
 
 await test('data: network answer is returned and saved with a timestamp', async () => {
@@ -226,9 +257,53 @@ await test('data: an ended session (login bounce) is passed through, saved data 
   w.routes.set('/internal/api/dashboard', loginBounce);
   const response = await w.request('/internal/api/dashboard');
   assert.match(await response.text(), /login/);
-  assert.equal((await w.stores.get('cv-data-v1')).map.size, 0);
+  assert.equal(dataSize(w), 0);
   assert.ok(w.posted.some((m) => m.type === 'cv:auth-expired'));
   assert.ok(!w.posted.some((m) => m.type === 'cv:stale-data'), 'no saved copy is shown after the session ended');
+});
+
+await test('data: any redirect (login or Cloudflare Access) is "session ended", not "offline"; saved copy dropped', async () => {
+  const w = await ready(makeWorld());
+  w.routes.set('/internal/api/dashboard', () => json({ secret: 'customer list' }));
+  await w.request('/internal/api/dashboard').then((r) => r.json());
+  w.routes.set('/internal/api/dashboard', accessRedirect);
+  const response = await w.request('/internal/api/dashboard');
+  assert.equal(response.status, 401);
+  const body = await response.json();
+  assert.equal(body.code, 'SESSION_ENDED');
+  assert.match(body.error, /session ended/i);
+  assert.equal(dataSize(w), 0);
+  assert.ok(w.posted.some((m) => m.type === 'cv:auth-expired'));
+  assert.ok(!w.posted.some((m) => m.type === 'cv:stale-data'), 'no saved copy after the session ended');
+  assert.ok(w.calls.inits.filter((c) => c.url.includes('/api/dashboard')).every((c) => c.init && c.init.redirect === 'manual'), 'data fetches must not follow redirects');
+});
+
+await test('writes: a redirect is "session ended" (401), not "not saved"; writes do not follow redirects', async () => {
+  const w = await ready(makeWorld());
+  w.routes.set('/internal/api/tasks?id=1', accessRedirect);
+  const response = await w.request('/internal/api/tasks?id=1', { method: 'PATCH' });
+  assert.equal(response.status, 401);
+  assert.equal((await response.json()).code, 'SESSION_ENDED');
+  assert.ok(w.posted.some((m) => m.type === 'cv:auth-expired'));
+  assert.equal(w.calls.inits.find((c) => c.url.includes('tasks?id=1')).init.redirect, 'manual');
+  assert.equal(w.calls.fetches.filter((u) => u.includes('tasks?id=1')).length, 1, 'never replayed');
+});
+
+await test('session end wipes ALL saved data, not only the endpoint that noticed', async () => {
+  for (const trigger of ['data', 'write', 'warm']) {
+    const w = await ready(makeWorld());
+    routeWarmData(w);
+    w.routes.set('/internal/api/jobs?id=J1', () => json({ job: 'J1' }));
+    w.routes.set('/internal/api/tasks', () => json({ tasks: ['call Pat'] }));
+    await w.request('/internal/api/jobs?id=J1').then((r) => r.json());
+    await w.request('/internal/api/tasks').then((r) => r.json());
+    assert.equal(dataSize(w), 2);
+    if (trigger === 'data') { w.routes.set('/internal/api/dashboard', accessRedirect); await w.request('/internal/api/dashboard'); }
+    if (trigger === 'write') { w.routes.set('/internal/api/job-checklist?id=1', accessRedirect); await w.request('/internal/api/job-checklist?id=1', { method: 'PATCH' }); }
+    if (trigger === 'warm') { w.routes.set('/internal/api/dashboard', accessRedirect); await w.message({ type: 'cv:warm' }); }
+    assert.equal(dataSize(w), 0, `${trigger}: every saved record is gone`);
+    assert.ok(w.posted.some((m) => m.type === 'cv:auth-expired'), `${trigger}: page told`);
+  }
 });
 
 await test('data: non-JSON 200s and redirects are never saved', async () => {
@@ -323,7 +398,7 @@ await test('warm: saves every page and the assets they pull in, and reports', as
   assert.equal(reply.type, 'cv:warm-done');
   assert.equal(reply.ok, true, JSON.stringify(reply));
   assert.equal(reply.saved, pages.length);
-  const assets = [...(await w.stores.get('cv-assets-v1')).map.keys()].map((k) => new URL(k).pathname).sort();
+  const assets = [...(await w.stores.get('cv-pinned-v1')).map.keys()].map((k) => new URL(k).pathname).sort();
   assert.deepEqual(assets, ['/_astro/chunk.js', '/_astro/page.css', '/_astro/page.js', '/_astro/pic.png']);
   const saved = await (await w.stores.get('cv-shell-v1')).match('/internal/today');
   assert.equal(saved.redirected, false);
@@ -378,12 +453,93 @@ await test('warm: no more than the job limit are saved, and a signed-out data fe
   assert.equal(signedOut.ok, false);
 });
 
+await test('warm: overlapping requests share one run', async () => {
+  const w = await ready(makeWorld());
+  routeWarmData(w);
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, () => html('<html></html>'));
+  const [a, b] = await Promise.all([w.message({ type: 'cv:warm' }), w.message({ type: 'cv:warm' })]);
+  assert.equal(a[0].ok, true);
+  assert.equal(b[0].ok, true);
+  const today = w.calls.fetches.filter((u) => u.endsWith('/internal/today')).length;
+  assert.equal(today, 1, 'each page fetched once, not once per request');
+});
+
+await test('warm: the pinned asset set is swept to exactly what the pages need, and only after a clean run', async () => {
+  const w = await ready(makeWorld());
+  routeWarmData(w);
+  const page = (asset) => () => html(`<html><script type="module" src="${asset}"></script></html>`);
+  const js = (body) => () => new Response(body, { status: 200, headers: { 'content-type': 'text/javascript' } });
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page('/_astro/v1.js'));
+  w.routes.set('/_astro/v1.js', js('1'));
+  await w.message({ type: 'cv:warm' });
+  const pinned = async () => [...(await w.stores.get('cv-pinned-v1')).map.keys()].map((k) => new URL(k).pathname);
+  assert.deepEqual(await pinned(), ['/_astro/v1.js']);
+  // A run with a failing page must not sweep: nothing the saved pages still need is lost.
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page('/_astro/v2.js'));
+  w.routes.set('/_astro/v2.js', js('2'));
+  w.routes.set(w.read('WARM_PAGES')[1], offline);
+  await w.message({ type: 'cv:warm' });
+  assert.deepEqual((await pinned()).sort(), ['/_astro/v1.js', '/_astro/v2.js']);
+  // A clean run keeps only the current set.
+  w.routes.set(w.read('WARM_PAGES')[1], page('/_astro/v2.js'));
+  await w.message({ type: 'cv:warm' });
+  assert.deepEqual(await pinned(), ['/_astro/v2.js']);
+  // Runtime-capped assets are a separate cache: the cap cannot evict a pinned file.
+  w.routes.set('/_astro/other.js', js('x'));
+  await w.request('/_astro/other.js').then((r) => r.text());
+  assert.ok((await w.stores.get('cv-assets-v1')).map.has(`${ORIGIN}/_astro/other.js`));
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, offline);
+  w.routes.set('/_astro/v2.js', offline);
+  assert.equal(await (await w.request('/_astro/v2.js')).text(), '2', 'served from the pinned set');
+  await w.message({ type: 'cv:clear', scope: 'all' });
+  assert.ok(![...w.stores.keys()].some((k) => k.startsWith('cv-')));
+});
+
+await test('warm: an asset that cannot be fetched is a failed run, so nothing is swept; look-alike paths inside scripts are ignored', async () => {
+  const w = await ready(makeWorld());
+  routeWarmData(w);
+  const js = (body) => () => new Response(body, { status: 200, headers: { 'content-type': 'text/javascript' } });
+  const page = (assets) => () => html(`<html>${assets.map((a) => `<script type="module" src="${a}"></script>`).join('')}</html>`);
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/keep.js']));
+  w.routes.set('/_astro/keep.js', js('export{}'));
+  await w.message({ type: 'cv:warm' });
+  const pinned = async () => [...(await w.stores.get('cv-pinned-v1')).map.keys()].map((k) => new URL(k).pathname).sort();
+  assert.deepEqual(await pinned(), ['/_astro/keep.js']);
+  // A page's own asset answers 404: the run fails and the pinned set (which an older saved page may still use) is kept.
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/new.js', '/_astro/gone.js']));
+  w.routes.set('/_astro/new.js', js('export{}'));
+  const [failedRun] = await w.message({ type: 'cv:warm' });
+  assert.equal(failedRun.ok, false);
+  assert.ok(failedRun.failed.some((f) => f.includes('gone.js')));
+  assert.ok((await pinned()).includes('/_astro/keep.js'), 'no sweep after a failed asset fetch');
+  // A server error on a page asset fails the run too.
+  w.routes.set('/_astro/gone.js', () => new Response('boom', { status: 503 }));
+  assert.equal((await w.message({ type: 'cv:warm' }))[0].ok, false);
+  // A look-alike path inside a script is not a missing asset.
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/new.js']));
+  w.routes.set('/_astro/new.js', js('const x="./not-a-real-file.js";export{}'));
+  const [cleanRun] = await w.message({ type: 'cv:warm' });
+  assert.equal(cleanRun.ok, true, JSON.stringify(cleanRun));
+  assert.deepEqual(await pinned(), ['/_astro/new.js'], 'clean run sweeps down to exactly the current set');
+});
+
 await test('warm: signed out (login bounce) stops and saves nothing', async () => {
   const w = await ready(makeWorld());
   for (const path of w.read('WARM_PAGES')) w.routes.set(path, loginBounce);
   const [reply] = await w.message({ type: 'cv:warm' });
   assert.equal(reply.signedOut, true);
   assert.equal(reply.ok, false);
+  assert.equal((await w.stores.get('cv-shell-v1')).map.size, 1, 'only the offline page');
+});
+
+await test('warm: a sign-in redirect on the first data probe stops everything before any page is fetched', async () => {
+  const w = await ready(makeWorld());
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, () => html('<html></html>'));
+  w.routes.set('/internal/api/dashboard', accessRedirect);
+  const [reply] = await w.message({ type: 'cv:warm' });
+  assert.equal(reply.signedOut, true);
+  assert.equal(reply.ok, false);
+  assert.equal(w.calls.fetches.filter((u) => /\/internal\/(today|jobs|tools)/.test(u) && !u.includes('/api/')).length, 0);
   assert.equal((await w.stores.get('cv-shell-v1')).map.size, 1, 'only the offline page');
 });
 
@@ -427,6 +583,40 @@ await test('status: reports counts and the newest saved-data time', async () => 
 await test('the worker never queues or replays writes', async () => {
   assert.doesNotMatch(swSource, /BackgroundSync|SyncManager|addEventListener\(\s*['"]sync['"]|indexedDB|periodicsync/i);
   assert.doesNotMatch(swSource, /method\s*:\s*['"](?:POST|PUT|PATCH|DELETE)/);
+});
+
+// ---- client logic ------------------------------------------------------------------------------
+
+const logic = await import(new URL('../src/lib/pwa-logic.ts', import.meta.url).href);
+
+await test('client: warm-up runs when online and due, backs off after any attempt, never offline', () => {
+  const now = 1_000_000_000_000;
+  const base = { now, online: true, lastOk: 0, lastAttempt: 0 };
+  assert.equal(logic.shouldWarm(base), true, 'first run');
+  assert.equal(logic.shouldWarm({ ...base, online: false }), false, 'offline');
+  assert.equal(logic.shouldWarm({ ...base, lastOk: now - 60_000 }), false, 'just saved');
+  assert.equal(logic.shouldWarm({ ...base, lastOk: now - logic.WARM_EVERY_MS - 1 }), true, 'a clean run is stale after 6 h');
+  assert.equal(logic.shouldWarm({ ...base, lastAttempt: now - 60_000 }), false, 'a failed attempt is not retried on every page load');
+  assert.equal(logic.shouldWarm({ ...base, lastAttempt: now - logic.WARM_RETRY_MS - 1 }), true, 'retried after the back-off');
+});
+
+await test('client: banner priority and wording', () => {
+  const now = 1_000_000_000_000;
+  const path = '/internal/jobs/field?id=J 1';
+  assert.equal(logic.bannerFor({ sessionExpired: false, online: true, staleSince: null, path, now }), null);
+  const offlineBanner = logic.bannerFor({ sessionExpired: false, online: false, staleSince: null, path, now });
+  assert.equal(offlineBanner.kind, 'offline');
+  assert.match(offlineBanner.text, /approvals, quotes and payments need a connection/);
+  const stale = logic.bannerFor({ sessionExpired: false, online: true, staleSince: now - 20 * 60_000, path, now });
+  assert.equal(stale.kind, 'stale');
+  assert.match(stale.text, /20 min ago/);
+  assert.equal(stale.actionLabel, 'Reload');
+  assert.ok(!/refreshes/i.test(stale.text), 'does not promise an automatic refresh the pages do not do');
+  const session = logic.bannerFor({ sessionExpired: true, online: false, staleSince: now, path, now });
+  assert.equal(session.kind, 'session', 'session ended outranks offline and saved copy');
+  assert.equal(session.actionHref, `/internal/login?next=${encodeURIComponent(path)}`);
+  assert.equal(logic.formatAge(now - 3 * 24 * 3_600_000, now), '3 days ago');
+  assert.equal(logic.formatAge(now - 90 * 60_000, now), '2 h ago');
 });
 
 // ---- part 2: manifest, headers, built pages --------------------------------------------------
@@ -507,6 +697,12 @@ await test('build: every internal page links the manifest, iOS app tags and the 
     else if ((authed[1] === 'false') !== name.endsWith('login.html')) problems.push(`${name}: only the login page may be unauthenticated`);
   }
   assert.deepEqual(problems, []);
+});
+
+await test('build: the Dashboard tab is highlighted on /internal and only there', () => {
+  const active = (file) => /class="active"[^>]*>Dashboard|href="\/internal\/"[^>]*aria-current="page"|aria-current="page"[^>]*href="\/internal\/"/.test(readFileSync(file, 'utf8'));
+  assert.ok(active(join(dist, 'internal.html')), 'Dashboard active on /internal');
+  assert.ok(!active(join(dist, 'internal/today.html')), 'Dashboard not active on /internal/today');
 });
 
 await test('build: the public site does not link or register the internal manifest or worker', () => {

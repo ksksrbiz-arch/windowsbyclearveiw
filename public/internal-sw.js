@@ -14,17 +14,20 @@
  *  - Data: GET only, and only the routes in DATA_ROUTES (the Today -> Jobs -> Field loop).
  *    Network first, saved copy for up to DATA_MAX_AGE_MS, marked with x-cv-cached-at, and the page
  *    is told so it can say "saved copy". Anything else under /internal/api is never touched.
- *  - Writes are never queued or replayed. A POST/PATCH/DELETE goes straight to the network and
- *    fails visibly offline: approval, price and state changes stay deterministic and online.
+ *  - Writes are never queued or replayed. A POST/PATCH/PUT/DELETE goes straight to the network
+ *    and fails visibly offline: approval, price and state changes stay deterministic and online.
+ *    For the DATA_ROUTES endpoints only, a connection failure is turned into a readable 503 JSON
+ *    ("not saved") instead of the browser's "Failed to fetch"; a real response is never altered.
  *  - Logout and the login page clear saved data (message cv:clear).
  *
  * Bump VERSION when this file's caching behaviour changes; old caches are deleted on activate.
  */
 const VERSION = 'v1';
 const SHELL_CACHE = `cv-shell-${VERSION}`;
-const ASSET_CACHE = `cv-assets-${VERSION}`;
+const ASSET_CACHE = `cv-assets-${VERSION}`; // assets seen at runtime; capped, oldest dropped first
+const PINNED_CACHE = `cv-pinned-${VERSION}`; // exactly what the warmed pages need; swept, never capped
 const DATA_CACHE = `cv-data-${VERSION}`;
-const ALL_CACHES = [SHELL_CACHE, ASSET_CACHE, DATA_CACHE];
+const ALL_CACHES = [SHELL_CACHE, ASSET_CACHE, PINNED_CACHE, DATA_CACHE];
 
 const OFFLINE_URL = '/internal-offline.html';
 const LOGIN_PATH = '/internal/login';
@@ -135,6 +138,23 @@ async function plainCopy(response) {
   return new Response(await response.arrayBuffer(), { status: 200, statusText: 'OK', headers });
 }
 
+// Any redirect on a JSON endpoint means the session ended: our own login bounce, or Cloudflare Access
+// sending the browser to its sign-in on another origin (a fetch that follows that fails CORS and would
+// look exactly like being offline). Data and write fetches use redirect: 'manual' to see it.
+function sessionEndedJson() {
+  return new Response(JSON.stringify({ error: 'Your session ended. Sign in again to continue.', code: 'SESSION_ENDED', sessionEnded: true }), {
+    status: 401,
+    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+  });
+}
+
+// The session ended (login bounce or Cloudflare Access): drop every saved customer record, not just
+// the one that noticed, and tell the page.
+async function endSession() {
+  await caches.delete(DATA_CACHE);
+  await broadcast({ type: 'cv:auth-expired' });
+}
+
 function offlineJson(message) {
   return new Response(JSON.stringify({ error: message, offline: true }), {
     status: 503,
@@ -169,11 +189,18 @@ self.addEventListener('activate', (event) => {
 
 // ---- fetch -----------------------------------------------------------------------------------
 
+const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.method !== 'GET') return; // writes always go straight to the network
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (request.method !== 'GET') {
+    // Writes always go straight to the network, never saved or replayed. Only the wording of a
+    // dead connection changes, and only for the same endpoints the pages already read.
+    if (WRITE_METHODS.has(request.method) && isDataRoute(url)) event.respondWith(handleWrite(request));
+    return;
+  }
 
   if (request.mode === 'navigate' && isShellPath(url)) {
     if (url.pathname.startsWith('/internal/api/')) return;
@@ -184,6 +211,20 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(handleAsset(request, url));
   }
 });
+
+async function handleWrite(request) {
+  let response;
+  try {
+    response = await fetch(request, { redirect: 'manual' });
+  } catch {
+    return offlineJson('No connection, so this could not be confirmed as saved. Nothing was queued. Check it and try again when you have signal.');
+  }
+  if (response.type === 'opaqueredirect') {
+    await endSession();
+    return sessionEndedJson();
+  }
+  return response;
+}
 
 function withTimeout(promise, ms) {
   return new Promise((resolve) => {
@@ -253,13 +294,16 @@ async function handleData(request, url) {
   const cache = await caches.open(DATA_CACHE);
   const key = `${url.origin}${url.pathname}${url.search}`;
 
-  const network = fetch(request).then(async (response) => {
+  const network = fetch(request, { redirect: 'manual' }).then(async (response) => {
+    if (response.type === 'opaqueredirect') {
+      await endSession();
+      return sessionEndedJson();
+    }
     if (response.ok && isCacheable(response) && contentType(response).includes('json')) {
       await saveData(cache, key, response.clone());
     } else if (wentToLogin(response) || (response.ok && !contentType(response).includes('json'))) {
       // Session ended: never show a saved copy of someone's data after that.
-      await cache.delete(key);
-      await broadcast({ type: 'cv:auth-expired' });
+      await endSession();
     } else if (response.status === 401 || response.status === 403 || response.status === 404) {
       await cache.delete(key); // the server answered: the record is gone or off limits
     }
@@ -283,7 +327,7 @@ async function handleData(request, url) {
 async function handleAsset(request, url) {
   const cache = await caches.open(ASSET_CACHE);
   const key = `${url.origin}${url.pathname}`;
-  const hit = await cache.match(key);
+  const hit = (await (await caches.open(PINNED_CACHE)).match(key)) || (await cache.match(key));
   if (hit) return hit;
   const response = await fetch(request);
   if (isCacheable(response)) {
@@ -305,8 +349,16 @@ async function ensureAsset(cache, url, seen, depth) {
   seen.add(key);
   let response = await cache.match(key);
   if (!response) {
-    response = await fetch(key, { credentials: 'same-origin' });
-    if (!isCacheable(response)) return;
+    // Reuse a copy already saved at runtime rather than downloading it again.
+    const runtime = await (await caches.open(ASSET_CACHE)).match(key);
+    response = runtime || (await fetch(key, { credentials: 'same-origin' }));
+    if (!isCacheable(response)) {
+      // A reference found inside a script or stylesheet may just be text that looks like a path: a 404 there is not
+      // a missing asset. Anything else (a page's own asset, a server error) is a failed warm-up, so the pinned set is
+      // not swept while a saved page may still need what could not be fetched.
+      if (depth > 0 && (response.status === 404 || response.status === 410)) return;
+      throw new Error(`asset ${key} answered ${response.status}`);
+    }
     await safePut(cache, key, response.clone());
   }
   if (!/\.(?:js|css)$/.test(url.pathname)) return;
@@ -325,8 +377,8 @@ async function ensureAsset(cache, url, seen, depth) {
 // when the session has ended, or null.
 async function warmOne(cache, path, failed) {
   try {
-    const response = await fetch(path, { credentials: 'same-origin', cache: 'no-cache' });
-    if (wentToLogin(response)) return 'auth';
+    const response = await fetch(path, { credentials: 'same-origin', cache: 'no-cache', redirect: 'manual' });
+    if (response.type === 'opaqueredirect' || wentToLogin(response)) return 'auth';
     if (response.ok && isCacheable(response) && contentType(response).includes('json')) {
       const body = await response.clone().json();
       await saveData(cache, `${self.location.origin}${path}`, response);
@@ -360,11 +412,25 @@ async function warmData(failed) {
   return { signedOut: false, saved };
 }
 
+// One warm-up at a time: several tabs or quick reloads share the run in progress.
+let warming = null;
+function warmOnce() {
+  if (!warming) warming = warm().finally(() => { warming = null; });
+  return warming;
+}
+
 async function warm() {
-  const shell = await caches.open(SHELL_CACHE);
-  const assets = await caches.open(ASSET_CACHE);
-  const seen = new Set();
+  // Data first: it is also the sign-in probe. A redirect here (login or Cloudflare Access) means signed
+  // out, so no page is fetched at all.
   const failed = [];
+  const data = await warmData(failed);
+  if (data.signedOut) {
+    await endSession();
+    return { ok: false, signedOut: true, saved: 0, failed };
+  }
+  const shell = await caches.open(SHELL_CACHE);
+  const assets = await caches.open(PINNED_CACHE);
+  const seen = new Set();
   let saved = 0;
   for (const path of WARM_PAGES) {
     const url = new URL(path, self.location.origin);
@@ -376,7 +442,10 @@ async function warm() {
       continue;
     }
     // Signed out: the middleware bounced this to the login page. Stop; nothing is saved.
-    if (wentToLogin(response)) return { ok: false, signedOut: true, saved, failed };
+    if (wentToLogin(response)) {
+      await endSession();
+      return { ok: false, signedOut: true, saved, failed };
+    }
     const okPage = response.status === 200 && response.type !== 'opaque' && response.type !== 'opaqueredirect';
     if (!okPage || !contentType(response).includes('text/html')) {
       failed.push(path);
@@ -390,8 +459,13 @@ async function warm() {
       try { await ensureAsset(assets, new URL(ref, url), seen, 0); } catch { failed.push(ref); }
     }
   }
-  const data = await warmData(failed);
-  if (data.signedOut) return { ok: false, signedOut: true, saved, failed };
+  // A clean run knows exactly which assets the saved pages need; drop the rest of the pinned set so
+  // an unchanged chunk is never evicted by newer deploys and a replaced one does not pile up.
+  if (failed.length === 0) {
+    for (const request of await assets.keys()) {
+      if (!seen.has(request.url)) await assets.delete(request);
+    }
+  }
   return { ok: failed.length === 0, signedOut: false, saved, dataSaved: data.saved, failed };
 }
 
@@ -402,6 +476,7 @@ async function clearData(scope) {
   if (scope === 'all') {
     await caches.delete(SHELL_CACHE);
     await caches.delete(ASSET_CACHE);
+    await caches.delete(PINNED_CACHE);
   }
 }
 
@@ -417,7 +492,7 @@ async function status() {
   return {
     version: VERSION,
     pages: Math.max(0, (await count(SHELL_CACHE)) - 1), // minus the offline fallback page
-    assets: await count(ASSET_CACHE),
+    assets: (await count(ASSET_CACHE)) + (await count(PINNED_CACHE)),
     data: await count(DATA_CACHE),
     newestDataAt: newest || null,
   };
@@ -427,7 +502,7 @@ self.addEventListener('message', (event) => {
   const data = event.data || {};
   const reply = (message) => { if (event.source && event.source.postMessage) event.source.postMessage(message); };
   if (data.type === 'cv:warm') {
-    event.waitUntil(warm().then((result) => reply({ type: 'cv:warm-done', ...result }), () => reply({ type: 'cv:warm-done', ok: false, failed: ['warm'] })));
+    event.waitUntil(warmOnce().then((result) => reply({ type: 'cv:warm-done', ...result }), () => reply({ type: 'cv:warm-done', ok: false, failed: ['warm'] })));
   } else if (data.type === 'cv:clear') {
     event.waitUntil(clearData(data.scope === 'all' ? 'all' : 'data').then(() => reply({ type: 'cv:cleared', scope: data.scope === 'all' ? 'all' : 'data' })));
   } else if (data.type === 'cv:status') {

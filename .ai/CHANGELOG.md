@@ -4,6 +4,18 @@ Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a curr
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
 
+## 2026-10-03 — Command Center PWA hardening (follow-up to the PR above)
+
+- **Pinned asset set.** Warm-up now writes the assets saved pages need to their own cache (`cv-pinned-v1`), swept to exactly that set after a clean run. Before, one capped asset cache meant that after enough deploys the 250-entry cap could evict a chunk an unchanged saved page still needed (offline pages would load unstyled). Runtime-seen assets stay in the capped `cv-assets-v1`.
+- **Writes get an honest offline message.** A dead connection on a write to `jobs`, `tasks`, `job-checklist` or `job-evidence` now answers `503 "could not be confirmed as saved. Nothing was queued."` instead of "Failed to fetch". Still never saved or replayed; real server answers are untouched; quotes/invoices/payments/photos writes are not touched at all. Photo upload logic is unaffected (verified: it only reads the `job-photos` route, which the worker ignores).
+- **Warm-up back-off and de-duplication.** A failed or signed-out run is not retried on every page load (10 min back-off, `src/lib/pwa-logic.ts`); overlapping requests share one run in the worker.
+- **Cloudflare Access is live on production** (found while checking the deploy: `/internal/today` 302s to `unify1.cloudflareaccess.com`). That turned "an expired Access session looks like offline" from a documented edge case into the main real-world failure. Data and write fetches now use `redirect: 'manual'`; any redirect (our login or Access) answers `401 SESSION_ENDED`, wipes **all** saved data and shows the Sign in banner; warm-up probes `dashboard` first and stops before fetching any page when signed out. Verified in Chromium with a proxy that 302s `/internal/*` to another origin. Not verifiable here: the Access sign-in inside an installed **iOS** app (different origin; may not share the app's cookies). Test on the iPhone before relying on it.
+- **Live headers checked after deploy:** manifest `application/manifest+json`, `public, max-age=3600` as intended; worker file identical to `main`; `/internal-offline` `no-cache`. `/internal-sw.js` comes back `max-age=14400`, not `no-cache` (zone setting, probably); harmless because the worker registers with `updateViaCache: 'none'`.
+- **Saved-copy banner** no longer promises an automatic refresh the pages do not do; it offers Reload.
+- **Dashboard tab highlight fixed** (pre-existing): the build reports pages as `/internal.html`, so the Dashboard link never matched; the layout now compares the bare path.
+- Tests: worker (writes, pinned sweep, shared warm-up) and the pure client decisions in `npm run test:internal-pwa`; browser re-run on the final build (offline write answer, no queue database).
+- Production check: after merge the new files returned 404 for a few minutes (deploy still running); re-verify headers on the live domain once the deploy lands.
+
 ## 2026-10-03 — Command Center PWA (install + offline)
 
 - **Scope.** Owner asked for robust PWA support for the internal area. Built: installable manifest, service worker, offline fallback, saved read-only data for the Today → Jobs → Field loop, install/offline UI, tests, docs. Deliberately not built: offline write queue, push, Background Sync, saving quotes/invoices/payments/leads (see `.ai/references/internal-pwa.md`, "Not built, on purpose").
