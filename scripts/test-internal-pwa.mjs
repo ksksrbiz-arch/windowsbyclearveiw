@@ -18,7 +18,7 @@ if (!existsSync(dist)) {
 
 let failures = 0;
 async function test(name, fn) {
-  try { await fn(); console.log(`ok   ${name}`); } catch (error) { failures += 1; console.error(`FAIL ${name}\n     ${error && error.stack ? error.stack.split('\n').slice(0, 4).join('\n     ') : error}`); }
+  try { await fn(); console.log(`ok   ${name}`); } catch (error) { failures += 1; console.error(`FAIL ${name}\n     ${error && error.stack ? error.stack.split('\n').slice(0, 8).join('\n     ') : error}`); }
 }
 
 // ---- sandbox ---------------------------------------------------------------------------------
@@ -131,6 +131,16 @@ await test('activate deletes old cv-* caches, keeps current ones and other cache
   await w.activate();
   assert.deepEqual([...w.stores.keys()].sort(), ['cv-shell-v1', 'unrelated']);
   assert.equal(w.calls.claim, claimed + 1);
+});
+
+await test('updates: activate tells open pages which build is now running; status reports it', async () => {
+  const w = await ready(makeWorld());
+  const activated = w.posted.find((m) => m.type === 'cv:activated');
+  assert.ok(activated, 'cv:activated broadcast on activate');
+  assert.equal(activated.build, w.read('BUILD_ID'));
+  const [status] = await w.message({ type: 'cv:status' });
+  assert.equal(status.build, w.read('BUILD_ID'));
+  assert.equal(w.calls.skipWaiting, 1, 'a new worker takes over without waiting for every tab to close');
 });
 
 await test('only the allowlisted read endpoints are intercepted; writes, other origins and sensitive APIs never are', async () => {
@@ -495,6 +505,32 @@ await test('warm: the pinned asset set is swept to exactly what the pages need, 
   assert.ok(![...w.stores.keys()].some((k) => k.startsWith('cv-')));
 });
 
+await test('warm state lives in the worker: clean run recorded, failed run backs off, running is visible, clear resets', async () => {
+  const w = await ready(makeWorld());
+  routeWarmData(w);
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, () => html('<html></html>'));
+  const status = async () => (await w.message({ type: 'cv:status' }))[0];
+  assert.equal(JSON.stringify((await status()).warm), JSON.stringify({ running: false }), 'nothing yet');
+  // A page asking for a warm-up can disappear before it finishes; the result is still recorded for the next page.
+  const run = w.message({ type: 'cv:warm' });
+  const during = await status();
+  assert.equal(during.warm.running, true, 'a second page can see a run is in progress');
+  await run;
+  const done = (await status()).warm;
+  assert.equal(done.running, false);
+  assert.equal(done.okBuild, w.read('BUILD_ID'));
+  assert.ok(done.okAt > 0);
+  assert.equal(done.attemptAt, 0, 'back-off marker cleared by a clean run');
+  // A failing run records the attempt (the page backs off) but not a success.
+  w.routes.set(w.read('WARM_PAGES')[0], offline);
+  await w.message({ type: 'cv:warm' });
+  const failed = (await status()).warm;
+  assert.ok(failed.attemptAt > 0);
+  assert.equal(failed.okBuild, w.read('BUILD_ID'), 'the earlier clean run is still the last success');
+  await w.message({ type: 'cv:clear', scope: 'all' });
+  assert.equal(JSON.stringify((await status()).warm), JSON.stringify({ running: false }), 'reset with the saved pages');
+});
+
 await test('warm: signed out (login bounce) stops and saves nothing', async () => {
   const w = await ready(makeWorld());
   for (const path of w.read('WARM_PAGES')) w.routes.set(path, loginBounce);
@@ -591,6 +627,46 @@ await test('client: banner priority and wording', () => {
   assert.equal(logic.formatAge(now - 90 * 60_000, now), '2 h ago');
 });
 
+await test('client: update detection compares build times, ignores dev builds, and never loops or loses work', () => {
+  const older = '1790000000000-aaaaaaa';
+  const newer = '1791000000000-bbbbbbb';
+  assert.equal(logic.pageIsStale(older, newer), true, 'worker newer than page: page is out of date');
+  assert.equal(logic.pageIsStale(newer, older), false, 'worker older than page: the worker will update itself, the page is fine');
+  assert.equal(logic.pageIsStale(newer, newer), false);
+  for (const odd of ['dev', '', null, undefined, '__BUILD_ID__']) {
+    assert.equal(logic.pageIsStale(odd, newer), false, `unparseable page id ${odd}`);
+    assert.equal(logic.pageIsStale(older, odd), false, `unparseable worker id ${odd}`);
+  }
+  assert.equal(logic.pageIsStale('0000000000000-local', '0000000000000-abc'), false, 'no-git fallback never judges pages stale');
+  assert.equal(logic.buildLabel(newer), 'bbbbbbb');
+  assert.equal(logic.buildLabel('dev'), 'dev');
+
+  const now = 2_000_000_000_000;
+  const base = { stale: true, online: true, hidden: false, dirty: false, lastReloadAt: 0, now };
+  assert.equal(logic.updateAction({ ...base, stale: false }), 'none');
+  assert.equal(logic.updateAction(base), 'reload-now', 'visible and clean: reload now');
+  assert.equal(logic.updateAction({ ...base, hidden: true }), 'reload-on-resume', 'in the background: reload when the app is next opened');
+  assert.equal(logic.updateAction({ ...base, dirty: true }), 'banner', 'unsaved input is never thrown away');
+  assert.equal(logic.updateAction({ ...base, online: false }), 'banner', 'offline a reload would serve the saved copy again');
+  assert.equal(logic.updateAction({ ...base, lastReloadAt: now - 60_000 }), 'banner', 'reloaded for an update a minute ago: no loop');
+  assert.equal(logic.updateAction({ ...base, lastReloadAt: now - logic.UPDATE_RELOAD_COOLDOWN_MS - 1 }), 'reload-now');
+
+  assert.equal(logic.shouldCheckForUpdate({ now, online: true, lastCheck: 0 }), true);
+  assert.equal(logic.shouldCheckForUpdate({ now, online: true, lastCheck: now - 60_000 }), false, 'checked a minute ago');
+  assert.equal(logic.shouldCheckForUpdate({ now, online: false, lastCheck: 0 }), false);
+  const warm = { now, online: true, lastOk: now - 60_000, lastAttempt: 0 };
+  assert.equal(logic.shouldWarm(warm), false, 'saved a minute ago');
+  assert.equal(logic.shouldWarm({ ...warm, buildChanged: true }), true, 'a new deploy refreshes the saved pages and assets right away');
+  assert.equal(logic.shouldWarm({ ...warm, buildChanged: true, online: false }), false);
+  assert.equal(logic.shouldWarm({ ...warm, buildChanged: true, lastAttempt: now - 60_000 }), false, 'still backs off after a failed attempt');
+  assert.equal(logic.shouldWarm({ ...warm, buildChanged: true, running: true }), false, 'a run is already in progress');
+  const ready = logic.bannerFor({ sessionExpired: false, online: true, staleSince: now - 60_000, updateReady: true, path: '/internal/today', now });
+  assert.equal(ready.kind, 'update');
+  assert.equal(ready.actionLabel, 'Reload');
+  assert.equal(logic.bannerFor({ sessionExpired: false, online: false, staleSince: null, updateReady: true, path: '/x', now }).kind, 'offline');
+  assert.equal(logic.bannerFor({ sessionExpired: true, online: true, staleSince: null, updateReady: true, path: '/x', now }).kind, 'session');
+});
+
 // ---- part 2: manifest, headers, built pages --------------------------------------------------
 
 const manifest = JSON.parse(readFileSync(join(root, 'public/internal.webmanifest'), 'utf8'));
@@ -627,7 +703,7 @@ await test('headers: worker is always revalidated; manifest and offline page are
 
 await test('build: worker, manifest and offline page ship at public paths outside /internal/', () => {
   for (const file of ['internal-sw.js', 'internal.webmanifest', 'internal-offline.html']) assert.ok(existsSync(join(dist, file)), `${file} missing from the build`);
-  assert.equal(readFileSync(join(dist, 'internal-sw.js'), 'utf8'), swSource);
+  assert.equal(readFileSync(join(dist, 'internal-sw.js'), 'utf8').replace(/const BUILD_ID = '[^']+';/, "const BUILD_ID = '__BUILD_ID__';"), swSource, 'shipped worker is the source plus the build id');
   assert.match(readFileSync(join(dist, 'internal-offline.html'), 'utf8'), /noindex/);
   const sitemap = readdirSync(dist).filter((f) => f.startsWith('sitemap')).map((f) => readFileSync(join(dist, f), 'utf8')).join('');
   assert.doesNotMatch(sitemap, /internal/);
@@ -675,6 +751,23 @@ await test('build: the Dashboard tab is highlighted on /internal and only there'
   const active = (file) => /class="active"[^>]*>Dashboard|href="\/internal\/"[^>]*aria-current="page"|aria-current="page"[^>]*href="\/internal\/"/.test(readFileSync(file, 'utf8'));
   assert.ok(active(join(dist, 'internal.html')), 'Dashboard active on /internal');
   assert.ok(!active(join(dist, 'internal/today.html')), 'Dashboard not active on /internal/today');
+});
+
+await test('build: every deploy stamps one build id into the worker and every internal page', () => {
+  assert.match(swSource, /const BUILD_ID = '__BUILD_ID__';/, 'source keeps the placeholder the build stamps');
+  const stamped = readFileSync(join(dist, 'internal-sw.js'), 'utf8');
+  const id = /const BUILD_ID = '([^']+)';/.exec(stamped);
+  assert.ok(id, 'worker has a BUILD_ID');
+  assert.doesNotMatch(stamped, /__BUILD_ID__/, 'placeholder was stamped');
+  assert.match(id[1], /^\d{10,}-\S+$/, 'format "<time ms>-<commit>"');
+  const pages = [join(dist, 'internal.html'), ...walk(join(dist, 'internal'))];
+  for (const file of pages) {
+    const page = readFileSync(file, 'utf8');
+    const meta = /<meta name="cv-build" content="([^"]*)"/.exec(page);
+    assert.ok(meta, `${relative(dist, file)}: cv-build meta`);
+    assert.equal(meta[1], id[1], `${relative(dist, file)}: page and worker must carry the same build id`);
+  }
+  assert.equal(stamped.replace(`'${id[1]}'`, "'__BUILD_ID__'"), swSource, 'stamping changes nothing but the id');
 });
 
 await test('build: the public site does not link or register the internal manifest or worker', () => {

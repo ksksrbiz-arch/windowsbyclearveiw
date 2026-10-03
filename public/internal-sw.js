@@ -21,13 +21,20 @@
  *  - Logout and the login page clear saved data (message cv:clear).
  *
  * Bump VERSION when this file's caching behaviour changes; old caches are deleted on activate.
+ * BUILD_ID changes on every deploy; that is what makes installed copies update (see src/lib/pwa-logic.ts).
  */
 const VERSION = 'v1';
+// Stamped at build time (astro.config.mjs) so every deploy changes this file's bytes: the browser then
+// installs the new worker by itself and the open pages learn about it (cv:activated). Format
+// "<epoch ms>-<commit>". Left as the placeholder in `astro dev`.
+const BUILD_ID = '__BUILD_ID__';
 const SHELL_CACHE = `cv-shell-${VERSION}`;
 const ASSET_CACHE = `cv-assets-${VERSION}`; // assets seen at runtime; capped, oldest dropped first
 const PINNED_CACHE = `cv-pinned-${VERSION}`; // exactly what the warmed pages need; swept, never capped
 const DATA_CACHE = `cv-data-${VERSION}`;
-const ALL_CACHES = [SHELL_CACHE, ASSET_CACHE, PINNED_CACHE, DATA_CACHE];
+const META_CACHE = `cv-meta-${VERSION}`; // small bookkeeping (warm-up state); no customer data
+const ALL_CACHES = [SHELL_CACHE, ASSET_CACHE, PINNED_CACHE, DATA_CACHE, META_CACHE];
+const WARM_STATE_KEY = '/__cv/warm-state';
 
 const OFFLINE_URL = '/internal-offline.html';
 const LOGIN_PATH = '/internal/login';
@@ -183,6 +190,7 @@ self.addEventListener('activate', (event) => {
         if (name.startsWith('cv-') && !ALL_CACHES.includes(name)) await caches.delete(name);
       }
       await self.clients.claim();
+      await broadcast({ type: 'cv:activated', build: BUILD_ID });
     })(),
   );
 });
@@ -406,10 +414,35 @@ async function warmData(failed) {
   return { signedOut: false, saved };
 }
 
+// Warm-up state lives here, with the worker that does the work, not in the page: a page that asks for a
+// warm-up is usually navigated away from before it finishes (this is a multi-page app), so it could never be
+// trusted to record the result. okAt/okBuild: last clean run. attemptAt/attemptBuild: last run that has not
+// finished cleanly (cleared on success), used by the page for its retry back-off.
+async function readWarmState() {
+  try {
+    const hit = await (await caches.open(META_CACHE)).match(WARM_STATE_KEY);
+    return hit ? await hit.json() : {};
+  } catch {
+    return {};
+  }
+}
+
+async function writeWarmState(patch) {
+  const next = { ...(await readWarmState()), ...patch };
+  await safePut(await caches.open(META_CACHE), WARM_STATE_KEY, new Response(JSON.stringify(next), { headers: { 'content-type': 'application/json' } }));
+}
+
 // One warm-up at a time: several tabs or quick reloads share the run in progress.
 let warming = null;
 function warmOnce() {
-  if (!warming) warming = warm().finally(() => { warming = null; });
+  if (!warming) {
+    warming = (async () => {
+      await writeWarmState({ attemptAt: Date.now(), attemptBuild: BUILD_ID });
+      const result = await warm();
+      if (result.ok) await writeWarmState({ okAt: Date.now(), okBuild: BUILD_ID, attemptAt: 0 });
+      return result;
+    })().finally(() => { warming = null; });
+  }
   return warming;
 }
 
@@ -471,10 +504,12 @@ async function clearData(scope) {
     await caches.delete(SHELL_CACHE);
     await caches.delete(ASSET_CACHE);
     await caches.delete(PINNED_CACHE);
+    await caches.delete(META_CACHE);
   }
 }
 
 async function status() {
+  const running = warming !== null; // read before any await: it must describe the moment of the request
   const count = async (name) => (await (await caches.open(name)).keys()).length;
   const data = await caches.open(DATA_CACHE);
   let newest = 0;
@@ -485,6 +520,8 @@ async function status() {
   }
   return {
     version: VERSION,
+    build: BUILD_ID,
+    warm: { ...(await readWarmState()), running },
     pages: Math.max(0, (await count(SHELL_CACHE)) - 1), // minus the offline fallback page
     assets: (await count(ASSET_CACHE)) + (await count(PINNED_CACHE)),
     data: await count(DATA_CACHE),
