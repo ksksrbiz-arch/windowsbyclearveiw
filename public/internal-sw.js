@@ -360,7 +360,13 @@ async function ensureAsset(cache, url, seen, depth) {
     // Reuse a copy already saved at runtime rather than downloading it again.
     const runtime = await (await caches.open(ASSET_CACHE)).match(key);
     response = runtime || (await fetch(key, { credentials: 'same-origin' }));
-    if (!isCacheable(response)) return;
+    if (!isCacheable(response)) {
+      // A reference found inside a script or stylesheet may just be text that looks like a path: a 404 there is not
+      // a missing asset. Anything else (a page's own asset, a server error) is a failed warm-up, so the pinned set is
+      // not swept while a saved page may still need what could not be fetched.
+      if (depth > 0 && (response.status === 404 || response.status === 410)) return;
+      throw new Error(`asset ${key} answered ${response.status}`);
+    }
     await safePut(cache, key, response.clone());
   }
   if (!/\.(?:js|css)$/.test(url.pathname)) return;

@@ -531,6 +531,34 @@ await test('warm state lives in the worker: clean run recorded, failed run backs
   assert.equal(JSON.stringify((await status()).warm), JSON.stringify({ running: false }), 'reset with the saved pages');
 });
 
+await test('warm: an asset that cannot be fetched is a failed run, so nothing is swept; look-alike paths inside scripts are ignored', async () => {
+  const w = await ready(makeWorld());
+  routeWarmData(w);
+  const js = (body) => () => new Response(body, { status: 200, headers: { 'content-type': 'text/javascript' } });
+  const page = (assets) => () => html(`<html>${assets.map((a) => `<script type="module" src="${a}"></script>`).join('')}</html>`);
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/keep.js']));
+  w.routes.set('/_astro/keep.js', js('export{}'));
+  await w.message({ type: 'cv:warm' });
+  const pinned = async () => [...(await w.stores.get('cv-pinned-v1')).map.keys()].map((k) => new URL(k).pathname).sort();
+  assert.deepEqual(await pinned(), ['/_astro/keep.js']);
+  // A page's own asset answers 404: the run fails and the pinned set (which an older saved page may still use) is kept.
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/new.js', '/_astro/gone.js']));
+  w.routes.set('/_astro/new.js', js('export{}'));
+  const [failedRun] = await w.message({ type: 'cv:warm' });
+  assert.equal(failedRun.ok, false);
+  assert.ok(failedRun.failed.some((f) => f.includes('gone.js')));
+  assert.ok((await pinned()).includes('/_astro/keep.js'), 'no sweep after a failed asset fetch');
+  // A server error on a page asset fails the run too.
+  w.routes.set('/_astro/gone.js', () => new Response('boom', { status: 503 }));
+  assert.equal((await w.message({ type: 'cv:warm' }))[0].ok, false);
+  // A look-alike path inside a script is not a missing asset.
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, page(['/_astro/new.js']));
+  w.routes.set('/_astro/new.js', js('const x="./not-a-real-file.js";export{}'));
+  const [cleanRun] = await w.message({ type: 'cv:warm' });
+  assert.equal(cleanRun.ok, true, JSON.stringify(cleanRun));
+  assert.deepEqual(await pinned(), ['/_astro/new.js'], 'clean run sweeps down to exactly the current set');
+});
+
 await test('warm: signed out (login bounce) stops and saves nothing', async () => {
   const w = await ready(makeWorld());
   for (const path of w.read('WARM_PAGES')) w.routes.set(path, loginBounce);
