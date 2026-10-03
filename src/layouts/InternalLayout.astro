@@ -20,10 +20,13 @@ const navItems = [
 ];
 // The build reports this page as "/internal/jobs/field.html", so an exact string match never matched.
 const isFieldMode = /^\/internal\/jobs\/field(\.html)?\/?$/.test(pathname);
-const isActive = (href: string) => href === '/internal/' ? pathname === href : pathname.startsWith(href);
+// The build reports pages as "/internal/today.html" (and the Dashboard as "/internal.html"), while Pages
+// serves them extensionless and redirects /internal/ to /internal; compare on the bare path.
+const here = pathname.replace(/\.html$/, '').replace(/\/index$/, '').replace(/\/+$/, '') || '/';
+const isActive = (href: string) => href === '/internal/' ? here === '/internal' : here.startsWith(href);
 const mobilePrimary = navItems.filter((item) => ['/internal/today', '/internal/follow-up', '/internal/quotes', '/internal/jobs'].includes(item.href));
 const mobileMoreItems = navItems.filter((item) => ['/internal/', '/internal/leads', '/internal/invoices', '/internal/schedule', '/internal/payments', '/internal/analytics', '/internal/tools', '/internal/ask-logs'].includes(item.href));
-const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ? pathname === item.href : pathname.startsWith(item.href));
+const isMoreActive = mobileMoreItems.some((item) => isActive(item.href));
 ---
 <!doctype html>
 <html lang="en">

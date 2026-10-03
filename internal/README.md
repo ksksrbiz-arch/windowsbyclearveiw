@@ -323,7 +323,11 @@ The Command Center is an installable app (PWA). Design and limits: `.ai/referenc
   evidence, approvals, quotes, invoices, payments) needs a connection and is never saved for later.**
 - **Control:** Tools, Phone app card: **Save pages for offline** (refresh now), **Clear saved data** (pages and data;
   photos are untouched). Logging out clears saved data.
-- Nothing to configure in Cloudflare. The worker and manifest are plain files in `public/`.
+- **Sign-in:** production sits behind Cloudflare Access. When the Access session ends, the app shows "Your session ended" with
+  a Sign in link, drops all saved data, and Access signs you in again. The Access session length you set (1 month) is how long
+  the app works without a sign-in. On an iPhone, check that this sign-in completes inside the installed app; if it loops,
+  keep using Safari for the Command Center and tell Keith.
+- Nothing to configure in Cloudflare for the app itself. The worker and manifest are plain files in `public/`.
 
 ## Local development
 
