@@ -1,3 +1,4 @@
+import { pacificDayRange } from '../_lib/pacific-day.mjs';
 import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
 
 function json(data, status = 200) {
@@ -26,6 +27,7 @@ async function ensureSchema(db) {
  *  against ISO bounds, so a value like "tomorrow" would sort after every real date and never go overdue.
  *  Returns { value } (undefined = not sent, null = cleared) or { error }. */
 function parseDueAt(raw) {
+  if (raw === null) return { value: null };
   if (typeof raw !== 'string') return { value: undefined };
   const text = raw.trim().slice(0, 40);
   if (!text) return { value: null };
@@ -44,7 +46,12 @@ export async function onRequestGet(context) {
   const page = Math.max(1, Number.parseInt(url.searchParams.get('page') || '1', 10) || 1);
   const limit = 200;
   const offset = (page - 1) * limit;
-  const where = leadId ? 'WHERE t.lead_id = ?' : '';
+  const status = url.searchParams.get('status');
+  if (status && !['open', 'done'].includes(status)) return json({ error: 'Choose a valid follow-up status.' }, 400);
+  const conditions = [], bindings = [];
+  if (leadId) { conditions.push('t.lead_id = ?'); bindings.push(leadId); }
+  if (status) { conditions.push('t.status = ?'); bindings.push(status); }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   // quote_id is added lazily by the follow-up sync; if that failed, still list the queue without it.
   const columns = await env.QUOTES_DB.prepare('PRAGMA table_info(follow_up_tasks)').all();
   const hasQuoteId = (columns.results || []).some((column) => column.name === 'quote_id');
@@ -55,14 +62,22 @@ export async function onRequestGet(context) {
     LEFT JOIN leads l ON l.id = t.lead_id
     ${hasQuoteId ? 'LEFT JOIN quotes q ON q.id = t.quote_id' : ''}
     ${where}
-    ORDER BY CASE WHEN t.status = 'open' THEN 0 ELSE 1 END, COALESCE(t.due_at, '9999-12-31T23:59:59Z') ASC, t.created_at DESC
+    ORDER BY CASE WHEN t.status = 'open' THEN 0 ELSE 1 END, COALESCE(t.due_at, '9999-12-31T23:59:59Z') ASC, t.created_at DESC, t.id ASC
     LIMIT ? OFFSET ?
   `);
-  const result = leadId ? await statement.bind(leadId, limit, offset).all() : await statement.bind(limit, offset).all();
+  const result = await statement.bind(...bindings, limit, offset).all();
   const countQuery = env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM follow_up_tasks t ${where}`);
-  const count = leadId ? await countQuery.bind(leadId).first() : await countQuery.first();
+  const count = await countQuery.bind(...bindings).first();
   const total = Number(count?.total || 0);
-  return json({ tasks: result.results || [], page, pageSize: limit, total, totalPages: Math.ceil(total / limit) });
+  const now = new Date().toISOString(), today = pacificDayRange(new Date(now));
+  // Summaries cover the whole lead/queue, regardless of which page or status is being viewed.
+  const summary = await env.QUOTES_DB.prepare(`SELECT
+    COUNT(*) AS open,
+    COALESCE(SUM(CASE WHEN due_at >= ? AND due_at < ? THEN 1 ELSE 0 END), 0) AS today,
+    COALESCE(SUM(CASE WHEN due_at < ? THEN 1 ELSE 0 END), 0) AS overdue
+    FROM follow_up_tasks WHERE status = 'open' ${leadId ? 'AND lead_id = ?' : ''}`)
+    .bind(today.start, today.end, now, ...(leadId ? [leadId] : [])).first();
+  return json({ tasks: result.results || [], page, pageSize: limit, total, totalPages: Math.ceil(total / limit), summary: summary || { open: 0, today: 0, overdue: 0 } });
 }
 
 export async function onRequestPost(context) {

@@ -1,5 +1,13 @@
 # ICM Changelog
 
+## 2026-10-03 — Full-queue filters, counts and visible recovery
+
+- `/internal/api/jobs?status=…` filters before pagination, returns the matching total plus the all-queue active count, and uses id as a stable sort tie-breaker. The Jobs screen resets to page one when switching filters and cancels/discards old responses.
+- `/internal/api/tasks?status=open` pages only open work. Its summary counts all open tasks, including the Pacific business day's due tasks and overdue work. Shared day boundaries now live in `functions/internal/_lib/pacific-day.mjs`; dashboard.js re-exports the existing helper so callers remain compatible. `dueAt:null` on PATCH clears the date.
+- Follow-up Done failures now show beside the task list, outside the usually hidden Add form. Both job and follow-up loaders offer retry after a failed request and recover if the final page empties.
+- Regression evidence: more than 200 seeded jobs/tasks on real SQLite; full-queue totals, filters, Pacific midnight boundaries, explicit date clearing; actual client handlers exercised for late responses and visible save errors. The old pagination fixture now isolates follow-up records from unrelated draft-quote reminder generation.
+- Validation: `npm run test:all`, `npm run test:pagination`, separate `npm run build`, and `git diff --check`. Browser/iPhone checks remain VERIFY; production records were not modified.
+
 ## 2026-10-03 — Dashboard dates, follow-up saves and short-screen navigation
 
 - Fixed dashboard Upcoming jobs showing the previous day in Pacific time: `src/lib/scheduled-day.ts` treats YYYY-MM-DD as a calendar date, validates it, and formats in UTC. Timestamp dates elsewhere retain their existing behavior.

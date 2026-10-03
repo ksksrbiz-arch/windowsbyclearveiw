@@ -284,3 +284,101 @@ console.log('command center fixes: ok');
   assert.equal(button.textContent, 'Done');
   pass('dashboard completion prevents duplicate saves and restores the button with the server error on failure');
 }
+
+// Filters are applied before pagination; summaries count the whole queue.
+{
+  const env = freshEnv();
+  await call(jobsApi.onRequestGet, env);
+  const insert = env.QUOTES_DB.raw.prepare(`INSERT INTO jobs (id,created_at,updated_at,status,customer_name) VALUES (?,'2026-10-01','2026-10-01',?,'Queue test')`);
+  for (let i=0;i<205;i++) insert.run(`J-ready-${i}`, 'ready');
+  for (let i=0;i<3;i++) insert.run(`J-completed-${i}`, 'completed');
+  const completed = await call(jobsApi.onRequestGet, env, { path: '/internal/api/jobs?status=completed' });
+  assert.equal(completed.body.jobs.length, 3);
+  assert.equal(completed.body.total, 3);
+  assert.equal(completed.body.activeTotal, 205);
+  assert.ok(completed.body.jobs.every(job => job.status === 'completed'));
+  const second = await call(jobsApi.onRequestGet, env, { path: '/internal/api/jobs?status=ready&page=2' });
+  assert.equal(second.body.jobs.length, 5);
+  assert.equal(second.body.total, 205);
+  assert.equal((await call(jobsApi.onRequestGet, env, { path: '/internal/api/jobs?status=invalid' })).status, 400);
+  pass('job filters find records beyond the first page; totals and active counts cover the whole queue');
+}
+{
+  const env = freshEnv();
+  await call(tasksApi.onRequestGet, env);
+  const { start, end } = dashboardApi.pacificDayRange();
+  const insert = env.QUOTES_DB.raw.prepare(`INSERT INTO follow_up_tasks (created_at,updated_at,title,status,due_at) VALUES ('2026-10-01','2026-10-01','Queue test',?,?)`);
+  for (let i=0;i<205;i++) insert.run('open', null);
+  insert.run('open', start);
+  insert.run('open', new Date(Date.parse(start)-1).toISOString());
+  insert.run('open', end);
+  insert.run('done', start);
+  const first = await call(tasksApi.onRequestGet, env, { path: '/internal/api/tasks?status=open' });
+  const second = await call(tasksApi.onRequestGet, env, { path: '/internal/api/tasks?status=open&page=2' });
+  assert.equal(first.body.total, 208);
+  assert.equal(first.body.tasks.length, 200);
+  assert.equal(second.body.tasks.length, 8);
+  assert.ok(first.body.tasks.every(task => task.status === 'open'));
+  assert.equal(first.body.summary.open, 208);
+  assert.equal(first.body.summary.today, 1, 'Pacific midnight included; next midnight excluded; completed tasks excluded');
+  assert.deepEqual(first.body.summary, second.body.summary, 'summary does not change between pages');
+  assert.equal((await call(tasksApi.onRequestGet, env, { path: '/internal/api/tasks?status=invalid' })).status, 400);
+  const id = first.body.tasks.find(task => task.due_at === start).id;
+  const cleared = await call(tasksApi.onRequestPatch, env, { method: 'PATCH', path: `/internal/api/tasks?id=${id}`, body: { dueAt: null } });
+  assert.equal(cleared.status, 200);
+  assert.equal(env.QUOTES_DB.raw.prepare('SELECT due_at FROM follow_up_tasks WHERE id=?').get(id).due_at, null);
+  pass('open follow-up pagination and summaries cover the full queue in Pacific time; null explicitly clears a due date');
+}
+
+// Run the real queue loader with responses finishing out of order.
+{
+  const source = read('src/pages/internal/jobs/index.astro');
+  const handler = source.slice(source.indexOf('    async function loadJobs()'), source.indexOf('    async function loadQuotes()'));
+  const requests = [];
+  const output = { textContent: '' };
+  const context = createContext({
+    AbortController, URLSearchParams, Error,
+    pending: null, jobs: [], activeFilter: 'ready', page: 1, totalPages: 1, total: 0,
+    prev: { disabled: true }, next: { disabled: true }, filters: [],
+    count: output, updated: { textContent: '' }, pageLabel: { textContent: '' },
+    list: { innerHTML: '', querySelector: () => null }, render: () => {},
+    label: value => value, esc: value => String(value),
+    fetch: (url, options) => new Promise(resolve => requests.push({ url, options, resolve })),
+  });
+  runInContext(stripTypeScriptTypes(handler), context);
+  const oldRequest = context.loadJobs();
+  context.activeFilter = 'completed';
+  const newRequest = context.loadJobs();
+  assert.equal(requests[0].options.signal.aborted, true);
+  assert.match(requests[1].url, /status=completed/);
+  requests[1].resolve(new Response(JSON.stringify({ jobs: [{ id:'new' }], page:1, total:1, totalPages:1, activeTotal:205 })));
+  await newRequest;
+  requests[0].resolve(new Response(JSON.stringify({ jobs: [{ id:'old' }], page:1, total:200, totalPages:1, activeTotal:999 })));
+  await oldRequest;
+  assert.equal(context.jobs[0].id, 'new');
+  assert.equal(output.textContent, '205');
+  pass('rapid job filter changes cannot replace the latest result with a late response');
+}
+{
+  const source = read('src/pages/internal/follow-up.astro');
+  const start = source.indexOf("      list.querySelectorAll('[data-done]')");
+  const handler = source.slice(start, source.indexOf('\n    }\n    async function load()', start));
+  class Element { hidden = true; textContent = ''; }
+  class Button extends Element { disabled = false; dataset = { done:'1' }; addEventListener(_, callback) { this.callback=callback; } }
+  const button = new Button(), error = new Element();
+  const context = createContext({
+    HTMLButtonElement: Button, HTMLElement: Element, Error,
+    list: { querySelectorAll: () => [button] },
+    document: { querySelector: selector => selector==='[data-queue-error]' ? error : null },
+    fetch: async () => new Response(JSON.stringify({error:'Not saved. Sign in again.'}), {status:401}),
+    load: async () => { throw new Error('failed write must not reload'); },
+  });
+  runInContext(stripTypeScriptTypes(handler), context);
+  await button.callback();
+  assert.equal(error.hidden, false);
+  assert.equal(error.textContent, 'Not saved. Sign in again.');
+  assert.equal(button.disabled, false);
+  assert.equal(button.textContent, 'Done');
+  assert.match(source, /<section class="task-panel">[\s\S]*?data-queue-error/, 'queue error lives outside the hidden Add form');
+  pass('a failed follow-up completion shows a visible queue error and restores Done');
+}
