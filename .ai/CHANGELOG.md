@@ -1,5 +1,12 @@
 # ICM Changelog
 
+## 2026-10-03 — Dashboard dates, follow-up saves and short-screen navigation
+
+- Fixed dashboard Upcoming jobs showing the previous day in Pacific time: `src/lib/scheduled-day.ts` treats YYYY-MM-DD as a calendar date, validates it, and formats in UTC. Timestamp dates elsewhere retain their existing behavior.
+- Dashboard Done buttons now disable immediately, ignore repeat taps while pending, restore after failure, and show the API error (including session/offline errors).
+- The mobile More menu has a viewport-bound scroll area; Escape closes it and returns focus to More.
+- `test:command-center` executes the real dashboard save handler with a deferred response and a rejected save, and checks calendar dates in four timezones including DST and leap day. Full local test suite and Astro build passed. Browser installation failed in this environment, so visual/iPhone checks remain VERIFY; no production customer records were modified.
+
 Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a current-state snapshot.
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.

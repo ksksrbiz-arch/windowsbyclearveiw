@@ -5,6 +5,8 @@
 //   client markup, never cut off), and the markup/CSS contracts behind the phone fixes in the quote
 //   builder and signature pad (focus kept while typing, no sideways scroll).
 import assert from 'node:assert/strict';
+import { stripTypeScriptTypes } from 'node:module';
+import { createContext, runInContext } from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createD1 } from './_lib/d1-sqlite.mjs';
@@ -226,3 +228,59 @@ async function approvedQuote(env, body) {
 }
 
 console.log('command center fixes: ok');
+
+// Calendar-only job dates must not inherit the phone's timezone.
+{
+  const { formatScheduledDay } = await import(pathToFileURL(`${root}src/lib/scheduled-day.ts`).href);
+  const originalZone = process.env.TZ;
+  try {
+    for (const zone of ['America/Los_Angeles', 'UTC', 'Pacific/Kiritimati', 'Pacific/Honolulu']) {
+      process.env.TZ = zone;
+      assert.equal(formatScheduledDay('2026-10-03'), 'Oct 3', zone);
+      assert.equal(formatScheduledDay('2026-03-08'), 'Mar 8', `${zone}: DST start`);
+      assert.equal(formatScheduledDay('2026-11-01'), 'Nov 1', `${zone}: DST end`);
+      assert.equal(formatScheduledDay('2028-02-29'), 'Feb 29', `${zone}: leap day`);
+    }
+    assert.equal(formatScheduledDay(null), 'Unscheduled');
+    assert.equal(formatScheduledDay('2026-02-30'), '2026-02-30');
+    assert.equal(formatScheduledDay('invalid'), 'invalid');
+  } finally {
+    if (originalZone === undefined) delete process.env.TZ; else process.env.TZ = originalZone;
+  }
+  pass('dashboard job dates stay on the scheduled calendar day across timezones and DST');
+}
+
+// Execute the dashboard's real click handler: a second tap while the save is pending makes no write.
+{
+  const source = read('src/pages/internal/index.astro');
+  const handler = source.slice(source.indexOf('    async function completeTask('), source.indexOf('    async function load('));
+  assert.ok(handler.includes('async function completeTask'), 'dashboard completion handler exists');
+  let resolveSave, writes = 0, reloads = 0;
+  const status = { textContent: '' };
+  const button = { disabled: false, textContent: 'Done' };
+  const context = createContext({
+    fetch: () => { writes++; return new Promise((resolve) => { resolveSave = resolve; }); },
+    load: async () => { reloads++; },
+    $: () => status,
+    Error,
+  });
+  runInContext(stripTypeScriptTypes(handler), context);
+  const first = context.completeTask(1, button);
+  assert.equal(button.disabled, true);
+  assert.equal(button.textContent, 'Saving…');
+  await context.completeTask(1, button);
+  assert.equal(writes, 1);
+  resolveSave(new Response(JSON.stringify({ ok: true })));
+  await first;
+  assert.equal(reloads, 1);
+  assert.equal(button.disabled, false);
+  assert.equal(button.textContent, 'Done');
+  const failed = context.completeTask(1, button);
+  resolveSave(new Response(JSON.stringify({ error: 'Your session ended. Sign in again.' }), { status: 401 }));
+  await failed;
+  assert.equal(reloads, 1);
+  assert.equal(status.textContent, 'Your session ended. Sign in again.');
+  assert.equal(button.disabled, false);
+  assert.equal(button.textContent, 'Done');
+  pass('dashboard completion prevents duplicate saves and restores the button with the server error on failure');
+}
