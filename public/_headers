@@ -24,6 +24,22 @@
 /site.webmanifest
   Cache-Control: public, max-age=86400
 
+# Command Center PWA (see .ai/references/internal-pwa.md). These sit outside /internal/ on
+# purpose: that path is behind the login middleware, and a manifest or service worker
+# request that gets redirected to the login page fails. None of them holds customer data.
+# The worker script must always be revalidated so a fix reaches the phone on the next launch.
+/internal.webmanifest
+  Cache-Control: public, max-age=3600
+
+/internal-sw.js
+  Cache-Control: no-cache
+
+/internal-offline.html
+  Cache-Control: no-cache
+
+/internal-offline
+  Cache-Control: no-cache
+
 # The font filename is stable rather than fingerprinted, so no `immutable`
 # here — a returning visitor still revalidates on reload and picks up a
 # typeface swap instead of holding a 30-day-stale file under that filename.

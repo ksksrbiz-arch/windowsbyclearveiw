@@ -1,0 +1,27 @@
+{
+  "id": "/internal",
+  "name": "Clearview Command Center",
+  "short_name": "Clearview Ops",
+  "description": "Clearview Windows & Trim internal operations: leads, quotes, jobs and field mode.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/internal/today?source=pwa",
+  "scope": "/internal",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#101113",
+  "theme_color": "#101113",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Today", "url": "/internal/today?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Follow-up", "url": "/internal/follow-up?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Jobs", "url": "/internal/jobs?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Job photos", "url": "/internal/tools/photos?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
