@@ -6,7 +6,7 @@ kicker: Guide
 topic: Product
 published: true
 updated: 2026-09-04
-order: 6
+order: 7
 heroImage: ../../assets/work/tan-upper-slider.jpg
 heroImageAlt: Close view of an upper-story white slider on tan vertical siding, showing the kind of opening where frame size and exposure matter.
 heroImageCredit: Clearview job photo — upper-story slider opening

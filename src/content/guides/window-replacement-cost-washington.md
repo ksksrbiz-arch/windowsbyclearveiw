@@ -31,7 +31,7 @@ Four things move the bid:
 3. **Glass.** Double-pane low-E is the baseline. Triple-pane, specialty sizes, and tempered glass add cost because they add performance or are required by code.
 4. **Access.** A first-floor slider is a very different job from a third-story picture window over a roof.
 
-Permits, if the city requires them for the scope, sit on top of that.
+Permits, if the city requires them for the scope, sit on top of that. Whether you need one depends on where you live; see [do you need a permit to replace windows in Washington](/guides/window-replacement-permit-washington).
 
 ## Ranges, not quotes
 
