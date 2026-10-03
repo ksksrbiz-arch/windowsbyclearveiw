@@ -1,6 +1,6 @@
 // Companion Worker for jobs Pages Functions cannot do: anything on a schedule.
 // Cron Triggers (see wrangler.toml):
-//   "15 10 * * *"  nightly D1 backup to R2 (about 3:15 AM Pacific), then prune to the newest 30
+//   "15 10 * * *"  nightly: purge /ask log rows past 30 days, D1 backup to R2 (about 3:15 AM Pacific), then prune to the newest 30
 //   "30 15 * * 1-5" weekday morning follow-up nudge (about 8:30 AM Pacific)
 //
 // It has no public surface: fetch() answers 404 to everything. Failures are pushed to the phone
@@ -8,17 +8,30 @@
 import { runBackup, pruneBackups } from './backup.mjs';
 import { countFollowUps, digestMessage, FOLLOW_UPS_URL } from './digest.mjs';
 import { sendOpsAlert } from '../../../functions/_lib/lead-alert.mjs';
+import { askLogCutoff } from '../../../functions/ask/_lib/log-scrub.mjs';
 
 export const BACKUP_CRON = '15 10 * * *';
 export const DIGEST_CRON = '30 15 * * 1-5';
 
+/** Deletes /ask log rows past the 30-day retention window. Never throws: the backup must still run. */
+export async function purgeAskLogs(db, now = new Date()) {
+  try {
+    const result = await db.prepare('DELETE FROM ask_logs WHERE created_at < ?').bind(askLogCutoff(now.getTime())).run();
+    return Number(result?.meta?.changes) || 0;
+  } catch (error) {
+    console.error('ask-logs-purge-failed', error?.message || error);
+    return 0;
+  }
+}
+
 export async function handleScheduled(cron, env, now = new Date(), alert = sendOpsAlert) {
   if (cron === BACKUP_CRON) {
     try {
+      const askLogsPurged = await purgeAskLogs(env.QUOTES_DB, now);
       const result = await runBackup(env.QUOTES_DB, env.DB_BACKUPS, now);
       const pruned = await pruneBackups(env.DB_BACKUPS, now);
-      console.log('backup-ok', JSON.stringify({ ...result, pruned: pruned.length }));
-      return { job: 'backup', ok: true, ...result, pruned: pruned.length };
+      console.log('backup-ok', JSON.stringify({ ...result, pruned: pruned.length, askLogsPurged }));
+      return { job: 'backup', ok: true, ...result, pruned: pruned.length, askLogsPurged };
     } catch (error) {
       console.error('backup-failed', error?.message || error);
       await alert(env, { title: 'Database backup FAILED', body: 'Last night\'s backup did not complete. The live data is fine. Tell Keith.', click: 'https://windowsbyclearview.com/internal', tags: 'warning' });

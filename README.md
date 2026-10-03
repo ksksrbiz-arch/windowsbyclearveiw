@@ -278,7 +278,7 @@ separate file, compare it with `npm run eval:retrieval` (hit rates, score ranges
 
 ### Ask observability
 
-Ask turns are logged best-effort to the `ask_logs` table in the internal D1 database. The internal `/internal/ask-logs` screen is protected by the same authentication boundary as the rest of the internal application.
+Ask turns are logged best-effort to the `ask_logs` table in the internal D1 database: metadata (model, tools, guide sources, refused) plus the question and answer, scrubbed of phone numbers, emails, links, street addresses, ZIP codes, long digit runs and "my name is …" by `functions/ask/_lib/log-scrub.mjs`. Rows live 30 days: every insert deletes expired rows, `/internal/api/ask-logs` never returns one, and the nightly `workers/ops-cron` job purges them and leaves the question/answer text out of its R2 backup. The privacy policy (`## The website consultant (/ask)`) states all of this; `npm run test:ask-logs` fails if the code and the policy drift apart. The internal `/internal/ask-logs` screen is protected by the same authentication boundary as the rest of the internal application.
 
 ### Ask testing
 

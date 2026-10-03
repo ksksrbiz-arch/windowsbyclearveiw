@@ -6,7 +6,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div>
       <p class="kicker">Clearview internal</p>
       <h1>Ask activity</h1>
-      <p class="lede">How the /ask chatbot is being used: which tools it reached for, what it could not answer, and where conversations lead. Visitors' words are not stored.</p>
+      <p class="lede">How the /ask chatbot is being used: which tools it reached for, what it could not answer, and where conversations lead. Questions and answers are kept for 30 days with phone numbers, emails, addresses and similar details scrubbed out, then deleted.</p>
     </div>
     <a class="btn btn-ghost" href="/internal/leads">Leads</a>
     <a class="btn btn-ghost" href="/internal/quotes">&larr; Quotes</a>
@@ -58,6 +58,10 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       } catch {
         return [];
       }
+    }
+
+    function isLegacy(l: any) {
+      return l.question === '[redacted]';
     }
 
     function renderFunnel(funnel: Record<string, number> | undefined) {
@@ -118,8 +122,9 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
                 ${tools.map((t: string) => `<span class="al-tag">${escapeHtml(t)}</span>`).join('')}
                 ${l.refused ? '<span class="al-tag al-tag-refused">no answer</span>' : ''}
               </div>
-              <p class="al-question">${escapeHtml(l.question)}</p>
-              <p class="al-answer">${escapeHtml(l.answer)}</p>
+              ${isLegacy(l)
+                ? '<p class="al-answer">Words not recorded (logged before question storage was turned on).</p>'
+                : `<p class="al-question">${escapeHtml(l.question)}</p><p class="al-answer">${escapeHtml(l.answer)}</p>`}
               ${sources.length ? `<p class="al-sources">Sources: ${sources.map((s: any) => escapeHtml(s?.title)).join(', ')}</p>` : ''}
             `;
             list.append(card);

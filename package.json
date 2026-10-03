@@ -22,6 +22,7 @@
     "test:ask-security": "node scripts/test-ask-security.mjs",
     "test:ask-pricing": "node scripts/test-ask-pricing-sync.mjs",
     "test:ask-handoff": "node scripts/test-ask-handoff.mjs",
+    "test:ask-logs": "node --disable-warning=ExperimentalWarning scripts/test-ask-logs.mjs",
     "test:recent-fixes": "node scripts/test-recent-fixes.mjs",
     "test:public-terminology": "node scripts/test-public-terminology.mjs",
     "test:seo": "node scripts/test-seo-meta.mjs",
