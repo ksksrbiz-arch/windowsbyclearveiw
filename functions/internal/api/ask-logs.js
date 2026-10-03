@@ -42,9 +42,16 @@ export async function onRequestGet(context) {
   } catch {
     // The read below still filters by date.
   }
-  const { results } = await env.QUOTES_DB.prepare(
-    `SELECT id, created_at, question, answer, model_used, tools_used, sources, match_count, refused
-     FROM ask_logs WHERE created_at >= ? ORDER BY created_at DESC LIMIT 200`,
-  ).bind(cutoff).all();
-  return json({ logs: results, funnel: await funnel(env.QUOTES_DB, 30) });
+  let logs = [];
+  try {
+    const { results } = await env.QUOTES_DB.prepare(
+      `SELECT id, created_at, question, answer, model_used, tools_used, sources, match_count, refused
+       FROM ask_logs WHERE created_at >= ? ORDER BY created_at DESC LIMIT 200`,
+    ).bind(cutoff).all();
+    logs = results || [];
+  } catch {
+    // No ask_logs table yet (a new database, or /ask has not logged anything): an empty list, not a 500,
+    // exactly as the funnel below already treats a missing table.
+  }
+  return json({ logs, funnel: await funnel(env.QUOTES_DB, 30) });
 }

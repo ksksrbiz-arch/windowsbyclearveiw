@@ -1149,3 +1149,29 @@ html.reveal-ready [data-reveal].is-revealed {
     object-fit: cover;
   }
 }
+
+/* Command Center on a touch screen (src/layouts/InternalLayout.astro sets body.internal).
+   iOS Safari zooms the page in whenever a form control under 16px takes focus and never zooms back out, which
+   hit most internal forms (Field mode, payments, job entry, the build-plan editor). 16px stops it without
+   disabling pinch-zoom. (!important because page-level scoped rules differ in specificity per page; this is a floor, not a style.) Check boxes and radios get a visible size where the page left the 13px default. Found by
+   the 2026-10-03 phone audit (.ai/CHANGELOG.md). */
+@media (pointer: coarse) {
+  body.internal.internal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+  body.internal.internal select,
+  body.internal.internal textarea {
+    font-size: max(16px, 1em) !important;
+  }
+  /* Phone numbers and emails are tap-to-call / tap-to-mail actions; grow the hit area without moving the text. */
+  body.internal.internal a[href^="tel:"],
+  body.internal.internal a[href^="mailto:"] {
+    display: inline-block;
+    padding-block: 0.65rem;
+    margin-block: -0.65rem;
+  }
+  body.internal.internal input[type="checkbox"],
+  body.internal.internal input[type="radio"] {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
+
