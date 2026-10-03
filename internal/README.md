@@ -321,6 +321,7 @@ The Command Center is an installable app (PWA). Design and limits: `.ai/referenc
   mode reads for each active job. With no signal those open from the saved copy (banner at the top says so);
   saved data expires after 3 days. Photos still save to the phone. **Anything that changes a record (checklist,
   evidence, approvals, quotes, invoices, payments) needs a connection and is never saved for later.**
+- **Updates:** nothing to do. After each deploy the installed app picks up the new version by itself the next time it is opened or brought to the front, and refreshes its saved pages. A page with typed-in, unsaved text is never reloaded under you; a banner offers Reload instead. Tools, Phone app card, shows the running version and has **Check for updates**.
 - **Control:** Tools, Phone app card: **Save pages for offline** (refresh now), **Clear saved data** (pages and data;
   photos are untouched). Logging out clears saved data.
 - **Sign-in:** production sits behind Cloudflare Access. When the Access session ends, the app shows "Your session ended" with

@@ -6,20 +6,24 @@
  * Tools page card, so module state (the captured install prompt) is shared between them.
  */
 
-import { bannerFor, formatAge, shouldWarm, type BannerState } from '../lib/pwa-logic';
+import { bannerFor, buildLabel, formatAge, pageIsStale, shouldCheckForUpdate, shouldWarm, updateAction, type BannerState } from '../lib/pwa-logic';
 
 export { formatAge };
 export const SW_URL = '/internal-sw.js';
 // No trailing slash on purpose: Pages serves the Dashboard at /internal (/internal/ redirects to it).
 export const SW_SCOPE = '/internal';
-const WARM_KEY = 'clearview:pwa:warmed';
-const WARM_ATTEMPT_KEY = 'clearview:pwa:warm-attempt';
+const UPDATE_RELOAD_KEY = 'clearview:pwa:update-reload';
+const UPDATE_INTERVAL_MS = 30 * 60 * 1000;
 const CLEAR_WAIT_MS = 1500;
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
 
+export type WarmState = { okAt?: number; okBuild?: string; attemptAt?: number; attemptBuild?: string; running?: boolean };
+
 export type WorkerStatus = {
   version: string;
+  build: string;
+  warm: WarmState;
   pages: number;
   assets: number;
   data: number;
@@ -35,10 +39,15 @@ export type PwaStatus = {
   online: boolean;
   persisted: boolean | null;
   worker: WorkerStatus | null;
+  /** Build this page was served from, and the build of the worker running it ("dev" when not stamped). */
+  pageBuild: string;
+  workerBuild: string | null;
 };
 
 let installPrompt: InstallPrompt | null = null;
 let started = false;
+let workerBuild: string | null = null;
+let lastUpdateCheck = 0;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((fn) => fn());
 
@@ -75,14 +84,12 @@ function ask<T extends { type: string }>(message: Record<string, unknown>, reply
 /** Remove saved customer data. `all` also drops saved pages and assets (the Tools "reset" button). */
 export async function clearSavedData(scope: 'data' | 'all' = 'data'): Promise<boolean> {
   const reply = await ask<{ type: string }>({ type: 'cv:clear', scope }, 'cv:cleared', CLEAR_WAIT_MS);
-  if (scope === 'all') { try { localStorage.removeItem(WARM_KEY); localStorage.removeItem(WARM_ATTEMPT_KEY); } catch { /* ignore */ } }
   return reply !== null;
 }
 
 /** Save the main pages for offline use. Returns the worker's report, or null when unavailable. */
 export async function warmPages(): Promise<{ ok: boolean; signedOut?: boolean; saved?: number; failed?: string[] } | null> {
   const result = await ask<{ type: string; ok: boolean; signedOut?: boolean; saved?: number; failed?: string[] }>({ type: 'cv:warm' }, 'cv:warm-done', 60_000);
-  if (result?.ok) { try { localStorage.setItem(WARM_KEY, String(Date.now())); } catch { /* ignore */ } }
   notify();
   return result;
 }
@@ -108,8 +115,56 @@ export async function getPwaStatus(): Promise<PwaStatus> {
     canInstall: installPrompt !== null,
     online: navigator.onLine,
     persisted,
-    worker: worker ? { version: worker.version, pages: worker.pages, assets: worker.assets, data: worker.data, newestDataAt: worker.newestDataAt } : null,
+    pageBuild: pageBuild(),
+    workerBuild: worker ? worker.build : null,
+    worker: worker ? { version: worker.version, build: worker.build, warm: worker.warm || {}, pages: worker.pages, assets: worker.assets, data: worker.data, newestDataAt: worker.newestDataAt } : null,
   };
+}
+
+export function pageBuild(): string {
+  return document.querySelector<HTMLMetaElement>('meta[name="cv-build"]')?.content || 'dev';
+}
+
+export { buildLabel };
+
+/** Anything typed into a form on this page that has not been saved. Controls filled in by script count too, so this errs toward "dirty". */
+function hasUnsavedInput(): boolean {
+  for (const el of Array.from(document.querySelectorAll('input, textarea, select'))) {
+    if (el instanceof HTMLInputElement) {
+      if (['hidden', 'button', 'submit', 'reset', 'file'].includes(el.type)) continue;
+      if (el.type === 'checkbox' || el.type === 'radio') { if (el.checked !== el.defaultChecked) return true; }
+      else if (el.value !== el.defaultValue) return true;
+    } else if (el instanceof HTMLTextAreaElement) {
+      if (el.value !== el.defaultValue) return true;
+    } else if (el instanceof HTMLSelectElement) {
+      if (Array.from(el.options).some((o) => o.selected !== o.defaultSelected)) return true;
+    }
+  }
+  return false;
+}
+
+/** Ask the worker for its status; also refreshes `workerBuild`. */
+async function askStatus(): Promise<(WorkerStatus & { type: string }) | null> {
+  const reply = await ask<WorkerStatus & { type: string }>({ type: 'cv:status' }, 'cv:status', 2500);
+  if (reply?.build) workerBuild = reply.build;
+  return reply;
+}
+
+async function refreshWorkerBuild(): Promise<string | null> {
+  await askStatus();
+  return workerBuild;
+}
+
+/** Ask the browser to look for a new worker now. Resolves once the check has finished. */
+export async function checkForUpdate(): Promise<'unsupported' | 'checked'> {
+  if (!('serviceWorker' in navigator)) return 'unsupported';
+  const registration = await navigator.serviceWorker.getRegistration(SW_SCOPE);
+  if (!registration) return 'unsupported';
+  lastUpdateCheck = Date.now();
+  try { await registration.update(); } catch { /* offline or blocked: try again later */ }
+  await refreshWorkerBuild();
+  notify();
+  return 'checked';
 }
 
 function banner() {
@@ -136,10 +191,31 @@ export function initInternalPwa(): void {
   const authed = document.body.dataset.internalAuthed === 'true';
   let sessionExpired = false;
   let staleSince: number | null = null;
+  let updateReady = false;
 
-  const refreshBanner = () => showBanner(bannerFor({ sessionExpired, online: navigator.onLine, staleSince, path: location.pathname + location.search }));
+  const refreshBanner = () => showBanner(bannerFor({ sessionExpired, online: navigator.onLine, staleSince, updateReady, path: location.pathname + location.search }));
 
-  window.addEventListener('online', () => { staleSince = null; refreshBanner(); if (authed) void maybeWarm(); notify(); });
+  // This page is older than the worker serving it (a deploy happened while the app was open or in the background).
+  // Reload when that cannot lose anything; otherwise offer the Reload link. See updateAction.
+  const evaluateUpdate = () => {
+    const lastReloadAt = (() => { try { return Number(sessionStorage.getItem(UPDATE_RELOAD_KEY)) || 0; } catch { return 0; } })();
+    const action = updateAction({ stale: pageIsStale(pageBuild(), workerBuild), online: navigator.onLine, hidden: document.hidden, dirty: hasUnsavedInput(), lastReloadAt, now: Date.now() });
+    updateReady = action === 'banner';
+    refreshBanner();
+    if (action === 'reload-now') {
+      try { sessionStorage.setItem(UPDATE_RELOAD_KEY, String(Date.now())); } catch { /* ignore */ }
+      location.reload();
+    }
+    notify();
+  };
+  const maybeCheckForUpdate = () => {
+    if (shouldCheckForUpdate({ now: Date.now(), online: navigator.onLine, lastCheck: lastUpdateCheck })) void checkForUpdate().then(evaluateUpdate);
+  };
+
+  window.addEventListener('online', () => { staleSince = null; refreshBanner(); maybeCheckForUpdate(); if (authed) void maybeWarm(); notify(); });
+  // A phone app can sit in the background for days: look for a new version whenever it comes back to the front.
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { evaluateUpdate(); maybeCheckForUpdate(); } });
+  setInterval(() => { if (!document.hidden) maybeCheckForUpdate(); }, UPDATE_INTERVAL_MS);
   window.addEventListener('offline', () => { refreshBanner(); notify(); });
   window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); installPrompt = event as InstallPrompt; notify(); });
   window.addEventListener('appinstalled', () => { installPrompt = null; notify(); });
@@ -166,13 +242,14 @@ export function initInternalPwa(): void {
     const data = event.data || {};
     if (data.type === 'cv:stale-data') { staleSince = Number(data.cachedAt) || Date.now(); refreshBanner(); }
     else if (data.type === 'cv:auth-expired') { sessionExpired = true; refreshBanner(); }
+    else if (data.type === 'cv:activated') { if (data.build) workerBuild = String(data.build); evaluateUpdate(); if (authed) void maybeWarm(); }
   });
 
   navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE, updateViaCache: 'none' }).then(
     () => {
       // The login page is where a session starts or ends: nothing from the last one stays saved.
-      if (!authed) void clearSavedData('data');
-      else void maybeWarm();
+      if (!authed) { void clearSavedData('data'); return; }
+      void refreshWorkerBuild().then(() => { evaluateUpdate(); return maybeWarm(); });
     },
     () => { /* unsupported or blocked: the site works exactly as before */ },
   );
@@ -184,10 +261,16 @@ export function initInternalPwa(): void {
   }
 }
 
+/**
+ * Ask the worker to save pages when that is due. The worker keeps the warm-up state (see readWarmState in
+ * public/internal-sw.js), so this works however often pages are opened and closed while a run is in progress.
+ */
 async function maybeWarm() {
-  const read = (key: string) => { try { return Number(localStorage.getItem(key)) || 0; } catch { return 0; } };
-  const now = Date.now();
-  if (!shouldWarm({ now, online: navigator.onLine, lastOk: read(WARM_KEY), lastAttempt: read(WARM_ATTEMPT_KEY) })) return;
-  try { localStorage.setItem(WARM_ATTEMPT_KEY, String(now)); } catch { /* ignore */ }
+  const status = await askStatus();
+  if (!status) return;
+  const warm = status.warm || {};
+  const buildChanged = warm.okBuild !== status.build;
+  const lastAttempt = warm.attemptBuild === status.build ? warm.attemptAt || 0 : 0;
+  if (!shouldWarm({ now: Date.now(), online: navigator.onLine, lastOk: warm.okAt || 0, lastAttempt, buildChanged, running: !!warm.running })) return;
   await warmPages();
 }

@@ -24,6 +24,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       </div>
       <div class="app-actions">
         <button class="btn btn-primary" type="button" data-app-install hidden>Install app</button>
+        <button class="btn btn-ghost" type="button" data-app-update>Check for updates</button>
         <button class="btn btn-ghost" type="button" data-app-refresh>Save pages for offline</button>
         <button class="btn btn-ghost" type="button" data-app-clear>Clear saved data</button>
       </div>
@@ -48,7 +49,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   <section class="roadmap panel"><div><p class="kicker">Operating sequence</p><h2>From estimate to completed job</h2><p class="muted">The internal system is built around one continuous record instead of separate disconnected utilities.</p></div><div class="roadmap-flow" aria-label="Workflow roadmap"><span>Lead</span><i>→</i><span>Measure</span><i>→</i><span>Quote</span><i>→</i><span>Build plan</span><i>→</i><span>Visualize</span><i>→</i><span>Sign</span><i>→</i><span>Schedule</span><i>→</i><span>Prep</span><i>→</i><span>Field mode</span><i>→</i><span>Close</span><i>→</i><span>Collect</span></div></section>
 </InternalLayout>
 <script>
-  import { clearSavedData, formatAge, getPwaStatus, onPwaChange, promptInstall, warmPages } from '../../../scripts/internal-pwa';
+  import { buildLabel, checkForUpdate, clearSavedData, formatAge, getPwaStatus, onPwaChange, promptInstall, warmPages } from '../../../scripts/internal-pwa';
   import { countStoredPhotos } from '../../../lib/field-photo-db';
 
   function initAppCard() {
@@ -61,6 +62,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const install = card.querySelector('[data-app-install]') as HTMLButtonElement;
     const refresh = card.querySelector('[data-app-refresh]') as HTMLButtonElement;
     const clear = card.querySelector('[data-app-clear]') as HTMLButtonElement;
+    const update = card.querySelector('[data-app-update]') as HTMLButtonElement;
     const note = card.querySelector('[data-app-note]') as HTMLElement;
 
     async function render() {
@@ -72,6 +74,9 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       if (s.worker) row(s.worker.pages > 0, s.worker.pages > 0 ? `${s.worker.pages} pages saved for offline` : 'No pages saved yet');
       if (s.worker) row(s.worker.data > 0, s.worker.data > 0 && s.worker.newestDataAt ? `Saved job and follow-up data from ${formatAge(s.worker.newestDataAt)}` : 'No job or follow-up data saved yet');
       if (s.standalone) row(s.persisted, s.persisted ? 'Phone storage is protected from automatic cleanup' : s.persisted === false ? 'Phone storage may be cleaned up when space is low' : 'Storage protection unknown');
+      // Updates arrive by themselves (see .ai/references/internal-pwa.md); this shows which build is running.
+      const behind = s.workerBuild && s.workerBuild !== s.pageBuild;
+      row(s.workerBuild ? !behind : null, s.workerBuild ? (behind ? `Version ${buildLabel(s.pageBuild)} on screen; ${buildLabel(s.workerBuild)} is installed. Reload to switch` : `Version ${buildLabel(s.pageBuild)} (updates install by themselves)`) : `Version ${buildLabel(s.pageBuild)}`);
       row(s.online, s.online ? 'Browser reports a network connection' : 'Offline right now');
       list.innerHTML = rows.join('');
       install.hidden = !s.canInstall;
@@ -93,6 +98,14 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       const r = await warmPages();
       note.textContent = !r ? 'Offline support is not running yet. Reload this page and try again.' : r.signedOut ? 'Signed out. Sign in, then try again.' : r.ok ? `Saved ${r.saved} pages for offline use.` : `Saved ${r.saved ?? 0} pages; ${r.failed?.length ?? 0} could not be saved. Check your connection and try again.`;
       refresh.disabled = false; render();
+    });
+    update.addEventListener('click', async () => {
+      update.disabled = true; note.textContent = 'Checking for a new version…';
+      const r = await checkForUpdate();
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // let a new worker finish installing
+      const s = await getPwaStatus();
+      note.textContent = r === 'unsupported' ? 'Offline support is not running, so there is nothing to update. Reload and try again.' : s.workerBuild && s.workerBuild !== s.pageBuild ? 'A newer version is installed. Reload this page to use it.' : `You have the latest version (${buildLabel(s.pageBuild)}).`;
+      update.disabled = false; render();
     });
     clear.addEventListener('click', async () => {
       if (!window.confirm('Clear saved pages and data from this phone? Job photos are not affected. They come back the next time you are online.')) return;

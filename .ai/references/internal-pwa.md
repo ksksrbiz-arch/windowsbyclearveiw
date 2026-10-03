@@ -27,7 +27,7 @@ Guard: `npm run test:internal-pwa` (sandboxed worker + build checks). Not a busi
 | Unsaved data while offline | `503 {"error": "...offline...", "offline": true}` so existing pages show a readable message | — |
 | A write (POST/PATCH/PUT/DELETE) to the same endpoints with no connection | Sent once, never saved or replayed. If the connection is dead the page gets `503 {"error": "No connection, so this could not be confirmed as saved. Nothing was queued…"}` instead of "Failed to fetch". A real server answer is passed through untouched. Other write endpoints (quotes, invoices, payments, photos, login/logout) are not touched at all | — |
 
-Warm-up (`cv:warm`): after sign-in (and on reconnect; decided by `shouldWarm` in `src/lib/pwa-logic.ts`: never offline, at most every 6 h after a clean run, and not again for 10 min after any attempt, so a failing run does not repeat on every page load; overlapping requests share one run in the worker) the worker fetches the pages in `WARM_PAGES`
+Warm-up (`cv:warm`): after sign-in (and on reconnect; decided by `shouldWarm` in `src/lib/pwa-logic.ts` from state the worker keeps: never offline or while a run is in progress; at most every 6 h after a clean run, **but at once after a new deploy**; not again for 10 min after a failed or interrupted attempt for the same build; overlapping requests share one run) the worker fetches the pages in `WARM_PAGES`
 plus every `/_astro` asset they reference (JS imports and CSS `url()`s, three levels deep). It also saves the list data
 in `WARM_DATA` and, for up to 8 active (not completed/cancelled) jobs on the dashboard, the three reads Field mode makes
 (`jobs?id=`, `job-checklist?jobId=`, `job-evidence?jobId=`), so tomorrow's job opens offline without having been opened
@@ -65,6 +65,29 @@ first. Every page must exist in the build (tested). Signed out → it stops and 
   once and cannot see photos taken in Safari. The card shows how many photos Safari holds.
 - Manifest: `short_name` "Clearview Ops" (home-screen label), start `/internal/today`, shortcuts Today, Follow-up,
   Jobs, Job photos. Names are owner-changeable; keep `short_name` <= 14 characters (tested).
+
+## How installed copies update (automatic)
+
+Nothing to do on deploy. Mechanism, so it stays that way:
+
+1. **Every deploy changes the worker file.** `astro.config.mjs` derives one build id (`<commit time ms>-<short commit>`, from git:
+   Astro evaluates the config more than once per build, so a clock would give the pages and the worker different ids) and
+   stamps it into `dist/internal-sw.js` (`BUILD_ID`, placeholder in `public/`) and every internal page (`<meta name="cv-build">`).
+   The build fails if the placeholder is missing. Without git history the id falls back to a zero time plus the Pages commit
+   hash: the worker still changes per deploy, but pages are never judged out of date.
+2. **The browser installs the new worker itself** (`updateViaCache: 'none'`, `skipWaiting`, `clients.claim`), and the app also
+   asks (`registration.update()`) when it comes to the front, when the connection returns, and every 30 min while visible
+   (throttled to 5 min). The worker announces `cv:activated` with its build.
+3. **Pages are always current anyway**: network first, so each navigation gets the new HTML and hashed assets.
+4. **A page older than its worker** (`pageIsStale`: worker build newer; dev/unparseable ids never count) is handled by
+   `updateAction`: reload now if the page is visible and has no unsaved input; reload when the app is next opened if it is in
+   the background; otherwise show the "new version" banner with Reload. Never while offline (a reload would serve the saved copy
+   again), never over unsaved input (`hasUnsavedInput` errs toward dirty), at most one automatic reload per 10 min (no loops).
+5. **Saved pages and assets refresh at once** on a new build (the worker's warm state records the build of the last clean run).
+6. Tools → Phone app shows the running version and has **Check for updates**.
+
+What cannot be automatic: on **iOS** the home-screen name and icon come from the manifest at install time (re-add the app to change
+them); Android refreshes them on its own schedule. Bump `VERSION` (not just the build) when the cache layout changes.
 
 ## Changing the worker
 
