@@ -10,6 +10,21 @@ export const KEEP_DAILY = 30;
 const PAGE = 500;
 const SKIP = /^(sqlite_|_cf_|d1_)/;
 
+// Columns whose text must not outlive its own retention window. /ask question and answer text is
+// kept 30 days (functions/ask/_lib/log-scrub.mjs), the same length as the backups, so a copy here
+// would silently stretch that promise to 60. The rows stay (counts, tools, sources) with a
+// placeholder in these columns; a restore still satisfies their NOT NULL constraints.
+export const BACKUP_TEXT_EXCLUDED = { ask_logs: ['question', 'answer'] };
+export const BACKUP_TEXT_PLACEHOLDER = '[not backed up]';
+
+function withoutExcludedText(table, row) {
+  const columns = BACKUP_TEXT_EXCLUDED[table];
+  if (!columns) return row;
+  const copy = { ...row };
+  for (const column of columns) if (column in copy) copy[column] = BACKUP_TEXT_PLACEHOLDER;
+  return copy;
+}
+
 export const backupKey = (now = new Date()) => `${BACKUP_PREFIX}${now.toISOString().slice(0, 10)}.json.gz`;
 
 const quoteIdent = (name) => `"${String(name).replace(/"/g, '""')}"`;
@@ -28,7 +43,7 @@ export async function dumpDatabase(db, now = new Date()) {
     const rows = [];
     for (let offset = 0; ; offset += PAGE) {
       const page = await db.prepare(`SELECT * FROM ${quoteIdent(name)} LIMIT ${PAGE} OFFSET ${offset}`).all();
-      rows.push(...page.results.map(encodeRow));
+      rows.push(...page.results.map((row) => encodeRow(withoutExcludedText(name, row))));
       if (page.results.length < PAGE) break;
     }
     dump.tables[name] = { sql, rows };

@@ -1,3 +1,5 @@
+import { askLogCutoff } from '../../ask/_lib/log-scrub.mjs';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -29,12 +31,20 @@ async function funnel(db, days) {
 }
 
 /** Recent /ask activity, for /internal/ask-logs — this route is only
- *  reachable at all through the /internal/* auth middleware. */
+ *  reachable at all through the /internal/* auth middleware. Rows older than
+ *  the 30-day retention window are never returned (and are deleted here too,
+ *  best effort), whether or not the nightly purge has run. */
 export async function onRequestGet(context) {
   const { env } = context;
+  const cutoff = askLogCutoff();
+  try {
+    await env.QUOTES_DB.prepare('DELETE FROM ask_logs WHERE created_at < ?').bind(cutoff).run();
+  } catch {
+    // The read below still filters by date.
+  }
   const { results } = await env.QUOTES_DB.prepare(
     `SELECT id, created_at, question, answer, model_used, tools_used, sources, match_count, refused
-     FROM ask_logs ORDER BY created_at DESC LIMIT 200`,
-  ).all();
+     FROM ask_logs WHERE created_at >= ? ORDER BY created_at DESC LIMIT 200`,
+  ).bind(cutoff).all();
   return json({ logs: results, funnel: await funnel(env.QUOTES_DB, 30) });
 }

@@ -1,9 +1,12 @@
 -- Lives in the same D1 database as the internal quoting tool (QUOTES_DB) —
 -- reusing that binding rather than provisioning a second database and a
--- second dashboard binding for one small table. Records activity metadata
--- only (model, tools, guide sources, match count, refused). The question and
--- answer columns are written as "[redacted]" by functions/ask/api/chat.js, so
--- no visitor words are stored.
+-- second dashboard binding for one small table. One row per answered turn:
+-- activity metadata (model, tools, guide sources, match count, refused) plus
+-- the question and answer, scrubbed of contact details by
+-- functions/ask/_lib/log-scrub.mjs and kept for 30 days only. Rows older than
+-- that are deleted on insert, hidden on read and purged nightly by
+-- workers/ops-cron; the nightly backup leaves question/answer out.
+-- Rows written before 2026-10-03 hold "[redacted]" instead of words.
 CREATE TABLE IF NOT EXISTS ask_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at TEXT NOT NULL,
