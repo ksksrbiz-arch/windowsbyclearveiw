@@ -18,8 +18,15 @@ async function validatedApprovedPlan(db,quoteId){const quote=await db.prepare(`S
 export async function onRequestGet(context){const{env}=context;await ensureSchema(env.QUOTES_DB);const url=new URL(context.request.url),id=url.searchParams.get('id');if(id){const job=await env.QUOTES_DB.prepare(`SELECT * FROM jobs WHERE id = ?`).bind(id).first();if(!job)return json({error:'Job not found.'},404);let quote=null,items=[];if(job.quote_id){quote=await env.QUOTES_DB.prepare(`SELECT * FROM quotes WHERE id = ?`).bind(job.quote_id).first();if(quote){const result=await env.QUOTES_DB.prepare(`SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC,id ASC`).bind(job.quote_id).all();items=result.results||[];}}return json({job,quote,items,buildPlan:parsePlan(job),buildPlanVersion:Number(job.build_plan_version||0),buildPlanKnowledgeVersion:job.build_plan_knowledge_version||null,buildPlanAttachedAt:job.build_plan_attached_at||null,buildPlanAttachedBy:job.build_plan_attached_by||null,checklist:await checklistProgress(env.QUOTES_DB,id)});}const limit=200,page=Math.max(1,Number.parseInt(url.searchParams.get('page')||'1',10)||1),offset=(page-1)*limit;
   const status=url.searchParams.get('status');
   if(status&&!['ready','scheduled','in-progress','completed','cancelled'].includes(status))return json({error:'Choose a valid job status.'},400);
-  const where=status?'WHERE j.status = ?':'';
-  const bindings=status?[status]:[];
+  const conditions=[],bindings=[];
+  if(status){conditions.push('j.status = ?');bindings.push(status);}
+  const from=url.searchParams.get('from'),to=url.searchParams.get('to');
+  if(from!==null||to!==null){
+    const valid=(value)=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(`${value}T12:00:00Z`))&&new Date(`${value}T12:00:00Z`).toISOString().slice(0,10)===value;
+    if(!valid(from)||!valid(to)||from>=to||Date.parse(to)-Date.parse(from)>31*86400000)return json({error:'Choose a valid schedule range of 1 to 31 days.'},400);
+    conditions.push("j.scheduled_date >= ? AND j.scheduled_date < ? AND j.status <> 'cancelled'");bindings.push(from,to);
+  }
+  const where=conditions.length?`WHERE ${conditions.join(' AND ')}`:'';
   const [rows,totalRow,activeRow]=await Promise.all([
     env.QUOTES_DB.prepare(`SELECT j.*,COALESCE(q.total_cents,j.agreed_cents) AS total_cents FROM jobs j LEFT JOIN quotes q ON q.id=j.quote_id ${where} ORDER BY CASE j.status WHEN 'scheduled' THEN 0 WHEN 'ready' THEN 1 WHEN 'in-progress' THEN 2 WHEN 'completed' THEN 3 ELSE 4 END,COALESCE(j.scheduled_date,'9999-12-31') ASC,j.created_at DESC,j.id ASC LIMIT ? OFFSET ?`).bind(...bindings,limit,offset).all(),
     env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM jobs j ${where}`).bind(...bindings).first(),

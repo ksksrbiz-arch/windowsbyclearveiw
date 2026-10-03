@@ -382,3 +382,91 @@ console.log('command center fixes: ok');
   assert.match(source, /<section class="task-panel">[\s\S]*?data-queue-error/, 'queue error lives outside the hidden Add form');
   pass('a failed follow-up completion shows a visible queue error and restores Done');
 }
+
+// The schedule selects the week in SQL, before the global 200-job page boundary.
+{
+  const env=freshEnv();await call(jobsApi.onRequestGet,env);
+  const insert=env.QUOTES_DB.raw.prepare(`INSERT INTO jobs (id,created_at,updated_at,status,customer_name,scheduled_date) VALUES (?,'2026-10-01','2026-10-01',?,'Schedule test',?)`);
+  for(let i=0;i<205;i++)insert.run(`J-ready-${i}`,'ready',null);
+  insert.run('J-week-start','completed','2026-09-28');
+  insert.run('J-week-end','scheduled','2026-10-04');
+  insert.run('J-next-week','scheduled','2026-10-05');
+  insert.run('J-cancelled','cancelled','2026-10-03');
+  const result=await call(jobsApi.onRequestGet,env,{path:'/internal/api/jobs?from=2026-09-28&to=2026-10-05'});
+  assert.equal(result.body.total,2);
+  assert.deepEqual(result.body.jobs.map(job=>job.id).sort(),['J-week-end','J-week-start']);
+  for(const range of ['from=2026-02-30&to=2026-03-05','from=2026-10-05','from=2026-10-05&to=2026-10-05','from=2026-01-01&to=2026-12-31'])assert.equal((await call(jobsApi.onRequestGet,env,{path:`/internal/api/jobs?${range}`})).status,400);
+  pass('weekly schedule finds older jobs before pagination, excludes cancelled/out-of-range work and validates ranges');
+}
+{
+  const env=freshEnv();
+  const name="Archive O'Neil %_";
+  const id=await approvedQuote(env,{customer:{...customer,name},items:[{label:'Slider',quantity:1,unitPriceCents:10000}]});
+  env.QUOTES_DB.raw.prepare("UPDATE quotes SET created_at='2020-01-01T00:00:00Z' WHERE id=?").run(id);
+  const insert=env.QUOTES_DB.raw.prepare(`INSERT INTO quotes (id,created_at,updated_at,status,customer_name,total_cents) VALUES (?,'2026-10-01','2026-10-01',?,'Recent customer',10000)`);
+  for(let i=0;i<205;i++)insert.run(`Q-recent-${i}`,'draft');
+  insert.run('Q-old-final','finalized');
+  const search=await call(quotesIndex.onRequestGet,env,{path:`/internal/api/quotes?search=${encodeURIComponent(name)}`});
+  assert.equal(search.body.total,1);assert.equal(search.body.quotes[0].id,id);assert.equal(search.body.quotes[0].build_plan_stale,false);
+  env.QUOTES_DB.raw.prepare('UPDATE quote_items SET quantity=quantity+1 WHERE quote_id=?').run(id);
+  const changed=await call(quotesIndex.onRequestGet,env,{path:`/internal/api/quotes?search=${encodeURIComponent(name)}`});
+  assert.equal(changed.body.quotes[0].build_plan_stale,true,'filtered source items still detect quote drift');
+  const final=await call(quotesIndex.onRequestGet,env,{path:'/internal/api/quotes?status=finalized'});
+  assert.equal(final.body.total,1);assert.equal(final.body.quotes[0].id,'Q-old-final');
+  assert.equal((await call(quotesIndex.onRequestGet,env,{path:'/internal/api/quotes?status=invalid'})).status,400);
+  pass('quote search and finalized filters find older records and keep correct Build Plan freshness');
+}
+{
+  const {businessCalendarDate,scheduleWeek}=await import(pathToFileURL(`${root}src/lib/schedule-week.ts`).href);
+  const beforeMidnight=new Date('2026-10-05T06:30:00Z');
+  assert.equal(businessCalendarDate(beforeMidnight).toISOString().slice(0,10),'2026-10-04');
+  const expected=['2026-09-28','2026-09-29','2026-09-30','2026-10-01','2026-10-02','2026-10-03','2026-10-04'];
+  assert.deepEqual(scheduleWeek(businessCalendarDate(beforeMidnight)).map(d=>d.toISOString().slice(0,10)),expected);
+  for(const instant of ['2026-03-08T18:00:00Z','2026-11-01T18:00:00Z']){
+    const days=scheduleWeek(businessCalendarDate(new Date(instant)));
+    assert.equal(days[0].getUTCDay(),1);assert.equal(days[6].getUTCDay(),0);
+    assert.equal(days[6].getTime()-days[0].getTime(),6*86400000);
+  }
+  pass('calendar weeks use the Pacific business date and stay contiguous across DST');
+}
+// Execute the dropdown loader: it requests finalized quotes and keeps every page.
+{
+  const source=read('src/pages/internal/jobs/index.astro');
+  const handler=source.slice(source.indexOf('    async function loadQuotes()'),source.indexOf("    create?.addEventListener"));
+  const select={innerHTML:''},urls=[];
+  const context=createContext({select,esc:v=>String(v),money:serverMoney,Error,fetch:async url=>{
+    urls.push(url);const page=new URL(url,ORIGIN).searchParams.get('page');
+    return new Response(JSON.stringify({quotes:page==='1'?[{id:'Q-first',customer_name:'First',total_cents:10000}]:[{id:'Q-last',customer_name:'Last',total_cents:20000}],totalPages:2}));
+  }});
+  runInContext(stripTypeScriptTypes(handler),context);await context.loadQuotes();
+  assert.equal(urls.length,2);assert.ok(urls.every(url=>url.includes('status=finalized')));
+  assert.match(select.innerHTML,/Q-first/);assert.match(select.innerHTML,/Q-last/);
+  pass('job-creation dropdown keeps finalized quotes from every page');
+}
+
+{
+  const {scheduleWeek}=await import(pathToFileURL(`${root}src/lib/schedule-week.ts`).href);
+  const source=read('src/pages/internal/schedule.astro');
+  const start=source.indexOf('    async function load()');
+  const handler=source.slice(start,source.indexOf("    document.querySelector('[data-prev]')",start));
+  class Element {hidden=false;innerHTML='';textContent='';}
+  class Button extends Element {disabled=false;}
+  const refresh=new Button(),empty=new Element(),grid=new Element(),status=new Element(),urls=[];
+  let renders=0;
+  const context=createContext({
+    HTMLElement:Element,HTMLButtonElement:Button,AbortController,URLSearchParams,Error,
+    grid,empty,status,range:new Element(),pending:null,jobs:[],anchor:new Date('2026-10-03T12:00:00Z'),scheduleWeek,
+    dayKey:d=>d.toISOString().slice(0,10),label:d=>d.toISOString().slice(0,10),render:()=>{renders++;},
+    document:{querySelector:()=>refresh},fetch:async url=>{
+      urls.push(url);const page=new URL(url,ORIGIN).searchParams.get('page');
+      return new Response(JSON.stringify({jobs:[{id:page==='1'?'J-first':'J-last'}],totalPages:2}));
+    },
+  });
+  runInContext(stripTypeScriptTypes(handler),context);await context.load();
+  assert.equal(urls.length,2);assert.ok(urls.every(url=>url.includes('from=2026-09-28')&&url.includes('to=2026-10-05')));
+  assert.equal(context.jobs.length,2);assert.equal(renders,1);assert.equal(refresh.disabled,false);
+  context.fetch=async()=>new Response(JSON.stringify({error:'Your session ended.'}),{status:401});
+  await context.load();
+  assert.equal(status.textContent,'Your session ended.');assert.equal(empty.hidden,true);assert.equal(grid.innerHTML,'');assert.equal(renders,1);assert.equal(refresh.disabled,false);
+  pass('schedule loads every weekly result page; failed loads show an error rather than a false empty week');
+}

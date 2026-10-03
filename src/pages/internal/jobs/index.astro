@@ -30,7 +30,18 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         if(prev)prev.disabled=page<=1;if(next)next.disabled=page>=totalPages;
       }catch(e){if(pending!==request||request.signal.aborted)return;list.innerHTML=`<div class="empty"><strong>Jobs could not be loaded.</strong><span>${esc(e instanceof Error?e.message:'Try again.')}</span><button class="btn btn-ghost" type="button" data-retry>Try again</button></div>`;list.querySelector('[data-retry]')?.addEventListener('click',loadJobs);if(updated)updated.textContent='Refresh failed';}
     }
-    async function loadQuotes(){if(!select)return;try{const r=await fetch('/internal/api/quotes');if(!r.ok)throw new Error();const d=await r.json();const qs=(d.quotes||[]).filter((q:Quote)=>q.status==='finalized');select.innerHTML=qs.length?'<option value="">Select a finalized quote…</option>'+qs.map(q=>`<option value="${esc(q.id)}">${esc(q.customer_name)} · ${esc(q.id)} · ${money(Number(q.total_cents||0))}</option>`).join(''):'<option value="">No finalized quotes available</option>'}catch{select.innerHTML='<option value="">Quotes unavailable</option>'}}
+    async function loadQuotes(){
+      if(!select)return;
+      try{
+        const qs:Quote[]=[];let page=1,totalPages=1;
+        do{
+          const r=await fetch(`/internal/api/quotes?status=finalized&page=${page}`,{headers:{'cache-control':'no-cache'}});
+          const d=await r.json();if(!r.ok)throw new Error(d.error||'Quotes unavailable');
+          qs.push(...(Array.isArray(d.quotes)?d.quotes:[]));totalPages=d.totalPages||1;page++;
+        }while(page<=totalPages);
+        select.innerHTML=qs.length?'<option value="">Select a finalized quote…</option>'+qs.map(q=>`<option value="${esc(q.id)}">${esc(q.customer_name)} · ${esc(q.id)} · ${money(Number(q.total_cents||0))}</option>`).join(''):'<option value="">No finalized quotes available</option>';
+      }catch{select.innerHTML='<option value="">Quotes unavailable — reload to try again</option>';}
+    }
     create?.addEventListener('click',async()=>{if(!select?.value||!create)return;create.disabled=true;if(createStatus)createStatus.textContent='Verifying approved Build Plan…';try{const r=await fetch('/internal/api/jobs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({quoteId:select.value})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Could not create job.');if(createStatus)createStatus.textContent=d.existing?'That quote already has a job. Opening it…':'Job created. Opening workspace…';location.href=`/internal/jobs/view?id=${encodeURIComponent(d.id)}`}catch(e){if(createStatus)createStatus.textContent=e instanceof Error?e.message:'Could not create job.';create.disabled=false}});select?.addEventListener('change',()=>{if(create)create.disabled=!select.value});filters.forEach(f=>f.addEventListener('click',()=>{activeFilter=f.getAttribute('data-filter')||'all';page=1;jobs=[];loadJobs()}));prev?.addEventListener('click',()=>{if(page>1){page--;loadJobs()}});next?.addEventListener('click',()=>{if(page<totalPages){page++;loadJobs()}});loadJobs();loadQuotes()}
   initJobsIndex();document.addEventListener('astro:page-load',initJobsIndex);
 </script>
