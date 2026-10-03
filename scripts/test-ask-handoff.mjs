@@ -171,8 +171,11 @@ const post = (handler, body, env) =>
         const listing = /SELECT id, created_at/.test(sql);
         const n = Object.entries(answers).find(([needle]) => sql.includes(needle))?.[1] ?? 0;
         return {
-          all: async () => ({ results: listing ? [{ id: 1 }] : [] }),
-          bind: () => ({ first: async () => ({ n }) }),
+          bind: () => ({
+            first: async () => ({ n }),
+            all: async () => ({ results: listing ? [{ id: 1 }] : [] }),
+            run: async () => ({ meta: { changes: 0 } }),
+          }),
         };
       },
     },
@@ -186,8 +189,9 @@ const post = (handler, body, env) =>
   const missing = {
     QUOTES_DB: {
       prepare: (sql) => ({
-        all: async () => ({ results: [] }),
         bind: () => ({
+          all: async () => ({ results: [] }),
+          run: async () => ({ meta: { changes: 0 } }),
           first: async () => {
             if (/ask_handoffs|leads/.test(sql)) throw new Error('no such table');
             return { n: 5 };
@@ -244,7 +248,7 @@ const post = (handler, body, env) =>
 // written against the code, so a new data flow cannot ship without it).
 {
   const privacy = read('src/content/legal/privacy.md');
-  for (const phrase of ['## The website consultant (/ask)', 'call-back request', 'Groq', 'Workers AI', 'DuckDuckGo', 'do not keep a copy of your messages']) {
+  for (const phrase of ['## The website consultant (/ask)', 'call-back request', 'Groq', 'Workers AI', 'DuckDuckGo', 'deleted 30 days after']) {
     assert.ok(privacy.includes(phrase), `privacy policy does not mention: ${phrase}`);
   }
   checks++;

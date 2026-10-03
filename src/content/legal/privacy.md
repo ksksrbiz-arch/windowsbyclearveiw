@@ -1,9 +1,9 @@
 ---
 title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-09-30
+updated: 2026-10-03
 order: 1
-summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list. The /ask consultant sends what you type to an AI service (Groq or Google) to write its answers, analyzes any photo you attach on Cloudflare, and keeps no copy of your messages or photos. If you ask it for a call back, that request is handled like an estimate request.
+summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list. The /ask consultant sends what you type to an AI service (Groq or Google) to write its answers, analyzes any photo you attach on Cloudflare, and keeps no photos. We keep each question and answer for 30 days, with phone numbers, email addresses, street addresses and similar details removed, so we can see what people ask, and then delete them. If you ask it for a call back, that request is handled like an estimate request.
 ---
 
 Clearview Windows, operated by Clearview Windows & Trim LLC ("Clearview", "we",
@@ -101,12 +101,23 @@ model. Here is what happens to what you type.
 - **Web searches.** For general questions the consultant may search the web
   through DuckDuckGo, using a search phrase the AI writes from your question.
   DuckDuckGo sees that phrase and the address of our server, not yours.
-- **What we keep.** We do not keep a copy of your messages, the replies, or
-  your photos. For each message we record only the time, which AI service
-  answered, which tools it used, which guides it drew on, and whether it could
-  answer. None of the words from your conversation are stored. The chat
-  itself lives only on the page in your browser; reloading it or choosing New
-  chat clears it.
+- **What we keep.** We do not keep your photos, and we do not link anything
+  you type in the chat to your name, your address or any ID for your browser.
+  For each message we keep the time, which AI service answered, which tools it
+  used, which guides it drew on, whether it could answer, and the text of your
+  question and the reply, so we can see what people ask and where the
+  consultant falls short. Before that text is saved, phone numbers, email
+  addresses, web links, street addresses, ZIP codes, long strings of digits
+  and a name you introduce yourself with ("my name is…") are replaced with a
+  placeholder. This is a best effort and will not catch everything, so please
+  do not put personal details in the chat. Only the owners of the business can
+  read the saved text, in our internal tools. It is deleted 30 days after the
+  message. Our nightly database backup keeps the counts and the other details
+  above but leaves this text out, so deleting it after 30 days removes it
+  everywhere. Because the saved text is not tied to you, we cannot look up a
+  particular conversation if you ask us to delete it; it will be gone within
+  30 days. The chat itself lives only on the page in your browser; reloading
+  it or choosing New chat clears it.
 - **Counting hand-offs.** When you go from the consultant to the estimate
   form, tap the call button, or open the call-back form, we add one to a count
   in our database. It records only which of those it was and the time,
