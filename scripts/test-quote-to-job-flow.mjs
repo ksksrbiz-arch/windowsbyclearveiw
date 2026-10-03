@@ -73,7 +73,7 @@ const makeJob = (env, quoteId) => call(jobs.onRequestPost, env, { method: 'POST'
   await saveGeneratedPlan(env, id);
   await transition(env, id, 'submit-review');
   await transition(env, id, 'approve');
-  const digital = () => call(quoteById.onRequestPatch, env, { method: 'PATCH', params: { id }, body: { signatureSvg: '<svg/>', signatureName: 'Pat Doe' } });
+  const digital = () => call(quoteById.onRequestPatch, env, { method: 'PATCH', params: { id }, body: { signatureStrokes: [[[10, 10], [60, 40], [120, 30]]], signatureName: 'Pat Doe' } });
   assert((await digital()).status === 200, 'digital signature finalizes the quote');
   const row = env.QUOTES_DB.raw.prepare('SELECT status, signature_name, signed_at, updated_at FROM quotes WHERE id = ?').get(id);
   assert(row.status === 'finalized' && row.signature_name === 'Pat Doe' && row.signed_at && row.updated_at, 'digital signature columns are all written');

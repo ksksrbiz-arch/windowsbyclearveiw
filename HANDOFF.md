@@ -244,6 +244,12 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **Real hero photos.** `/new-construction`, `/areas` (+ city pages) and `/tools` now use real Clearview job photos instead of AI/stock imagery; the credit lines say "Clearview job photo" and, on city pages, "not specific to <city>" because photos are not tagged to towns. With those swapped, nothing referenced `src/assets/hero/` any more, so the whole directory (AI/stock hero files) was deleted. The other photo heroes (`/about`, `/process`, `/replacement`, `/window-features`, `/sliding-glass-doors`, `/gallery`) already used real job photos; the homepage hero is video-backed and the guides pages use no photo hero.
 - **CI.** `test:google-reviews` had been failing on `main` (it required the about page to read `site.googleReviews`, but the about page no longer shows a rating); the assertion now allows an about page with no rating/count of its own. The GitHub Actions `build` job also intermittently fails in ~4 s with no runner allocated (infrastructure, not code); a failure that runs ~40 s is a real test failure. Cloudflare Pages preview success is a separate build signal.
 
+### 2026-10-03 — Command Center bug sweep
+
+- Found by running the real handlers and built pages together in Chromium at phone widths (details and the full list: `.ai/CHANGELOG.md`). Biggest: editing a quote line's price or quantity was impossible (focus lost each keystroke), the on-device signature pad overflowed every phone and could store a cut-off signature, and every amount was rounded to whole dollars (including the emailed invoice). All fixed; `npm run test:command-center` guards them.
+- **Behavior changes to know about:** `PATCH /internal/api/quotes/[id]` for an on-screen signature now takes `signatureStrokes` (the page sends them) instead of `signatureSvg`; cents now show on quote, invoice, job and payment screens whenever an amount has them.
+- **VERIFY with Mark (not changed):** a field gate can be unchecked after later gates are checked, so an opening can read "Complete" with "Verify" unchecked. Say whether he wants unchecking blocked until the later gates are cleared.
+
 ### 2026-10-03 — Ask log shows real (scrubbed) questions for 30 days
 
 - Keith's call: `/internal/ask-logs` was all "[redacted]" by design; now it stores each question and answer with phone, email, link, street address, ZIP, long digit runs and "my name is …" removed, and deletes them after 30 days. Detail and file list: `.ai/CHANGELOG.md`; tests: `npm run test:ask-logs`.

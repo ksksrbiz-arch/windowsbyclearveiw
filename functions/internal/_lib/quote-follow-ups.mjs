@@ -16,6 +16,8 @@
 //   * Only the latest step that is due is created, so an old draft gets one
 //     reminder, not three.
 
+import { formatCents } from './money.mjs';
+
 export const CADENCE_DAYS = [2, 7, 14];
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -45,7 +47,7 @@ export async function ensureFollowUpSchema(db) {
   migrated.add(db);
 }
 
-const money = (cents) => `$${Math.round((Number(cents) || 0) / 100).toLocaleString('en-US')}`;
+const money = formatCents;
 
 /**
  * Pure planner. quotes: draft quotes {id, created_at, customer_name, total_cents, lead_id}.

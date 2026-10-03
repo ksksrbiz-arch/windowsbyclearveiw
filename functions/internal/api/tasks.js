@@ -22,6 +22,18 @@ async function ensureSchema(db) {
   ]);
 }
 
+/** A due date is stored as a UTC ISO timestamp: the dashboard and the morning nudge compare it as text
+ *  against ISO bounds, so a value like "tomorrow" would sort after every real date and never go overdue.
+ *  Returns { value } (undefined = not sent, null = cleared) or { error }. */
+function parseDueAt(raw) {
+  if (typeof raw !== 'string') return { value: undefined };
+  const text = raw.trim().slice(0, 40);
+  if (!text) return { value: null };
+  const time = Date.parse(text);
+  if (!Number.isFinite(time)) return { error: 'The due date and time are not valid.' };
+  return { value: new Date(time).toISOString() };
+}
+
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureSchema(env.QUOTES_DB);
@@ -61,7 +73,9 @@ export async function onRequestPost(context) {
   const title = typeof body.title === 'string' ? body.title.trim().slice(0, 240) : '';
   if (!title) return json({ error: 'Task title is required.' }, 400);
   const leadId = body.leadId !== null && body.leadId !== '' && body.leadId !== undefined && Number.isInteger(Number(body.leadId)) && Number(body.leadId) > 0 ? Number(body.leadId) : null;
-  const dueAt = typeof body.dueAt === 'string' ? body.dueAt.trim().slice(0, 40) || null : null;
+  const due = parseDueAt(body.dueAt);
+  if (due.error) return json({ error: due.error }, 400);
+  const dueAt = due.value ?? null;
   const notes = typeof body.notes === 'string' ? body.notes.slice(0, 4000) : null;
   const now = new Date().toISOString();
   const result = await env.QUOTES_DB.prepare(`INSERT INTO follow_up_tasks (created_at, updated_at, lead_id, title, due_at, notes) VALUES (?, ?, ?, ?, ?, ?)`)
@@ -80,7 +94,9 @@ export async function onRequestPatch(context) {
   if (!current) return json({ error: 'Task not found.' }, 404);
   const status = ['open', 'done'].includes(body.status) ? body.status : current.status;
   const title = typeof body.title === 'string' ? body.title.trim().slice(0, 240) || current.title : current.title;
-  const dueAt = typeof body.dueAt === 'string' ? body.dueAt.trim().slice(0, 40) || null : current.due_at;
+  const due = parseDueAt(body.dueAt);
+  if (due.error) return json({ error: due.error }, 400);
+  const dueAt = due.value === undefined ? current.due_at : due.value;
   const notes = typeof body.notes === 'string' ? body.notes.slice(0, 4000) : current.notes;
   await env.QUOTES_DB.prepare(`UPDATE follow_up_tasks SET updated_at = ?, title = ?, due_at = ?, notes = ?, status = ? WHERE id = ?`)
     .bind(new Date().toISOString(), title, dueAt, notes, status, id).run();

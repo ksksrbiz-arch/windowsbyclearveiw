@@ -147,6 +147,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 </InternalLayout>
 
 <script>
+  import { formatCents } from '../../../lib/money';
   function initQuoteView() {
     const root = document.querySelector('[data-contract]');
     if (!(root instanceof HTMLElement) || root.dataset.bound === 'true') return;
@@ -170,7 +171,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       return;
     }
 
-    const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const money = formatCents;
 
     // Which website inquiry this quote came from. Suggestions are exact
     // phone/email matches and are only linked when Mark clicks one.
@@ -525,11 +526,14 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      // The pad is always 600 x 180 drawing units, whatever size it is shown at (CSS scales it down
+      // to fit a phone). Pointer positions are converted into those units below, so the stored
+      // signature matches what was drawn on any screen.
+      const PAD_W = 600;
+      const PAD_H = 180;
       const ratio = window.devicePixelRatio || 1;
-      canvas.width = 600 * ratio;
-      canvas.height = 180 * ratio;
-      canvas.style.width = '600px';
-      canvas.style.height = '180px';
+      canvas.width = PAD_W * ratio;
+      canvas.height = PAD_H * ratio;
       ctx.scale(ratio, ratio);
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
@@ -542,7 +546,10 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
       function pointFromEvent(event: PointerEvent): [number, number] {
         const rect = canvas.getBoundingClientRect();
-        return [event.clientX - rect.left, event.clientY - rect.top];
+        const x = ((event.clientX - rect.left) * PAD_W) / (rect.width || PAD_W);
+        const y = ((event.clientY - rect.top) * PAD_H) / (rect.height || PAD_H);
+        // A held pen can leave the pad; the server rejects points outside it.
+        return [Math.min(PAD_W, Math.max(0, x)), Math.min(PAD_H, Math.max(0, y))];
       }
 
       canvas.addEventListener('pointerdown', (event) => {
@@ -558,6 +565,9 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       canvas.addEventListener('pointermove', (event) => {
         if (!drawing || !currentStroke) return;
         const point = pointFromEvent(event);
+        const last = currentStroke[currentStroke.length - 1];
+        // Skip points that barely moved: high-rate pens would otherwise exceed the server's point limit.
+        if (last && Math.hypot(point[0] - last[0], point[1] - last[1]) < 1) return;
         currentStroke.push(point);
         ctx.lineTo(point[0], point[1]);
         ctx.stroke();
@@ -572,21 +582,10 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       canvas.addEventListener('pointercancel', stopDrawing);
       canvas.style.touchAction = 'none';
 
-      function toSvg(): string {
-        const paths = strokes
-          .filter((stroke) => stroke.length > 0)
-          .map((stroke) => {
-            const d = stroke.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
-            return `<path d="${d}" fill="none" stroke="#111214" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
-          })
-          .join('');
-        return `<svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
-      }
-
       const clearBtn = root.querySelector('[data-sig-clear]');
       clearBtn?.addEventListener('click', () => {
         strokes = [];
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, PAD_W, PAD_H);
       });
 
       const saveBtn = root.querySelector('[data-sig-save]');
@@ -618,7 +617,8 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
           const response = await fetch(`/internal/api/quotes/${encodeURIComponent(quote.id)}`, {
             method: 'PATCH',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ signatureSvg: toSvg(), signatureName: name }),
+            // Strokes, not markup: the server turns them into the stored SVG (same as the customer's link).
+            body: JSON.stringify({ signatureStrokes: strokes.filter((stroke) => stroke.length > 0), signatureName: name }),
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.error || 'Could not save the signature.');
@@ -894,6 +894,11 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
   }
 
   [data-sig-canvas] {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    aspect-ratio: 600 / 180;
+    touch-action: none;
     border: 1px dashed var(--line-strong);
     border-radius: var(--radius);
     background: var(--paper-sunk);

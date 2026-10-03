@@ -1,7 +1,8 @@
 import { json, clean, parseQuoteBody } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
 import { requireApprovedBuildPlan } from '../../_lib/quote-gates.mjs';
-import { ensureSigningSchema } from '../../_lib/quote-signing.mjs';
+import { ensureSigningSchema, renderSignatureSvg } from '../../_lib/quote-signing.mjs';
+import { ensureFollowUpSchema } from '../../_lib/quote-follow-ups.mjs';
 
 export async function onRequestGet(context) {
   const { env, params } = context;
@@ -70,7 +71,13 @@ export async function onRequestDelete(context) {
   const quote = await env.QUOTES_DB.prepare('SELECT status FROM quotes WHERE id = ?').bind(id).first();
   if (!quote) return json({ error: 'Not found.' }, 404);
   if (quote.status !== 'draft') return json({ error: 'Only a draft can be deleted — a finalized quote is a record, not a scratch file.' }, 409);
+  // A deleted draft leaves nothing behind: its customer signing links (which would otherwise stay
+  // live for 30 days pointing at nothing) and its automatic follow-up reminders go with it.
+  await ensureSigningSchema(env.QUOTES_DB);
+  await ensureFollowUpSchema(env.QUOTES_DB);
   await env.QUOTES_DB.batch([
+    env.QUOTES_DB.prepare('DELETE FROM quote_sign_links WHERE quote_id = ?').bind(id),
+    env.QUOTES_DB.prepare('DELETE FROM follow_up_tasks WHERE quote_id = ?').bind(id),
     env.QUOTES_DB.prepare('DELETE FROM quote_items WHERE quote_id = ?').bind(id),
     env.QUOTES_DB.prepare('DELETE FROM invoices WHERE quote_id = ?').bind(id),
     env.QUOTES_DB.prepare('DELETE FROM quotes WHERE id = ?').bind(id),
@@ -105,9 +112,14 @@ export async function onRequestPatch(context) {
   }
 
   if (quote.signature_method !== 'digital') return json({ error: 'This quote is not awaiting a digital signature.' }, 409);
-  const signatureSvg = clean(body.signatureSvg, 20000);
   const signatureName = clean(body.signatureName, 200);
-  if (!signatureSvg || !signatureName) return json({ error: 'A drawn signature and a printed name are both required.' }, 400);
+  if (!Array.isArray(body.signatureStrokes) || !signatureName) return json({ error: 'A drawn signature and a printed name are both required.' }, 400);
+  // The device sends pen strokes and the server builds the SVG, exactly as for the customer's own link.
+  // Storing client-built markup let a long signature be cut mid-tag at a character limit and left raw
+  // markup to be rendered in this admin.
+  const rendered = renderSignatureSvg(body.signatureStrokes);
+  if (rendered.error) return json({ error: rendered.error }, 400);
+  const signatureSvg = rendered.svg;
   const gate = await requireApprovedBuildPlan(env.QUOTES_DB, id);
   if (gate) return json({ error: gate.error, code: gate.code }, 409);
 
