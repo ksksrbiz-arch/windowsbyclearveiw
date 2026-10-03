@@ -24,6 +24,14 @@ export async function onRequestGet(context) {
   const { env } = context;
   const url = new URL(context.request.url);
   const page = Math.max(1, Number.parseInt(url.searchParams.get('page') || '1', 10) || 1);
+  const status = url.searchParams.get('status');
+  if (status && !['draft', 'finalized'].includes(status)) return json({ error: 'Choose a valid quote status.' }, 400);
+  const search = (url.searchParams.get('search') || '').trim().slice(0, 120);
+  const conditions = [], bindings = [];
+  if (status) { conditions.push('q.status = ?'); bindings.push(status); }
+  // Literal substring matching: %, _ and quotes in a customer name are not SQL wildcards.
+  if (search) { conditions.push("INSTR(LOWER(COALESCE(q.customer_name,'') || ' ' || COALESCE(q.customer_city,'')), LOWER(?)) > 0"); bindings.push(search); }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const pageSize = 200;
   const offset = (page - 1) * pageSize;
   await ensureInvoiceSchema(env.QUOTES_DB);
@@ -36,15 +44,16 @@ export async function onRequestGet(context) {
      FROM quotes q
      LEFT JOIN invoices i ON i.quote_id = q.id
      LEFT JOIN quote_build_plans bp ON bp.quote_id = q.id
-     ORDER BY q.created_at DESC LIMIT ? OFFSET ?`,
-  ).bind(pageSize, offset).all(), env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM quotes`).first()]);
+     ${where}
+     ORDER BY q.created_at DESC, q.id ASC LIMIT ? OFFSET ?`,
+  ).bind(...bindings, pageSize, offset).all(), env.QUOTES_DB.prepare(`SELECT COUNT(*) AS total FROM quotes q ${where}`).bind(...bindings).first()]);
   // Stale = the quote's current items differ from the snapshot the plan was
   // saved against. Uses the same sourceSnapshot() as the approval, signing
   // and job gates so the list badge can never disagree with them.
   const { results: itemRows } = await env.QUOTES_DB.prepare(
-    `SELECT * FROM quote_items WHERE quote_id IN (SELECT id FROM quotes ORDER BY created_at DESC LIMIT ? OFFSET ?)
+    `SELECT * FROM quote_items WHERE quote_id IN (SELECT q.id FROM quotes q ${where} ORDER BY q.created_at DESC, q.id ASC LIMIT ? OFFSET ?)
      ORDER BY quote_id, sort_order ASC, id ASC`,
-  ).bind(pageSize, offset).all();
+  ).bind(...bindings, pageSize, offset).all();
   const itemsByQuote = new Map();
   for (const item of itemRows || []) {
     if (!itemsByQuote.has(item.quote_id)) itemsByQuote.set(item.quote_id, []);

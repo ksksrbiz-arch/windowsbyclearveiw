@@ -12,15 +12,15 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
+  import { businessCalendarDate, scheduleWeek } from '../../lib/schedule-week';
   type Job={id:string;status:string;scheduled_date:string|null;scheduled_window:string|null;customer_name:string;customer_city:string|null;customer_phone:string|null;total_cents:number|null};
   function initSchedule(){
     const grid=document.querySelector('[data-grid]');if(!(grid instanceof HTMLElement)||grid.dataset.bound==='true')return;grid.dataset.bound='true';
-    const range=document.querySelector('[data-range]');const status=document.querySelector('[data-status]');const empty=document.querySelector('[data-empty]');let jobs:Job[]=[];let anchor=new Date();
-    const startOfWeek=(d:Date)=>{const x=new Date(d);const day=x.getDay();const delta=day===0?-6:1-day;x.setHours(12,0,0,0);x.setDate(x.getDate()+delta);return x;};
-    const dayKey=(d:Date)=>d.toISOString().slice(0,10);const esc=(v:unknown)=>{const x=document.createElement('div');x.textContent=String(v??'');return x.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');};const label=(d:Date)=>d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const range=document.querySelector('[data-range]');const status=document.querySelector('[data-status]');const empty=document.querySelector('[data-empty]');let jobs:Job[]=[];let anchor=businessCalendarDate();let pending:AbortController|null=null;
+    const dayKey=(d:Date)=>d.toISOString().slice(0,10);const esc=(v:unknown)=>{const x=document.createElement('div');x.textContent=String(v??'');return x.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');};const label=(d:Date)=>d.toLocaleDateString('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'});
     function render(){
-      const monday=startOfWeek(anchor);const days=[...Array(7)].map((_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
-      if(range)range.textContent=`${days[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      const days=scheduleWeek(anchor);
+      if(range)range.textContent=`${days[0].toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'})}`;
       grid.innerHTML='';let any=false;
       for(const d of days){
         const key=dayKey(d);const scheduled=jobs.filter(j=>j.scheduled_date===key&&j.status!=='cancelled');if(scheduled.length)any=true;
@@ -31,8 +31,31 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       }
       if(empty instanceof HTMLElement)empty.hidden=any;if(status)status.textContent=`Updated ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
     }
-    async function load(){const refresh=document.querySelector('[data-refresh]') as HTMLButtonElement|null;if(refresh){refresh.disabled=true;refresh.textContent='Refreshing…';}try{const r=await fetch('/internal/api/jobs',{headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error();const d=await r.json();jobs=Array.isArray(d.jobs)?d.jobs:[];render();}catch{if(status)status.textContent='Could not load the installation schedule.';}finally{if(refresh){refresh.disabled=false;refresh.textContent='Refresh';}}}
-    document.querySelector('[data-prev]')?.addEventListener('click',()=>{anchor.setDate(anchor.getDate()-7);render();});document.querySelector('[data-next]')?.addEventListener('click',()=>{anchor.setDate(anchor.getDate()+7);render();});document.querySelector('[data-today]')?.addEventListener('click',()=>{anchor=new Date();render();});document.querySelector('[data-refresh]')?.addEventListener('click',load);load();
+    async function load(){
+      pending?.abort();const request=new AbortController();pending=request;
+      const refresh=document.querySelector('[data-refresh]') as HTMLButtonElement|null;
+      if(refresh){refresh.disabled=true;refresh.textContent='Refreshing…';}
+      if(empty instanceof HTMLElement)empty.hidden=true;
+      grid.innerHTML='<p class="none">Loading selected week…</p>';
+      const days=scheduleWeek(anchor),end=new Date(days[6]);end.setUTCDate(end.getUTCDate()+1);
+      if(range)range.textContent=`${label(days[0])} – ${label(days[6])}`;
+      if(status)status.textContent='Loading schedule…';
+      try{
+        const records:Job[]=[];let page=1,totalPages=1;
+        do{
+          const params=new URLSearchParams({from:dayKey(days[0]),to:dayKey(end),page:String(page)});
+          const r=await fetch(`/internal/api/jobs?${params}`,{signal:request.signal,headers:{'cache-control':'no-cache'}});
+          const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load the installation schedule.');if(pending!==request)return;
+          records.push(...(Array.isArray(d.jobs)?d.jobs:[]));totalPages=d.totalPages||1;page++;
+        }while(page<=totalPages);
+        jobs=records;render();
+      }catch(error){if(pending!==request||request.signal.aborted)return;grid.innerHTML='';if(status)status.textContent=error instanceof Error?error.message:'Could not load the installation schedule. Use Refresh to try again.';}
+      finally{if(pending===request&&refresh){refresh.disabled=false;refresh.textContent='Refresh';}}
+    }
+    document.querySelector('[data-prev]')?.addEventListener('click',()=>{anchor.setUTCDate(anchor.getUTCDate()-7);load();});
+    document.querySelector('[data-next]')?.addEventListener('click',()=>{anchor.setUTCDate(anchor.getUTCDate()+7);load();});
+    document.querySelector('[data-today]')?.addEventListener('click',()=>{anchor=businessCalendarDate();load();});
+    document.querySelector('[data-refresh]')?.addEventListener('click',load);load();
   }
   initSchedule();document.addEventListener('astro:page-load',initSchedule);
 </script>

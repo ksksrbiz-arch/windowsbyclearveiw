@@ -1,5 +1,27 @@
 # ICM Changelog
 
+## 2026-10-03 — Schedule and quote discovery beyond the first page
+
+- Schedule queries the selected calendar week before pagination (`jobs?from=YYYY-MM-DD&to=YYYY-MM-DD`, inclusive start/exclusive end; 1–31 real calendar days). Cancelled jobs are excluded; all matching pages are read. Week dates and Today use the Pacific business date independent of the phone timezone, including DST. Failed loads clear the calendar and show the server error instead of claiming there are no jobs.
+- Quote API accepts literal customer/city `search` and `status=draft|finalized` before pagination, with stable id ordering. The filtered item snapshot query matches the filtered quote query, preserving Build Plan stale detection. The UI debounces search, resets pagination and ignores cancelled/late results.
+- The job-creation dropdown requests only finalized quotes and reads every page; old signed quotes are no longer lost behind newer drafts.
+- Regression: real SQLite with 200+ jobs/quotes, week boundaries and cancelled jobs, literal apostrophe/percent/underscore searches, filtered Build Plan freshness, Pacific/DST weeks, actual dropdown and schedule loaders including failure recovery. Full local suite/build and pagination/quote-to-job checks required. No production customer records were modified. Browser/real-iPhone checks remain VERIFY.
+
+## 2026-10-03 — Full-queue filters, counts and visible recovery
+
+- `/internal/api/jobs?status=…` filters before pagination, returns the matching total plus the all-queue active count, and uses id as a stable sort tie-breaker. The Jobs screen resets to page one when switching filters and cancels/discards old responses.
+- `/internal/api/tasks?status=open` pages only open work. Its summary counts all open tasks, including the Pacific business day's due tasks and overdue work. Shared day boundaries now live in `functions/internal/_lib/pacific-day.mjs`; dashboard.js re-exports the existing helper so callers remain compatible. `dueAt:null` on PATCH clears the date.
+- Follow-up Done failures now show beside the task list, outside the usually hidden Add form. Both job and follow-up loaders offer retry after a failed request and recover if the final page empties.
+- Regression evidence: more than 200 seeded jobs/tasks on real SQLite; full-queue totals, filters, Pacific midnight boundaries, explicit date clearing; actual client handlers exercised for late responses and visible save errors. The old pagination fixture now isolates follow-up records from unrelated draft-quote reminder generation.
+- Validation: `npm run test:all`, `npm run test:pagination`, separate `npm run build`, and `git diff --check`. Browser/iPhone checks remain VERIFY; production records were not modified.
+
+## 2026-10-03 — Dashboard dates, follow-up saves and short-screen navigation
+
+- Fixed dashboard Upcoming jobs showing the previous day in Pacific time: `src/lib/scheduled-day.ts` treats YYYY-MM-DD as a calendar date, validates it, and formats in UTC. Timestamp dates elsewhere retain their existing behavior.
+- Dashboard Done buttons now disable immediately, ignore repeat taps while pending, restore after failure, and show the API error (including session/offline errors).
+- The mobile More menu has a viewport-bound scroll area; Escape closes it and returns focus to More.
+- `test:command-center` executes the real dashboard save handler with a deferred response and a rejected save, and checks calendar dates in four timezones including DST and leap day. Full local test suite and Astro build passed. Browser installation failed in this environment, so visual/iPhone checks remain VERIFY; no production customer records were modified.
+
 Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a current-state snapshot.
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
