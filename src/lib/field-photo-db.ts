@@ -34,3 +34,21 @@ export async function openPhotoDb(): Promise<IDBDatabase> {
   db.close();
   return open(next);
 }
+
+/** How many photos this browser holds. Counts records without reading the image blobs; 0 on any failure. */
+export async function countStoredPhotos(): Promise<number> {
+  try {
+    const db = await openPhotoDb();
+    try {
+      return await new Promise<number>((resolve) => {
+        const request = db.transaction(PHOTO_STORE, 'readonly').objectStore(PHOTO_STORE).count();
+        request.onsuccess = () => resolve(Number(request.result) || 0);
+        request.onerror = () => resolve(0);
+      });
+    } finally {
+      db.close();
+    }
+  } catch {
+    return 0;
+  }
+}

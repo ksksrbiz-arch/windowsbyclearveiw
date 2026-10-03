@@ -309,6 +309,22 @@ so keep the TTL short-ish; the compliant way to show *every* review later is the
 Business Profile API with owner OAuth (Keith manages the profile), which needs
 Google's API access approval.
 
+## Install on a phone, and offline use
+
+The Command Center is an installable app (PWA). Design and limits: `.ai/references/internal-pwa.md`.
+
+- **Android (Chrome):** open `/internal/tools`, **Phone app** card, **Install app** (or the browser menu, Add to Home screen).
+- **iPhone / iPad (Safari):** Share, **Add to Home Screen**. The installed app has its **own storage and sign-in**:
+  it asks for the password once, and photos taken in Safari do not show up in it. Until R2 photo backup is connected
+  (see "Job photo storage"), photos exist only on the phone, so connect R2 first or keep taking photos in Safari.
+- **Offline:** after signing in, the app saves the main pages and today's jobs and follow-ups, including what Field
+  mode reads for each active job. With no signal those open from the saved copy (banner at the top says so);
+  saved data expires after 3 days. Photos still save to the phone. **Anything that changes a record (checklist,
+  evidence, approvals, quotes, invoices, payments) needs a connection and is never saved for later.**
+- **Control:** Tools, Phone app card: **Save pages for offline** (refresh now), **Clear saved data** (pages and data;
+  photos are untouched). Logging out clears saved data.
+- Nothing to configure in Cloudflare. The worker and manifest are plain files in `public/`.
+
 ## Local development
 
 ```bash

@@ -28,6 +28,7 @@ Mission: a trustworthy operating system for Clearview Windows & Trim LLC, not me
 | Ship, deploy, domain or mail change | `.ai/workflows/deploy-check/` | analytics, specialists |
 | `/ask` routing or specialists | `.ai/references/ask-routing.md`, `.ai/specialists/<id>/CONTEXT.md` | workflows |
 | New Command Center feature | `.ai/references/command-center-gap-analysis.md` | specialists |
+| Install, offline, service worker, manifest (Command Center PWA) | `.ai/references/internal-pwa.md` | workflows, specialists |
 | AI feature (provider, budget, tools) | `.ai/AI-OPERATING-CONTRACT.md`, `.ai/RULES.md` | workflows |
 | What is the current state? | `.ai/STATE.md`, `.ai/WORKING.md` | `CHANGELOG.md` (history only) |
 | Why ICM is shaped this way (method background) | `.ai/references/icm-method-notes.md` | workflows, specialists |

@@ -35,11 +35,22 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
     <meta name="theme-color" content="#101113" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    {/* Installable Command Center (contract: .ai/references/internal-pwa.md). The manifest and worker are
+        public files outside /internal/ because the login middleware redirects everything under it. */}
+    <link rel="manifest" href="/internal.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Clearview Ops" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   </head>
-  <body class:list={['internal', { 'field-mode': isFieldMode }]}>
+  <body class:list={['internal', { 'field-mode': isFieldMode }]} data-internal-authed={showLogout ? 'true' : 'false'}>
     <header class="internal-header">
       <div class="internal-header-inner">
-        <a class="internal-brand" href="/internal/" aria-label="Clearview Command Center">Clearview <span>Command Center</span></a>
+        <div class="internal-header-left">
+          <button class="internal-back" type="button" data-pwa-back aria-label="Back" hidden>←</button>
+          <a class="internal-brand" href="/internal/" aria-label="Clearview Command Center">Clearview <span>Command Center</span></a>
+        </div>
         {showLogout && (
           <div class="internal-header-right">
             <nav class="internal-nav" aria-label="Internal navigation">
@@ -52,6 +63,11 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
         )}
       </div>
     </header>
+
+    <div class="pwa-banner" data-pwa-banner role="status" aria-live="polite" hidden>
+      <span data-pwa-banner-text></span>
+      <a data-pwa-banner-action href="/internal/login" hidden></a>
+    </div>
 
     {showLogout && (
       <nav class="internal-mobile-nav" aria-label="Primary mobile navigation">
@@ -76,6 +92,11 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
     )}
 
     <main class="internal-main"><slot /></main>
+
+    <script>
+      import { initInternalPwa } from '../scripts/internal-pwa';
+      initInternalPwa();
+    </script>
 
     <script>
       (() => {
@@ -182,6 +203,8 @@ const isMoreActive = mobileMoreItems.some((item) => item.href === '/internal/' ?
       .internal{background:var(--paper);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
       .internal-header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--black) 97%,transparent);color:var(--on-dark);border-bottom:1px solid var(--dark-line);backdrop-filter:blur(14px)}
       .internal-header-inner{max-width:76rem;margin-inline:auto;padding:.68rem var(--space-m);display:flex;align-items:center;justify-content:space-between;gap:var(--space-m)}
+      .internal-header-left{display:flex;align-items:center;gap:.5rem;min-width:0}.internal-back{appearance:none;border:1px solid var(--dark-line);background:transparent;color:var(--on-dark);border-radius:999px;min-width:44px;min-height:44px;font:inherit;font-size:1.15rem;line-height:1;cursor:pointer}.internal-back:hover{background:color-mix(in srgb,var(--on-dark) 10%,transparent)}
+      .pwa-banner{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;padding:.5rem var(--space-m);font-size:var(--step--1);font-weight:600;background:var(--ink);color:var(--on-dark)}.pwa-banner[hidden]{display:none}.pwa-banner[data-kind="session"]{background:var(--danger);color:#fff}.pwa-banner a[hidden]{display:none}.pwa-banner a{color:inherit;font-weight:800;text-decoration:underline;min-height:44px;display:inline-flex;align-items:center}
       .internal-brand{color:var(--on-dark);font-weight:750;letter-spacing:-.02em;text-decoration:none;white-space:nowrap}.internal-brand span{color:var(--accent-bright);font-weight:550;margin-left:.35rem}
       .internal-header-right{display:flex;align-items:center;gap:var(--space-s);min-width:0}.internal-nav{display:flex;align-items:center;gap:.15rem;min-width:0;overflow-x:auto;scrollbar-width:none}.internal-nav::-webkit-scrollbar{display:none}
       .internal-nav a{position:relative;color:var(--on-dark-soft);text-decoration:none;font-size:var(--step--2);font-weight:650;padding:.48rem .58rem;border-radius:var(--radius);white-space:nowrap}.internal-nav a::after{content:'';position:absolute;left:.58rem;right:.58rem;bottom:.16rem;height:2px;border-radius:999px;background:var(--accent-bright);transform:scaleX(0);transform-origin:center;transition:transform 140ms ease}.internal-nav a:hover,.internal-nav a:focus-visible,.internal-nav a.active{color:var(--on-dark);background:rgb(255 255 255 / .08)}.internal-nav a.active::after{transform:scaleX(1)}

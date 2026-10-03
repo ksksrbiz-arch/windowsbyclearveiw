@@ -26,6 +26,7 @@ Working and deployed:
 - **Estimate delivery verified live:** a real public production submission was made through `/estimate`; it returned success, created a D1 lead record, and Resend reported the Mark notification as delivered to the working Google Workspace mailbox at `owner@windowsbyclearveiw.com`.
 - A protected Command Center production-mail test is available under `/internal/tools`; it uses the exact production Resend configuration and returns the provider message ID without creating a lead. This remains useful for repeatable diagnostics after deployments.
 - Free cost estimator at `/tools/window-replacement-cost-calculator`
+- **Command Center is installable and works with no signal (2026-10-03, on branch `claude/internal-pwa`, not yet on `main` until merged).** Saved pages plus a fixed allowlist of read-only job/follow-up data; writes are never queued. Contract `.ai/references/internal-pwa.md`, test `npm run test:internal-pwa`, owner steps in `internal/README.md` ("Install on a phone"). **Before installing on an iPhone, connect R2 photo backup** or keep taking photos in Safari: the home-screen app has separate storage and cannot see Safari's photos. Not yet checked on a real phone.
 - Pricing worker with KV, validation, monthly cron, and a GitHub Actions health check
 - Domain migration (windowsbyclearveiw.com → windowsbyclearview.com) is complete for the website: DNS, GTM/GA4, and Cloudflare Pages custom domains are pointed at the canonical web domain. Mail remains on the legacy domain until a real mailbox exists on the new one.
 
