@@ -88,7 +88,12 @@ export async function onRequestGet(context) {
       END AS source, COUNT(*) AS count
       FROM leads GROUP BY source ORDER BY count DESC, source ASC LIMIT 6
     `).all(),
-    env.QUOTES_DB.prepare(`SELECT COALESCE(NULLIF(city, ''), 'City not provided') AS city, COUNT(*) AS count FROM leads GROUP BY city ORDER BY count DESC, city ASC LIMIT 6`).all(),
+    // Group on what is displayed: leads with a NULL city, an empty city, or the same city typed with
+    // different spacing or capitals are one row, not several rows with the same label.
+    env.QUOTES_DB.prepare(`
+      SELECT COALESCE(NULLIF(MIN(TRIM(city)), ''), 'City not provided') AS city, COUNT(*) AS count
+      FROM leads GROUP BY LOWER(TRIM(COALESCE(city, ''))) ORDER BY count DESC, city ASC LIMIT 6
+    `).all(),
     env.QUOTES_DB.prepare(`
       SELECT t.id, t.title, t.due_at, t.status, t.lead_id, t.quote_id,
              COALESCE(l.name, q.customer_name) AS lead_name, COALESCE(l.phone, q.customer_phone) AS lead_phone,

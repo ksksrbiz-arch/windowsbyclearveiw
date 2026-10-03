@@ -48,6 +48,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
+  import { formatCents } from '../../lib/money';
   type Task={id:number;title:string;lead_id:number|null;quote_id?:string|null;lead_name?:string|null;lead_phone?:string|null;lead_city?:string|null;due_at:string|null;status:string;notes:string|null};
   type Job={id:string;status:string;scheduled_date:string|null;scheduled_window:string|null;customer_name:string;customer_city:string|null;total_cents:number|null};
   function initToday(){
@@ -56,7 +57,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     const esc=(v:unknown)=>{const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;')};
     const date=(v:string|null)=>{if(!v)return 'No due date';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})};
     const jobDate=(v:string|null)=>{if(!v)return 'Not scheduled';const d=new Date(`${v}T12:00:00`);return Number.isNaN(d.getTime())?v:d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})};
-    const money=(c:number|null)=>`$${(Number(c||0)/100).toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    const money = formatCents;
     function dueClass(v:string|null){if(!v)return '';const d=new Date(v).getTime();return Number.isFinite(d)&&d<Date.now()?' overdue':''}
     function set(s:string,v:string){const el=q(s);if(el)el.textContent=v;}
     async function load(){

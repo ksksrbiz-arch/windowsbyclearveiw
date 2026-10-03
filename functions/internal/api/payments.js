@@ -1,5 +1,6 @@
 import { ensureInvoiceSchema } from '../_lib/invoices.mjs';
 import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
+import { formatCents } from '../_lib/money.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -120,7 +121,7 @@ export async function onRequestPatch(context) {
     const numeric = typeof raw === 'number' || (typeof raw === 'string' && raw.trim() !== '');
     amountPaid = numeric ? Number(raw) : NaN;
     if (!Number.isFinite(amountPaid) || amountPaid < 0 || amountPaid > total) {
-      return json({ error: `Amount paid must be between $0 and ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(total / 100)}.` }, 400);
+      return json({ error: `Amount paid must be between $0 and ${formatCents(total)}.` }, 400);
     }
     amountPaid = Math.round(amountPaid);
   }

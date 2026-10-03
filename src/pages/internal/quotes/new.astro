@@ -127,6 +127,8 @@ const catalog = {
 </InternalLayout>
 
 <script>
+  import { formatCents } from '../../../lib/money';
+
   type CatalogOpening = { id: string; label: string; low: number; high: number; isDoor: boolean };
   type CatalogMaterial = { id: string; label: string; multiplier: number };
   type CatalogBrand = { id: string; label: string; low: number; high: number };
@@ -177,7 +179,6 @@ const catalog = {
       return;
     }
 
-    const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     const mid = (low: number, high: number) => (low + high) / 2;
 
     for (const o of catalog.openings) {
@@ -212,57 +213,85 @@ const catalog = {
     openingSelect.addEventListener('change', syncBrandVisibility);
     syncBrandVisibility();
 
-    function render() {
-      itemsBody.innerHTML = '';
-      itemsEmpty.hidden = items.length > 0;
+    // Money is whole cents everywhere, exactly as the server computes it (quantity x the unit price
+    // rounded to cents), and shown without rounding a cent away: $1,234.50 never reads "$1,235".
+    const lineCents = (item: LineItem) => Math.round(item.quantity * Math.round(item.unitPrice * 100));
+    let totalCells: HTMLElement[] = [];
 
+    // Typing in a quantity or price must only refresh the numbers. Rebuilding the rows on every
+    // keystroke replaced the field being typed in, so focus was lost after each digit.
+    function updateTotals() {
       let subtotal = 0;
       items.forEach((item, index) => {
-        const lineTotal = Math.round(item.quantity * item.unitPrice * 100) / 100;
-        subtotal += lineTotal;
+        const cents = lineCents(item);
+        subtotal += cents;
+        if (totalCells[index]) totalCells[index].textContent = formatCents(cents);
+      });
+      const discount = Math.max(0, Math.min(subtotal, Math.round((Number(discountInput.value) || 0) * 100)));
+      subtotalOut.textContent = formatCents(subtotal);
+      totalOut.textContent = formatCents(subtotal - discount);
+    }
 
+    // Rebuilds the rows. Only for adding, removing and loading lines, never while typing.
+    function render() {
+      itemsBody.innerHTML = '';
+      totalCells = [];
+      itemsEmpty.hidden = items.length > 0;
+
+      items.forEach((item, index) => {
         const row = document.createElement('tr');
 
         const labelCell = document.createElement('td');
+        labelCell.className = 'qb-cell-label';
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
         labelInput.value = item.label;
+        labelInput.maxLength = 300;
+        labelInput.setAttribute('aria-label', 'Line description');
         labelInput.addEventListener('input', () => {
           items[index].label = labelInput.value;
         });
         labelCell.append(labelInput);
 
         const qtyCell = document.createElement('td');
+        qtyCell.className = 'qb-cell-qty';
+        qtyCell.dataset.cap = 'Qty';
         const qtyInputEl = document.createElement('input');
         qtyInputEl.type = 'number';
         qtyInputEl.inputMode = 'numeric';
         qtyInputEl.min = '1';
         qtyInputEl.step = '1';
         qtyInputEl.value = String(item.quantity);
+        qtyInputEl.setAttribute('aria-label', 'Quantity');
         qtyInputEl.addEventListener('input', () => {
           items[index].quantity = Math.max(1, Number(qtyInputEl.value) || 1);
-          render();
+          updateTotals();
         });
         qtyCell.append(qtyInputEl);
 
         const priceCell = document.createElement('td');
+        priceCell.className = 'qb-cell-price';
+        priceCell.dataset.cap = 'Unit ($)';
         const priceInputEl = document.createElement('input');
         priceInputEl.type = 'number';
         priceInputEl.inputMode = 'decimal';
         priceInputEl.step = '0.01';
         priceInputEl.min = '0';
         priceInputEl.value = String(item.unitPrice);
+        priceInputEl.setAttribute('aria-label', 'Unit price in dollars');
         priceInputEl.addEventListener('input', () => {
-          items[index].unitPrice = Number(priceInputEl.value) || 0;
-          render();
+          items[index].unitPrice = Math.max(0, Number(priceInputEl.value) || 0);
+          updateTotals();
         });
         priceCell.append(priceInputEl);
 
         const totalCell = document.createElement('td');
-        totalCell.className = 'qb-line-total';
-        totalCell.textContent = money(lineTotal);
+        totalCell.className = 'qb-line-total qb-cell-total';
+        totalCell.dataset.cap = 'Total';
+        totalCells.push(totalCell);
 
         const removeCell = document.createElement('td');
+        removeCell.className = 'qb-cell-remove';
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.className = 'qb-remove';
@@ -278,12 +307,10 @@ const catalog = {
         itemsBody.append(row);
       });
 
-      const discount = Math.max(0, Math.min(subtotal, Number(discountInput.value) || 0));
-      subtotalOut.textContent = money(subtotal);
-      totalOut.textContent = money(subtotal - discount);
+      updateTotals();
     }
 
-    discountInput.addEventListener('input', render);
+    discountInput.addEventListener('input', updateTotals);
 
     const catalogAdd = form.querySelector('[data-catalog-add]');
     catalogAdd?.addEventListener('click', () => {
@@ -519,6 +546,7 @@ const catalog = {
   }
 
   .qb-block {
+    min-width: 0; /* a fieldset otherwise grows to its widest child and pushes the page sideways on a phone */
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     padding: var(--space-m);
@@ -558,7 +586,8 @@ const catalog = {
     border: 0;
     padding: 0;
     display: flex;
-    gap: var(--space-m);
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
   }
 
   .qb-role .choice {
@@ -659,7 +688,8 @@ const catalog = {
 
   .qb-sig-choice {
     display: flex;
-    gap: var(--space-l);
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
   }
 
   .qb-sig-choice .choice {
@@ -680,6 +710,53 @@ const catalog = {
     .qb-catalog-row,
     .qb-custom-row {
       grid-template-columns: 1fr;
+    }
+
+    /* Each line becomes a small card: description on its own row, then qty / unit price, then total / remove. */
+    .qb-items thead {
+      display: none;
+    }
+
+    .qb-items,
+    .qb-items tbody {
+      display: block;
+    }
+
+    :global(.qb-items tbody tr) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.4rem 0.6rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    :global(.qb-items td) {
+      padding: 0;
+      border-bottom: 0;
+      min-width: 0;
+    }
+
+    :global(.qb-items td[data-cap]::before) {
+      content: attr(data-cap);
+      display: block;
+      font-size: var(--step--2);
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    :global(.qb-cell-label) {
+      grid-column: 1 / -1;
+    }
+
+    :global(.qb-items td input[type='number']) {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    :global(.qb-cell-remove) {
+      justify-self: end;
+      align-self: end;
     }
   }
 </style>

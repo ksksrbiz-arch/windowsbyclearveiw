@@ -118,6 +118,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
 </InternalLayout>
 
 <script>
+  import { formatCents } from '../../../lib/money';
   type Job = {
     id: string;
     quote_id: string | null;
@@ -162,7 +163,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       return;
     }
 
-    const money = (cents: number) => `$${(Number(cents || 0) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const money = formatCents;
     const esc = (value: unknown) => {
       const element = document.createElement('div');
       element.textContent = String(value ?? '');
@@ -275,7 +276,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         setText('[data-subtitle]', [job.work_description, job.customer_city].filter(Boolean).join(' · ') || job.id);
         setText('[data-closeout-help]', 'Final walkthrough and any punch-list notes. Set the status to Completed when the work is done.');
         const agreedCents = Number(job.agreed_cents) || 0;
-        setText('[data-general-total]', agreedCents % 100 === 0 ? money(agreedCents) : `$${(agreedCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+        setText('[data-general-total]', money(agreedCents));
         setText('[data-schedule-title]', 'Start date');
         q('[data-g-desc]').value = job.work_description || '';
         q('[data-g-amount]').value = job.agreed_cents ? String((Number(job.agreed_cents) / 100).toFixed(2)).replace(/\.00$/, '') : '';
