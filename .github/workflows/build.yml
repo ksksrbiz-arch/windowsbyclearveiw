@@ -50,6 +50,7 @@ jobs:
       - run: npm run test:form-patterns
       - run: npm run test:charts
       - run: npm run test:internal-styles
+      - run: npm run test:internal-mobile
       - run: npm run test:internal-pwa
       - run: npm run test:job-photos
       - run: npm run test:photo-sync
