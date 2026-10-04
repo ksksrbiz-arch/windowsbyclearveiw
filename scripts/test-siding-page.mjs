@@ -128,6 +128,10 @@ const cities = readdirSync(join(dist, 'areas')).filter((f) => f.endsWith('.html'
 assert.equal(cities.length, 8, 'eight city pages built');
 for (const f of cities) assert.ok(/href="\/siding"/.test(read(`areas/${f}`)), `areas/${f} links to /siding`);
 assert.ok(/href="\/siding"/.test(read('about.html')), 'footer links to /siding');
+for (const page of ['index.html', 'about.html', 'replacement.html', 'siding.html']) {
+  assert.match(read(page), /<nav class="nav"[^>]*>[\s\S]*?<a href="\/siding"[^>]*>Siding<\/a>/, `the primary nav links to /siding on ${page}`);
+}
+// (The current-page highlight is applied in the browser; it was checked there, not in the static HTML.)
 const sitemap = readFileSync(join(dist, readdirSync(dist).find((f) => /^sitemap-\d+\.xml$/.test(f))), 'utf8');
 assert.ok(sitemap.includes('https://windowsbyclearview.com/siding<'), 'sitemap lists /siding');
 
