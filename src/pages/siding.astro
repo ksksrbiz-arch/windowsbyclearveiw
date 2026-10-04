@@ -17,8 +17,10 @@ const heroBg = await getHeroBg(heroPhoto.image);
 
 // Owner direction, 2026-10-04: fiber cement lap and board and batten, primarily
 // James Hardie; LP products such as SmartSide board; other wood siding products.
-// Labor rates are owner-provided (src/data/siding.ts). The warranty is the manufacturer's, stated
-// without a term because the owner's figure did not match James Hardie's published paperwork.
+// Labor rates are owner-provided (src/data/siding.ts). The warranty is the manufacturer's: the 30 years
+// is James Hardie's own figure ("a 30-year non-prorated limited, transferrable substrate warranty" on
+// its HardiePlank lap siding and HardiePanel vertical siding pages, read 2026-10-04); the owner said
+// to use what the manufacturer's sheet says. No term is stated for any other manufacturer.
 // Nothing here states a certification, a Clearview workmanship warranty or a timeline.
 const materials = [
   {
@@ -97,7 +99,7 @@ const faq = [
   {
     question: 'Is there a warranty on the siding?',
     answer:
-      "James Hardie siding, and most other siding products, come with a manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications. The manufacturer sets the terms, so ask for the paperwork for the product you choose.",
+      "James Hardie fiber cement siding comes with a 30-year limited manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications. Most other siding products come with a manufacturer's warranty on the same condition. The length and terms are the manufacturer's, so ask for the paperwork for the product you choose.",
   },
   {
     question: 'Can you replace windows during a siding job?',
@@ -240,13 +242,14 @@ const schema = {
           <p class="rule-label">Warranty</p>
           <h2>The manufacturer's warranty.</h2>
           <p class="lede">
-            James Hardie siding, and most other siding products, come with a manufacturer's
-            warranty when the product is bought, as long as it is installed to the manufacturer's
-            specifications.
+            James Hardie fiber cement siding comes with a 30-year limited manufacturer's warranty
+            when the product is bought, as long as it is installed to the manufacturer's
+            specifications. Most other siding products come with a manufacturer's warranty on the
+            same condition.
           </p>
           <p class="fine-print">
-            The manufacturer sets the terms and the length of its warranty. Ask for the current
-            paperwork for the product you choose.
+            The 30 years is James Hardie's own figure. Other manufacturers set their own length and
+            terms, so ask for the current paperwork for the product you choose.
           </p>
         </div>
       </div>

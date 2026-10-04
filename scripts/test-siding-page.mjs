@@ -4,8 +4,9 @@
 // Owner-provided 2026-10-04: labor starts at $2/sq ft (new construction), $3/sq ft (existing home),
 // board and batten $3/sq ft new construction and $4/sq ft existing home, cedar $4/sq ft, all per
 // square foot of total wall area (height times width); tear-off and new plywood $2/sq ft; significant suspected
-// dry rot adds $1,500 to $3,000 in labor depending on severity; siding material is separate; the warranty is the manufacturer's and is
-// stated without a term (the owner's "25 years" did not match James Hardie's published paperwork).
+// dry rot adds $1,500 to $3,000 in labor depending on severity; siding material is separate; the warranty is the manufacturer's: 30 years
+// for James Hardie siding (its own product pages say "a 30-year non-prorated limited ... warranty"; the owner
+// said to use the sheet's number), and no term stated for any other manufacturer.
 // The page states no certification, Clearview workmanship warranty, timeline or crew claim, and
 // shows only the owner's real siding-job photos (captions describe what is visible).
 import assert from 'node:assert/strict';
@@ -42,7 +43,6 @@ const invented = [
   [/\bour (?:own )?(?:workmanship )?warranty|we warrant/i, 'a Clearview warranty'],
   [/certified|certification|authorized|preferred (?:installer|contractor)/i, 'a certification claim'],
   [/colorplus|hardie ?zone|hardie ?plank/i, 'a product line the owner did not name'],
-  [/\b\d+[\s-]*(?:years?|yrs?|decades?)\b/i, 'a years claim (warranty terms belong to the manufacturer)'],
   [/\bMark\b/, 'a personal name'],
   [/\b(?:our|the) (?:crew|team|installers)\b/i, 'a crew or team claim'],
 ];
@@ -71,9 +71,17 @@ assert.ok(/A square foot is total wall area: height times width/.test(text), 'sq
 assert.ok(/siding itself is a separate cost/.test(text) && /not a quote/.test(text), 'material is separate and the rates are starting rates, not a quote');
 assert.ok(!/\$\d+[^.]*\binstalled\b/i.test(text.replace(/installed to the manufacturer/g, '')), 'rates are never called installed prices');
 
-// Warranty: the manufacturer's, no term stated.
-assert.ok(/manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications/.test(text), "manufacturer's warranty condition stated as given");
-assert.ok(/The manufacturer sets the terms/.test(text), 'terms are left to the manufacturer');
+// Warranty: the manufacturer's. The only length on the page is James Hardie's own 30 years (a year count
+// anywhere else, or a different one, is an invented claim); other manufacturers' terms are theirs.
+const yearClaims = [...text.matchAll(/\b\d+[\s-]*(?:years?|yrs?|decades?)\b/gi)];
+assert.ok(yearClaims.length >= 2, 'the 30 years appears (warranty section and FAQ)');
+for (const match of yearClaims) {
+  assert.match(match[0].replace(/\s+/g, '-'), /^30-years?$/i, `the only year count on the page is James Hardie's 30: "${match[0]}"`);
+  assert.ok(/James Hardie/.test(text.slice(Math.max(0, match.index - 70), match.index + 70)), 'and it is always attributed to James Hardie');
+}
+assert.ok(/30-year limited (?:manufacturer's )?warranty when the product is bought, as long as it is installed to the manufacturer's specifications/.test(text), "James Hardie's warranty and its installation condition are stated as given");
+assert.ok(/Most other siding products come with a manufacturer's warranty on the same condition/.test(text), 'other products: a manufacturer warranty on the same condition, no length');
+assert.ok(/Other manufacturers set their own length and terms/.test(text), "other manufacturers' terms are left to them");
 
 // Windows on a siding job are offered only on request.
 assert.ok(/We can, if you ask/.test(text) && /Can you replace windows during a siding job\?/.test(text), 'windows-on-request stated');
