@@ -32,11 +32,12 @@ const quoteSecond = await get(quotes.onRequestGet, db, '/internal/api/quotes?pag
 assert(quoteFirst.status === 200 && quoteFirst.body.quotes.length === 200 && quoteFirst.body.total === 205 && quoteFirst.body.totalPages === 2, 'quotes page 1 returns bounded rows and accurate totals');
 assert(quoteSecond.body.quotes.length === 5 && quoteSecond.body.page === 2 && quoteSecond.body.quotes.every((item) => !quoteFirst.body.quotes.some((first) => first.id === item.id)), 'quotes page 2 returns remaining non-duplicate rows');
 
-seed(db, 'follow_up_tasks', `CREATE TABLE follow_up_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, lead_id INTEGER, title TEXT NOT NULL, due_at TEXT, status TEXT NOT NULL DEFAULT 'open', notes TEXT, created_by TEXT NOT NULL DEFAULT 'mark');`,
+const taskDb = createD1({ schemaFiles: ['internal/db/schema.sql'] });
+seed(taskDb, 'follow_up_tasks', `CREATE TABLE follow_up_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, lead_id INTEGER, title TEXT NOT NULL, due_at TEXT, status TEXT NOT NULL DEFAULT 'open', notes TEXT, created_by TEXT NOT NULL DEFAULT 'mark');`,
   Array.from({ length: 205 }, (_, i) => [i + 1, `2026-01-01T00:00:${String(i % 60).padStart(2, '0')}.000Z`, '2026-01-01T00:00:00.000Z', null, `Task ${i + 1}`, null, 'open', null, 'mark']));
-db.raw.exec(`CREATE TABLE leads (id INTEGER PRIMARY KEY, name TEXT, phone TEXT, email TEXT, city TEXT);`);
-const taskFirst = await get(tasks.onRequestGet, db, '/internal/api/tasks?page=1');
-const taskSecond = await get(tasks.onRequestGet, db, '/internal/api/tasks?page=2');
+taskDb.raw.exec(`CREATE TABLE leads (id INTEGER PRIMARY KEY, name TEXT, phone TEXT, email TEXT, city TEXT);`);
+const taskFirst = await get(tasks.onRequestGet, taskDb, '/internal/api/tasks?page=1');
+const taskSecond = await get(tasks.onRequestGet, taskDb, '/internal/api/tasks?page=2');
 assert(taskFirst.status === 200 && taskFirst.body.tasks.length === 200 && taskFirst.body.total === 205 && taskFirst.body.totalPages === 2, 'tasks page 1 returns bounded rows and accurate totals');
 assert(taskSecond.body.tasks.length === 5 && taskSecond.body.page === 2 && taskSecond.body.tasks.every((item) => !taskFirst.body.tasks.some((first) => first.id === item.id)), 'tasks page 2 returns remaining non-duplicate rows');
 

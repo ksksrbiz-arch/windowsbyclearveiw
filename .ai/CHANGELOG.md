@@ -1,8 +1,41 @@
 # ICM Changelog
 
+## 2026-10-03 — Schedule and quote discovery beyond the first page
+
+- Schedule queries the selected calendar week before pagination (`jobs?from=YYYY-MM-DD&to=YYYY-MM-DD`, inclusive start/exclusive end; 1–31 real calendar days). Cancelled jobs are excluded; all matching pages are read. Week dates and Today use the Pacific business date independent of the phone timezone, including DST. Failed loads clear the calendar and show the server error instead of claiming there are no jobs.
+- Quote API accepts literal customer/city `search` and `status=draft|finalized` before pagination, with stable id ordering. The filtered item snapshot query matches the filtered quote query, preserving Build Plan stale detection. The UI debounces search, resets pagination and ignores cancelled/late results.
+- The job-creation dropdown requests only finalized quotes and reads every page; old signed quotes are no longer lost behind newer drafts.
+- Regression: real SQLite with 200+ jobs/quotes, week boundaries and cancelled jobs, literal apostrophe/percent/underscore searches, filtered Build Plan freshness, Pacific/DST weeks, actual dropdown and schedule loaders including failure recovery. Full local suite/build and pagination/quote-to-job checks required. No production customer records were modified. Browser/real-iPhone checks remain VERIFY.
+
+## 2026-10-03 — Full-queue filters, counts and visible recovery
+
+- `/internal/api/jobs?status=…` filters before pagination, returns the matching total plus the all-queue active count, and uses id as a stable sort tie-breaker. The Jobs screen resets to page one when switching filters and cancels/discards old responses.
+- `/internal/api/tasks?status=open` pages only open work. Its summary counts all open tasks, including the Pacific business day's due tasks and overdue work. Shared day boundaries now live in `functions/internal/_lib/pacific-day.mjs`; dashboard.js re-exports the existing helper so callers remain compatible. `dueAt:null` on PATCH clears the date.
+- Follow-up Done failures now show beside the task list, outside the usually hidden Add form. Both job and follow-up loaders offer retry after a failed request and recover if the final page empties.
+- Regression evidence: more than 200 seeded jobs/tasks on real SQLite; full-queue totals, filters, Pacific midnight boundaries, explicit date clearing; actual client handlers exercised for late responses and visible save errors. The old pagination fixture now isolates follow-up records from unrelated draft-quote reminder generation.
+- Validation: `npm run test:all`, `npm run test:pagination`, separate `npm run build`, and `git diff --check`. Browser/iPhone checks remain VERIFY; production records were not modified.
+
+## 2026-10-03 — Dashboard dates, follow-up saves and short-screen navigation
+
+- Fixed dashboard Upcoming jobs showing the previous day in Pacific time: `src/lib/scheduled-day.ts` treats YYYY-MM-DD as a calendar date, validates it, and formats in UTC. Timestamp dates elsewhere retain their existing behavior.
+- Dashboard Done buttons now disable immediately, ignore repeat taps while pending, restore after failure, and show the API error (including session/offline errors).
+- The mobile More menu has a viewport-bound scroll area; Escape closes it and returns focus to More.
+- `test:command-center` executes the real dashboard save handler with a deferred response and a rejected save, and checks calendar dates in four timezones including DST and leap day. Full local test suite and Astro build passed. Browser installation failed in this environment, so visual/iPhone checks remain VERIFY; no production customer records were modified.
+
 Dated detail moved out of `STATE.md` on 2026-10-01 so `STATE.md` can stay a current-state snapshot.
 History only: load this to answer "why was X built this way?", not to learn the current state.
 Newest entries go at the top. Entries below are verbatim from `STATE.md` as of 2026-10-01.
+
+## 2026-10-03 — Phone audit of the Command Center: iOS zoom, tap areas, labels, Ask logs 500
+
+- **Evidence first.** Production check (read-only counts, 2026-10-03): 0 leads ever, 0 quotes, 1 job. The repo's own gap analysis already says the bottleneck is lead volume, not tooling, and ranks everything past the revenue path as Systems/Scale, so this pass adds **no features**: it fixes defects found by auditing the real pages the way Mark uses them. The audit drove all 27 internal pages (seeded quote → approved plan → signed → job → follow-up) at 390 px and 360 px with touch emulation, checking horizontal overflow, console and network errors, control sizes, labels, alt text, duplicate ids and keyboard types.
+- **iOS focus zoom (the big one).** About 60 form controls were under 16 px (Field mode, payments, job entry, the build-plan editor, measurements, photos). iPhone Safari zooms the page in when one takes focus and never zooms back out, in the installed app too. `src/styles/global.css` now sets a 16 px floor under `@media (pointer: coarse)` on `body.internal` (`!important`: page-level scoped rules differ in specificity per page; this is a floor, not a style). Pinch-zoom is untouched. Check boxes and radios get a visible 1.35 rem size where pages left the 13 px default.
+- **Tap targets.** Tap-to-call and tap-to-mail links were 16–20 px tall (they are the actions Mark uses most from a job or quote): hit area grown with padding and a matching negative margin, so nothing moves. The header brand link is now 44 px tall. Checked and left alone: Field-mode and Prepare check boxes look small but sit inside 48–50 px label rows.
+- **Labels.** The 44 build-plan list inputs (materials, steps and similar) had no accessible name; each now has one ("materials 2"), and each remove button says which item it removes.
+- **Real bug: `/internal/api/ask-logs` returned 500 on a database with no `ask_logs` table** (a new database, or one where /ask has not logged anything), although the funnel code beside it was already written to read a missing table as zero. The main query is now guarded the same way. Regression test added to `test:ask-logs` (fails without the fix, passes with it).
+- **Checked, no change needed:** no horizontal overflow on any page at 390 or 360 px; every phone, email and amount field already raises the right keyboard (`tel`, `email`, `decimal`/`numeric`); no console errors, failed requests, missing alt text or duplicate ids elsewhere; the sticky header was suspected broken in Field-mode screenshots and is fine (`top: 0` in both emulation modes; it was a screenshot artifact).
+- **Guard:** `npm run test:internal-mobile` (static checks on the source for each fix, in CI). The audit itself needs a browser and a seeded database, so it is a manual procedure (`wrangler pages dev` behind Playwright); see `.ai/references/internal-pwa.md` for the harness notes.
+- **Not done, on purpose:** quote and payment data offline, an offline write queue, more screens. With zero leads in production, each of those is scale before revenue. The next lever is getting estimate requests, not more internal tooling.
 
 ## 2026-10-03 — Installed PWA updates itself on every deploy
 
