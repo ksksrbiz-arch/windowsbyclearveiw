@@ -5,7 +5,7 @@ kicker: Guide
 topic: Product
 published: true
 updated: 2026-09-04
-order: 5
+order: 6
 heroImage: ../../assets/work/blue-slider.jpg
 heroImageAlt: White slider window installed on a dark blue house beside a wood deck, showing a finished Clearview installation.
 heroImageCredit: Clearview job photo — finished slider installation
