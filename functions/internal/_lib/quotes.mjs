@@ -1,3 +1,5 @@
+import { parseWorkType } from './work-types.mjs';
+
 // Kept in sync with src/data/contractTerms.ts by hand, not by import.
 // Pages Functions in this repo never import from src/ — functions/api/estimate.js
 // sets this precedent, duplicating its FROM address rather than reaching into
@@ -19,7 +21,7 @@ export const clean = (v, max = 500) => String(v ?? '').trim().slice(0, max);
  * line-item shape a quote is built from, and recomputes totals from the
  * items rather than trusting whatever the client sent — a stray transcription
  * bug in the browser should never become the number printed on a contract.
- * Returns { error } or { name, phone, customer, cleanItems, subtotalCents, discountCents, totalCents, notes }.
+ * Returns { error } or { name, phone, customer, workType, cleanItems, subtotalCents, discountCents, totalCents, notes }.
  */
 export function parseQuoteBody(body) {
   const customer = body.customer || {};
@@ -28,6 +30,9 @@ export function parseQuoteBody(body) {
   if (!name || !phone) {
     return { error: 'Customer name and phone are required.' };
   }
+
+  const type = parseWorkType(body.workType);
+  if (type.error) return { error: type.error };
 
   const items = Array.isArray(body.items) ? body.items : [];
   if (items.length === 0) {
@@ -63,6 +68,7 @@ export function parseQuoteBody(body) {
   return {
     name,
     phone,
+    workType: type.workType,
     email: clean(customer.email, 200),
     address: clean(customer.address, 300),
     city: clean(customer.city, 120),

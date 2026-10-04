@@ -1,5 +1,6 @@
 import { BUILD_PLAN_STATES, transitionPlanState, assertJobEligible } from '../../_lib/build-plan-state.mjs';
 import { lintPlan, sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
+import { isSidingQuoteId, SIDING_NO_PLAN } from '../_lib/work-types.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -60,6 +61,7 @@ export async function onRequestGet({ env, request }) {
   await ensureSchema(env.QUOTES_DB);
   const quoteId = clean(new URL(request.url).searchParams.get('quoteId'));
   if (!quoteId) return json({ error: 'Quote id is required.' }, 400);
+  if (await isSidingQuoteId(env.QUOTES_DB, quoteId)) return json(SIDING_NO_PLAN, 409);
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
   const checked = await refreshQuality(env.QUOTES_DB, quoteId, loaded);
@@ -75,6 +77,7 @@ export async function onRequestPost({ env, request }) {
   const action = clean(body.action);
   const actor = clean(body.actor, 80) || 'mark';
   if (!quoteId || !action) return json({ error: 'quoteId and action are required.' }, 400);
+  if (await isSidingQuoteId(env.QUOTES_DB, quoteId)) return json(SIDING_NO_PLAN, 409);
   const loaded = await loadPlan(env.QUOTES_DB, quoteId);
   if (!loaded) return json({ error: 'Build Plan not found.' }, 404);
 

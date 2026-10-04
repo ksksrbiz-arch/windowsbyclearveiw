@@ -4,7 +4,7 @@ import '../styles/estimate-form.css';
 ---
 <form class="estimate-form" method="post" action="/api/estimate" id="estimate-form" enctype="multipart/form-data">
   <div class="hp" aria-hidden="true"><label>Company<input name="company" type="text" tabindex="-1" autocomplete="off" /></label></div>
-  <input type="hidden" name="visitor_id" data-visitor-id /><input type="hidden" name="visit_journey" data-visit-journey />
+  <input type="hidden" name="visitor_id" data-visitor-id /><input type="hidden" name="visit_journey" data-visit-journey /><input type="hidden" name="service" data-service />
   <fieldset class="field-group"><legend>Who is asking?</legend><label class="choice"><input type="radio" name="role" value="Homeowner" checked /><span>Homeowner — replacing what is there</span></label><label class="choice"><input type="radio" name="role" value="Builder / GC" /><span>Builder or GC — setting them in a new build</span></label></fieldset>
   <label>Name<input name="name" type="text" required autocomplete="name" autocapitalize="words" maxlength="120" aria-describedby="field-error-name" /><span class="field-error" id="field-error-name" data-field-error="name" hidden></span></label>
   <label>Phone<input name="phone" type="tel" required autocomplete="tel" inputmode="tel" placeholder="(360) 555-0123" maxlength="40" pattern="(\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}" title="A 10-digit US phone number, e.g. (360) 555-0123" aria-describedby="field-error-phone" /><span class="field-error" id="field-error-phone" data-field-error="phone" hidden></span></label>
@@ -27,6 +27,13 @@ function bindEstimate() {
 
   const params = new URLSearchParams(window.location.search);
   const notes = form.querySelector('[name="notes"]');
+  // The siding page sends visitors here with service=siding so the request is filed as a siding
+  // inquiry (the server accepts only that one value). It also swaps the window-specific example text.
+  if (params.get('service') === 'siding') {
+    const serviceField = form.querySelector('[data-service]');
+    if (serviceField instanceof HTMLInputElement) serviceField.value = 'siding';
+    if (notes instanceof HTMLTextAreaElement) notes.placeholder = 'Which sides of the house, the siding you have now or want, and anything you have noticed: damage, rot, peeling paint.';
+  }
   if (notes instanceof HTMLTextAreaElement && !notes.value) {
     const parts = [];
     const home = params.get('home_type');
@@ -59,7 +66,7 @@ function bindEstimate() {
     const role = form.querySelector('input[name="role"][value="Builder / GC"]');
     if (role instanceof HTMLInputElement) role.checked = true;
   }
-  if (window.history.replaceState && ['home_type', 'openings', 'opening_type', 'concern', 'stage', 'scope', 'role'].some((key) => params.has(key))) {
+  if (window.history.replaceState && ['home_type', 'openings', 'opening_type', 'concern', 'stage', 'scope', 'role', 'service'].some((key) => params.has(key))) {
     window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash}`);
   }
 

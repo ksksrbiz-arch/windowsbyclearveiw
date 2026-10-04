@@ -1,0 +1,9 @@
+---
+// "All / Windows / Siding" for Command Center lists. Behaviour lives in src/lib/work-type.ts
+// (bindWorkTypeFilter); the styles are global in InternalLayout.astro.
+---
+<div class="wt-filter" role="group" aria-label="Type of work" data-wt-filter>
+  <button type="button" data-wt="" aria-pressed="true">All</button>
+  <button type="button" data-wt="windows" aria-pressed="false">Windows</button>
+  <button type="button" data-wt="siding" aria-pressed="false">Siding</button>
+</div>

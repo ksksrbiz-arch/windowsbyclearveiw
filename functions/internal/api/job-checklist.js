@@ -113,8 +113,10 @@ export async function onRequestGet(context) {
   await ensureSchema(env.QUOTES_DB);
   const jobId = new URL(context.request.url).searchParams.get('jobId');
   if (!jobId) return json({ error: 'jobId is required.' }, 400);
-  const job = await env.QUOTES_DB.prepare(`SELECT id FROM jobs WHERE id = ?`).bind(jobId).first();
+  const job = await env.QUOTES_DB.prepare(`SELECT id, work_type FROM jobs WHERE id = ?`).bind(jobId).first();
   if (!job) return json({ error: 'Job not found.' }, 404);
+  // The field checklist is the window install sequence. Siding jobs have none (see work-types.mjs).
+  if (job.work_type === 'siding') return json({ error: 'Siding jobs do not use the window field checklist.', code: 'SIDING_JOB' }, 409);
   await seed(env.QUOTES_DB, jobId);
   const result = await env.QUOTES_DB.prepare(`SELECT id, section, label, checked, notes, position, updated_at FROM job_checklist_items WHERE job_id = ? ORDER BY position, id`).bind(jobId).all();
   const snapshot = await buildPlanSnapshot(env.QUOTES_DB, jobId);

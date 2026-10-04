@@ -1,18 +1,20 @@
 ---
 import InternalLayout from '../../../layouts/InternalLayout.astro';
+import WorkTypeFilter from '../../../components/WorkTypeFilter.astro';
 ---
 <InternalLayout title="Quotes">
   <div class="ql-head">
     <div><p class="kicker">Sales workspace</p><h1>Quotes</h1><p class="lede">Build, finalize, and hand the customer cleanly into invoicing and production.</p></div>
-    <div class="ql-head-actions"><a class="btn btn-ghost" href="/internal/invoices">Invoices</a><a class="btn btn-ghost" href="/internal/leads">Leads</a><a class="btn btn-primary" href="/internal/quotes/new">New quote</a></div>
+    <div class="ql-head-actions"><a class="btn btn-ghost" href="/internal/invoices">Invoices</a><a class="btn btn-ghost" href="/internal/leads">Leads</a><a class="btn btn-ghost" href="/internal/quotes/new?type=siding">New siding quote</a><a class="btn btn-primary" href="/internal/quotes/new">New window quote</a></div>
   </div>
-  <section class="quote-command"><div><span>QUOTE WORKSPACE</span><strong>Finish drafts before starting more work.</strong><p>Every draft needs a current, approved Build Plan before it can be finalized.</p></div><a href="/internal/jobs">Open jobs →</a></section>
-  <div class="quote-toolbar"><label class="ql-search"><span>Search quotes</span><input type="search" maxlength="120" data-search placeholder="Customer or city" /></label><span class="ql-result-note" data-result-note></span></div>
-  <p data-loading>Loading…</p><p class="ql-error" data-error hidden role="alert"></p><p data-empty hidden>No quotes yet. Start with New quote above.</p><p class="ql-empty-filtered" data-empty-filtered hidden>No quotes match that search.</p>
+  <section class="quote-command"><div><span>QUOTE WORKSPACE</span><strong>Finish drafts before starting more work.</strong><p>Every window draft needs a current, approved Build Plan before it can be finalized. A siding quote is approved by its signature.</p></div><a href="/internal/jobs">Open jobs →</a></section>
+  <div class="quote-toolbar"><WorkTypeFilter /><label class="ql-search"><span>Search quotes</span><input type="search" maxlength="120" data-search placeholder="Customer or city" /></label><span class="ql-result-note" data-result-note></span></div>
+  <p data-loading>Loading…</p><p class="ql-error" data-error hidden role="alert"></p><p data-empty hidden>No quotes yet. Start with a new window or siding quote above.</p><p class="ql-empty-filtered" data-empty-filtered hidden>No quotes match that search or filter.</p>
   <div class="quote-list" data-list></div><nav class="list-pages" aria-label="Quote pages"><button type="button" data-page-prev disabled>Previous</button><span data-page-label></span><button type="button" data-page-next disabled>Next</button></nav>
 </InternalLayout>
 <script>
   import { formatCents } from '../../../lib/money';
+  import { bindWorkTypeFilter, workTypeBadge } from '../../../lib/work-type';
   function initQuoteList(){
     const list=document.querySelector('[data-list]');if(!(list instanceof HTMLElement)||list.dataset.bound==='true')return;list.dataset.bound='true';
     const loading=document.querySelector('[data-loading]'),errorEl=document.querySelector('[data-error]'),emptyEl=document.querySelector('[data-empty]'),emptyFiltered=document.querySelector('[data-empty-filtered]'),search=document.querySelector('[data-search]'),note=document.querySelector('[data-result-note]');
@@ -21,12 +23,12 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const planLabel=(p:any)=>{if(!p||p.error)return 'Plan unavailable';if(p.status==='approved'&&!p.stale)return 'Plan approved';if(p.stale)return 'Plan stale';if((p.quality?.blockers||[]).length)return 'Plan blocked';if(p.status==='review')return 'Plan in review';if(p.status==='reopened')return 'Plan reopened';if(p.generated)return 'Plan not saved';return 'Plan draft';};
     const planClass=(p:any)=>{if(!p||p.error)return 'plan-unavailable';if(p.status==='approved'&&!p.stale)return 'plan-approved';if(p.stale)return 'plan-stale';if((p.quality?.blockers||[]).length)return 'plan-blocked';if(p.status==='review')return 'plan-review';if(p.status==='reopened')return 'plan-reopened';return 'plan-draft';};
     const planAction=(p:any)=>p?.status==='approved'&&!p?.stale?'Open plan':p?.status==='review'?'Review plan':'Build plan';
-    let pending:AbortController|null=null;let searchTimer:ReturnType<typeof setTimeout>;let quotes:any[]=[];let plans:Record<string,any>={},page=1,totalPages=1,total=0;
-    async function loadPlans(items:any[],signal:AbortSignal){await Promise.all(items.filter(x=>x.status!=='finalized').map(async x=>{try{const r=await fetch(`/internal/api/build-plan?quoteId=${encodeURIComponent(x.id)}`,{signal,headers:{'cache-control':'no-cache'}});const result=r.ok?await r.json():{error:true};if(!signal.aborted)plans[x.id]=result;}catch{if(!signal.aborted)plans[x.id]={error:true};}}));}
+    let workType:''|'windows'|'siding'='';let pending:AbortController|null=null;let searchTimer:ReturnType<typeof setTimeout>;let quotes:any[]=[];let plans:Record<string,any>={},page=1,totalPages=1,total=0;
+    async function loadPlans(items:any[],signal:AbortSignal){await Promise.all(items.filter(x=>x.status!=='finalized'&&x.work_type!=='siding').map(async x=>{try{const r=await fetch(`/internal/api/build-plan?quoteId=${encodeURIComponent(x.id)}`,{signal,headers:{'cache-control':'no-cache'}});const result=r.ok?await r.json():{error:true};if(!signal.aborted)plans[x.id]=result;}catch{if(!signal.aborted)plans[x.id]={error:true};}}));}
     function render(){
       const term=search instanceof HTMLInputElement?search.value.trim():'';const visible=quotes;
-      if(note)note.textContent=quotes.length?`${visible.length} of ${quotes.length} quotes`:'';if(emptyFiltered instanceof HTMLElement)emptyFiltered.hidden=!(term&&!visible.length);if(!visible.length){if(!quotes.length&&emptyEl instanceof HTMLElement)emptyEl.hidden=false;list.innerHTML='';return;}if(emptyEl instanceof HTMLElement)emptyEl.hidden=true;
-      list.innerHTML=visible.map(x=>{const finalized=x.status==='finalized',p=plans[x.id],href=`/internal/quotes/build-plan?quoteId=${encodeURIComponent(x.id)}`,text=finalized?'Plan attached to production flow':planLabel(p),cls=finalized?'plan-approved':planClass(p);return `<article class="quote-card"><div class="quote-card-main"><div class="quote-card-top"><span class="quote-status ${finalized?'is-final':'is-draft'}">${quoteLabel(x.status)}</span>${!finalized?`<span class="plan-status ${cls}">${text}</span>`:''}<span class="quote-id">${esc(x.id)}</span><time>${new Date(x.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</time></div><h2>${esc(x.customer_name)}</h2><p class="quote-meta">${esc([x.customer_city,x.customer_role].filter(Boolean).join(' · ')||'Customer')}</p></div><div class="quote-card-value"><strong>${money(x.total_cents)}</strong><span>${invoiceLabel(x.invoice_status)}</span></div><div class="quote-card-actions"><a class="btn btn-ghost btn-small" href="/internal/quotes/view?id=${encodeURIComponent(x.id)}">Open quote</a>${!finalized?`<a class="btn btn-primary btn-small" href="${href}">${planAction(p)}</a>`:''}${!finalized&&p?.status==='review'?`<a class="btn btn-ghost btn-small" href="/internal/quotes/build-plan-approval?quoteId=${encodeURIComponent(x.id)}">Approval gate</a>`:''}${x.invoice_id?`<a class="btn btn-ghost btn-small" href="/internal/invoices/view?id=${encodeURIComponent(x.invoice_id)}">Invoice</a>`:''}${finalized?`<a class="btn btn-primary btn-small" href="/internal/jobs">Jobs →</a>`:''}</div></article>`;}).join('');
+      if(note)note.textContent=quotes.length?`${visible.length} of ${quotes.length} quotes`:'';if(emptyFiltered instanceof HTMLElement)emptyFiltered.hidden=!((term||workType)&&!visible.length);if(!visible.length){if(!quotes.length&&!term&&!workType&&emptyEl instanceof HTMLElement)emptyEl.hidden=false;list.innerHTML='';return;}if(emptyEl instanceof HTMLElement)emptyEl.hidden=true;
+      list.innerHTML=visible.map(x=>{const finalized=x.status==='finalized',siding=x.work_type==='siding',p=plans[x.id],href=`/internal/quotes/build-plan?quoteId=${encodeURIComponent(x.id)}`,text=finalized?'Plan attached to production flow':planLabel(p),cls=finalized?'plan-approved':planClass(p);return `<article class="quote-card"><div class="quote-card-main"><div class="quote-card-top"><span class="quote-status ${finalized?'is-final':'is-draft'}">${quoteLabel(x.status)}</span>${workTypeBadge(x.work_type)}${!finalized&&!siding?`<span class="plan-status ${cls}">${text}</span>`:''}<span class="quote-id">${esc(x.id)}</span><time>${new Date(x.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</time></div><h2>${esc(x.customer_name)}</h2><p class="quote-meta">${esc([x.customer_city,x.customer_role].filter(Boolean).join(' · ')||'Customer')}</p></div><div class="quote-card-value"><strong>${money(x.total_cents)}</strong><span>${invoiceLabel(x.invoice_status)}</span></div><div class="quote-card-actions"><a class="btn btn-ghost btn-small" href="/internal/quotes/view?id=${encodeURIComponent(x.id)}">Open quote</a>${!finalized&&!siding?`<a class="btn btn-primary btn-small" href="${href}">${planAction(p)}</a>`:''}${!finalized&&!siding&&p?.status==='review'?`<a class="btn btn-ghost btn-small" href="/internal/quotes/build-plan-approval?quoteId=${encodeURIComponent(x.id)}">Approval gate</a>`:''}${x.invoice_id?`<a class="btn btn-ghost btn-small" href="/internal/invoices/view?id=${encodeURIComponent(x.invoice_id)}">Invoice</a>`:''}${finalized?`<a class="btn btn-primary btn-small" href="/internal/jobs">Jobs →</a>`:''}</div></article>`;}).join('');
     }
     async function load(){
       pending?.abort();const request=new AbortController();pending=request;
@@ -35,21 +37,21 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       if(loading instanceof HTMLElement)loading.hidden=false;if(errorEl instanceof HTMLElement)errorEl.hidden=true;
       if(emptyEl instanceof HTMLElement)emptyEl.hidden=true;if(emptyFiltered instanceof HTMLElement)emptyFiltered.hidden=true;list.innerHTML='';
       try{
-        const params=new URLSearchParams({page:String(page)});const term=search instanceof HTMLInputElement?search.value.trim():'';if(term)params.set('search',term);
+        const params=new URLSearchParams({page:String(page)});const term=search instanceof HTMLInputElement?search.value.trim():'';if(term)params.set('search',term);if(workType)params.set('workType',workType);
         const response=await fetch(`/internal/api/quotes?${params}`,{signal:request.signal,headers:{'cache-control':'no-cache'}});
         const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Could not load quotes.');if(pending!==request)return;
         const rows=Array.isArray(data.quotes)?data.quotes:[];
         await loadPlans(rows,request.signal);if(pending!==request||request.signal.aborted)return;
         quotes=rows;page=data.page||page;totalPages=Math.max(1,data.totalPages||0);total=data.total||0;
         if(page>totalPages){page=totalPages;return load();}
-        render();if(note)note.textContent=`${quotes.length} shown · ${total} ${term?'matching quotes':'total quotes'}`;
-        if(emptyEl instanceof HTMLElement)emptyEl.hidden=Boolean(term||quotes.length);
+        render();if(note)note.textContent=`${quotes.length} shown · ${total} ${term||workType?'matching quotes':'total quotes'}`;
+        if(emptyEl instanceof HTMLElement)emptyEl.hidden=Boolean(term||workType||quotes.length);
         const label=document.querySelector('[data-page-label]');if(label)label.textContent=`Page ${page} of ${totalPages}`;
         if(prev instanceof HTMLButtonElement)prev.disabled=page<=1;if(next instanceof HTMLButtonElement)next.disabled=page>=totalPages;
       }catch(e){if(pending!==request||request.signal.aborted)return;if(errorEl instanceof HTMLElement){errorEl.hidden=false;errorEl.textContent=e instanceof Error?e.message:'Could not load quotes.';}list.innerHTML='<button class="btn btn-ghost" type="button" data-retry>Try again</button>';list.querySelector('[data-retry]')?.addEventListener('click',load);}
       finally{if(pending===request&&loading instanceof HTMLElement)loading.hidden=true;}
     }
-    search?.addEventListener('input',()=>{clearTimeout(searchTimer);pending?.abort();page=1;searchTimer=setTimeout(load,250)});document.querySelector('[data-page-prev]')?.addEventListener('click',()=>{if(page>1){page--;load()}});document.querySelector('[data-page-next]')?.addEventListener('click',()=>{if(page<totalPages){page++;load()}});load();
+    search?.addEventListener('input',()=>{clearTimeout(searchTimer);pending?.abort();page=1;searchTimer=setTimeout(load,250)});document.querySelector('[data-page-prev]')?.addEventListener('click',()=>{if(page>1){page--;load()}});document.querySelector('[data-page-next]')?.addEventListener('click',()=>{if(page<totalPages){page++;load()}});workType=bindWorkTypeFilter(document,(next)=>{workType=next;pending?.abort();page=1;load()});load();
   }
   initQuoteList();document.addEventListener('astro:page-load',initQuoteList);
 </script>

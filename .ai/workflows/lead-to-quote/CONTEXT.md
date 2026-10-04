@@ -26,9 +26,15 @@ Validation, rate limits and the customer receipt are deterministic and already e
    Mark confirms it; the system never auto-links.
 4. **Quote.** Items, quantities and prices come from Mark and the pricing model, never from AI.
 5. **Follow-up.** Unsigned draft quotes get day 2/7/14 reminder tasks; they never contact the customer.
-6. **Build Plan, then finalize.** Hand off to `.ai/workflows/build-plan/`. A quote cannot be finalized without an
+6. **Build Plan, then finalize.** Hand off to `.ai/workflows/build-plan/`. A window quote cannot be finalized without an
    approved, current Build Plan.
 7. **Sign.** A customer signing link (`/sign#<token>`) passes the same Build Plan and terms gates.
+
+**Siding branch (2026-10-04).** A request from `/siding` is filed as a siding lead (`leads.service = 'siding'`).
+*Start siding quote* creates a quote with `work_type = 'siding'`, fixed at creation. The Build Plan describes window
+openings and does not apply: step 6 is skipped and the signature alone (Mark's device or the customer link) approves
+the quote. Its invoice and job inherit the type; the job has no plan snapshot, window checklist or opening closeout.
+Window quotes are unchanged. Code: `functions/internal/_lib/work-types.mjs`.
 
 ## Output
 
@@ -43,4 +49,4 @@ Lead data is missing a fact needed for pricing; two leads match one quote; the q
 
 Done when the quote is signed and `quotes.lead_id` is set (or Mark deliberately left it unlinked). Code paths are
 verified by `npm run test:estimate`, `test:lead-links`, `test:quote-follow-ups`, `test:quote-signing` and
-`test:quote-to-job`. A human (Mark) sends and finalizes; AI never does.
+`test:quote-to-job` and `test:siding-work`. A human (Mark) sends and finalizes; AI never does.

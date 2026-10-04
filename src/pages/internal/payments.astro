@@ -26,7 +26,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 
 <script>
   import { formatCents } from '../../lib/money';
-  type JobPayment={id:string;job_status:string;scheduled_date?:string|null;customer_name:string;customer_city?:string|null;total_cents?:number|null;amount_paid_cents:number;balance_cents:number;payment_status:string;payment_method?:string|null;notes?:string|null};
+  import { jobTypeBadge } from '../../lib/work-type';
+  type JobPayment={id:string;work_type?:string;job_status:string;scheduled_date?:string|null;customer_name:string;customer_city?:string|null;total_cents?:number|null;amount_paid_cents:number;balance_cents:number;payment_status:string;payment_method?:string|null;notes?:string|null};
   function initPayments(){
     const root=document.querySelector('main'); if(!(root instanceof HTMLElement)||root.dataset.paymentBound==='true')return; root.dataset.paymentBound='true';
     const list=root.querySelector('[data-list]') as HTMLElement; const filters=Array.from(root.querySelectorAll('[data-filter]')); const refresh=root.querySelector('[data-refresh]') as HTMLButtonElement|null; const scopedJobId=new URLSearchParams(location.search).get('jobId')?.trim()||''; let jobs:JobPayment[]=[]; let filter='all';
@@ -39,7 +40,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       list.innerHTML=visible.map((j,i)=>{
         const state=j.payment_status==='paid'?'Paid':j.payment_status==='partial'?'Partial':'Unpaid';
         return `<article class="payment-card" data-row="${i}">
-          <div class="payment-card-head"><div><span class="pill pill-${esc(j.payment_status)}">${state}</span><a class="customer-link" href="/internal/jobs/view?id=${encodeURIComponent(j.id)}"><strong>${esc(j.customer_name)}</strong></a><small>${esc([j.customer_city,date(j.scheduled_date)].filter(Boolean).join(' · '))}</small></div><div class="balance-block"><span>Balance</span><strong>${money(j.balance_cents)}</strong></div></div>
+          <div class="payment-card-head"><div><span class="pill pill-${esc(j.payment_status)}">${state}</span><a class="customer-link" href="/internal/jobs/view?id=${encodeURIComponent(j.id)}"><strong>${esc(j.customer_name)}</strong></a> ${jobTypeBadge(j.work_type)}<small>${esc([j.customer_city,date(j.scheduled_date)].filter(Boolean).join(' · '))}</small></div><div class="balance-block"><span>Balance</span><strong>${money(j.balance_cents)}</strong></div></div>
           <div class="money-grid"><div><span>Quoted</span><strong>${money(Number(j.total_cents)||0)}</strong></div><div><span>Paid</span><strong>${money(j.amount_paid_cents)}</strong></div><div><span>Status</span><strong>${state}</strong></div></div>
           <details class="payment-editor"><summary>Update payment record</summary><div class="editor-body"><div class="field-grid"><label>Paid to date<input inputmode="decimal" data-paid-input value="${(Number(j.amount_paid_cents||0)/100).toFixed(2)}"></label><label>Method<select data-method><option value="">Not recorded</option><option>Cash</option><option>Check</option><option>Card</option><option>ACH</option><option>Other</option></select></label></div><label>Notes<textarea data-notes maxlength="4000" placeholder="Payment / reconciliation note">${esc(j.notes||'')}</textarea><div class="editor-foot"><span class="status-text" data-status-text>Ready</span><button class="btn btn-primary" type="button" data-save>Save payment record</button></div></div></details>
         </article>`;

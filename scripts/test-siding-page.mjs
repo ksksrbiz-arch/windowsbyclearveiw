@@ -101,7 +101,7 @@ for (const place of ['Clark County', 'Camas', 'Battle Ground', 'Ridgefield']) {
 assert.ok(/Vancouver, Washougal, Woodland and La Center, have their own rules/.test(text), 'unverified cities are deferred to the building department');
 
 // The CTA tags the request so siding leads can be counted for the 90-day review.
-assert.ok(html.includes('/estimate?scope=House%20siding'), 'estimate link carries the House siding scope');
+assert.ok(html.includes('/estimate?service=siding&amp;scope=House%20siding') || html.includes('/estimate?service=siding&scope=House%20siding'), 'estimate link carries the siding service and the House siding scope');
 assert.ok(readFileSync(join(root, 'src/components/EstimateForm.astro'), 'utf8').includes("params.get('scope')") || readFileSync(join(root, 'src/components/EstimateForm.astro'), 'utf8').includes("params.has('scope')"), 'estimate form reads the scope param');
 
 // Structured data: a Service with the eight areas, and the FAQ.

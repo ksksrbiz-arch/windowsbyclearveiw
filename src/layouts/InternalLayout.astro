@@ -204,6 +204,16 @@ const isMoreActive = mobileMoreItems.some((item) => isActive(item.href));
       })();
     </script>
 
+    <style is:global>
+      /* Windows / Siding labels and filter, used by every Command Center list (src/lib/work-type.ts). */
+      .wt-badge{display:inline-flex;align-items:center;font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;line-height:1;padding:.22rem .5rem;border-radius:999px;border:1px solid var(--line-strong);background:var(--paper-raised);color:var(--ink-soft);white-space:nowrap}
+      .wt-badge.wt-siding{border-color:var(--accent-2-ink);background:color-mix(in srgb,var(--accent-2) 14%,var(--paper));color:var(--accent-2-ink)}
+      .wt-badge.wt-general{border-style:dashed}
+      .wt-filter{display:inline-flex;gap:.2rem;padding:.2rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-raised)}
+      .wt-filter button{appearance:none;border:0;background:transparent;color:var(--ink-soft);font:inherit;font-size:var(--step--1);font-weight:650;min-height:44px;padding:.35rem .9rem;border-radius:calc(var(--radius) - 2px);cursor:pointer}
+      .wt-filter button[aria-pressed="true"]{background:var(--ink);color:var(--on-dark)}
+      .wt-filter button:focus-visible{outline:2px solid var(--accent-2-ink);outline-offset:2px}
+    </style>
     <style>
       .internal{background:var(--paper);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
       .internal-header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--black) 97%,transparent);color:var(--on-dark);border-bottom:1px solid var(--dark-line);backdrop-filter:blur(14px)}

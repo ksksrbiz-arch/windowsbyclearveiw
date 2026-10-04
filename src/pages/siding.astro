@@ -161,7 +161,7 @@ const schema = {
         in person and give you a written estimate before anything is ordered.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-light" href="/estimate?scope=House%20siding">Get a written estimate</a>
+        <a class="btn btn-light" href="/estimate?service=siding&scope=House%20siding">Get a written estimate</a>
         <a class="btn btn-ghost btn-on-dark" href="#materials">See what we install</a>
       </div>
       <p class="hero-note">
@@ -339,6 +339,7 @@ const schema = {
     body="We walk the house, measure the walls, and write the estimate down before anything is ordered."
     showToolLink={false}
     showAskLink={false}
+    estimateHref="/estimate?service=siding&scope=House%20siding"
   />
 </BaseLayout>
 

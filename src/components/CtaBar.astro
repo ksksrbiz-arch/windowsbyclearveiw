@@ -8,6 +8,8 @@ interface Props {
   showToolLink?: boolean;
   /** Secondary route for visitors who are not ready to book: the /ask consultant. */
   showAskLink?: boolean;
+  /** Where the estimate button goes. The siding page passes its own so requests arrive tagged as siding. */
+  estimateHref?: string;
 }
 
 const {
@@ -15,6 +17,7 @@ const {
   body = 'We measure the glass, sills, and trim in person, then give you a number in writing — not a guess from a photo.',
   showToolLink = true,
   showAskLink = true,
+  estimateHref = '/estimate',
 } = Astro.props;
 ---
 <section class="cta-band">
@@ -37,7 +40,7 @@ const {
         <span class="cta-phone-number" aria-hidden="true">{site.phoneDisplay}</span>
         <span class="visually-hidden">{site.phoneDisplay}</span>
       </a>
-      <a class="btn btn-ghost btn-on-dark cta-secondary" href="/estimate">Request an estimate</a>
+      <a class="btn btn-ghost btn-on-dark cta-secondary" href={estimateHref}>Request an estimate</a>
     </div>
   </div>
 </section>

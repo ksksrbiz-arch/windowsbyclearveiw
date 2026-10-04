@@ -2,6 +2,8 @@ import { pacificDayRange } from '../_lib/pacific-day.mjs';
 export { pacificDayRange } from '../_lib/pacific-day.mjs';
 import { syncQuoteFollowUps } from '../_lib/quote-follow-ups.mjs';
 import { ensureJobsSchema } from '../_lib/jobs-schema.mjs';
+import { ensureQuoteWorkTypeColumn } from '../_lib/work-types.mjs';
+import { ensureLeadServiceColumn } from '../../_lib/lead-service.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -34,6 +36,8 @@ export async function onRequestGet(context) {
   const { env } = context;
   await ensureTaskSchema(env.QUOTES_DB);
   await ensureJobsSchema(env.QUOTES_DB);
+  await ensureQuoteWorkTypeColumn(env.QUOTES_DB);
+  const leadService = (await ensureLeadServiceColumn(env.QUOTES_DB)) ? ', service' : '';
   await syncQuoteFollowUps(env.QUOTES_DB).catch((error) => console.error('quote-follow-up-sync-failed', error));
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const now = new Date().toISOString();
@@ -54,8 +58,8 @@ export async function onRequestGet(context) {
         (SELECT COUNT(*) FROM jobs WHERE status NOT IN ('completed','cancelled')) AS active_jobs,
         (SELECT COALESCE(SUM(CASE WHEN j.status NOT IN ('completed','cancelled') THEN COALESCE(q.total_cents,j.agreed_cents,0) ELSE 0 END),0) FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id) AS active_job_value_cents
     `).bind(weekAgo, today.start, today.end, now).first(),
-    env.QUOTES_DB.prepare(`SELECT id, created_at, name, phone, email, city, role FROM leads ORDER BY created_at DESC LIMIT 6`).all(),
-    env.QUOTES_DB.prepare(`SELECT id, created_at, status, customer_name, customer_city, total_cents FROM quotes ORDER BY created_at DESC LIMIT 6`).all(),
+    env.QUOTES_DB.prepare(`SELECT id, created_at, name, phone, email, city, role${leadService} FROM leads ORDER BY created_at DESC LIMIT 6`).all(),
+    env.QUOTES_DB.prepare(`SELECT id, created_at, status, work_type, customer_name, customer_city, total_cents FROM quotes ORDER BY created_at DESC LIMIT 6`).all(),
     env.QUOTES_DB.prepare(`
       SELECT CASE
         WHEN first_utm_source IS NOT NULL AND first_utm_source <> '' THEN first_utm_source
@@ -80,7 +84,7 @@ export async function onRequestGet(context) {
       LIMIT 8
     `).all(),
     env.QUOTES_DB.prepare(`
-      SELECT j.id, j.status, j.scheduled_date, j.scheduled_window, j.customer_name, j.customer_city, COALESCE(q.total_cents, j.agreed_cents) AS total_cents
+      SELECT j.id, j.status, j.work_type, j.scheduled_date, j.scheduled_window, j.customer_name, j.customer_city, COALESCE(q.total_cents, j.agreed_cents) AS total_cents
       FROM jobs j LEFT JOIN quotes q ON q.id = j.quote_id
       WHERE j.status <> 'completed' AND j.status <> 'cancelled'
       ORDER BY CASE WHEN j.scheduled_date IS NULL THEN 1 ELSE 0 END, j.scheduled_date ASC, j.created_at DESC

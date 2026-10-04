@@ -30,6 +30,7 @@ jobs:
       - run: npm run test:ask-handoff
       - run: npm run test:ask-logs
       - run: npm run test:command-center
+      - run: npm run test:siding-work
       - run: npm run test:recent-fixes
       - run: npm run test:public-terminology
       - run: npm run test:copilot

@@ -49,7 +49,12 @@ CREATE TABLE IF NOT EXISTS quotes (
   -- only; set by "Start quote" or confirmed by Mark on the quote page. Not a
   -- foreign key because leads lives in the public-form schema file.
   lead_id            INTEGER,
-  lead_linked_at     TEXT
+  lead_linked_at     TEXT,
+
+  -- 'windows' | 'siding'. Set when the quote is created and never changed. Siding quotes are
+  -- approved by signature alone (no window Build Plan). Existing databases get this column
+  -- lazily (functions/internal/_lib/work-types.mjs).
+  work_type          TEXT NOT NULL DEFAULT 'windows'
 );
 
 CREATE INDEX IF NOT EXISTS idx_quotes_lead_id ON quotes(lead_id);

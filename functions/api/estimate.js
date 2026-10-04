@@ -1,5 +1,6 @@
 import { sendLeadAlert } from '../_lib/lead-alert.mjs';
 import { takeRateLimit, verifyTurnstile } from '../_lib/abuse-guard.mjs';
+import { ensureLeadServiceColumn, leadServiceFromForm } from '../_lib/lead-service.mjs';
 
 const MAX = {
   name: 120,
@@ -118,6 +119,7 @@ function buildVCard(lead) {
   const phone = telUri(lead.phone);
   const noteBits = [
     lead.role && `Role: ${lead.role}`,
+    lead.service === 'siding' && 'Service: Siding',
     lead.city && `City: ${lead.city}`,
     lead.notes && `Notes: ${lead.notes}`,
   ].filter(Boolean);
@@ -203,12 +205,14 @@ async function logLead(env, lead, journey, visitorId) {
   if (!env?.QUOTES_DB) return;
   try {
     const first = journey.firstTouch || {};
+    // The service tag is a convenience: if the column cannot be added, the lead is saved without it.
+    const tagged = lead.service && (await ensureLeadServiceColumn(env.QUOTES_DB));
     await env.QUOTES_DB.prepare(
       `INSERT INTO leads (
         created_at, name, phone, email, city, role, notes, visitor_id,
         first_seen_at, first_referrer, first_utm_source, first_utm_medium, first_utm_campaign, landing_path,
-        visit_count, page_views_json
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        visit_count, page_views_json${tagged ? ', service' : ''}
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?${tagged ? ',?' : ''})`,
     )
       .bind(
         new Date().toISOString(),
@@ -227,6 +231,7 @@ async function logLead(env, lead, journey, visitorId) {
         first.path || null,
         journey.visits.length,
         JSON.stringify(journey.visits),
+        ...(tagged ? [lead.service] : []),
       )
       .run();
   } catch (error) {
@@ -345,6 +350,9 @@ export async function onRequestPost(context) {
     role: clean(form.get('role'), MAX.role),
     notes: cleanMultiline(form.get('notes'), MAX.notes),
   };
+  // 'siding' only when the siding page sent it (or the request carries that page's own prefill);
+  // everything else stays untagged.
+  lead.service = leadServiceFromForm(form.get('service'), lead.notes);
 
   const fieldErrors = {};
   if (!lead.name) fieldErrors.name = 'Enter your name.';
@@ -411,7 +419,7 @@ export async function onRequestPost(context) {
           CUSTOMER_EMAIL: lead.email || 'Not given',
           EMAIL_BUTTON_HTML: emailButtonHtml(lead.name, lead.email),
           CITY: lead.city,
-          NOTES: [lead.role && `[${lead.role}]`, lead.notes || 'No notes.', journeySummary]
+          NOTES: [[lead.role && `[${lead.role}]`, lead.service === 'siding' && '[Siding]'].filter(Boolean).join(' '), lead.notes || 'No notes.', journeySummary]
             .filter(Boolean)
             .join('\n\n'),
           RECEIVED_AT: receivedAt(),

@@ -63,6 +63,7 @@ import { site } from '../../../data/site';
 
 <script>
   import { formatCents } from '../../../lib/money';
+  import { workTypeLabel } from '../../../lib/work-type';
   function initInvoiceView() {
     const sheet = document.querySelector('[data-sheet]');
     if (!(sheet instanceof HTMLElement) || sheet.dataset.bound === 'true') return;
@@ -99,7 +100,9 @@ import { site } from '../../../data/site';
       if (sheet instanceof HTMLElement) sheet.hidden = false;
       const set = (s, v) => { const el = sheet.querySelector(s); if (el) el.textContent = v; };
       set('[data-number]', invoice.invoice_number);
-      set('[data-subtitle]', `${invoice.invoice_number} · ${invoice.customer_name}`);
+      // The subtitle lives in the toolbar, outside the sheet, so it is set from the document (it used to be looked up inside the sheet and never filled in).
+      const subtitle = document.querySelector('[data-subtitle]');
+      if (subtitle) subtitle.textContent = `${invoice.invoice_number} · ${invoice.customer_name} · ${workTypeLabel(invoice.work_type)}`;
       set('[data-issued]', `Issued ${new Date(invoice.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`);
       set('[data-customer]', invoice.customer_name || '—');
       set('[data-address]', [invoice.customer_address, invoice.customer_city].filter(Boolean).join(', ') || 'Address on file');
