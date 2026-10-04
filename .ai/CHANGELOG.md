@@ -1,5 +1,13 @@
 # ICM Changelog
 
+## 2026-10-04 — House siding page (`/siding`)
+
+- New page `src/pages/siding.astro` for the owner's siding service in the same eight areas. Only owner-supplied facts: fiber cement lap and board and batten (primarily James Hardie), LP products such as SmartSide board, other wood siding products. No price, warranty, certification, timeline, gallery or personal name. Permit section limited to the four building departments whose own pages say siding needs a permit (Clark County, Camas, Battle Ground, Ridgefield; read 2026-10-04); other cities deferred to the building department. Title "Siding Installation in Vancouver, WA" (56 chars with suffix), description 145 chars, `Service` + `FAQPage` JSON-LD, estimate CTA `/estimate?scope=House%20siding` so siding leads can be counted.
+- Links: footer Work column, home page (one line under the service tiles), `/replacement` hero note, every city page (template line in `areas/[slug].astro`), business JSON-LD offer catalog and `knowsAbout`. Not added to the header: at 1440px a tenth link collides with the logo and Facebook icon.
+- Hero is a real Clearview window job on lap siding, credited as "a window install on lap siding"; there are no siding-job photos yet.
+- Pressure test before building (builder's-trap check): local demand is small (about 70 searches a month for "siding replacement vancouver wa", seasonal), the Vancouver local pack has 97-199 five-star reviews, so the page is a conversion destination for existing traffic, not a ranking bet. Scope held to one page; 90-day review rule recorded in `.ai/WORKING.md`.
+- Test: `npm run test:siding` (added to CI order after `test:seo`) guards against invented facts and checks the wiring, the JSON-LD, and that the sitemap and all eight city pages link to the page. `test:public-terminology`, `test:seo` and `npm run build` pass locally.
+
 ## 2026-10-03 — Schedule and quote discovery beyond the first page
 
 - Schedule queries the selected calendar week before pagination (`jobs?from=YYYY-MM-DD&to=YYYY-MM-DD`, inclusive start/exclusive end; 1–31 real calendar days). Cancelled jobs are excluded; all matching pages are read. Week dates and Today use the Pacific business date independent of the phone timezone, including DST. Failed loads clear the calendar and show the server error instead of claiming there are no jobs.

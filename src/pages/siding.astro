@@ -1,0 +1,359 @@
+---
+import { getHeroBg } from '../lib/hero-bg';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBar from '../components/CtaBar.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import { findWork } from '../data/work';
+import { site } from '../data/site';
+
+// No siding-job photos exist yet (VERIFY with Mark, see .ai/WORKING.md). The hero
+// is a real Clearview window job on a lap-siding house and says so in its credit
+// line; it is not presented as a siding install.
+const heroPhoto = findWork('gray-lap-siding-triple-hung')!;
+const heroBg = await getHeroBg(heroPhoto.image);
+
+// Owner direction, 2026-10-04: fiber cement lap and board and batten, primarily
+// James Hardie; LP products such as SmartSide board; other wood siding products.
+// Nothing here states a price, warranty, certification or timeline.
+const materials = [
+  {
+    name: 'Fiber cement lap siding',
+    text: 'Horizontal lap boards in fiber cement, primarily James Hardie. This is the siding we install most.',
+  },
+  {
+    name: 'Fiber cement board and batten',
+    text: 'Vertical boards with battens over the seams, in fiber cement, primarily James Hardie. A taller, more vertical look than lap.',
+  },
+  {
+    name: 'LP siding',
+    text: 'LP siding products, including LP SmartSide board.',
+  },
+  {
+    name: 'Other wood siding products',
+    text: 'We also work with other wood siding products. If your house has wood siding now, or you want it, say so in your request and the estimate will cover it.',
+  },
+];
+
+const steps = [
+  {
+    name: 'Walkthrough and measure',
+    text: 'We walk the house with you, measure the walls, and talk through the product and profile you want: lap or board and batten, fiber cement or wood.',
+  },
+  {
+    name: 'Written estimate',
+    text: 'You get the estimate in writing before anything is ordered. How long the job takes depends on the specifics of your house, and we tell you what we know once we have seen it.',
+  },
+  {
+    name: 'The work',
+    text: 'We install the siding you chose and haul away debris.',
+  },
+  {
+    name: 'Final walkthrough',
+    text: 'We walk the finished work with you before we call it done.',
+  },
+];
+
+// Primary sources, read October 2026 (see the permit guide's Sources list). La Center
+// publishes no siding line, and Vancouver, Washougal and Woodland were not verified,
+// so none of those three is stated here.
+const permits = [
+  {
+    name: 'Clark County (unincorporated)',
+    text: 'The county says a permit is required to replace any siding on a structure, and issues it as a Roofing, Siding and Windows (RSW) permit.',
+  },
+  {
+    name: 'Camas',
+    text: 'Lists residential roof and siding work as needing a permit, and says it is generally issued the same day it is submitted when there are no structural changes.',
+  },
+  {
+    name: 'Battle Ground',
+    text: 'Lists reroofing and siding among the projects that need a building permit.',
+  },
+  {
+    name: 'Ridgefield',
+    text: 'Lists reroofing and siding among the projects that need a building permit.',
+  },
+];
+
+const faq = [
+  {
+    question: 'What siding do you install?',
+    answer:
+      'Fiber cement lap siding and fiber cement board and batten, primarily James Hardie, plus LP siding products such as LP SmartSide board and other wood siding products.',
+  },
+  {
+    question: 'How much does siding cost?',
+    answer:
+      'It depends on the size of the house, the product and profile you choose, and what is under the old siding. We do not publish a price list. We measure in person and give you a written estimate.',
+  },
+  {
+    question: 'Do I need a permit to replace siding?',
+    answer:
+      'Usually. Clark County says a permit is required to replace any siding on a structure, and Camas, Battle Ground and Ridgefield all list siding among the work that needs one. Other cities have their own rules, so confirm with the building department for your address.',
+  },
+  {
+    question: 'Which areas do you cover?',
+    answer:
+      'The same areas we install windows in: Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center and Woodland.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Service',
+      serviceType: 'Siding installation',
+      name: 'Siding installation',
+      description:
+        'Fiber cement and wood siding installation for Vancouver, WA and Clark County homes: James Hardie fiber cement lap and board and batten, and LP siding products.',
+      provider: { '@id': `${site.url}/#business` },
+      areaServed: site.nearby.map((place) => ({
+        '@type': 'City',
+        name: place.name,
+        containedInPlace: { '@type': 'State', name: place.state },
+      })),
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+  ],
+};
+---
+<BaseLayout
+  title="Siding Installation in Vancouver, WA"
+  description="Fiber cement lap and board-and-batten siding, mainly James Hardie, plus LP SmartSide, in Vancouver, WA and Clark County. Free in-home measure."
+  path="/siding"
+  crumbs={[{ name: 'Siding', href: '/siding' }]}
+  ogImageSrc={heroPhoto.image}
+  ogImageAlt={heroPhoto.alt}
+  schema={schema}
+>
+  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
+    <div class="wrap">
+      <p class="kicker">Services</p>
+      <h1>Siding installation in Vancouver, WA</h1>
+      <p class="lede">
+        Fiber cement and wood siding for homes in Vancouver and across Clark County. We measure
+        in person and give you a written estimate before anything is ordered.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="/estimate?scope=House%20siding">Get a written estimate</a>
+        <a class="btn btn-ghost btn-on-dark" href="#materials">See what we install</a>
+      </div>
+      <p class="hero-note">
+        Replacing windows too? See <a href="/replacement">window replacement</a>, and mention it
+        in your request.
+      </p>
+    </div>
+    <p class="hero-photo-credit">Clearview job photo — a window install on lap siding</p>
+  </section>
+
+  <section class="section" id="materials">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">What we install</p>
+      <h2>Siding we install.</h2>
+      <p class="lede">
+        Fiber cement is the main line, primarily James Hardie. We also install LP siding products
+        and other wood siding products.
+      </p>
+      <div class="style-list">
+        {materials.map((item) => (
+          <article class="style-row">
+            <h3>{item.name}</h3>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </div>
+      <p class="fine-print">
+        We do not list prices here. Cost depends on the house, so the number comes from the
+        written estimate after we measure.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap" data-reveal>
+      <div class="two-col">
+      <div>
+        <p class="rule-label">How a siding job runs</p>
+        <h2>From walkthrough to final look.</h2>
+        <ol class="steps">
+          {steps.map((step) => (
+            <li><strong>{step.name}.</strong> {step.text}</li>
+          ))}
+        </ol>
+      </div>
+      <div>
+        <p class="rule-label">Permits</p>
+        <h2>Siding usually needs one.</h2>
+        <p class="lede">
+          Unlike a same-size window swap in some cities, the building departments we checked list
+          siding as work that needs a permit.
+        </p>
+        <div class="style-list style-list-tight">
+          {permits.map((item) => (
+            <article class="style-row">
+              <h3>{item.name}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+        <p class="fine-print">
+          Read from each department's published page in October 2026. Other cities, including
+          Vancouver, Washougal, Woodland and La Center, have their own rules, so confirm with the
+          building department for your address. More on the window side in{' '}
+          <a href="/guides/window-replacement-permit-washington">our permit guide</a>.
+        </p>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" data-reveal>
+      <p class="rule-label">Where we work</p>
+      <h2>Siding in Vancouver and Clark County.</h2>
+      <p class="lede">
+        We take siding work in the same areas we install windows. Pick your city to see what we
+        say about it.
+      </p>
+      <ul class="area-list">
+        {site.nearby.map((place) => (
+          <li>
+            <a href={`/areas/${place.name.toLowerCase().replace(/\s+/g, '-')}`}>{place.name}, {place.region}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-sunk">
+    <div class="wrap is-narrow" data-reveal>
+      <FaqAccordion items={faq} heading="Siding questions" />
+    </div>
+  </section>
+
+  <CtaBar
+    heading="Get a written estimate."
+    body="We walk the house, measure the walls, and write the estimate down before anything is ordered."
+    showToolLink={false}
+    showAskLink={false}
+  />
+</BaseLayout>
+
+<style>
+  .page-hero-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-photo-credit {
+    position: absolute;
+    right: var(--space-s);
+    bottom: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--on-dark-faint);
+    opacity: 0.75;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin: var(--space-m) 0 0;
+  }
+
+  .hero-note {
+    margin: var(--space-m) 0 0;
+    max-width: 44rem;
+    font-size: var(--step--1);
+    color: var(--on-dark-faint);
+  }
+
+  .hero-note a {
+    color: var(--on-dark);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-bright);
+    text-underline-offset: 0.2em;
+  }
+
+  .hero-note a:hover,
+  .hero-note a:focus-visible {
+    color: var(--accent-bright);
+  }
+
+  /* Same scanning-spine list as sliding-glass-doors.astro. */
+  .style-list {
+    margin: var(--space-l) 0 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .style-row {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: baseline;
+    padding: var(--space-s) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .style-row h3 {
+    margin: 0;
+    font-size: var(--step-0);
+  }
+
+  .style-row p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+
+  /* The permit list sits in a half-width column, so its label column is narrower. */
+  .style-list-tight .style-row {
+    grid-template-columns: 9rem minmax(0, 1fr);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .area-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-xs) var(--space-m);
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .area-list a {
+    font-weight: 500;
+  }
+
+  @media (max-width: 900px) {
+    .style-row,
+    .style-list-tight .style-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+
+    .area-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

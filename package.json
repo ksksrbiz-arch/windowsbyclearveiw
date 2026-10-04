@@ -27,6 +27,7 @@
     "test:recent-fixes": "node scripts/test-recent-fixes.mjs",
     "test:public-terminology": "node scripts/test-public-terminology.mjs",
     "test:seo": "node scripts/test-seo-meta.mjs",
+    "test:siding": "node scripts/test-siding-page.mjs",
     "test:form-patterns": "node scripts/test-form-patterns.mjs",
     "test:pagination": "node --disable-warning=ExperimentalWarning scripts/test-pagination.mjs",
     "test:copilot": "node scripts/test-copilot.mjs",

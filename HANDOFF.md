@@ -250,6 +250,13 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - **VERIFY before relying on it:** Vancouver (largest market) is not stated because its code page could not be read; the likely rule and the citation to check are in `.ai/WORKING.md`. Also confirm Washougal and Woodland, and whether Clearview pulls the permit for the customer (the guide says only that we talk permits through before work starts).
 - **To do (needs credentials):** `npm run build:guides-index` so `/ask` can use the new guide.
 
+### 2026-10-04 — House siding page
+
+- Mark asked for a dedicated page promoting his house siding in the same areas. Built `/siding` from what he told us: fiber cement lap and board and batten, primarily James Hardie; LP products such as SmartSide board; other wood siding. Nothing else is stated: no prices, warranty, certifications, timeline or photos of siding jobs (the hero is a window job on lap siding and says so).
+- The permit section is from each building department's own page (Clark County, Camas, Battle Ground, Ridgefield say siding needs a permit; Vancouver, Washougal, Woodland, La Center are not stated).
+- **Before it is promoted:** Mark should confirm the four process steps, whether he quotes windows and siding together, and send real siding photos. Header link is deliberately absent (the nav is already full at 1440px). Details and the 90-day review rule: `.ai/WORKING.md` "Public copy log". Guard: `npm run test:siding`.
+- Context for the decision: local search demand is small and the top local firms have 100-200 reviews, so expect this page to convert existing traffic (window customers, city pages) rather than rank quickly.
+
 ### 2026-10-03 — Command Center bug sweep
 
 - Found by running the real handlers and built pages together in Chromium at phone widths (details and the full list: `.ai/CHANGELOG.md`). Biggest: editing a quote line's price or quantity was impossible (focus lost each keystroke), the on-device signature pad overflowed every phone and could store a cut-off signature, and every amount was rounded to whole dollars (including the emailed invoice). All fixed; `npm run test:command-center` guards them.
