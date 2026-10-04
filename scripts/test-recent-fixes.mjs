@@ -95,7 +95,7 @@ assert(/new URLSearchParams\(location\.search\)\.get\('leadId'\)/.test(followUp)
 assert(/leadIdInput\.value=linkedLeadId;addCard\.hidden=false/.test(followUp), 'follow-up handoff opens with the inquiry already linked');
 assert(/data-linked-lead/.test(followUp) && /For \$\{lead\.name\}/.test(followUp), 'follow-up form identifies the linked customer');
 assert(/form\.reset\(\);if\(linkedLeadId&&leadIdInput instanceof HTMLInputElement\)leadIdInput\.value=linkedLeadId/.test(followUp), 'repeat follow-ups remain linked to the selected inquiry');
-assert(/timeZone: 'America\/Los_Angeles'/.test(dashboardApi) && /pacificDayRange/.test(dashboardApi), 'dashboard due-today counts use the business timezone');
+assert(/timeZone: 'America\/Los_Angeles'/.test(read('functions/internal/_lib/pacific-day.mjs')) && /import \{ pacificDayRange \} from/.test(dashboardApi), 'dashboard due-today counts use the business timezone');
 assert(/due_at >= \? AND due_at < \?/.test(dashboardApi) && /\.bind\(weekAgo, today\.start, today\.end, now\)/.test(dashboardApi), 'dashboard due-today counts use exact local-day boundaries');
 assert(/due_at < \?\) AS tasks_overdue/.test(dashboardApi) && /\.bind\(weekAgo, today\.start, today\.end, now\)/.test(dashboardApi), 'overdue counts compare consistent ISO timestamps');
 assert(/AS active_jobs/.test(dashboardApi) && /Number\(c\.active_jobs\)\|\|0/.test(todayPage), 'Today active-job count is not limited to the preview list');

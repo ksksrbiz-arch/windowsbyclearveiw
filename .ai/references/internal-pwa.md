@@ -97,6 +97,16 @@ them); Android refreshes them on its own schedule. Bump `VERSION` (not just the 
    Chromium via Playwright: sign in, wait for warm-up, drop the connection, reload Today / Jobs / Field mode / Tools
    / an unsaved page, expire the cookie, log out. (Done 2026-10-03; steps in `.ai/CHANGELOG.md`.)
 
+## Phone audit harness (manual)
+
+Browser checks the unit tests cannot do. `npm run build`, then `wrangler pages dev dist` from a scratch folder holding a minimal
+`wrangler.toml` (D1 only; the repo one declares a remote AI binding that needs a Cloudflare login), `--binding INTERNAL_PASSWORD=...
+INTERNAL_SESSION_SECRET=...`, with `internal/db/schema.sql` and `functions/api/_data/schema.sql` applied to the local D1. Seed a
+quote → plan → approve → sign → job through the API. For offline runs put a tiny proxy in front that destroys connections on demand
+(Playwright's `setOffline` does not stop service-worker requests) and another toggle that 302s `/internal/*` to a second origin to
+imitate Cloudflare Access. Then drive Chromium (touch, 390 and 360 wide): overflow, console/network errors, control sizes (>= 16 px,
+>= 36 px), labels, keyboard types. Results and the fixes they led to: `.ai/CHANGELOG.md` (2026-10-03 entries).
+
 ## Not built, on purpose (Cathedral order: Foundation first)
 
 Offline write queue / Background Sync, push notifications (lead alerts already use ntfy), offline quotes or

@@ -1,0 +1,57 @@
+# Deploys the ops-cron Worker (nightly D1 backup + weekday follow-up digest) to
+# the Cloudflare account that owns the site. Needs two repository secrets:
+#   CLOUDFLARE_API_TOKEN   token with "Edit Cloudflare Workers" (+ D1/R2 as used)
+#   CLOUDFLARE_ACCOUNT_ID  4ea07267e2e2d00360aef41fb85040e1
+# Until both exist the deploy step is skipped with a notice instead of failing.
+# Worker secrets (LEAD_ALERT_NTFY_TOPIC, ...) live in Cloudflare and survive deploys.
+name: Deploy ops-cron
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/ops-cron/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-ops-cron
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.19.0
+          cache: npm
+      - run: npm ci
+      - name: Test the worker before shipping it
+        run: npm run test:ops-cron
+
+      - name: Check deploy credentials
+        id: creds
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set; skipping deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy
+        if: steps.creds.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/ops-cron
+          command: deploy

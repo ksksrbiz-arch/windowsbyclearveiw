@@ -467,3 +467,13 @@ Shipped via PRs #110–#113. What changed and the rules that came out of it:
 - Say plainly when something cannot be done honestly, then build the nearest thing that can.
 - Flag your own bugs rather than quietly patching them.
 - Push to `main`; Cloudflare Pages deploys automatically.
+
+
+## 2026-10-03 — Internal queue reliability (PR #182 continuation)
+
+Jobs status filtering moved into the existing API before pagination; `activeTotal` is an all-queue count. Follow-up requests now use `status=open` and read `summary.open/today/overdue` from the API, not from the current page. Pacific day boundaries moved to `functions/internal/_lib/pacific-day.mjs` with the dashboard export preserved. Both clients discard late responses and recover an emptied last page; failed queue saves have a visible error outside the Add form. PATCH `dueAt:null` clears the date. Regression checks live in `test:command-center`; pagination fixtures use isolated databases to avoid cadence-generated reminders changing expected totals. No bindings or migrations required. Browser and real-iPhone visual checks remain VERIFY; these changes are on PR #182, not main.
+
+
+## 2026-10-03 — Schedule and quote discovery (PR #182 continuation)
+
+The jobs list API now supports a validated 1–31 day from/to interval (inclusive start/exclusive end), used by Schedule to query only its week before pagination and read every matching page. Calendar anchors come from Pacific business dates and use UTC calendar arithmetic. Quotes accept status/search before pagination; the quote-item subquery uses identical filters and stable ordering, so freshness checks remain correct. Quote search resets pagination, debounces and cancels pending requests. Jobs loads all finalized-quote pages into the creation dropdown. No migrations/bindings required. Tests execute both loaders and real SQLite filters/freshness. Browser/iPhone verification remains pending; changes stay in PR #182.

@@ -16,7 +16,7 @@ crons = ["15 10 * * *", "30 15 * * 1-5"]
 [[d1_databases]]
 binding = "QUOTES_DB"
 database_name = "clearveiw-quotes"
-database_id = "4700b6f7-c3d8-46c9-9b19-17cf34accb84"
+database_id = "5bd299fc-0ca2-4d75-94f5-95c3943e9d79"
 
 [[r2_buckets]]
 binding = "DB_BACKUPS"

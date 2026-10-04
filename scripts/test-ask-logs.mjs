@@ -20,6 +20,16 @@ const ok = async (fn) => { await fn(); groups++; };
 const freshDb = () => createD1({ schemaFiles: ['functions/ask/_data/schema.sql'] });
 const turn = (overrides = {}) => ({ question: 'How much for a slider?', answer: 'Sliders run about $X.', modelUsed: 'groq', toolsUsed: ['estimate_price'], sources: [{ title: 'Guide' }], matchCount: 2, refused: false, ...overrides });
 
+// A database that has never seen /ask has no ask_logs table: the page must load empty, not 500.
+await ok(async () => {
+  const bare = createD1({ schemaFiles: [] });
+  const res = await onRequestGet({ env: { QUOTES_DB: bare } });
+  assert.equal(res.status, 200, 'no table yet is an empty page, not a 500');
+  const body = await res.json();
+  assert.deepEqual(body.logs, []);
+  assert.equal(body.funnel.conversations, 0);
+});
+
 await ok(async () => {
   assert.equal(ASK_LOG_RETENTION_DAYS, 30);
   const now = Date.parse('2026-10-03T12:00:00Z');
