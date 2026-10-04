@@ -1,7 +1,9 @@
 /*
  * Clearview Command Center service worker. Registered by src/scripts/internal-pwa.ts with scope
  * /internal (no trailing slash: Cloudflare Pages redirects /internal/ to /internal, so the Dashboard
- * page lives at the bare path), so it never sees the public marketing site. It lives at a public path on purpose:
+ * page lives at the bare path), so it never sees the public marketing site. It lives at a public path on purpose, and its name must not start with "internal":
+ * Cloudflare Access gates /internal* by prefix (checked 2026-10-04), which redirected /internal-sw.js to the Access sign-in and
+ * broke install, offline and updates. Also:
  * functions/internal/_middleware.js redirects every unauthenticated /internal/* request to the
  * login page, and a service worker script is not allowed to redirect, so under /internal/ it
  * could not install or update once a session expired.
@@ -36,7 +38,7 @@ const META_CACHE = `cv-meta-${VERSION}`; // small bookkeeping (warm-up state); n
 const ALL_CACHES = [SHELL_CACHE, ASSET_CACHE, PINNED_CACHE, DATA_CACHE, META_CACHE];
 const WARM_STATE_KEY = '/__cv/warm-state';
 
-const OFFLINE_URL = '/internal-offline.html';
+const OFFLINE_URL = '/ops-offline.html';
 const LOGIN_PATH = '/internal/login';
 
 // Read-only endpoints worth having in a crawlspace. Customer PII lives in these responses, so the

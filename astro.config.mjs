@@ -20,7 +20,7 @@ if (!site.lniNumber) {
 }
 
 // One id per build, shared by the internal pages (<meta name="cv-build">) and the Command Center service
-// worker (public/internal-sw.js has a placeholder, stamped below). Because every deploy now changes the worker's
+// worker (public/ops-sw.js has a placeholder, stamped below). Because every deploy now changes the worker's
 // bytes, an installed phone app notices the new version on its own; see .ai/references/internal-pwa.md.
 // Format "<commit time in ms>-<short commit>": derived from git, not the clock, because Astro evaluates this config
 // in more than one place per build and every evaluation must agree (a clock would give the pages and the worker
@@ -43,9 +43,9 @@ const stampServiceWorker = {
   name: 'cv-stamp-service-worker',
   hooks: {
     'astro:build:done': async ({ dir }) => {
-      const file = new URL('internal-sw.js', dir);
+      const file = new URL('ops-sw.js', dir);
       const source = await readFile(file, 'utf8');
-      if (!source.includes("'__BUILD_ID__'")) throw new Error('[clearview] internal-sw.js has no __BUILD_ID__ placeholder to stamp');
+      if (!source.includes("'__BUILD_ID__'")) throw new Error('[clearview] ops-sw.js has no __BUILD_ID__ placeholder to stamp');
       await writeFile(file, source.replace("'__BUILD_ID__'", `'${BUILD_ID}'`));
     },
   },
