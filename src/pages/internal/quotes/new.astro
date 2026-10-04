@@ -1,6 +1,7 @@
 ---
 import InternalLayout from '../../../layouts/InternalLayout.astro';
 import { pricing } from '../../../data/pricing';
+import { sidingLabor, sidingDryRot } from '../../../data/siding';
 
 // Everything the client script needs to compute a suggested price, in one
 // serialised payload — same pattern CostEstimator.astro uses. This page
@@ -11,6 +12,17 @@ const catalog = {
   materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
   brands: pricing.brands.map((b) => ({ id: b.id, label: b.label, low: b.low, high: b.high })),
   fullFrame: { low: pricing.fullFrame.low, high: pricing.fullFrame.high },
+  // Siding is priced per square foot of total wall area (height times width). These are Mark's labor
+  // starting rates (src/data/siding.ts); the siding material is its own line, and every price stays editable.
+  siding: [
+    { id: 'labor-new', label: 'Siding labor, new construction', rate: sidingLabor.newConstruction },
+    { id: 'labor-existing', label: 'Siding labor, existing home', rate: sidingLabor.existingHome },
+    { id: 'bb-new', label: 'Board and batten labor, new construction', rate: sidingLabor.boardAndBattenNewConstruction },
+    { id: 'bb-existing', label: 'Board and batten labor, existing home', rate: sidingLabor.boardAndBattenExistingHome },
+    { id: 'cedar', label: 'Cedar siding labor', rate: sidingLabor.cedar },
+    { id: 'tearoff', label: 'Tear-off and new plywood', rate: sidingLabor.tearOffPlywood },
+  ],
+  dryRot: { low: sidingDryRot.low, high: sidingDryRot.high },
 };
 ---
 <InternalLayout title="New quote">
@@ -20,6 +32,15 @@ const catalog = {
   <p class="qb-status" data-load-error hidden role="alert"></p>
 
   <form id="quote-form" data-catalog={JSON.stringify(catalog)}>
+    <fieldset class="qb-block">
+      <legend>Type of work</legend>
+      <div class="qb-sig-choice" data-work-type-choice>
+        <label class="choice"><input type="radio" name="workType" value="windows" checked /> Windows</label>
+        <label class="choice"><input type="radio" name="workType" value="siding" /> Siding</label>
+      </div>
+      <p class="est-hint" data-work-type-hint>Window quotes go through the Build Plan before they can be signed. A siding quote is approved by its signature. The type is locked once the quote is saved.</p>
+    </fieldset>
+
     <fieldset class="qb-block">
       <legend>Customer</legend>
       <div class="qb-grid-2">
@@ -37,7 +58,21 @@ const catalog = {
       <label>Notes (not printed on the contract)<textarea name="notes" rows="2" maxlength="4000"></textarea></label>
     </fieldset>
 
-    <fieldset class="qb-block">
+    <fieldset class="qb-block" data-wt-panel="siding" hidden>
+      <legend>Add from the siding rates</legend>
+      <div class="qb-catalog-row">
+        <label>Work
+          <select data-siding-rate></select>
+        </label>
+        <label>Wall area (sq ft)
+          <input type="number" inputmode="numeric" data-siding-area min="1" step="1" placeholder="height × width" />
+        </label>
+        <button type="button" class="btn btn-ghost" data-siding-add>Add line</button>
+      </div>
+      <p class="est-hint" data-siding-hint>Labor starting rates per square foot of total wall area (height times width). The siding material is a separate line: add it below as a custom line. Every price stays editable.</p>
+    </fieldset>
+
+    <fieldset class="qb-block" data-wt-panel="windows">
       <legend>Add from the price book</legend>
       <div class="qb-catalog-row">
         <label>Opening
@@ -67,7 +102,7 @@ const catalog = {
       <legend>Add a custom line</legend>
       <div class="qb-custom-row">
         <label>Label
-          <input type="text" data-custom-label placeholder="e.g. Trim, rot repair, discount" maxlength="300" />
+          <input type="text" data-custom-label placeholder="e.g. Trim, rot repair, discount" maxlength="300" data-custom-placeholder-windows="e.g. Trim, rot repair, discount" data-custom-placeholder-siding="e.g. Siding material, dry rot, trim, discount" />
         </label>
         <label>Qty
           <input type="number" inputmode="numeric" data-custom-qty value="1" min="1" step="1" />
@@ -137,7 +172,10 @@ const catalog = {
     materials: CatalogMaterial[];
     brands: CatalogBrand[];
     fullFrame: { low: number; high: number };
+    siding: { id: string; label: string; rate: number }[];
+    dryRot: { low: number; high: number };
   };
+  type WorkType = 'windows' | 'siding';
   type LineItem = { label: string; description: string; quantity: number; unitPrice: number };
 
   function initQuoteBuilder() {
@@ -152,6 +190,15 @@ const catalog = {
 
     const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
     const items: LineItem[] = [];
+
+    // Windows or siding. Chosen here for a new quote (the ?type=siding link, a siding inquiry, or the radios)
+    // and locked for an existing draft: the server refuses to change a saved quote's type.
+    let workType: WorkType = searchParams.get('type') === 'siding' ? 'siding' : 'windows';
+    const sidingRateSelect = form.querySelector('[data-siding-rate]');
+    const sidingAreaInput = form.querySelector('[data-siding-area]');
+    const sidingHint = form.querySelector('[data-siding-hint]');
+    const typeRadios = [...form.querySelectorAll('input[name="workType"]')].filter((el): el is HTMLInputElement => el instanceof HTMLInputElement);
+    const moneyText = (dollars: number) => formatCents(Math.round(dollars * 100));
 
     const openingSelect = form.querySelector('[data-catalog-opening]');
     const materialSelect = form.querySelector('[data-catalog-material]');
@@ -355,6 +402,53 @@ const catalog = {
       render();
     });
 
+    if (sidingRateSelect instanceof HTMLSelectElement) {
+      for (const rate of catalog.siding || []) {
+        const opt = document.createElement('option');
+        opt.value = rate.id;
+        opt.textContent = `${rate.label} — ${moneyText(rate.rate)} per sq ft`;
+        sidingRateSelect.append(opt);
+      }
+    }
+    if (sidingHint instanceof HTMLElement && catalog.dryRot) {
+      sidingHint.textContent += ` Dry rot adds labor of ${moneyText(catalog.dryRot.low)} to ${moneyText(catalog.dryRot.high)} depending on severity: add it as a custom line once you have seen it.`;
+    }
+    form.querySelector('[data-siding-add]')?.addEventListener('click', () => {
+      if (!(sidingRateSelect instanceof HTMLSelectElement) || !(sidingAreaInput instanceof HTMLInputElement)) return;
+      const rate = (catalog.siding || []).find((entry) => entry.id === sidingRateSelect.value);
+      const area = Math.round(Number(sidingAreaInput.value));
+      if (!rate) return;
+      if (!Number.isFinite(area) || area < 1) {
+        sidingAreaInput.focus();
+        return;
+      }
+      // Quantity is square feet of wall; the unit price is the per-square-foot labor rate. Both stay editable.
+      items.push({ label: rate.label, description: 'Per sq ft of total wall area (height × width)', quantity: area, unitPrice: rate.rate });
+      sidingAreaInput.value = '';
+      render();
+    });
+
+    function applyWorkType() {
+      form.querySelectorAll('[data-wt-panel]').forEach((panel) => {
+        if (panel instanceof HTMLElement) panel.hidden = panel.dataset.wtPanel !== workType;
+      });
+      typeRadios.forEach((radio) => { radio.checked = radio.value === workType; });
+      const customLabelInput = form.querySelector('[data-custom-label]');
+      if (customLabelInput instanceof HTMLInputElement) {
+        customLabelInput.placeholder = (workType === 'siding' ? customLabelInput.dataset.customPlaceholderSiding : customLabelInput.dataset.customPlaceholderWindows) || customLabelInput.placeholder;
+      }
+      if (!editId && !duplicateId && !leadId) {
+        const heading = document.querySelector('[data-heading]');
+        if (heading) heading.textContent = workType === 'siding' ? 'New siding quote' : 'New quote';
+      }
+    }
+    typeRadios.forEach((radio) => radio.addEventListener('change', () => {
+      if (!radio.checked || (radio.value !== 'windows' && radio.value !== 'siding')) return;
+      workType = radio.value;
+      applyWorkType();
+    }));
+    applyWorkType();
+
     render();
 
     const status = form.querySelector('[data-status]');
@@ -396,6 +490,8 @@ const catalog = {
           if (ledeEl) ledeEl.textContent = `Copied from ${quote.id} — check the customer details before you save.`;
         }
 
+        workType = quote.work_type === 'siding' ? 'siding' : 'windows';
+        applyWorkType();
         setField('name', quote.customer_name);
         setField('phone', quote.customer_phone);
         setField('email', quote.customer_email);
@@ -424,6 +520,8 @@ const catalog = {
             el.disabled = false;
           }
         });
+        // A saved quote's type is fixed (the server enforces it too).
+        if (mode === 'edit') typeRadios.forEach((radio) => { radio.disabled = true; });
         syncBrandVisibility();
       } catch (error) {
         if (loadErrorEl instanceof HTMLElement) {
@@ -450,7 +548,9 @@ const catalog = {
         setField('city', lead.city);
         setField('notes', lead.notes);
         if (lead.role === 'Builder / GC' || lead.role === 'Homeowner') setRadio('role', lead.role);
-        if (headingEl) headingEl.textContent = `Quote for ${lead.name || 'new customer'}`;
+        // An inquiry from the siding page starts a siding quote (the Start quote link also carries ?type=siding).
+        if (lead.service === 'siding' || searchParams.get('type') === 'siding') { workType = 'siding'; applyWorkType(); }
+        if (headingEl) headingEl.textContent = `${workType === 'siding' ? 'Siding quote' : 'Quote'} for ${lead.name || 'new customer'}`;
         if (ledeEl) ledeEl.textContent = 'Customer details started from the inquiry. Confirm the address and build the quote.';
         form.querySelectorAll('input, select, textarea, button').forEach((el) => {
           if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement) el.disabled = false;
@@ -492,6 +592,7 @@ const catalog = {
           role: data.get('role'),
         },
         notes: data.get('notes'),
+        workType,
         items: items.map((item) => ({
           label: item.label,
           description: item.description,

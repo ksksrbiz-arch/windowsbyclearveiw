@@ -79,7 +79,7 @@ export async function onRequestGet(context) {
   }
 
   const result = await env.QUOTES_DB.prepare(`
-    SELECT j.id, j.status AS job_status, j.scheduled_date, j.customer_name, j.customer_city,
+    SELECT j.id, j.status AS job_status, j.work_type, j.scheduled_date, j.customer_name, j.customer_city,
            COALESCE(q.total_cents, j.agreed_cents) AS total_cents, p.id AS payment_id, p.amount_paid_cents, p.payment_method, p.notes, p.updated_at AS payment_updated_at
     FROM jobs j
     LEFT JOIN quotes q ON q.id = j.quote_id

@@ -1,10 +1,26 @@
 import { clean } from './quotes.mjs';
 import { formatCents } from './money.mjs';
+import { ensureQuoteWorkTypeColumn, workTypeOf } from './work-types.mjs';
 
 const FROM = 'Clearview Windows <estimates@windowsbyclearveiw.com>';
 const REPLY_TO = 'owner@windowsbyclearveiw.com';
 
+const invoiceTypeReady = new WeakSet();
+
 export async function ensureInvoiceSchema(db) {
+  await ensureInvoiceTables(db);
+  // An invoice carries its quote's type ('windows' | 'siding') so lists can filter and label it
+  // without joining. Added lazily, like every column added after the first release.
+  if (invoiceTypeReady.has(db)) return;
+  try {
+    await db.prepare(`ALTER TABLE invoices ADD COLUMN work_type TEXT NOT NULL DEFAULT 'windows'`).run();
+  } catch (error) {
+    if (!/duplicate column/i.test(String(error?.message))) throw error;
+  }
+  invoiceTypeReady.add(db);
+}
+
+async function ensureInvoiceTables(db) {
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS invoices (
       id TEXT PRIMARY KEY,
@@ -59,8 +75,10 @@ export async function getInvoice(db, invoiceId) {
 
 export async function ensureInvoiceForQuote(db, quoteId, { finalize = false } = {}) {
   await ensureInvoiceSchema(db);
+  await ensureQuoteWorkTypeColumn(db);
   const quote = await db.prepare('SELECT * FROM quotes WHERE id = ?').bind(quoteId).first();
   if (!quote) throw new Error('Quote not found.');
+  const workType = workTypeOf(quote);
 
   const invoice = await db.prepare('SELECT * FROM invoices WHERE quote_id = ?').bind(quoteId).first();
   if (invoice && invoice.status !== 'draft') return getInvoice(db, invoice.id);
@@ -73,10 +91,10 @@ export async function ensureInvoiceForQuote(db, quoteId, { finalize = false } = 
 
   await db.batch([
     invoice
-      ? db.prepare(`UPDATE invoices SET updated_at = ?, status = ?, customer_name = ?, customer_phone = ?, customer_email = ?, customer_address = ?, customer_city = ?, subtotal_cents = ?, discount_cents = ?, discount_reason = ?, total_cents = ? WHERE id = ?`)
-          .bind(now, nextStatus, quote.customer_name, quote.customer_phone, quote.customer_email, quote.customer_address, quote.customer_city, quote.subtotal_cents, quote.discount_cents, quote.discount_reason, quote.total_cents, id)
-      : db.prepare(`INSERT INTO invoices (id, invoice_number, quote_id, created_at, updated_at, status, customer_name, customer_phone, customer_email, customer_address, customer_city, subtotal_cents, discount_cents, discount_reason, total_cents) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-          .bind(id, invoiceNumber, quoteId, now, now, nextStatus, quote.customer_name, quote.customer_phone, quote.customer_email, quote.customer_address, quote.customer_city, quote.subtotal_cents, quote.discount_cents, quote.discount_reason, quote.total_cents),
+      ? db.prepare(`UPDATE invoices SET updated_at = ?, status = ?, customer_name = ?, customer_phone = ?, customer_email = ?, customer_address = ?, customer_city = ?, subtotal_cents = ?, discount_cents = ?, discount_reason = ?, total_cents = ?, work_type = ? WHERE id = ?`)
+          .bind(now, nextStatus, quote.customer_name, quote.customer_phone, quote.customer_email, quote.customer_address, quote.customer_city, quote.subtotal_cents, quote.discount_cents, quote.discount_reason, quote.total_cents, workType, id)
+      : db.prepare(`INSERT INTO invoices (id, invoice_number, quote_id, created_at, updated_at, status, customer_name, customer_phone, customer_email, customer_address, customer_city, subtotal_cents, discount_cents, discount_reason, total_cents, work_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+          .bind(id, invoiceNumber, quoteId, now, now, nextStatus, quote.customer_name, quote.customer_phone, quote.customer_email, quote.customer_address, quote.customer_city, quote.subtotal_cents, quote.discount_cents, quote.discount_reason, quote.total_cents, workType),
     db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').bind(id),
     ...quoteItems.map((item, index) => db.prepare(`INSERT INTO invoice_items (invoice_id, sort_order, label, description, quantity, unit_price_cents, line_total_cents) VALUES (?,?,?,?,?,?,?)`)
       .bind(id, index, item.label, item.description, item.quantity, item.unit_price_cents, item.line_total_cents)),

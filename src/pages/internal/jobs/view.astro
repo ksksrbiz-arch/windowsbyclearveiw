@@ -71,7 +71,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       <p class="muted general-help">No quote or Build Plan exists for this job, and the signed agreement is on your own paper. Edits save with the Save changes button below.</p>
     </section>
 
-    <section class="panel" data-window-only>
+    <section class="panel" data-quote-scope>
       <div class="panel-head"><div><p class="kicker">Scope</p><h2>Quoted work</h2></div><strong data-total>—</strong></div>
       <div class="scope-list" data-items></div>
     </section>
@@ -269,7 +269,17 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         <div class="scope-row"><span><strong>${esc(item.label)}</strong><small>Qty ${Number(item.quantity) || 0}</small></span><strong>${money(Number(item.line_total_cents) || 0)}</strong></div>`).join('') : '<p class="muted">No line items were attached to the quote.</p>';
 
       const general = job.work_type === 'general';
-      document.querySelectorAll('[data-window-only]').forEach((element) => { (element as HTMLElement).hidden = general; });
+      // A siding job is built from a signed siding quote: it keeps the quoted scope, payments and photos,
+      // but has no window Build Plan, field checklist or opening closeout (work-types.mjs).
+      const siding = job.work_type === 'siding';
+      document.querySelectorAll('[data-window-only]').forEach((element) => { (element as HTMLElement).hidden = general || siding; });
+      document.querySelectorAll('[data-quote-scope]').forEach((element) => { (element as HTMLElement).hidden = general; });
+      if (siding) {
+        for (const selector of ['[data-closeout-link]', '[data-closeout-panel-link]', '[data-field-link]']) q(selector).hidden = true;
+        setText('[data-subtitle]', ['Siding', job.customer_city, job.id].filter(Boolean).join(' · '));
+        setText('[data-closeout-help]', 'Final walkthrough and any punch-list notes. Set the status to Completed when the work is done.');
+        setText('[data-schedule-title]', 'Start date');
+      }
       q('[data-general-panel]').hidden = !general;
       if (general) {
         for (const selector of ['[data-closeout-link]', '[data-closeout-panel-link]', '[data-field-link]', '[data-quote-link]']) q(selector).hidden = true;

@@ -29,6 +29,16 @@ Owner direction, 2026-09-30. Business facts here come from the owner; do not ext
   or "leave the room usable" (owner direction, 2026-09-30: timing depends on the specifics of each job).
   Saying we haul away debris is fine. Lead times are fine when tied to the manufacturer.
 
+## Siding (owner direction, 2026-10-04)
+
+Source of truth for `/siding` and anything else that mentions siding; do not extend by guessing.
+
+- **Products:** fiber cement lap and board and batten, primarily James Hardie; LP siding products such as LP SmartSide board; other wood siding products. Windows can be done on a siding job if the customer asks.
+- **Price:** charged by the square foot of total wall area (height times width). **Labor only** (the siding material is a separate cost quoted in the estimate): starting at $2 per sq ft on new construction, $3 on an existing home, board and batten $3 on new construction and $4 on an existing home; cedar siding $4 on any job; tear-off and new plywood sheathing is $2 per sq ft; dry rot is added labor of $1,500 to $3,000 depending on severity (Mark's own texts, 2026-10-04; his first text said roughly $1,000 to $2,000, then he corrected it; he confirmed the plywood figure is labor only). Values live in `src/data/siding.ts`. Say "labor starts at", never "installed from" and never a total.
+- **Warranty:** the manufacturer's. James Hardie, and most other siding products, carry a manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications. The length: the owner first said 25 years, then said to use whatever the manufacturer's sheet says. James Hardie's own HardiePlank lap siding and HardiePanel vertical siding pages (read 2026-10-04) say "a 30-year non-prorated limited, transferrable substrate warranty", so the page says **30 years for James Hardie siding** and nothing else. Do not state a length for LP or any other manufacturer (the test fails on any other year count), and do not say "25". No Clearview workmanship warranty is stated.
+- **Photos:** four owner-supplied siding-job photos (`kind: 'siding'` in `src/data/work.ts`). Captions say only what is visible, some are mid-job (house wrap, panels before finish). Mark confirmed all four are fine to publish. Street numbers, people and phone metadata must not ship: one door number is blurred, one person is cropped out, EXIF is stripped (guarded by `test:siding`).
+- Still not stated anywhere: certifications (no "certified installer"), crew or experience claims, job duration.
+
 ## Graphics
 
 - AI-generated window diagrams have repeatedly come out wrong. Two were removed on 2026-09-30

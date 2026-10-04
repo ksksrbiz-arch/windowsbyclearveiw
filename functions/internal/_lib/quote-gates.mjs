@@ -4,12 +4,16 @@
 // explicitly approved Build Plan that still matches the quote's items.
 
 import { sourceSnapshot } from '../../_lib/build-plan-rules.mjs';
+import { isSidingQuoteId } from './work-types.mjs';
 
 function sameSource(a, b) {
   return JSON.stringify(a || []) === JSON.stringify(b || []);
 }
 
 export async function requireApprovedBuildPlan(db, quoteId) {
+  // The Build Plan describes window openings and does not apply to siding. A siding quote is
+  // approved by its signature alone (owner decision, 2026-10-04); window quotes are unchanged.
+  if (await isSidingQuoteId(db, quoteId)) return null;
   await db.prepare(`CREATE TABLE IF NOT EXISTS quote_build_plans (quote_id TEXT PRIMARY KEY REFERENCES quotes(id) ON DELETE CASCADE, version INTEGER NOT NULL DEFAULT 1, plan_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, updated_by TEXT NOT NULL DEFAULT 'mark')`).run();
   for (const sql of [
     `ALTER TABLE quote_build_plans ADD COLUMN state TEXT NOT NULL DEFAULT 'draft'`,

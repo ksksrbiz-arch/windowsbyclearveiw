@@ -3,14 +3,17 @@ import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.
 import { requireApprovedBuildPlan } from '../../_lib/quote-gates.mjs';
 import { ensureSigningSchema, renderSignatureSvg } from '../../_lib/quote-signing.mjs';
 import { ensureFollowUpSchema } from '../../_lib/quote-follow-ups.mjs';
+import { ensureQuoteWorkTypeColumn, workTypeOf } from '../../_lib/work-types.mjs';
 
 export async function onRequestGet(context) {
   const { env, params } = context;
   const id = String(params.id || '');
   await ensureInvoiceSchema(env.QUOTES_DB);
+  await ensureQuoteWorkTypeColumn(env.QUOTES_DB);
 
   const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(id).first();
   if (!quote) return json({ error: 'Not found.' }, 404);
+  quote.work_type = workTypeOf(quote);
 
   const { results: items } = await env.QUOTES_DB.prepare(
     'SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order ASC',
@@ -26,6 +29,7 @@ export async function onRequestGet(context) {
 export async function onRequestPut(context) {
   const { request, env, params } = context;
   const id = String(params.id || '');
+  await ensureQuoteWorkTypeColumn(env.QUOTES_DB);
   const quote = await env.QUOTES_DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(id).first();
   if (!quote) return json({ error: 'Not found.' }, 404);
   if (quote.status !== 'draft') return json({ error: 'This quote is already finalized and can no longer be edited.' }, 409);
@@ -34,6 +38,11 @@ export async function onRequestPut(context) {
   try { body = await request.json(); } catch { return json({ error: 'Body must be JSON.' }, 400); }
   const parsed = parseQuoteBody(body);
   if (parsed.error) return json({ error: parsed.error }, 400);
+  // The type is fixed when the quote is created. A window quote must not lose its Build Plan gate
+  // (and a siding quote must not pick one up) by being relabelled; delete the draft and start again.
+  if (body.workType !== undefined && parsed.workType !== workTypeOf(quote)) {
+    return json({ error: 'The type of work cannot be changed once a quote is created. Start a new quote instead.', code: 'WORK_TYPE_FIXED' }, 409);
+  }
   const { name, phone, email, address, city, role, notes, discountReason, cleanItems, subtotalCents, discountCents, totalCents } = parsed;
   const signatureMethod = body.signatureMethod === 'digital' ? 'digital' : 'pen';
   const now = new Date().toISOString();

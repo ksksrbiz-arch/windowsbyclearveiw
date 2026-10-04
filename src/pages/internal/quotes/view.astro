@@ -47,6 +47,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       <div class="contract-meta">
         <p><strong data-quote-id></strong></p>
         <p data-quote-date></p>
+        <p>Type of work: <strong data-quote-type></strong></p>
       </div>
     </header>
 
@@ -148,6 +149,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
 
 <script>
   import { formatCents } from '../../../lib/money';
+  import { workTypeLabel } from '../../../lib/work-type';
   function initQuoteView() {
     const root = document.querySelector('[data-contract]');
     if (!(root instanceof HTMLElement) || root.dataset.bound === 'true') return;
@@ -368,6 +370,7 @@ import { contractTerms, WARRANTY_YEARS } from '../../../data/contractTerms';
       loadShareLink(quote.id);
 
       set('[data-quote-id]', quote.id);
+      set('[data-quote-type]', workTypeLabel(quote.work_type));
       set('[data-quote-date]', new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
       set('[data-c-name]', quote.customer_name || '—');
       set('[data-c-phone]', quote.customer_phone || '—');

@@ -1,6 +1,6 @@
 import type { ImageMetadata } from 'astro';
 
-export type WorkKind = 'after' | 'interior' | 'process' | 'new construction';
+export type WorkKind = 'after' | 'interior' | 'process' | 'new construction' | 'siding';
 
 export type WorkPhoto = {
   id: string;
@@ -68,6 +68,12 @@ import newBuildTanCorner from '../assets/work/new-build-tan-corner.jpg';
 // tile were using for lack of an actual job photo.
 import graySidingWhiteSliderDeck from '../assets/work/gray-siding-white-slider-deck.jpg';
 import tanSliderKitchenView from '../assets/work/tan-slider-kitchen-view.jpg';
+// Siding jobs, added 2026-10-04 (owner: "all siding jobs"). Metadata stripped; the street number on
+// the brick building's door is blurred and the person at the right edge is cropped out.
+import sidingBrickWallPanels from '../assets/work/siding-brick-wall-panels.jpg';
+import sidingGarageHouseWrap from '../assets/work/siding-garage-house-wrap.jpg';
+import sidingGarageVerticalWood from '../assets/work/siding-garage-vertical-wood.jpg';
+import sidingTwoStoryPanels from '../assets/work/siding-two-story-panels.jpg';
 
 // New batch added 2026-10-03
 import taupeBrickBaseArchTransomInstall from '../assets/work/taupe-brick-base-arch-transom-install.jpg';
@@ -489,11 +495,49 @@ export const workPhotos: WorkPhoto[] = [
     featured: false,
     order: 47,
   },
+  {
+    id: 'siding-two-story-panels',
+    image: sidingTwoStoryPanels,
+    alt: 'Two-story house with large tan wall panels and horizontal lap siding around black-framed windows, blue flashing membrane along the base and a ladder against the wall',
+    caption: 'Panel and lap siding around black-framed windows',
+    kind: 'siding',
+    featured: false,
+    order: 48,
+  },
+  {
+    id: 'siding-brick-wall-panels',
+    image: sidingBrickWallPanels,
+    alt: 'Single-story brick building with new black-framed windows and tan panels covering the upper wall, with a pile of removed material in the foreground',
+    caption: 'Tan wall panels going up over a brick building',
+    kind: 'siding',
+    featured: false,
+    order: 49,
+  },
+  {
+    id: 'siding-garage-house-wrap',
+    image: sidingGarageHouseWrap,
+    alt: 'Long garage-style building wrapped in white house wrap under a new dark shingle roof, with one small window',
+    caption: 'Wall wrapped in house wrap',
+    kind: 'siding',
+    featured: false,
+    order: 50,
+  },
+  {
+    id: 'siding-garage-vertical-wood',
+    image: sidingGarageVerticalWood,
+    alt: 'The same building with vertical wood siding panels covering the wall, a stepladder against it and one small window',
+    caption: 'The same wall with vertical wood siding going on',
+    kind: 'siding',
+    featured: false,
+    order: 51,
+  },
 ];
 
 const byOrder = (a: WorkPhoto, b: WorkPhoto) => a.order - b.order;
 
 export const featuredWork = workPhotos.filter((photo) => photo.featured).sort(byOrder);
+
+export const sidingWork = workPhotos.filter((photo) => photo.kind === 'siding').sort(byOrder);
 
 export const processWork = workPhotos.filter((photo) => photo.kind === 'process').sort(byOrder);
 
@@ -521,6 +565,7 @@ const KIND_LABELS: Record<WorkKind, string> = {
   interior: 'Interior',
   process: 'Install day',
   'new construction': 'New construction',
+  siding: 'Siding',
 };
 
 export function workKindLabel(kind: WorkKind): string {

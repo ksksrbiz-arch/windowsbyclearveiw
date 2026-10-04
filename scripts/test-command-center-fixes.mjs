@@ -338,7 +338,7 @@ console.log('command center fixes: ok');
   const output = { textContent: '' };
   const context = createContext({
     AbortController, URLSearchParams, Error,
-    pending: null, jobs: [], activeFilter: 'ready', page: 1, totalPages: 1, total: 0,
+    pending: null, jobs: [], activeFilter: 'ready', workType: '', page: 1, totalPages: 1, total: 0,
     prev: { disabled: true }, next: { disabled: true }, filters: [],
     count: output, updated: { textContent: '' }, pageLabel: { textContent: '' },
     list: { innerHTML: '', querySelector: () => null }, render: () => {},

@@ -1,5 +1,6 @@
 ---
 import InternalLayout from '../../layouts/InternalLayout.astro';
+import WorkTypeFilter from '../../components/WorkTypeFilter.astro';
 ---
 <InternalLayout title="Leads">
   <div class="ld-head">
@@ -19,16 +20,18 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   <p class="ld-error" data-error hidden role="alert"></p>
   <p data-empty hidden>No estimate requests yet.</p>
 
+  <div class="ld-type-filter" data-type-filter-wrap hidden><WorkTypeFilter /></div>
   <label class="ld-search" data-search-wrap hidden>
     Search
     <input type="search" data-search placeholder="Name, phone, or city" />
   </label>
-  <p class="ld-empty-filtered" data-empty-filtered hidden>No leads match that search.</p>
+  <p class="ld-empty-filtered" data-empty-filtered hidden>No leads match that search or filter.</p>
 
   <div class="ld-list" data-list hidden></div>
 </InternalLayout>
 
 <script>
+  import { bindWorkTypeFilter, workTypeBadge } from '../../lib/work-type';
   function initLeads() {
     const list = document.querySelector('[data-list]');
     if (!(list instanceof HTMLElement) || list.dataset.bound === 'true') return;
@@ -97,6 +100,9 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
         }
 
         if (searchWrap instanceof HTMLElement) searchWrap.hidden = leads.length < 2;
+        const typeFilterWrap = document.querySelector('[data-type-filter-wrap]');
+        if (typeFilterWrap instanceof HTMLElement) typeFilterWrap.hidden = leads.length < 2;
+        applyFilter();
 
         if (list instanceof HTMLElement) {
           list.hidden = false;
@@ -105,13 +111,16 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
             const card = document.createElement('article');
             card.className = 'ld-card';
             card.dataset.search = `${lead.name || ''} ${lead.phone || ''} ${lead.city || ''}`.toLowerCase();
+            // Untagged inquiries are window work; the siding page files its requests as 'siding'.
+            const kind = lead.service === 'siding' ? 'siding' : 'windows';
+            card.dataset.type = kind;
 
             const phoneHref = telHref(lead.phone);
             const leadId = encodeURIComponent(String(lead.id ?? ''));
             card.innerHTML = `
               <div class="ld-card-top">
                 <div>
-                  <h2>${escapeHtml(lead.name)}</h2>
+                  <h2>${escapeHtml(lead.name)} ${workTypeBadge(kind)}</h2>
                   <p class="ld-meta">
                     ${phoneHref ? `<a href="${phoneHref}">${escapeHtml(lead.phone)}</a>` : escapeHtml(lead.phone || '')}
                     ${lead.email ? ` &middot; <a href="mailto:${escapeHtml(lead.email)}">${escapeHtml(lead.email)}</a>` : ''}
@@ -124,8 +133,8 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
               <div class="ld-card-actions">
                 ${lead.quote_id
                   ? `<a class="ld-action ld-action-primary" href="/internal/quotes/view?id=${encodeURIComponent(String(lead.quote_id))}">Open quote (${lead.quote_status === 'finalized' ? 'signed' : 'draft'})</a>
-                     <a class="ld-action" href="/internal/quotes/new?leadId=${leadId}">Another quote</a>`
-                  : `<a class="ld-action ld-action-primary" href="/internal/quotes/new?leadId=${leadId}">Start quote</a>`}
+                     <a class="ld-action" href="/internal/quotes/new?leadId=${leadId}${kind === 'siding' ? '&type=siding' : ''}">Another quote</a>`
+                  : `<a class="ld-action ld-action-primary" href="/internal/quotes/new?leadId=${leadId}${kind === 'siding' ? '&type=siding' : ''}">${kind === 'siding' ? 'Start siding quote' : 'Start quote'}</a>`}
                 <a class="ld-action" href="/internal/follow-up?leadId=${leadId}">Add follow-up</a>
                 ${phoneHref ? `<a class="ld-action" href="${phoneHref}">Call</a>` : ''}
                 ${lead.email ? `<a class="ld-action" href="mailto:${escapeHtml(lead.email)}">Email</a>` : ''}
@@ -155,13 +164,20 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       let visibleCount = 0;
       for (const card of list.querySelectorAll('[data-search]')) {
         const el = card as HTMLElement;
-        const match = !query || (el.dataset.search || '').includes(query);
+        const match = (!query || (el.dataset.search || '').includes(query)) && (!typeFilter || el.dataset.type === typeFilter);
         el.hidden = !match;
         if (match) visibleCount += 1;
       }
       if (emptyFilteredEl instanceof HTMLElement) {
-        emptyFilteredEl.hidden = !(query && visibleCount === 0);
+        emptyFilteredEl.hidden = !((query || typeFilter) && visibleCount === 0);
       }
+    }
+
+    let typeFilter = '';
+    const typeWrap = document.querySelector('[data-type-filter-wrap]');
+    if (typeWrap instanceof HTMLElement && typeWrap.dataset.bound !== 'true') {
+      typeWrap.dataset.bound = 'true';
+      typeFilter = bindWorkTypeFilter(document, (next) => { typeFilter = next; applyFilter(); });
     }
 
     if (searchInput instanceof HTMLInputElement && searchInput.dataset.bound !== 'true') {
@@ -180,6 +196,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   .ld-head { display:flex; justify-content:space-between; align-items:end; margin-bottom:var(--space-l); gap:var(--space-m); }
   .ld-head-actions { display:flex; gap:var(--space-xs); flex-wrap:wrap; }
   .ld-error { color:var(--danger); }
+  .ld-type-filter { margin-bottom: var(--space-s); }
   .ld-search { display:grid; gap:.2rem; max-width:20rem; margin-bottom:var(--space-m); font-size:var(--step--1); font-weight:500; }
   .ld-search input { border:1px solid var(--line-strong); border-radius:var(--radius); padding:.55rem; font:inherit; font-size:var(--step-0); }
   .ld-empty-filtered { color:var(--ink-soft); }

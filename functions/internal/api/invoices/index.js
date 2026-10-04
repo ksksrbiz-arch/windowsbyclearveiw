@@ -1,11 +1,14 @@
 import { json } from '../../_lib/quotes.mjs';
 import { ensureInvoiceForQuote, ensureInvoiceSchema } from '../../_lib/invoices.mjs';
+import { WORK_TYPES } from '../../_lib/work-types.mjs';
 
 export async function onRequestGet(context) {
   const { env } = context;
   await ensureInvoiceSchema(env.QUOTES_DB);
   const url = new URL(context.request.url);
   const quoteId = url.searchParams.get('quoteId');
+  const workType = url.searchParams.get('workType');
+  if (workType && !WORK_TYPES.includes(workType)) return json({ error: 'Choose Windows or Siding.' }, 400);
 
   if (quoteId) {
     const quote = await env.QUOTES_DB.prepare('SELECT id, status FROM quotes WHERE id = ?').bind(quoteId).first();
@@ -19,9 +22,9 @@ export async function onRequestGet(context) {
   }
 
   const { results } = await env.QUOTES_DB.prepare(
-    `SELECT id, invoice_number, quote_id, created_at, status, customer_name, customer_city, total_cents, sent_at
-     FROM invoices ORDER BY created_at DESC LIMIT 200`,
-  ).all();
+    `SELECT id, invoice_number, quote_id, created_at, status, work_type, customer_name, customer_city, total_cents, sent_at
+     FROM invoices ${workType ? 'WHERE work_type = ?' : ''} ORDER BY created_at DESC LIMIT 200`,
+  ).bind(...(workType ? [workType] : [])).all();
   return json({ invoices: results });
 }
 

@@ -13,8 +13,9 @@ async function ensureSchema(db){await db.prepare(`CREATE TABLE IF NOT EXISTS job
 )`).run();}
 async function load(db,jobId){return db.prepare(`SELECT * FROM job_closeouts WHERE job_id = ?`).bind(jobId).first();}
 async function readiness(db,jobId){
- const job=await db.prepare(`SELECT id,status,build_plan_json FROM jobs WHERE id=?`).bind(jobId).first();
+ const job=await db.prepare(`SELECT id,status,build_plan_json,work_type FROM jobs WHERE id=?`).bind(jobId).first();
  if(!job)return {error:'Job not found.',status:404};
+ if(job.work_type==='siding')return {error:'Siding jobs have no window closeout. Finish them from the job page.',status:409};
  let openingCount=0;try{const plan=JSON.parse(job.build_plan_json||'{}');openingCount=Array.isArray(plan?.openings)?plan.openings.length:0;}catch{}
  const checklist=await db.prepare(`SELECT section,label,checked FROM job_checklist_items WHERE job_id=?`).bind(jobId).all();
  const items=checklist.results||[];const openings=Array.from({length:openingCount},(_,i)=>{const section=`Opening ${String(i+1).padStart(2,'0')}`;return {index:i,complete:items.some(x=>x.section===section&&x.label==='Complete'&&Number(x.checked)===1)};});
