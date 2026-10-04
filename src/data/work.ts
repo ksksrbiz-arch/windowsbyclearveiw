@@ -69,6 +69,11 @@ import newBuildTanCorner from '../assets/work/new-build-tan-corner.jpg';
 import graySidingWhiteSliderDeck from '../assets/work/gray-siding-white-slider-deck.jpg';
 import tanSliderKitchenView from '../assets/work/tan-slider-kitchen-view.jpg';
 
+// New batch added 2026-10-03
+import taupeBrickBaseArchTransomInstall from '../assets/work/taupe-brick-base-arch-transom-install.jpg';
+import grayLapArchedPairStoneBase from '../assets/work/gray-lap-arched-pair-stone-base.jpg';
+import blueGableStackedPairs from '../assets/work/blue-gable-stacked-pairs.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -456,6 +461,33 @@ export const workPhotos: WorkPhoto[] = [
     kind: 'after',
     featured: false,
     order: 44,
+  },
+  {
+    id: 'taupe-brick-base-arch-transom-install',
+    image: taupeBrickBaseArchTransomInstall,
+    alt: 'Two installers on ladders trimming out a new picture window with an arched transom on a taupe two-story house with a brick base, bare sheathing still exposed around the opening',
+    caption: 'New picture window set, trim going on',
+    kind: 'process',
+    featured: false,
+    order: 45,
+  },
+  {
+    id: 'gray-lap-arched-pair-stone-base',
+    image: grayLapArchedPairStoneBase,
+    alt: 'Pair of new white double-hung windows with arched transoms above, on light gray lap siding over a stone veneer base',
+    caption: 'Arched-top pair over stone veneer',
+    kind: 'after',
+    featured: false,
+    order: 46,
+  },
+  {
+    id: 'blue-gable-stacked-pairs',
+    image: blueGableStackedPairs,
+    alt: 'Two stacked pairs of new white double-hung windows in the gable of a light blue lap-siding house under a deep blue sky',
+    caption: 'Stacked pairs in the gable',
+    kind: 'after',
+    featured: false,
+    order: 47,
   },
 ];
 
