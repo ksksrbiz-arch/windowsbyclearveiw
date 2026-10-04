@@ -3,6 +3,7 @@
 // someone signed in to the Command Center.
 //
 //   GET    ?jobId=J-...           list (works even before R2 is connected: { configured: false })
+//   GET    ?status=1              { configured, backedUp }: is the R2 binding present, and how many photos it holds
 //   GET    ?id=<photo id>         the image bytes
 //   POST   ?jobId&stage&opening&clientId&name&takenAt   body = the image (JPEG, PNG or WebP)
 //   PATCH  ?id=<photo id>         { note }
@@ -64,6 +65,12 @@ export async function onRequestGet({ request, env }) {
         ...NO_STORE,
       },
     });
+  }
+
+  if (url.searchParams.get('status') === '1') {
+    // For Tools > Phone app: is cloud backup connected at all? No photo data, just the answer and a count.
+    const row = await db.prepare('SELECT COUNT(*) AS n FROM job_photos').first();
+    return json({ configured: Boolean(env.JOB_PHOTOS), backedUp: Number(row?.n) || 0 });
   }
 
   const jobId = parseJobId(url.searchParams.get('jobId'));

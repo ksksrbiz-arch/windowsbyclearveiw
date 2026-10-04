@@ -27,7 +27,9 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
         <button class="btn btn-ghost" type="button" data-app-update>Check for updates</button>
         <button class="btn btn-ghost" type="button" data-app-refresh>Save pages for offline</button>
         <button class="btn btn-ghost" type="button" data-app-clear>Clear saved data</button>
+        <button class="btn btn-ghost" type="button" data-app-diag>Copy diagnostics</button>
       </div>
+      <textarea class="app-diag" data-app-diag-text readonly rows="8" aria-label="Diagnostics" hidden></textarea>
       <p class="app-note" data-app-note role="status"></p>
     </div>
   </section>
@@ -49,7 +51,8 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   <section class="roadmap panel"><div><p class="kicker">Operating sequence</p><h2>From estimate to completed job</h2><p class="muted">The internal system is built around one continuous record instead of separate disconnected utilities.</p></div><div class="roadmap-flow" aria-label="Workflow roadmap"><span>Lead</span><i>→</i><span>Measure</span><i>→</i><span>Quote</span><i>→</i><span>Build plan</span><i>→</i><span>Visualize</span><i>→</i><span>Sign</span><i>→</i><span>Schedule</span><i>→</i><span>Prep</span><i>→</i><span>Field mode</span><i>→</i><span>Close</span><i>→</i><span>Collect</span></div></section>
 </InternalLayout>
 <script>
-  import { buildLabel, checkForUpdate, clearSavedData, formatAge, getPwaStatus, onPwaChange, promptInstall, warmPages } from '../../../scripts/internal-pwa';
+  import { buildDiagnostics, buildLabel, checkForUpdate, clearSavedData, formatAge, getPhotoBackup, getPwaStatus, onPwaChange, promptInstall, warmPages } from '../../../scripts/internal-pwa';
+  import { photoBackupLine } from '../../../lib/pwa-logic';
   import { countStoredPhotos } from '../../../lib/field-photo-db';
 
   function initAppCard() {
@@ -63,6 +66,8 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
     const refresh = card.querySelector('[data-app-refresh]') as HTMLButtonElement;
     const clear = card.querySelector('[data-app-clear]') as HTMLButtonElement;
     const update = card.querySelector('[data-app-update]') as HTMLButtonElement;
+    const diag = card.querySelector('[data-app-diag]') as HTMLButtonElement;
+    const diagText = card.querySelector('[data-app-diag-text]') as HTMLTextAreaElement;
     const note = card.querySelector('[data-app-note]') as HTMLElement;
 
     async function render() {
@@ -77,6 +82,8 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       // Updates arrive by themselves (see .ai/references/internal-pwa.md); this shows which build is running.
       const behind = s.workerBuild && s.workerBuild !== s.pageBuild;
       row(s.workerBuild ? !behind : null, s.workerBuild ? (behind ? `Version ${buildLabel(s.pageBuild)} on screen; ${buildLabel(s.workerBuild)} is installed. Reload to switch` : `Version ${buildLabel(s.pageBuild)} (updates install by themselves)`) : `Version ${buildLabel(s.pageBuild)}`);
+      const pl = photoBackupLine(await getPhotoBackup());
+      row(pl.ok, pl.text);
       row(s.online, s.online ? 'Browser reports a network connection' : 'Offline right now');
       list.innerHTML = rows.join('');
       install.hidden = !s.canInstall;
@@ -107,6 +114,18 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
       note.textContent = r === 'unsupported' ? 'Offline support is not running, so there is nothing to update. Reload and try again.' : s.workerBuild && s.workerBuild !== s.pageBuild ? 'A newer version is installed. Reload this page to use it.' : `You have the latest version (${buildLabel(s.pageBuild)}).`;
       update.disabled = false; render();
     });
+    diag.addEventListener('click', async () => {
+      diag.disabled = true; note.textContent = 'Collecting…';
+      const text = await buildDiagnostics();
+      let copied = false;
+      try { await navigator.clipboard.writeText(text); copied = true; } catch { /* fall through to the older route */ }
+      if (!copied) {
+        diagText.hidden = false; diagText.value = text; diagText.focus(); diagText.select();
+        try { copied = document.execCommand('copy'); } catch { /* leave the text on screen to copy by hand */ }
+      }
+      note.textContent = copied ? 'Diagnostics copied. Paste them into a message; they hold versions, counts and event names, no customer data.' : 'Select the text below and copy it, then paste it into a message.';
+      diag.disabled = false;
+    });
     clear.addEventListener('click', async () => {
       if (!window.confirm('Clear saved pages and data from this phone? Job photos are not affected. They come back the next time you are online.')) return;
       const ok = await clearSavedData('all');
@@ -136,6 +155,7 @@ import InternalLayout from '../../../layouts/InternalLayout.astro';
   .app-card{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-m);margin-bottom:var(--space-m)}.app-copy h2{margin:.08rem 0 .4rem}.app-copy p{margin:.4rem 0;color:var(--ink-soft);font-size:var(--step--1)}.app-limits strong{color:var(--ink)}
   .app-status{list-style:none;margin:0 0 .75rem;padding:0;display:grid;gap:.3rem;font-size:var(--step--1)}.app-status :global(li){padding-left:1.4rem;position:relative}.app-status :global(li)::before{content:"•";position:absolute;left:.3rem;color:var(--ink-faint)}.app-status :global(li[data-state="ok"])::before{content:"✓";color:var(--accent-ink);font-weight:800}.app-status :global(li[data-state="no"])::before{content:"–";color:var(--danger);font-weight:800}
   .app-ios{margin:0 0 .75rem;padding:.7rem .8rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-sunk);font-size:var(--step--1)}.app-ios[hidden],.app-actions button[hidden]{display:none}
+  .app-diag{width:100%;margin-top:.6rem;font:12px/1.4 ui-monospace,monospace;border:1px solid var(--line);border-radius:var(--radius-lg);padding:.6rem;background:var(--paper)}.app-diag[hidden]{display:none}
   .app-actions{display:flex;gap:.5rem;flex-wrap:wrap}.app-note{margin:.6rem 0 0;color:var(--ink-faint);font-size:var(--step--2);min-height:1.2em}
   @media(max-width:820px){.app-card{grid-template-columns:1fr}}
 </style>

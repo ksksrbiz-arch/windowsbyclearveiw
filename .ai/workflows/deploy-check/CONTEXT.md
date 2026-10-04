@@ -25,7 +25,11 @@ in the repo `wrangler.toml`.
    are all built "off until configured"). Do not claim they are on until the owner has set them.
 4. Test server-side behavior with `wrangler pages dev`; `astro dev` does not reproduce Functions.
 5. Inspect the live page in a browser for UI-dependent changes (phone width included).
-6. Domain/mail: public site is `windowsbyclearview.com`. Production mail remains on the legacy
+6. Touched the Command Center PWA, or did Cloudflare Access settings change? After the deploy lands run
+   `npm run check:pwa-live` (add a preview URL as the argument to test a preview). It confirms the worker, manifest and offline
+   page are public and stamped, and that `/internal` is still gated. Access once began matching `/internal*` by prefix and
+   redirected the PWA's files, which silently broke install, offline and updates (see `.ai/CHANGELOG.md`, 2026-10-04).
+7. Domain/mail: public site is `windowsbyclearview.com`. Production mail remains on the legacy
    `windowsbyclearveiw.com` until a real mailbox exists on the canonical domain and is tested with the
    Command Center mail test. Do not change the default notification address before that.
 

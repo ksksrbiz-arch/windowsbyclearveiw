@@ -75,6 +75,11 @@ import sidingGarageHouseWrap from '../assets/work/siding-garage-house-wrap.jpg';
 import sidingGarageVerticalWood from '../assets/work/siding-garage-vertical-wood.jpg';
 import sidingTwoStoryPanels from '../assets/work/siding-two-story-panels.jpg';
 
+// New batch added 2026-10-03
+import taupeBrickBaseArchTransomInstall from '../assets/work/taupe-brick-base-arch-transom-install.jpg';
+import grayLapArchedPairStoneBase from '../assets/work/gray-lap-arched-pair-stone-base.jpg';
+import blueGableStackedPairs from '../assets/work/blue-gable-stacked-pairs.jpg';
+
 export const workPhotos: WorkPhoto[] = [
   {
     id: 'blue-gable-arch',
@@ -464,13 +469,40 @@ export const workPhotos: WorkPhoto[] = [
     order: 44,
   },
   {
+    id: 'taupe-brick-base-arch-transom-install',
+    image: taupeBrickBaseArchTransomInstall,
+    alt: 'Two installers on ladders trimming out a new picture window with an arched transom on a taupe two-story house with a brick base, bare sheathing still exposed around the opening',
+    caption: 'New picture window set, trim going on',
+    kind: 'process',
+    featured: false,
+    order: 45,
+  },
+  {
+    id: 'gray-lap-arched-pair-stone-base',
+    image: grayLapArchedPairStoneBase,
+    alt: 'Pair of new white double-hung windows with arched transoms above, on light gray lap siding over a stone veneer base',
+    caption: 'Arched-top pair over stone veneer',
+    kind: 'after',
+    featured: false,
+    order: 46,
+  },
+  {
+    id: 'blue-gable-stacked-pairs',
+    image: blueGableStackedPairs,
+    alt: 'Two stacked pairs of new white double-hung windows in the gable of a light blue lap-siding house under a deep blue sky',
+    caption: 'Stacked pairs in the gable',
+    kind: 'after',
+    featured: false,
+    order: 47,
+  },
+  {
     id: 'siding-two-story-panels',
     image: sidingTwoStoryPanels,
     alt: 'Two-story house with large tan wall panels and horizontal lap siding around black-framed windows, blue flashing membrane along the base and a ladder against the wall',
     caption: 'Panel and lap siding around black-framed windows',
     kind: 'siding',
     featured: false,
-    order: 45,
+    order: 48,
   },
   {
     id: 'siding-brick-wall-panels',
@@ -479,7 +511,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Tan wall panels going up over a brick building',
     kind: 'siding',
     featured: false,
-    order: 46,
+    order: 49,
   },
   {
     id: 'siding-garage-house-wrap',
@@ -488,7 +520,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'Wall wrapped in house wrap',
     kind: 'siding',
     featured: false,
-    order: 47,
+    order: 50,
   },
   {
     id: 'siding-garage-vertical-wood',
@@ -497,7 +529,7 @@ export const workPhotos: WorkPhoto[] = [
     caption: 'The same wall with vertical wood siding going on',
     kind: 'siding',
     featured: false,
-    order: 48,
+    order: 51,
   },
 ];
 
