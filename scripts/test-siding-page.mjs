@@ -4,7 +4,7 @@
 // Owner-provided 2026-10-04: labor starts at $2/sq ft (new construction), $3/sq ft (existing home),
 // board and batten $3/sq ft new construction and $4/sq ft existing home, cedar $4/sq ft, all per
 // square foot of total wall area (height times width); tear-off and new plywood $2/sq ft; significant suspected
-// dry rot adds roughly $1,000 to $2,000; siding material is separate; the warranty is the manufacturer's and is
+// dry rot adds $1,500 to $3,000 in labor depending on severity; siding material is separate; the warranty is the manufacturer's and is
 // stated without a term (the owner's "25 years" did not match James Hardie's published paperwork).
 // The page states no certification, Clearview workmanship warranty, timeline or crew claim, and
 // shows only the owner's real siding-job photos (captions describe what is visible).
@@ -54,16 +54,16 @@ const rates = (await import(`data:text/javascript,${encodeURIComponent(ratesSour
 assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBattenNewConstruction: 3, boardAndBattenExistingHome: 4, cedar: 4, tearOffPlywood: 2 }, "rates match the owner's figures");
 const dryRotSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
 const dryRot = (await import(`data:text/javascript,${encodeURIComponent(dryRotSource)}`)).sidingDryRot;
-assert.deepEqual(dryRot, { low: 1000, high: 2000 }, "dry-rot range matches the owner's figures");
-assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/g)].map((m) => m[1]))].sort(), ['1,000', '2', '2,000', '3', '4'], 'only the owner figures appear');
+assert.deepEqual(dryRot, { low: 1500, high: 3000 }, "dry-rot range matches the owner's figures");
+assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/g)].map((m) => m[1]))].sort(), ['1,500', '2', '3', '3,000', '4'], 'only the owner figures appear');
 for (const [label, line] of [
   ['New construction', 'Labor starts at $2 per square foot'],
   ['Existing home', 'Labor starts at $3 per square foot'],
   ['Board and batten, new construction', 'Labor starts at $3 per square foot'],
   ['Board and batten, existing home', 'Labor starts at $4 per square foot'],
-  ['Cedar siding', 'Labor starts at $4 per square foot'],
+  ['Cedar siding', 'Labor starts at $4 per square foot on any job'],
   ['Tear-off and new plywood', 'Labor is $2 per square foot'],
-  ['Significant suspected dry rot', 'Adds roughly $1,000 to $2,000 to the job'],
+  ['Dry rot', 'Adds $1,500 to $3,000 in labor, depending on severity'],
 ]) {
   assert.ok(text.includes(`${label} ${line}`), `${label}: "${line}"`);
 }

@@ -411,7 +411,7 @@ const catalog = {
       }
     }
     if (sidingHint instanceof HTMLElement && catalog.dryRot) {
-      sidingHint.textContent += ` Significant suspected dry rot adds roughly ${moneyText(catalog.dryRot.low)} to ${moneyText(catalog.dryRot.high)}: add it as a custom line once you have seen it.`;
+      sidingHint.textContent += ` Dry rot adds labor of ${moneyText(catalog.dryRot.low)} to ${moneyText(catalog.dryRot.high)} depending on severity: add it as a custom line once you have seen it.`;
     }
     form.querySelector('[data-siding-add]')?.addEventListener('click', () => {
       if (!(sidingRateSelect instanceof HTMLSelectElement) || !(sidingAreaInput instanceof HTMLInputElement)) return;

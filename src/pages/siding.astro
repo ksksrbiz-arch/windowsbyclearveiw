@@ -92,7 +92,7 @@ const faq = [
   },
   {
     question: 'What if there is dry rot under the old siding?',
-    answer: `If there is significant suspected dry rot, it adds roughly ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} to the job. Tearing off the old sheathing and putting in new plywood is ${money(sidingLabor.tearOffPlywood)} per square foot of labor. We tell you what we see when we measure, and the written estimate says what it covers.`,
+    answer: `Dry rot adds labor to the job, ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} depending on how severe it is. Tearing off the old sheathing and putting in new plywood is ${money(sidingLabor.tearOffPlywood)} per square foot of labor. We tell you what we see when we measure, and the written estimate says what it covers.`,
   },
   {
     question: 'Is there a warranty on the siding?',
@@ -220,15 +220,15 @@ const schema = {
             </div>
             <div class="spec-pair">
               <dt>Cedar siding</dt>
-              <dd>{`Labor starts at ${money(sidingLabor.cedar)} per square foot`}</dd>
+              <dd>{`Labor starts at ${money(sidingLabor.cedar)} per square foot on any job`}</dd>
             </div>
             <div class="spec-pair">
               <dt>Tear-off and new plywood</dt>
               <dd>{`Labor is ${money(sidingLabor.tearOffPlywood)} per square foot`}</dd>
             </div>
             <div class="spec-pair">
-              <dt>Significant suspected dry rot</dt>
-              <dd>{`Adds roughly ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} to the job`}</dd>
+              <dt>Dry rot</dt>
+              <dd>{`Adds ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} in labor, depending on severity`}</dd>
             </div>
           </dl>
           <p class="fine-print">

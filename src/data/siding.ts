@@ -13,5 +13,6 @@ export const sidingLabor = {
   tearOffPlywood: 2,
 } as const;
 
-// "If there is significant suspected dry rot it will add roughly 1k to 2k more." (Mark, 2026-10-04)
-export const sidingDryRot = { low: 1000, high: 2000 } as const;
+// Dry rot is just added labor cost, $1,500 to $3,000 depending on severity (Mark, 2026-10-04; his first
+// text said "roughly 1k to 2k" for significant suspected dry rot, then corrected it to this range).
+export const sidingDryRot = { low: 1500, high: 3000 } as const;
