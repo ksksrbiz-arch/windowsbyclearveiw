@@ -89,6 +89,16 @@ Nothing to do on deploy. Mechanism, so it stays that way:
 What cannot be automatic: on **iOS** the home-screen name and icon come from the manifest at install time (re-add the app to change
 them); Android refreshes them on its own schedule. Bump `VERSION` (not just the build) when the cache layout changes.
 
+## Diagnostics and photo-backup status (Tools > Phone app)
+
+- Photo backup row: `GET /internal/api/job-photos?status=1` (`configured`, `backedUp`) plus what the phone holds (`countPhotoBackupState`).
+  Photos are the only data that exists solely on the device until R2 is connected, so the row says so in words (`photoBackupLine`).
+- Worker log (`logEvent`/`readLog`, `cv-meta-v1`): 25 entries max; kinds `activated`, `warm-ok|warm-failed|warm-signed-out`,
+  `session-ended`, `write-offline`, `saved-copy`; detail is a path without its query string. Never put customer data, ids or
+  request bodies in it. Cleared with "Clear saved data".
+- **Copy diagnostics** (`diagnosticsText`) is how to read the state of a real phone: builds, switches, counts, warm state, photo
+  line, log. Ask for it before guessing at device-specific problems (iOS standalone, the Access sign-in inside the app).
+
 ## Migration from the old file names
 
 Installed copies registered `/internal-sw.js`. The page script now registers `/ops-sw.js` at the same scope, which updates the existing

@@ -157,10 +157,44 @@ function sessionEndedJson() {
   });
 }
 
+// A short, bounded record of what the worker did, kept with the warm-up state (no customer data: kinds and paths without query
+// strings). Tools > Phone app > Copy diagnostics prints it, so a problem on a real phone can be read without developer tools.
+const LOG_KEY = '/__cv/log';
+const LOG_MAX = 25;
+let logQueue = Promise.resolve();
+
+function logEvent(kind, detail) {
+  const text = String(detail === undefined ? '' : detail).split('?')[0].slice(0, 160);
+  logQueue = logQueue.then(async () => {
+    try {
+      const cache = await caches.open(META_CACHE);
+      const hit = await cache.match(LOG_KEY);
+      const list = hit ? await hit.json() : [];
+      const last = list[list.length - 1];
+      // A weak connection can repeat the same event many times a minute; keep one.
+      if (last && last.kind === kind && last.detail === text && Date.now() - Date.parse(last.at) < 60000) return;
+      list.push({ at: new Date().toISOString(), kind, detail: text });
+      await safePut(cache, LOG_KEY, new Response(JSON.stringify(list.slice(-LOG_MAX)), { headers: { 'content-type': 'application/json' } }));
+    } catch { /* logging must never break the worker */ }
+  });
+  return logQueue;
+}
+
+async function readLog() {
+  try {
+    await logQueue;
+    const hit = await (await caches.open(META_CACHE)).match(LOG_KEY);
+    return hit ? await hit.json() : [];
+  } catch {
+    return [];
+  }
+}
+
 // The session ended (login bounce or Cloudflare Access): drop every saved customer record, not just
 // the one that noticed, and tell the page.
-async function endSession() {
+async function endSession(trigger) {
   await caches.delete(DATA_CACHE);
+  await logEvent('session-ended', trigger);
   await broadcast({ type: 'cv:auth-expired' });
 }
 
@@ -192,6 +226,7 @@ self.addEventListener('activate', (event) => {
         if (name.startsWith('cv-') && !ALL_CACHES.includes(name)) await caches.delete(name);
       }
       await self.clients.claim();
+      await logEvent('activated', BUILD_ID);
       await broadcast({ type: 'cv:activated', build: BUILD_ID });
     })(),
   );
@@ -227,10 +262,11 @@ async function handleWrite(request) {
   try {
     response = await fetch(request, { redirect: 'manual' });
   } catch {
+    void logEvent('write-offline', new URL(request.url).pathname);
     return offlineJson('No connection, so this could not be confirmed as saved. Nothing was queued. Check it and try again when you have signal.');
   }
   if (response.type === 'opaqueredirect') {
-    await endSession();
+    await endSession('write');
     return sessionEndedJson();
   }
   return response;
@@ -292,7 +328,8 @@ async function saveData(cache, key, response) {
   await trim(cache, DATA_MAX_ENTRIES);
 }
 
-async function serveSaved(saved) {
+async function serveSaved(saved, path) {
+  void logEvent('saved-copy', path);
   const cachedAt = Number(saved.headers.get('x-cv-cached-at'));
   await broadcast({ type: 'cv:stale-data', cachedAt });
   const headers = new Headers(saved.headers);
@@ -306,14 +343,14 @@ async function handleData(request, url) {
 
   const network = fetch(request, { redirect: 'manual' }).then(async (response) => {
     if (response.type === 'opaqueredirect') {
-      await endSession();
+      await endSession('data');
       return sessionEndedJson();
     }
     if (response.ok && isCacheable(response) && contentType(response).includes('json')) {
       await saveData(cache, key, response.clone());
     } else if (wentToLogin(response) || (response.ok && !contentType(response).includes('json'))) {
       // Session ended: never show a saved copy of someone's data after that.
-      await endSession();
+      await endSession('data');
     } else if (response.status === 401 || response.status === 403 || response.status === 404) {
       await cache.delete(key); // the server answered: the record is gone or off limits
     }
@@ -329,7 +366,7 @@ async function handleData(request, url) {
   }
 
   if (response && !(saved && response.status >= 500)) return response;
-  if (saved) return serveSaved(saved);
+  if (saved) return serveSaved(saved, url.pathname);
   if (response) return response;
   return offlineJson('You are offline and this has not been saved on this phone yet.');
 }
@@ -448,6 +485,8 @@ function warmOnce() {
       await writeWarmState({ attemptAt: Date.now(), attemptBuild: BUILD_ID });
       const result = await warm();
       if (result.ok) await writeWarmState({ okAt: Date.now(), okBuild: BUILD_ID, attemptAt: 0 });
+      const failedList = (result.failed || []).slice(0, 4).map((f) => String(f).split('?')[0]).join(', ');
+      await logEvent(result.ok ? 'warm-ok' : result.signedOut ? 'warm-signed-out' : 'warm-failed', result.ok ? `${result.saved} pages, ${result.dataSaved} data` : failedList || 'nothing saved');
       return result;
     })().finally(() => { warming = null; });
   }
@@ -460,7 +499,7 @@ async function warm() {
   const failed = [];
   const data = await warmData(failed);
   if (data.signedOut) {
-    await endSession();
+    await endSession('warm');
     return { ok: false, signedOut: true, saved: 0, failed };
   }
   const shell = await caches.open(SHELL_CACHE);
@@ -478,7 +517,7 @@ async function warm() {
     }
     // Signed out: the middleware bounced this to the login page. Stop; nothing is saved.
     if (wentToLogin(response)) {
-      await endSession();
+      await endSession('warm');
       return { ok: false, signedOut: true, saved, failed };
     }
     const okPage = response.status === 200 && response.type !== 'opaque' && response.type !== 'opaqueredirect';
@@ -530,6 +569,7 @@ async function status() {
     version: VERSION,
     build: BUILD_ID,
     warm: { ...(await readWarmState()), running },
+    log: await readLog(),
     pages: Math.max(0, (await count(SHELL_CACHE)) - 1), // minus the offline fallback page
     assets: (await count(ASSET_CACHE)) + (await count(PINNED_CACHE)),
     data: await count(DATA_CACHE),

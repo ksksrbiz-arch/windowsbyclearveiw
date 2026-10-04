@@ -108,6 +108,7 @@ const CLIENT = '3f2a9c1e-1b7d-4c55-9f7e-0a1b2c3d4e5f';
   const list = await call(photosApi.onRequestGet, env, { path: `/internal/api/job-photos?jobId=${jobId}` });
   assert.deepEqual(list.body, { configured: false, photos: [] }, 'listing still works so the page can say so');
   assert.equal((await call(photosApi.onRequestGet, env, { path: '/internal/api/job-photos?id=x' })).status, 503);
+  assert.deepEqual((await call(photosApi.onRequestGet, env, { path: '/internal/api/job-photos?status=1' })).body, { configured: false, backedUp: 0 }, 'status answers "not connected" without a job id');
   pass('before R2 is connected: uploads answer 503 with a clear code, the list says not configured');
 }
 
@@ -136,6 +137,9 @@ let photoId;
   const list = await call(photosApi.onRequestGet, env, { path: `/internal/api/job-photos?jobId=${jobId}` });
   assert.equal(list.body.configured, true);
   assert.equal(list.body.photos.length, 1);
+  const status = await call(photosApi.onRequestGet, env, { path: '/internal/api/job-photos?status=1' });
+  assert.deepEqual(status.body, { configured: true, backedUp: 1 }, 'status says connected and counts backed-up photos');
+  assert.equal(JSON.stringify(status.body).includes('jobs/'), false, 'status carries no keys or file names');
   assert.equal(JSON.stringify(list.body).includes('r2_key'), false, 'the storage key is never sent to the phone');
   assert.equal(JSON.stringify(list.body).includes('jobs/'), false);
   assert.equal(list.body.photos[0].clientId, CLIENT);
