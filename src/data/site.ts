@@ -56,7 +56,7 @@ export const site = {
    * Empty means the widget is not rendered and the server does not require a token. Set it here
    * together with TURNSTILE_SECRET_KEY in the Pages dashboard; see internal/README.md.
    */
-  turnstileSiteKey: '0x4AAAAAAFKprEejBks4hT4Y',
+  turnstileSiteKey: '0x4AAAAAAFNHME2_-jEn_icn',
   lniNumber: 'CLEARVW74601',
   /**
    * Commercial general liability insurance, from the ACORD 25 certificate on
