@@ -5,7 +5,7 @@ description: No single Washington rule. See what Clark County, Camas, Battle Gro
 kicker: Permits and code
 topic: Permits
 published: true
-updated: 2026-10-03
+updated: 2026-10-04
 order: 5
 faq:
   - question: Do you need a permit to replace windows in Washington state?
@@ -15,7 +15,7 @@ faq:
   - question: Does changing the size of a window need a permit?
     answer: Yes, in every building department we checked. A bigger, smaller or new opening changes the framing around it, which is structural work, so the city or county reviews it. Camas asks for plans in that case.
   - question: Do replacement windows have to meet an energy rating in Washington?
-    answer: Yes. The Washington State Energy Code, residential edition, requires a replacement window to have a U-factor of 0.30 or lower. It applies whether you replace a whole window or just the sash and glass, and the code applies statewide.
+    answer: Yes. The Washington State Energy Code, residential edition, sets a maximum U-factor of 0.30 for replacement windows. If you replace several windows, the code lets you use the area-weighted average of all of them. It applies whether you replace a whole window or just the sash and glass, and the code applies statewide. A few special cases, such as homes above 4,000 feet, have a 0.32 limit instead.
   - question: How do I find out the rule for my address?
     answer: Call or visit the building department for the city your home is in, or Clark County if your home is outside a city. Give them your address and say you are replacing windows in the same size openings, or changing the size, whichever applies. Ask whether a permit is needed and whether plans are required.
 ---
@@ -34,13 +34,13 @@ We checked each of these building departments' published pages in October 2026. 
 - **Ridgefield.** The city lists window and door replacement of the same size as work that does not need a permit. A different size does.
 - **La Center.** The city lists window replacement among the projects that need a building permit.
 
-Other cities have their own rules, including Vancouver, Washougal and Woodland. They are not listed here. Ask the building department for your address.
+The cities' own wording on this is brief, and exceptions can apply, so confirm for your address. Other cities have their own rules, including Vancouver, Washougal and Woodland. They are not listed here. Ask the building department for your address.
 
 ## What a replacement window has to meet, permit or not
 
 A permit is only one part of this. These rules apply to the window itself.
 
-- **Energy.** The Washington State Energy Code (2021 edition, in effect statewide since March 15, 2024) says that when some or all of an existing window is replaced, including the sash and glass, the new unit has to meet the code's U-factor limit. For homes in our area that limit is **0.30 or lower**. If you are replacing several windows, the code lets you average them by area. Storm windows added over an existing window and window film put on existing single-pane glass are exceptions. Ask any installer for the U-factor of the window they are quoting.
+- **Energy.** The Washington State Energy Code (2021 edition, in effect statewide since March 15, 2024) says that when some or all of an existing window is replaced, including the sash and glass, the new unit has to meet the code's U-factor limit. The usual limit is a U-factor of **0.30 or lower**. If you are replacing several windows, the code lets you average them by area. A few special cases (homes above 4,000 feet in elevation, or in windborne-debris regions) have a limit of 0.32 instead. Storm windows added over an existing window and window film put on existing single-pane glass are exceptions. Ask any installer for the U-factor of the window they are quoting.
 - **Escape (egress) windows.** Clark County's permit handout says egress windows still have to meet the building code's egress rules when they are replaced. It says the sill-height rule does not apply when you replace a window in the same opening.
 - **Safety glass.** The same handout notes that some windows may need safety glazing, depending on where they sit in the house.
 
