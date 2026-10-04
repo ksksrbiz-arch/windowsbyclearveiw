@@ -1,12 +1,16 @@
 // Guards the /siding page against invented business facts and broken wiring. Runs against the built
 // site (`npm run build` first). Owner direction 2026-10-04: fiber cement lap and board and batten,
 // primarily James Hardie, plus LP products such as SmartSide board and other wood siding products.
-// The page states no price, warranty, certification, timeline or crew claim, and shows no siding
-// gallery until real siding-job photos exist.
+// Owner-provided 2026-10-04: labor starts at $2/sq ft (new construction), $3/sq ft (existing home),
+// board and batten $4/sq ft; siding material is separate; the warranty is the manufacturer's and is
+// stated without a term (the owner's "25 years" did not match James Hardie's published paperwork).
+// The page states no certification, Clearview workmanship warranty, timeline or crew claim, and
+// shows no siding gallery until real siding-job photos exist.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stripTypeScriptTypes } from 'node:module';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
@@ -31,17 +35,34 @@ for (const phrase of ['James Hardie', 'fiber cement', 'board and batten', 'LP Sm
 
 // Nothing the owner has not supplied.
 const invented = [
-  [/\$\s?\d/, 'a price'],
-  [/warrant/i, 'a warranty'],
   [/guarantee/i, 'a guarantee'],
   [/lifetime/i, 'a lifetime claim'],
+  [/\bour (?:own )?(?:workmanship )?warranty|we warrant/i, 'a Clearview warranty'],
   [/certified|certification|authorized|preferred (?:installer|contractor)/i, 'a certification claim'],
   [/colorplus|hardie ?zone|hardie ?plank/i, 'a product line the owner did not name'],
-  [/\b\d+\s*(?:years?|decades?)\b/i, 'a years claim'],
+  [/\b\d+[\s-]*(?:years?|yrs?|decades?)\b/i, 'a years claim (warranty terms belong to the manufacturer)'],
   [/\bMark\b/, 'a personal name'],
   [/\b(?:our|the) (?:crew|team|installers)\b/i, 'a crew or team claim'],
 ];
 for (const [re, label] of invented) assert.ok(!re.test(text), `siding page must not state ${label}`);
+
+// Prices: exactly the owner's three labor rates, labelled as labor, material separate, starting rates.
+const ratesSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
+const rates = (await import(`data:text/javascript,${encodeURIComponent(ratesSource)}`)).sidingLabor;
+assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBatten: 4 }, "rates match the owner's figures");
+assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/g)].map((m) => m[1]))].sort(), ['2', '3', '4'], 'only the three owner rates appear');
+for (const [label, rate] of [['New construction', 2], ['Existing home', 3], ['Board and batten', 4]]) {
+  assert.ok(new RegExp(`${label}\\s+Labor starts at \\$${rate} per square foot`).test(text), `${label} labor rate shown as $${rate}`);
+}
+assert.ok(/siding itself is a separate cost/.test(text) && /not a quote/.test(text), 'material is separate and the rates are starting rates, not a quote');
+assert.ok(!/\$\d+[^.]*\binstalled\b/i.test(text.replace(/installed to the manufacturer/g, '')), 'rates are never called installed prices');
+
+// Warranty: the manufacturer's, no term stated.
+assert.ok(/manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications/.test(text), "manufacturer's warranty condition stated as given");
+assert.ok(/The manufacturer sets the terms/.test(text), 'terms are left to the manufacturer');
+
+// Windows on a siding job are offered only on request.
+assert.ok(/We can, if you ask/.test(text) && /Can you replace windows during a siding job\?/.test(text), 'windows-on-request stated');
 
 // No siding gallery: the only photo is the hero, and it is labelled as a window job.
 assert.ok(!/work-grid/.test(html), 'no gallery grid until real siding photos exist');

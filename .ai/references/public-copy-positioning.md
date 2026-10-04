@@ -29,6 +29,15 @@ Owner direction, 2026-09-30. Business facts here come from the owner; do not ext
   or "leave the room usable" (owner direction, 2026-09-30: timing depends on the specifics of each job).
   Saying we haul away debris is fine. Lead times are fine when tied to the manufacturer.
 
+## Siding (owner direction, 2026-10-04)
+
+Source of truth for `/siding` and anything else that mentions siding; do not extend by guessing.
+
+- **Products:** fiber cement lap and board and batten, primarily James Hardie; LP siding products such as LP SmartSide board; other wood siding products. Windows can be done on a siding job if the customer asks.
+- **Price:** charged by the square foot. **Labor only** (the siding material is a separate cost quoted in the estimate): starting at $2 per sq ft on new construction, $3 on an existing home, $4 for board and batten. Values live in `src/data/siding.ts`. Say "labor starts at", never "installed from" and never a total.
+- **Warranty:** the manufacturer's. James Hardie, and most other siding products, carry a manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications. Publish no term length: the owner said 25 years, but James Hardie's published HardiePlank warranty says 30 (ColorPlus finish 15), so the number is VERIFY against Hardie's current paperwork. No Clearview workmanship warranty is stated.
+- Still not stated anywhere: certifications (no "certified installer"), crew or experience claims, job duration.
+
 ## Graphics
 
 - AI-generated window diagrams have repeatedly come out wrong. Two were removed on 2026-09-30

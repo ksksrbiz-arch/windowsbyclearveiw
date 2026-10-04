@@ -5,6 +5,7 @@ import CtaBar from '../components/CtaBar.astro';
 import FaqAccordion from '../components/FaqAccordion.astro';
 import { findWork } from '../data/work';
 import { site } from '../data/site';
+import { sidingLabor } from '../data/siding';
 
 // No siding-job photos exist yet (VERIFY with Mark, see .ai/WORKING.md). The hero
 // is a real Clearview window job on a lap-siding house and says so in its credit
@@ -14,7 +15,9 @@ const heroBg = await getHeroBg(heroPhoto.image);
 
 // Owner direction, 2026-10-04: fiber cement lap and board and batten, primarily
 // James Hardie; LP products such as SmartSide board; other wood siding products.
-// Nothing here states a price, warranty, certification or timeline.
+// Labor rates are owner-provided (src/data/siding.ts). The warranty is the manufacturer's, stated
+// without a term because the owner's figure did not match James Hardie's published paperwork.
+// Nothing here states a certification, a Clearview workmanship warranty or a timeline.
 const materials = [
   {
     name: 'Fiber cement lap siding',
@@ -83,8 +86,17 @@ const faq = [
   },
   {
     question: 'How much does siding cost?',
+    answer: `We charge by the square foot. Our labor starts at $${sidingLabor.newConstruction} per square foot on new construction and $${sidingLabor.existingHome} on an existing home, and board and batten starts at $${sidingLabor.boardAndBatten}. The siding material is a separate cost. These are starting rates, so we measure in person and put the full number in a written estimate.`,
+  },
+  {
+    question: 'Is there a warranty on the siding?',
     answer:
-      'It depends on the size of the house, the product and profile you choose, and what is under the old siding. We do not publish a price list. We measure in person and give you a written estimate.',
+      "James Hardie siding, and most other siding products, come with a manufacturer's warranty when the product is bought, as long as it is installed to the manufacturer's specifications. The manufacturer sets the terms, so ask for the paperwork for the product you choose.",
+  },
+  {
+    question: 'Can you replace windows during a siding job?',
+    answer:
+      'Yes, if you ask. Say so in your estimate request and we include the windows with the siding.',
   },
   {
     question: 'Do I need a permit to replace siding?',
@@ -147,8 +159,8 @@ const schema = {
         <a class="btn btn-ghost btn-on-dark" href="#materials">See what we install</a>
       </div>
       <p class="hero-note">
-        Replacing windows too? See <a href="/replacement">window replacement</a>, and mention it
-        in your request.
+        Want windows replaced on the same job? We can, if you ask. See
+        <a href="/replacement">window replacement</a> and mention it in your request.
       </p>
     </div>
     <p class="hero-photo-credit">Clearview job photo — a window install on lap siding</p>
@@ -170,14 +182,56 @@ const schema = {
           </article>
         ))}
       </div>
-      <p class="fine-print">
-        We do not list prices here. Cost depends on the house, so the number comes from the
-        written estimate after we measure.
-      </p>
     </div>
   </section>
 
-  <section class="section section-sunk">
+  <section class="section section-sunk" id="pricing">
+    <div class="wrap" data-reveal>
+      <div class="two-col">
+        <div>
+          <p class="rule-label">What we charge</p>
+          <h2>Priced by the square foot.</h2>
+          <p class="lede">
+            These are our labor rates. The siding itself is a separate cost, and we put both in the
+            written estimate.
+          </p>
+          <dl class="spec-table">
+            <div class="spec-pair">
+              <dt>New construction</dt>
+              <dd>{`Labor starts at $${sidingLabor.newConstruction} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Existing home</dt>
+              <dd>{`Labor starts at $${sidingLabor.existingHome} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Board and batten</dt>
+              <dd>{`Labor starts at $${sidingLabor.boardAndBatten} per square foot`}</dd>
+            </div>
+          </dl>
+          <p class="fine-print">
+            Starting rates, not a quote. The final number depends on the house, so we measure
+            before we write it down.
+          </p>
+        </div>
+        <div>
+          <p class="rule-label">Warranty</p>
+          <h2>The manufacturer's warranty.</h2>
+          <p class="lede">
+            James Hardie siding, and most other siding products, come with a manufacturer's
+            warranty when the product is bought, as long as it is installed to the manufacturer's
+            specifications.
+          </p>
+          <p class="fine-print">
+            The manufacturer sets the terms and the length of its warranty. Ask for the current
+            paperwork for the product you choose.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="wrap" data-reveal>
       <div class="two-col">
       <div>
@@ -215,7 +269,7 @@ const schema = {
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section-sunk">
     <div class="wrap" data-reveal>
       <p class="rule-label">Where we work</p>
       <h2>Siding in Vancouver and Clark County.</h2>
@@ -233,7 +287,7 @@ const schema = {
     </div>
   </section>
 
-  <section class="section section-sunk">
+  <section class="section">
     <div class="wrap is-narrow" data-reveal>
       <FaqAccordion items={faq} heading="Siding questions" />
     </div>
@@ -328,6 +382,36 @@ const schema = {
     align-items: start;
   }
 
+  .spec-table {
+    margin: var(--space-l) 0 0;
+  }
+
+  .spec-pair {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: var(--space-s);
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .spec-pair:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .spec-pair dt {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--ink-faint);
+  }
+
+  .spec-pair dd {
+    margin: 0;
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
   .area-list {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -350,6 +434,11 @@ const schema = {
 
     .two-col {
       grid-template-columns: 1fr;
+    }
+
+    .spec-pair {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
     }
 
     .area-list {
