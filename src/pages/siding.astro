@@ -3,14 +3,16 @@ import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import FaqAccordion from '../components/FaqAccordion.astro';
-import { findWork } from '../data/work';
+import WorkCard from '../components/WorkCard.astro';
+import { findWork, sidingWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
-import { sidingLabor } from '../data/siding';
+import { sidingLabor, sidingDryRot } from '../data/siding';
 
-// No siding-job photos exist yet (VERIFY with Mark, see .ai/WORKING.md). The hero
-// is a real Clearview window job on a lap-siding house and says so in its credit
-// line; it is not presented as a siding install.
-const heroPhoto = findWork('gray-lap-siding-triple-hung')!;
+const money = (dollars: number) => `$${dollars.toLocaleString('en-US')}`;
+
+// Real siding-job photos, supplied by the owner 2026-10-04 ("all siding jobs"). Some are
+// mid-job; captions describe only what is visible. The hero is the finished-looking one.
+const heroPhoto = findWork('siding-two-story-panels')!;
 const heroBg = await getHeroBg(heroPhoto.image);
 
 // Owner direction, 2026-10-04: fiber cement lap and board and batten, primarily
@@ -33,7 +35,7 @@ const materials = [
   },
   {
     name: 'Other wood siding products',
-    text: 'We also work with other wood siding products. If your house has wood siding now, or you want it, say so in your request and the estimate will cover it.',
+    text: 'Cedar siding and other wood siding products. If your house has wood siding now, or you want it, say so in your request and the estimate will cover it.',
   },
 ];
 
@@ -86,7 +88,11 @@ const faq = [
   },
   {
     question: 'How much does siding cost?',
-    answer: `We charge by the square foot. Our labor starts at $${sidingLabor.newConstruction} per square foot on new construction and $${sidingLabor.existingHome} on an existing home, and board and batten starts at $${sidingLabor.boardAndBatten}. The siding material is a separate cost. These are starting rates, so we measure in person and put the full number in a written estimate.`,
+    answer: `We charge by the square foot. Our labor starts at ${money(sidingLabor.newConstruction)} per square foot on new construction and ${money(sidingLabor.existingHome)} on an existing home. Board and batten and cedar siding start at ${money(sidingLabor.boardAndBatten)}. The siding material is a separate cost. These are starting rates, so we measure in person and put the full number in a written estimate.`,
+  },
+  {
+    question: 'What if there is dry rot under the old siding?',
+    answer: `If there is significant suspected dry rot, it adds roughly ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} to the job. Tearing off the old sheathing and putting in new plywood is ${money(sidingLabor.tearOffPlywood)} per square foot of labor. We tell you what we see when we measure, and the written estimate says what it covers.`,
   },
   {
     question: 'Is there a warranty on the siding?',
@@ -159,11 +165,11 @@ const schema = {
         <a class="btn btn-ghost btn-on-dark" href="#materials">See what we install</a>
       </div>
       <p class="hero-note">
-        Want windows replaced on the same job? We can, if you ask. See
+        Want windows replaced on the same job? We can, if you ask. See{' '}
         <a href="/replacement">window replacement</a> and mention it in your request.
       </p>
     </div>
-    <p class="hero-photo-credit">Clearview job photo — a window install on lap siding</p>
+    <p class="hero-photo-credit">Clearview job photo — siding and black-framed windows</p>
   </section>
 
   <section class="section" id="materials">
@@ -198,15 +204,27 @@ const schema = {
           <dl class="spec-table">
             <div class="spec-pair">
               <dt>New construction</dt>
-              <dd>{`Labor starts at $${sidingLabor.newConstruction} per square foot`}</dd>
+              <dd>{`Labor starts at ${money(sidingLabor.newConstruction)} per square foot`}</dd>
             </div>
             <div class="spec-pair">
               <dt>Existing home</dt>
-              <dd>{`Labor starts at $${sidingLabor.existingHome} per square foot`}</dd>
+              <dd>{`Labor starts at ${money(sidingLabor.existingHome)} per square foot`}</dd>
             </div>
             <div class="spec-pair">
               <dt>Board and batten</dt>
-              <dd>{`Labor starts at $${sidingLabor.boardAndBatten} per square foot`}</dd>
+              <dd>{`Labor starts at ${money(sidingLabor.boardAndBatten)} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Cedar siding</dt>
+              <dd>{`Labor starts at ${money(sidingLabor.cedar)} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Tear-off and new plywood</dt>
+              <dd>{`Labor is ${money(sidingLabor.tearOffPlywood)} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Significant suspected dry rot</dt>
+              <dd>{`Adds roughly ${money(sidingDryRot.low)} to ${money(sidingDryRot.high)} to the job`}</dd>
             </div>
           </dl>
           <p class="fine-print">
@@ -269,7 +287,26 @@ const schema = {
     </div>
   </section>
 
-  <section class="section section-sunk">
+  {sidingWork.length > 0 && (
+    <section class="section section-sunk" id="work">
+      <div class="wrap" data-reveal>
+        <p class="rule-label">Real siding jobs</p>
+        <h2>Siding work, as it goes on.</h2>
+        <p class="lede">
+          Photos from our siding jobs. Some were taken mid-job, so you can see the wrap and the
+          wall under the siding as well as the finished look.
+        </p>
+        <div class="work-grid siding-work">
+          {sidingWork.map((photo) => (
+            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} sizes="(max-width: 560px) 90vw, (max-width: 900px) 46vw, 300px" />
+          ))}
+        </div>
+        <p class="section-link"><a href="/gallery#siding">See them in the gallery</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
     <div class="wrap" data-reveal>
       <p class="rule-label">Where we work</p>
       <h2>Siding in Vancouver and Clark County.</h2>
@@ -287,7 +324,7 @@ const schema = {
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section-sunk">
     <div class="wrap is-narrow" data-reveal>
       <FaqAccordion items={faq} heading="Siding questions" />
     </div>
@@ -386,9 +423,13 @@ const schema = {
     margin: var(--space-l) 0 0;
   }
 
+  .siding-work {
+    margin: var(--space-l) 0 0;
+  }
+
   .spec-pair {
     display: grid;
-    grid-template-columns: 10rem minmax(0, 1fr);
+    grid-template-columns: 12rem minmax(0, 1fr);
     gap: var(--space-s);
     padding: var(--space-s) 0;
     border-top: 1px solid var(--line);

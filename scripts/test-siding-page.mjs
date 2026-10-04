@@ -2,10 +2,11 @@
 // site (`npm run build` first). Owner direction 2026-10-04: fiber cement lap and board and batten,
 // primarily James Hardie, plus LP products such as SmartSide board and other wood siding products.
 // Owner-provided 2026-10-04: labor starts at $2/sq ft (new construction), $3/sq ft (existing home),
-// board and batten $4/sq ft; siding material is separate; the warranty is the manufacturer's and is
+// board and batten $4/sq ft, cedar $4/sq ft; tear-off and new plywood $2/sq ft; significant suspected
+// dry rot adds roughly $1,000 to $2,000; siding material is separate; the warranty is the manufacturer's and is
 // stated without a term (the owner's "25 years" did not match James Hardie's published paperwork).
 // The page states no certification, Clearview workmanship warranty, timeline or crew claim, and
-// shows no siding gallery until real siding-job photos exist.
+// shows only the owner's real siding-job photos (captions describe what is visible).
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -49,10 +50,20 @@ for (const [re, label] of invented) assert.ok(!re.test(text), `siding page must 
 // Prices: exactly the owner's three labor rates, labelled as labor, material separate, starting rates.
 const ratesSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
 const rates = (await import(`data:text/javascript,${encodeURIComponent(ratesSource)}`)).sidingLabor;
-assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBatten: 4 }, "rates match the owner's figures");
-assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/g)].map((m) => m[1]))].sort(), ['2', '3', '4'], 'only the three owner rates appear');
-for (const [label, rate] of [['New construction', 2], ['Existing home', 3], ['Board and batten', 4]]) {
-  assert.ok(new RegExp(`${label}\\s+Labor starts at \\$${rate} per square foot`).test(text), `${label} labor rate shown as $${rate}`);
+assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBatten: 4, cedar: 4, tearOffPlywood: 2 }, "rates match the owner's figures");
+const dryRotSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
+const dryRot = (await import(`data:text/javascript,${encodeURIComponent(dryRotSource)}`)).sidingDryRot;
+assert.deepEqual(dryRot, { low: 1000, high: 2000 }, "dry-rot range matches the owner's figures");
+assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/g)].map((m) => m[1]))].sort(), ['1,000', '2', '2,000', '3', '4'], 'only the owner figures appear');
+for (const [label, line] of [
+  ['New construction', 'Labor starts at $2 per square foot'],
+  ['Existing home', 'Labor starts at $3 per square foot'],
+  ['Board and batten', 'Labor starts at $4 per square foot'],
+  ['Cedar siding', 'Labor starts at $4 per square foot'],
+  ['Tear-off and new plywood', 'Labor is $2 per square foot'],
+  ['Significant suspected dry rot', 'Adds roughly $1,000 to $2,000 to the job'],
+]) {
+  assert.ok(text.includes(`${label} ${line}`), `${label}: "${line}"`);
 }
 assert.ok(/siding itself is a separate cost/.test(text) && /not a quote/.test(text), 'material is separate and the rates are starting rates, not a quote');
 assert.ok(!/\$\d+[^.]*\binstalled\b/i.test(text.replace(/installed to the manufacturer/g, '')), 'rates are never called installed prices');
@@ -64,9 +75,21 @@ assert.ok(/The manufacturer sets the terms/.test(text), 'terms are left to the m
 // Windows on a siding job are offered only on request.
 assert.ok(/We can, if you ask/.test(text) && /Can you replace windows during a siding job\?/.test(text), 'windows-on-request stated');
 
-// No siding gallery: the only photo is the hero, and it is labelled as a window job.
-assert.ok(!/work-grid/.test(html), 'no gallery grid until real siding photos exist');
-assert.ok(text.includes('a window install on lap siding'), 'hero photo credit says it is a window job');
+// Photos: the four owner-supplied siding jobs, in the page and in the gallery. No metadata, and the
+// blurred street number / cropped person are guarded by the source files' dimensions and EXIF.
+const sidingPhotos = ['siding-brick-wall-panels', 'siding-garage-house-wrap', 'siding-garage-vertical-wood', 'siding-two-story-panels'];
+for (const alt of ['Two-story house with large tan wall panels', 'Single-story brick building with new black-framed windows', 'Long garage-style building wrapped in white house wrap', 'The same building with vertical wood siding panels']) {
+  assert.ok(html.includes(alt), `siding page renders the photo "${alt}"`);
+}
+const gallery = visible(read('gallery.html'));
+assert.ok(/Siding jobs, some photographed mid-job/.test(gallery), 'gallery has a siding group');
+for (const id of sidingPhotos) {
+  const file = join(root, `src/assets/work/${id}.jpg`);
+  assert.ok(existsSync(file), `${id}.jpg exists`);
+  const bytes = readFileSync(file);
+  assert.ok(!bytes.includes(Buffer.from('Exif\0\0')), `${id}.jpg carries no EXIF (dates, GPS, device)`);
+}
+assert.ok(text.includes('Clearview job photo — siding and black-framed windows'), 'hero credit describes the siding photo');
 
 // Permit claims are limited to the four departments whose published pages say so.
 for (const place of ['Clark County', 'Camas', 'Battle Ground', 'Ridgefield']) {

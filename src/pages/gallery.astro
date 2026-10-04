@@ -50,6 +50,13 @@ const groups = [
     density: 'is-large',
     photos: allWork.filter((photo) => photo.kind === 'new construction'),
   },
+  {
+    id: 'siding',
+    label: 'Siding',
+    blurb: 'Siding jobs, some photographed mid-job.',
+    density: 'is-dense',
+    photos: allWork.filter((photo) => photo.kind === 'siding'),
+  },
 ].filter((group) => group.photos.length > 0);
 
 const total = allWork.length;
@@ -67,8 +74,8 @@ const total = allWork.length;
       <p class="kicker">Gallery</p>
       <h1>Real jobs, real photos.</h1>
       <p class="lede">
-        Replacement windows on Washington homes: sliders, double-hungs, and photos from
-        install day. Every photo here is from one of our jobs.
+        Replacement windows and siding on Washington homes: sliders, double-hungs, and
+        photos from install day. Every photo here is from one of our jobs.
       </p>
       <p class="gallery-index">
         <span class="gallery-count">{total}</span>
