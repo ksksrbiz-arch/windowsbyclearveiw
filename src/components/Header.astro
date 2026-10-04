@@ -10,6 +10,7 @@ const links = [
   ['/replacement', 'Replacement'],
   ['/new-construction', 'New construction'],
   ['/sliding-glass-doors', 'Sliding glass doors'],
+  ['/siding', 'Siding'],
   ['/window-features', 'Features'],
   ['/process', 'Process'],
   ['/tools', 'Tools'],
@@ -220,12 +221,21 @@ const links = [
     min-width: 0;
     justify-content: center;
     /* .wrap caps this row at --max (1240px), so above the 1400px breakpoint
-       where .header-estimate reappears, the unwrapped 10-link nav is short
-       by a small, constant amount regardless of viewport width — it always
-       overlaps .header-social, never resolves no matter how wide the window
-       gets. Trimmed just enough to close that gap with a safety margin. */
+       where .header-estimate reappears, the unwrapped nav is short by a
+       constant amount regardless of viewport width: it overlaps .header-social
+       and never resolves, however wide the window gets. See the 1401px block
+       below for how the row is given room (Siding made it eleven links). */
     gap: 0.1rem .65rem;
     white-space: nowrap;
+  }
+
+  /* Eleven links plus the estimate button do not fit 1240px. Below 1400px the nav has ~46px of
+     clearance either side; above it, only this header row is widened to 1340px (page content stays
+     1240px) and the links close up slightly, which restores ~30px of clearance at every width up to
+     1920px. Measured in a browser at 1401, 1440, 1536 and 1920. */
+  @media (min-width: 1401px) {
+    .header-inner { width: min(1340px, calc(100% - var(--space-m) * 2)); }
+    .nav { gap: 0.1rem .6rem; }
   }
 
   .nav a {

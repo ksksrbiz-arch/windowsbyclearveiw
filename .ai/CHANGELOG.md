@@ -1,5 +1,9 @@
 # ICM Changelog
 
+## 2026-10-04 — Siding in the primary nav
+
+- Owner request: the siding page needs an actual nav link. `src/components/Header.astro` now lists Siding after Sliding glass doors (the mobile menu too). Eleven links plus the estimate button overflowed the 1240px header row above 1400px (it collided with the logo and Facebook icon), so at 1401px and up only the header row is widened to 1340px (page content stays 1240px) and the link gap tightens to .6rem. Measured in Chromium at 1281, 1300, 1366, 1400, 1401, 1440, 1536, 1680 and 1920px: no overlap, 29-47px clearance either side, one row, no horizontal overflow; the phone menu (375px) lists Siding and the current page is marked. `test:siding` now also asserts the header link.
+
 ## 2026-10-04 — Siding vs window work in the Command Center
 
 - Owner request: tell siding and window clients/jobs apart and create quotes and invoices for each. Decisions (Keith, 2026-10-04): a siding quote is approved by its **signature alone** (no window Build Plan); first pass is tag + quote + invoice + job (no siding closeout checklist); inquiries from `/siding` are auto-tagged.
