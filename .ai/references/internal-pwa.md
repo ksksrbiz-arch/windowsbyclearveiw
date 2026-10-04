@@ -1,7 +1,7 @@
 # Command Center PWA — contract
 
-Reference for the installable, offline-tolerant Command Center (`/internal`). Code: `public/internal-sw.js`,
-`public/internal.webmanifest`, `public/internal-offline.html`, `src/scripts/internal-pwa.ts`,
+Reference for the installable, offline-tolerant Command Center (`/internal`). Code: `public/ops-sw.js`,
+`public/ops.webmanifest`, `public/ops-offline.html`, `src/scripts/internal-pwa.ts`,
 `src/layouts/InternalLayout.astro`, the "Phone app" card in `src/pages/internal/tools/index.astro`.
 Guard: `npm run test:internal-pwa` (sandboxed worker + build checks). Not a business record; D1 stays the truth.
 
@@ -9,7 +9,7 @@ Guard: `npm run test:internal-pwa` (sandboxed worker + build checks). Not a busi
 
 | Decision | Why |
 |---|---|
-| Manifest, worker and offline page are **public files outside `/internal/`** | `functions/internal/_middleware.js` 302s every unauthenticated `/internal/*` request to the login page; a manifest or worker request that redirects fails. None of them holds customer data. |
+| Manifest, worker and offline page are **public files outside `/internal`, named `ops-*`** (`/ops-sw.js`, `/ops.webmanifest`, `/ops-offline.html`; never `internal-*`) | `functions/internal/_middleware.js` 302s every unauthenticated `/internal/*` request to the login page; a manifest or worker request that redirects fails. None of them holds customer data. **Cloudflare Access gates `/internal*` by prefix** (it began doing so 2026-10-04: `/internalx` and `/internal-sw.js` were redirected to the Access sign-in), so a name starting with `internal` is not safe; tested. After a deploy or an Access change run `npm run check:pwa-live`. |
 | Scope is **`/internal`, no trailing slash** | Cloudflare Pages 308-redirects `/internal/` to `/internal` (the Dashboard is `internal.html`). A scope ending in `/` would leave the Dashboard outside the app. Verified with `wrangler pages dev`. |
 | Saved pages are rebuilt as a plain 200 (`plainCopy`) | Pages 308s `/x.html` to `/x`; Chrome refuses a *redirected* response for a navigation (`ERR_FAILED`). Found in the 2026-10-03 browser test. |
 | Redirects and `/internal/login` are never saved | A saved login bounce would "log in" offline to a dead form. |
@@ -23,7 +23,7 @@ Guard: `npm run test:internal-pwa` (sandboxed worker + build checks). Not a busi
 | Pages (`/internal*` HTML) | Network first, saved copy on failure or after 5 s. Key = path only (no query, no trailing slash). Static Astro output: no customer data in the HTML. | Until replaced or cleared |
 | Assets (`/_astro`, `/fonts`, `/logo`, icons) | Cache first. Two stores: **pinned** (exactly what the warmed pages need; swept to that set after every clean warm-up, never capped, so newer deploys cannot evict a file a saved page still uses) and **runtime** (anything else seen; capped at 250, oldest dropped) | Pinned: until the next clean warm-up replaces it. Runtime: until evicted |
 | Data (`dashboard`, `tasks`, `jobs`, `job-checklist`, `job-evidence`; GET only) | Network first, saved copy on failure or after 5 s, marked `x-cv-from-cache`; capped at 80 entries | **3 days**, then deleted on read |
-| Unsaved page while offline | `/internal-offline.html` (precached at install) | — |
+| Unsaved page while offline | `/ops-offline.html` (precached at install) | — |
 | Unsaved data while offline | `503 {"error": "...offline...", "offline": true}` so existing pages show a readable message | — |
 | A write (POST/PATCH/PUT/DELETE) to the same endpoints with no connection | Sent once, never saved or replayed. If the connection is dead the page gets `503 {"error": "No connection, so this could not be confirmed as saved. Nothing was queued…"}` instead of "Failed to fetch". A real server answer is passed through untouched. Other write endpoints (quotes, invoices, payments, photos, login/logout) are not touched at all | — |
 
@@ -49,7 +49,7 @@ first. Every page must exist in the build (tested). Signed out → it stops and 
   sign-in. Access session length (owner chose 1 month in `internal/README.md`) therefore sets how long the app works unattended.
 - **Open, needs a real iPhone:** in an installed iOS home-screen app the Access sign-in is a different origin, which iOS may
   open outside the app's cookie jar; if sign-in loops, that is why. Android Chrome PWAs handle it normally.
-- `/internal-sw.js` is served by Cloudflare with `max-age=14400` even though `_headers` says `no-cache` (the manifest's header
+- `/ops-sw.js` is served by Cloudflare with `max-age=14400` even though `_headers` says `no-cache` (the manifest's header
   applied; the cause is likely the zone's Browser Cache TTL). Harmless for updates: registration uses `updateViaCache: 'none'`,
   which makes update checks skip the HTTP cache. Optional owner fix: Caching → Browser Cache TTL → Respect Existing Headers.
 
@@ -72,7 +72,7 @@ Nothing to do on deploy. Mechanism, so it stays that way:
 
 1. **Every deploy changes the worker file.** `astro.config.mjs` derives one build id (`<commit time ms>-<short commit>`, from git:
    Astro evaluates the config more than once per build, so a clock would give the pages and the worker different ids) and
-   stamps it into `dist/internal-sw.js` (`BUILD_ID`, placeholder in `public/`) and every internal page (`<meta name="cv-build">`).
+   stamps it into `dist/ops-sw.js` (`BUILD_ID`, placeholder in `public/`) and every internal page (`<meta name="cv-build">`).
    The build fails if the placeholder is missing. Without git history the id falls back to a zero time plus the Pages commit
    hash: the worker still changes per deploy, but pages are never judged out of date.
 2. **The browser installs the new worker itself** (`updateViaCache: 'none'`, `skipWaiting`, `clients.claim`), and the app also
@@ -88,6 +88,12 @@ Nothing to do on deploy. Mechanism, so it stays that way:
 
 What cannot be automatic: on **iOS** the home-screen name and icon come from the manifest at install time (re-add the app to change
 them); Android refreshes them on its own schedule. Bump `VERSION` (not just the build) when the cache layout changes.
+
+## Migration from the old file names
+
+Installed copies registered `/internal-sw.js`. The page script now registers `/ops-sw.js` at the same scope, which updates the existing
+registration to the new script (same caches, `v1`); the old URL is never needed again (and Access was redirecting it anyway). Verified
+in Chromium: a registration made by the old build switched to the new worker, kept its saved pages, and kept controlling the page.
 
 ## Changing the worker
 

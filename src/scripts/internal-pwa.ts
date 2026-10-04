@@ -1,7 +1,7 @@
 /**
- * Command Center PWA client: registers /internal-sw.js, shows the offline / saved-copy / session
+ * Command Center PWA client: registers /ops-sw.js, shows the offline / saved-copy / session
  * banner, captures the install prompt, keeps main pages saved for offline, and clears saved data
- * at logout. The caching rules live in the worker (public/internal-sw.js); contract:
+ * at logout. The caching rules live in the worker (public/ops-sw.js); contract:
  * .ai/references/internal-pwa.md. Imported by InternalLayout (every internal page) and by the
  * Tools page card, so module state (the captured install prompt) is shared between them.
  */
@@ -9,7 +9,7 @@
 import { bannerFor, buildLabel, formatAge, pageIsStale, shouldCheckForUpdate, shouldWarm, updateAction, type BannerState } from '../lib/pwa-logic';
 
 export { formatAge };
-export const SW_URL = '/internal-sw.js';
+export const SW_URL = '/ops-sw.js';
 // No trailing slash on purpose: Pages serves the Dashboard at /internal (/internal/ redirects to it).
 export const SW_SCOPE = '/internal';
 const UPDATE_RELOAD_KEY = 'clearview:pwa:update-reload';
@@ -263,7 +263,7 @@ export function initInternalPwa(): void {
 
 /**
  * Ask the worker to save pages when that is due. The worker keeps the warm-up state (see readWarmState in
- * public/internal-sw.js), so this works however often pages are opened and closed while a run is in progress.
+ * public/ops-sw.js), so this works however often pages are opened and closed while a run is in progress.
  */
 async function maybeWarm() {
   const status = await askStatus();

@@ -1,5 +1,5 @@
 // Command Center PWA guard (run `npm run build` first; it also checks the built pages).
-// Part 1 runs public/internal-sw.js in a sandbox with a fake Cache API and drives its fetch/message
+// Part 1 runs public/ops-sw.js in a sandbox with a fake Cache API and drives its fetch/message
 // handlers: what is saved, what is never saved, what is served when offline, what is wiped.
 // Part 2 checks the manifest, headers, and that every built internal page is wired up.
 // Contract: .ai/references/internal-pwa.md
@@ -24,7 +24,7 @@ async function test(name, fn) {
 // ---- sandbox ---------------------------------------------------------------------------------
 
 const ORIGIN = 'https://test.local';
-const swSource = readFileSync(join(root, 'public/internal-sw.js'), 'utf8');
+const swSource = readFileSync(join(root, 'public/ops-sw.js'), 'utf8');
 
 class FakeCache {
   constructor() { this.map = new Map(); }
@@ -74,7 +74,7 @@ function makeWorld({ fetchImpl, setTimeoutImpl } = {}) {
     self, caches, fetch: (...a) => world.fetch(...a), Response, Request, Headers, URL, Date, Promise, Set, Map, Math, Number, Array, JSON, console,
     setTimeout: setTimeoutImpl || setTimeout, clearTimeout,
   });
-  vm.runInContext(swSource, context, { filename: 'internal-sw.js' });
+  vm.runInContext(swSource, context, { filename: 'ops-sw.js' });
   world.read = (expr) => vm.runInContext(expr, context);
   world.install = async () => { let p; await listeners.install({ waitUntil: (x) => { p = x; } }); await p; };
   world.activate = async () => { let p; await listeners.activate({ waitUntil: (x) => { p = x; } }); await p; };
@@ -105,7 +105,7 @@ const accessRedirect = () => flagged(new Response(null, { status: 200 }), { type
 const routeWarmData = (w) => { for (const path of w.read('WARM_DATA')) if (!w.routes.has(path)) w.routes.set(path, () => json({})); };
 
 async function ready(world) {
-  world.routes.set('/internal-offline.html', html('<html>offline page</html>'));
+  world.routes.set('/ops-offline.html', html('<html>offline page</html>'));
   await world.install();
   await world.activate();
   return world;
@@ -115,9 +115,9 @@ async function ready(world) {
 
 await test('install saves the offline page as a plain 200 and activates immediately', async () => {
   const w = makeWorld();
-  w.routes.set('/internal-offline.html', () => flagged(html('<html>offline page</html>'), { redirected: true, url: `${ORIGIN}/internal-offline` }));
+  w.routes.set('/ops-offline.html', () => flagged(html('<html>offline page</html>'), { redirected: true, url: `${ORIGIN}/ops-offline` }));
   await w.install();
-  const saved = await (await w.stores.get('cv-shell-v1')).match('/internal-offline.html');
+  const saved = await (await w.stores.get('cv-shell-v1')).match('/ops-offline.html');
   assert.equal(saved.status, 200);
   assert.equal(saved.redirected, false, 'a redirected response cannot answer a navigation');
   assert.match(await saved.text(), /offline page/);
@@ -374,7 +374,7 @@ await test('pages: redirects, the login page and API paths are never saved', asy
   await (await w.request('/internal/login', { mode: 'navigate' })).text();
   assert.equal(await w.request('/internal/api/quotes', { mode: 'navigate' }), null, 'API paths are not handled as pages');
   const keys = [...(await w.stores.get('cv-shell-v1')).map.keys()];
-  assert.deepEqual(keys, [`${ORIGIN}/internal-offline.html`]);
+  assert.deepEqual(keys, [`${ORIGIN}/ops-offline.html`]);
 });
 
 await test('pages: a 5xx falls back to the saved page when there is one', async () => {
@@ -697,7 +697,7 @@ await test('client: update detection compares build times, ignores dev builds, a
 
 // ---- part 2: manifest, headers, built pages --------------------------------------------------
 
-const manifest = JSON.parse(readFileSync(join(root, 'public/internal.webmanifest'), 'utf8'));
+const manifest = JSON.parse(readFileSync(join(root, 'public/ops.webmanifest'), 'utf8'));
 
 function builtFile(path) {
   const clean = path.replace(/[?#].*$/, '').replace(/\/+$/, '');
@@ -721,18 +721,35 @@ await test('manifest: installable fields, scope covers every start/shortcut URL,
   assert.ok(!/\.(?:com|net|org)\b/.test(JSON.stringify(manifest)), 'no absolute URLs: it must work on previews and production alike');
 });
 
+await test('naming: public PWA files must not start with "internal" (Cloudflare Access gates /internal* by prefix)', () => {
+  // 2026-10-04: production Access started matching /internal* as a prefix, so /internal-sw.js, /internal.webmanifest and
+  // /internal-offline.html were redirected to the Access sign-in. A service worker script and a manifest cannot follow a
+  // redirect, so install, offline and updates all broke. Anything that must stay public lives outside that prefix.
+  for (const file of ['ops-sw.js', 'ops.webmanifest', 'ops-offline.html']) {
+    assert.ok(existsSync(join(root, 'public', file)), `public/${file} exists`);
+    assert.ok(!file.startsWith('internal'), `${file} must not start with "internal"`);
+  }
+  for (const stale of ['internal-sw.js', 'internal.webmanifest', 'internal-offline.html']) assert.ok(!existsSync(join(root, 'public', stale)), `public/${stale} is gone`);
+  const reg = readFileSync(join(root, 'src/scripts/internal-pwa.ts'), 'utf8');
+  assert.match(reg, /SW_URL = '\/ops-sw\.js'/);
+  assert.match(readFileSync(join(root, 'src/layouts/InternalLayout.astro'), 'utf8'), /rel="manifest" href="\/ops\.webmanifest"/);
+  assert.match(swSource, /const OFFLINE_URL = '\/ops-offline\.html'/);
+  const headers = readFileSync(join(root, 'public/_headers'), 'utf8');
+  assert.doesNotMatch(headers, /^\/internal[-.]/m, '_headers has no rule for an /internal-* public file');
+});
+
 await test('headers: worker is always revalidated; manifest and offline page are not served from the private area', () => {
   const headers = readFileSync(join(root, 'public/_headers'), 'utf8');
   const rule = (path) => { const m = headers.match(new RegExp(`^${path.replace(/[.]/g, '\\.')}\\n((?:  .*\\n?)+)`, 'm')); return m ? m[1] : ''; };
-  assert.match(rule('/internal-sw.js'), /Cache-Control: no-cache/);
-  assert.match(rule('/internal-offline.html'), /Cache-Control: no-cache/);
-  assert.match(rule('/internal.webmanifest'), /Cache-Control: public/);
+  assert.match(rule('/ops-sw.js'), /Cache-Control: no-cache/);
+  assert.match(rule('/ops-offline.html'), /Cache-Control: no-cache/);
+  assert.match(rule('/ops.webmanifest'), /Cache-Control: public/);
 });
 
 await test('build: worker, manifest and offline page ship at public paths outside /internal/', () => {
-  for (const file of ['internal-sw.js', 'internal.webmanifest', 'internal-offline.html']) assert.ok(existsSync(join(dist, file)), `${file} missing from the build`);
-  assert.equal(readFileSync(join(dist, 'internal-sw.js'), 'utf8').replace(/const BUILD_ID = '[^']+';/, "const BUILD_ID = '__BUILD_ID__';"), swSource, 'shipped worker is the source plus the build id');
-  assert.match(readFileSync(join(dist, 'internal-offline.html'), 'utf8'), /noindex/);
+  for (const file of ['ops-sw.js', 'ops.webmanifest', 'ops-offline.html']) assert.ok(existsSync(join(dist, file)), `${file} missing from the build`);
+  assert.equal(readFileSync(join(dist, 'ops-sw.js'), 'utf8').replace(/const BUILD_ID = '[^']+';/, "const BUILD_ID = '__BUILD_ID__';"), swSource, 'shipped worker is the source plus the build id');
+  assert.match(readFileSync(join(dist, 'ops-offline.html'), 'utf8'), /noindex/);
   const sitemap = readdirSync(dist).filter((f) => f.startsWith('sitemap')).map((f) => readFileSync(join(dist, f), 'utf8')).join('');
   assert.doesNotMatch(sitemap, /internal/);
 });
@@ -745,7 +762,7 @@ await test('build: every warm page exists, and every worker scope assumption hol
   assert.ok(!pages.some((p) => /login|api|quote|invoice|payment/.test(p)), 'no sensitive or auth pages in the warm list');
   const reg = readFileSync(join(root, 'src/scripts/internal-pwa.ts'), 'utf8');
   assert.match(reg, /SW_SCOPE = '\/internal'/);
-  assert.match(reg, /SW_URL = '\/internal-sw\.js'/);
+  assert.match(reg, /SW_URL = '\/ops-sw\.js'/);
 });
 
 function* walk(dir) {
@@ -763,7 +780,7 @@ await test('build: every internal page links the manifest, iOS app tags and the 
   for (const file of pages) {
     const page = readFileSync(file, 'utf8');
     const name = relative(dist, file);
-    if (!page.includes('<link rel="manifest" href="/internal.webmanifest"')) problems.push(`${name}: manifest link`);
+    if (!page.includes('<link rel="manifest" href="/ops.webmanifest"')) problems.push(`${name}: manifest link`);
     if (!page.includes('name="apple-mobile-web-app-capable"')) problems.push(`${name}: apple-mobile-web-app-capable`);
     if (!page.includes('rel="apple-touch-icon"')) problems.push(`${name}: apple-touch-icon`);
     if (!page.includes('data-pwa-banner')) problems.push(`${name}: banner`);
@@ -783,7 +800,7 @@ await test('build: the Dashboard tab is highlighted on /internal and only there'
 
 await test('build: every deploy stamps one build id into the worker and every internal page', () => {
   assert.match(swSource, /const BUILD_ID = '__BUILD_ID__';/, 'source keeps the placeholder the build stamps');
-  const stamped = readFileSync(join(dist, 'internal-sw.js'), 'utf8');
+  const stamped = readFileSync(join(dist, 'ops-sw.js'), 'utf8');
   const id = /const BUILD_ID = '([^']+)';/.exec(stamped);
   assert.ok(id, 'worker has a BUILD_ID');
   assert.doesNotMatch(stamped, /__BUILD_ID__/, 'placeholder was stamped');
@@ -800,7 +817,7 @@ await test('build: every deploy stamps one build id into the worker and every in
 
 await test('build: the public site does not link or register the internal manifest or worker', () => {
   const home = readFileSync(join(dist, 'index.html'), 'utf8');
-  assert.ok(!home.includes('internal.webmanifest') && !home.includes('internal-sw'));
+  assert.ok(!home.includes('ops.webmanifest') && !home.includes('ops-sw'));
 });
 
 if (failures) { console.error(`\n${failures} check(s) failed.`); process.exit(1); }

@@ -35,6 +35,7 @@
     "test:charts": "node scripts/test-charts.mjs",
     "test:internal-styles": "node scripts/test-internal-runtime-styles.mjs",
     "test:internal-mobile": "node scripts/test-internal-mobile.mjs",
+    "check:pwa-live": "node scripts/check-pwa-live.mjs",
     "test:internal-pwa": "node scripts/test-internal-pwa.mjs",
     "test:contact-import": "node scripts/test-contact-import.mjs",
     "test:field-photo-db": "node scripts/test-field-photo-db.mjs",
