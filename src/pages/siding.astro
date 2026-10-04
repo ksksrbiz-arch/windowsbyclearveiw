@@ -88,7 +88,7 @@ const faq = [
   },
   {
     question: 'How much does siding cost?',
-    answer: `We charge by the square foot. Our labor starts at ${money(sidingLabor.newConstruction)} per square foot on new construction and ${money(sidingLabor.existingHome)} on an existing home. Board and batten and cedar siding start at ${money(sidingLabor.boardAndBatten)}. The siding material is a separate cost. These are starting rates, so we measure in person and put the full number in a written estimate.`,
+    answer: `We charge by the square foot. Our labor starts at ${money(sidingLabor.newConstruction)} per square foot on new construction and ${money(sidingLabor.existingHome)} on an existing home. Board and batten starts at ${money(sidingLabor.boardAndBattenNewConstruction)} on new construction and ${money(sidingLabor.boardAndBattenExistingHome)} on an existing home, and cedar siding starts at ${money(sidingLabor.cedar)}. We measure the total wall area, height times width. The siding material is a separate cost. These are starting rates, so we measure in person and put the full number in a written estimate.`,
   },
   {
     question: 'What if there is dry rot under the old siding?',
@@ -211,8 +211,12 @@ const schema = {
               <dd>{`Labor starts at ${money(sidingLabor.existingHome)} per square foot`}</dd>
             </div>
             <div class="spec-pair">
-              <dt>Board and batten</dt>
-              <dd>{`Labor starts at ${money(sidingLabor.boardAndBatten)} per square foot`}</dd>
+              <dt>Board and batten, new construction</dt>
+              <dd>{`Labor starts at ${money(sidingLabor.boardAndBattenNewConstruction)} per square foot`}</dd>
+            </div>
+            <div class="spec-pair">
+              <dt>Board and batten, existing home</dt>
+              <dd>{`Labor starts at ${money(sidingLabor.boardAndBattenExistingHome)} per square foot`}</dd>
             </div>
             <div class="spec-pair">
               <dt>Cedar siding</dt>
@@ -228,8 +232,8 @@ const schema = {
             </div>
           </dl>
           <p class="fine-print">
-            Starting rates, not a quote. The final number depends on the house, so we measure
-            before we write it down.
+            A square foot is total wall area: height times width. These are starting rates, not
+            a quote. The final number depends on the house, so we measure before we write it down.
           </p>
         </div>
         <div>

@@ -2,7 +2,8 @@
 // site (`npm run build` first). Owner direction 2026-10-04: fiber cement lap and board and batten,
 // primarily James Hardie, plus LP products such as SmartSide board and other wood siding products.
 // Owner-provided 2026-10-04: labor starts at $2/sq ft (new construction), $3/sq ft (existing home),
-// board and batten $4/sq ft, cedar $4/sq ft; tear-off and new plywood $2/sq ft; significant suspected
+// board and batten $3/sq ft new construction and $4/sq ft existing home, cedar $4/sq ft, all per
+// square foot of total wall area (height times width); tear-off and new plywood $2/sq ft; significant suspected
 // dry rot adds roughly $1,000 to $2,000; siding material is separate; the warranty is the manufacturer's and is
 // stated without a term (the owner's "25 years" did not match James Hardie's published paperwork).
 // The page states no certification, Clearview workmanship warranty, timeline or crew claim, and
@@ -50,7 +51,7 @@ for (const [re, label] of invented) assert.ok(!re.test(text), `siding page must 
 // Prices: exactly the owner's three labor rates, labelled as labor, material separate, starting rates.
 const ratesSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
 const rates = (await import(`data:text/javascript,${encodeURIComponent(ratesSource)}`)).sidingLabor;
-assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBatten: 4, cedar: 4, tearOffPlywood: 2 }, "rates match the owner's figures");
+assert.deepEqual(rates, { newConstruction: 2, existingHome: 3, boardAndBattenNewConstruction: 3, boardAndBattenExistingHome: 4, cedar: 4, tearOffPlywood: 2 }, "rates match the owner's figures");
 const dryRotSource = stripTypeScriptTypes(readFileSync(join(root, 'src/data/siding.ts'), 'utf8'));
 const dryRot = (await import(`data:text/javascript,${encodeURIComponent(dryRotSource)}`)).sidingDryRot;
 assert.deepEqual(dryRot, { low: 1000, high: 2000 }, "dry-rot range matches the owner's figures");
@@ -58,13 +59,15 @@ assert.deepEqual([...new Set([...text.matchAll(/\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)/
 for (const [label, line] of [
   ['New construction', 'Labor starts at $2 per square foot'],
   ['Existing home', 'Labor starts at $3 per square foot'],
-  ['Board and batten', 'Labor starts at $4 per square foot'],
+  ['Board and batten, new construction', 'Labor starts at $3 per square foot'],
+  ['Board and batten, existing home', 'Labor starts at $4 per square foot'],
   ['Cedar siding', 'Labor starts at $4 per square foot'],
   ['Tear-off and new plywood', 'Labor is $2 per square foot'],
   ['Significant suspected dry rot', 'Adds roughly $1,000 to $2,000 to the job'],
 ]) {
   assert.ok(text.includes(`${label} ${line}`), `${label}: "${line}"`);
 }
+assert.ok(/A square foot is total wall area: height times width/.test(text), 'square foot is defined as total wall area');
 assert.ok(/siding itself is a separate cost/.test(text) && /not a quote/.test(text), 'material is separate and the rates are starting rates, not a quote');
 assert.ok(!/\$\d+[^.]*\binstalled\b/i.test(text.replace(/installed to the manufacturer/g, '')), 'rates are never called installed prices');
 
