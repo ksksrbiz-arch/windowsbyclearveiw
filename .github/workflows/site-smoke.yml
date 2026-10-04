@@ -1,0 +1,59 @@
+﻿# Live-site smoke check. Needs no secrets. Runs after every push to main (once
+# Cloudflare Pages has had time to deploy), every 6 hours, and on demand.
+# A failure emails the repo owner through GitHub's normal Actions notifications.
+name: Site smoke
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    # workflow_run fires for failed builds too; only smoke-test after a green one.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://windowsbyclearview.com
+      WWW: https://www.windowsbyclearview.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Pages to publish the commit
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: sleep 150
+
+      - name: Apex and www respond 200
+        run: |
+          for u in "$SITE/" "$WWW/" "$SITE/estimate" "$SITE/robots.txt" "$SITE/sitemap-index.xml"; do
+            code=$(curl -s -o /dev/null -L -m 30 -w '%{http_code}' "$u")
+            echo "$code $u"
+            [ "$code" = "200" ] || { echo "::error::$u returned $code"; exit 1; }
+          done
+
+      - name: Estimate form ships the Turnstile key from src/data/site.ts
+        run: |
+          want=$(grep -oP "turnstileSiteKey:\s*'\K[^']+" src/data/site.ts || true)
+          [ -n "$want" ] || { echo "::error::no turnstileSiteKey in src/data/site.ts"; exit 1; }
+          curl -s -L -m 30 "$SITE/estimate" | grep -q "$want" \
+            || { echo "::error::live /estimate does not contain Turnstile key $want"; exit 1; }
+          echo "Turnstile key present: $want"
+
+      - name: Internal area is not publicly open
+        run: |
+          # Once ACCESS_REQUIRED=1 and the Access app is live, anonymous requests must
+          # be redirected to the Access login (302) or refused (401/403), never 200.
+          code=$(curl -s -o /dev/null -m 30 -w '%{http_code}' "$SITE/internal")
+          echo "internal -> $code"
+          case "$code" in
+            200) echo "::warning::/internal answered 200 to an anonymous request. Expected until ACCESS_REQUIRED=1 is set; investigate if it was already set." ;;
+            5*)  echo "::error::/internal returned $code"; exit 1 ;;
+          esac
