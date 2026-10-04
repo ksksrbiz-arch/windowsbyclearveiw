@@ -129,7 +129,7 @@ await test('activate deletes old cv-* caches, keeps current ones and other cache
   for (const name of ['cv-shell-v0', 'cv-data-v0', 'unrelated']) w.stores.set(name, new FakeCache());
   const claimed = w.calls.claim;
   await w.activate();
-  assert.deepEqual([...w.stores.keys()].sort(), ['cv-shell-v1', 'unrelated']);
+  assert.deepEqual([...w.stores.keys()].sort(), ['cv-meta-v1', 'cv-shell-v1', 'unrelated'], 'old versions deleted; current caches and the bookkeeping cache kept');
   assert.equal(w.calls.claim, claimed + 1);
 });
 
@@ -474,6 +474,42 @@ await test('warm: overlapping requests share one run', async () => {
   assert.equal(today, 1, 'each page fetched once, not once per request');
 });
 
+await test('diagnostics log: bounded, deduplicated, no query strings or customer data, cleared with the saved pages', async () => {
+  const w = await ready(makeWorld());
+  const log = async () => (await w.message({ type: 'cv:status' }))[0].log;
+  assert.ok((await log()).some((e) => e.kind === 'activated' && e.detail === w.read('BUILD_ID')), 'activation recorded');
+  // writes that fail offline record the path only, and repeats of the same event within a minute collapse
+  w.routes.set('/internal/api/job-checklist?id=7', offline);
+  for (let i = 0; i < 4; i++) await w.request('/internal/api/job-checklist?id=7', { method: 'PATCH' });
+  const offlineEntries = (await log()).filter((e) => e.kind === 'write-offline');
+  assert.equal(offlineEntries.length, 1, 'repeats collapse');
+  assert.equal(offlineEntries[0].detail, '/internal/api/job-checklist', 'path without the query string');
+  // saved copies served, a failed warm-up, and a session end are all recorded
+  w.routes.set('/internal/api/jobs?id=J-SECRET-1', () => json({ job: { customer: 'Pat Doe' } }));
+  await w.request('/internal/api/jobs?id=J-SECRET-1').then((r) => r.json());
+  w.routes.set('/internal/api/jobs?id=J-SECRET-1', offline);
+  await w.request('/internal/api/jobs?id=J-SECRET-1').then((r) => r.json());
+  routeWarmData(w);
+  for (const path of w.read('WARM_PAGES')) w.routes.set(path, () => html('<html></html>'));
+  w.routes.set(w.read('WARM_PAGES')[0], offline);
+  await w.message({ type: 'cv:warm' });
+  w.routes.set('/internal/api/dashboard', accessRedirect);
+  await w.request('/internal/api/dashboard');
+  const entries = await log();
+  const kinds = entries.map((e) => e.kind);
+  for (const k of ['activated', 'write-offline', 'saved-copy', 'warm-failed', 'session-ended']) assert.ok(kinds.includes(k), `${k} recorded`);
+  const dump = JSON.stringify(entries);
+  assert.ok(!dump.includes('?') && !dump.includes('J-SECRET-1') && !dump.includes('Pat Doe'), 'no query strings, job ids or customer data in the log');
+  assert.ok(entries.every((e) => e.at && Date.parse(e.at) > 0), 'every entry has a time');
+  // bounded: alternating paths cannot be collapsed, so 60 events must still leave at most 25
+  const w2 = await ready(makeWorld());
+  for (const p of ['/internal/api/tasks', '/internal/api/jobs']) w2.routes.set(p, offline);
+  for (let i = 0; i < 60; i++) await w2.request(i % 2 ? '/internal/api/tasks' : '/internal/api/jobs', { method: 'POST' });
+  assert.equal((await w2.message({ type: 'cv:status' }))[0].log.length, 25);
+  await w2.message({ type: 'cv:clear', scope: 'all' });
+  assert.deepEqual([...(await w2.message({ type: 'cv:status' }))[0].log].map((e) => e.kind), [], 'clearing everything clears the log');
+});
+
 await test('warm: the pinned asset set is swept to exactly what the pages need, and only after a clean run', async () => {
   const w = await ready(makeWorld());
   routeWarmData(w);
@@ -693,6 +729,37 @@ await test('client: update detection compares build times, ignores dev builds, a
   assert.equal(ready.actionLabel, 'Reload');
   assert.equal(logic.bannerFor({ sessionExpired: false, online: false, staleSince: null, updateReady: true, path: '/x', now }).kind, 'offline');
   assert.equal(logic.bannerFor({ sessionExpired: true, online: true, staleSince: null, updateReady: true, path: '/x', now }).kind, 'session');
+});
+
+await test('client: photo backup line says plainly when photos exist only on the phone', () => {
+  const line = (p) => logic.photoBackupLine({ configured: true, backedUp: 0, total: 0, waiting: 0, ...p });
+  assert.equal(line({ configured: false, total: 3 }).ok, false);
+  assert.match(line({ configured: false, total: 3 }).text, /NOT connected: the 3 photos on this phone exist only here/);
+  assert.match(line({ configured: false, total: 1 }).text, /the 1 photo on this phone exists only here/);
+  assert.match(line({ configured: false, total: 0 }).text, /not connected yet. Photos you take will exist only on this phone/);
+  assert.equal(line({ configured: null, total: 2 }).ok, null);
+  assert.match(line({ configured: null, total: 2 }).text, /unknown.*2 photos on this phone/);
+  assert.equal(line({ configured: true, waiting: 2, total: 5 }).ok, false);
+  assert.match(line({ configured: true, waiting: 1, total: 5 }).text, /1 photo on this phone is not backed up yet/);
+  assert.deepEqual(line({ configured: true, backedUp: 12 }), { ok: true, text: 'Cloud photo backup is on (12 photos backed up). Nothing on this phone is waiting.' });
+});
+
+await test('client: diagnostics text carries versions, switches, counts and events, and nothing else', () => {
+  const now = 1_790_000_000_000;
+  const base = {
+    now, pageBuild: '1790000000000-aaaaaaa', workerBuild: '1790000000000-aaaaaaa', supported: true, controlled: true, standalone: true, ios: true,
+    online: true, persisted: true, userAgent: 'Mozilla/5.0 (iPhone)',
+    worker: { version: 'v1', pages: 12, assets: 27, data: 8, newestDataAt: now - 5 * 60_000, warm: { okAt: now - 3_600_000, okBuild: '1790000000000-aaaaaaa', attemptAt: 0, running: false }, log: [{ at: '2026-10-04T01:00:00.000Z', kind: 'warm-ok', detail: '11 pages, 8 data' }, { at: '2026-10-04T02:00:00.000Z', kind: 'session-ended', detail: 'data' }] },
+    photos: { configured: false, backedUp: null, total: 4, waiting: 4 },
+  };
+  const text = logic.diagnosticsText(base);
+  for (const needle of ['Clearview Command Center diagnostics', 'page build 1790000000000-aaaaaaa (aaaaaaa)', 'installed app yes | iOS yes | online yes', 'saved: 12 pages, 27 assets, 8 data entries', 'last clean warm-up', 'NOT connected: the 4 photos on this phone exist only here', 'warm-ok 11 pages, 8 data', 'session-ended data']) assert.ok(text.includes(needle), `has: ${needle}`);
+  assert.ok(!text.includes('MISMATCH'));
+  assert.ok(logic.diagnosticsText({ ...base, workerBuild: '1791000000000-bbbbbbb' }).includes('MISMATCH'), 'flags a page/worker version mismatch');
+  const none = logic.diagnosticsText({ ...base, worker: null, workerBuild: null, supported: false, controlled: false, persisted: null, photos: { configured: null, backedUp: null, total: 0, waiting: 0 } });
+  assert.match(none, /worker: no answer/);
+  assert.match(none, /storage protected unknown/);
+  assert.match(none, /recent worker events: none/);
 });
 
 // ---- part 2: manifest, headers, built pages --------------------------------------------------

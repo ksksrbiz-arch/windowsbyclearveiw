@@ -322,6 +322,11 @@ The Command Center is an installable app (PWA). Design and limits: `.ai/referenc
   saved data expires after 3 days. Photos still save to the phone. **Anything that changes a record (checklist,
   evidence, approvals, quotes, invoices, payments) needs a connection and is never saved for later.**
 - **Updates:** nothing to do. After each deploy the installed app picks up the new version by itself the next time it is opened or brought to the front, and refreshes its saved pages. A page with typed-in, unsaved text is never reloaded under you; a banner offers Reload instead. Tools, Phone app card, shows the running version and has **Check for updates**.
+- **Photo backup:** the Phone app card has a line that says whether cloud photo backup is connected and how many photos on this
+  phone are not backed up yet. If it says "NOT connected", those photos exist only on that phone: finish the R2 steps in "Job photo
+  storage" above (the bucket and the `JOB_PHOTOS` binding on the Pages project that serves the site).
+- **Something looks wrong on a phone?** Tools, Phone app card, **Copy diagnostics**, then paste into a message. It holds versions,
+  counts and event names, no customer data.
 - **Control:** Tools, Phone app card: **Save pages for offline** (refresh now), **Clear saved data** (pages and data;
   photos are untouched). Logging out clears saved data.
 - **Sign-in:** production sits behind Cloudflare Access. When the Access session ends, the app shows "Your session ended" with

@@ -10,12 +10,20 @@ import assert from 'node:assert/strict';
 const origin = (process.argv[2] || 'https://windowsbyclearview.com').replace(/\/+$/, '');
 let failures = 0;
 
-async function check(name, path, verify) {
+// `sameSiteRedirectOk`: Cloudflare Pages answers /x.html with a 308 to /x. That is fine for the offline page (the worker fetches it with
+// redirects followed and stores a clean copy) but never for the worker script or the manifest, which must answer directly.
+async function check(name, path, verify, { sameSiteRedirectOk = false } = {}) {
   try {
-    const response = await fetch(origin + path, { redirect: 'manual' });
+    let response = await fetch(origin + path, { redirect: 'manual' });
     if (response.status >= 300 && response.status < 400) {
-      throw new Error(`${response.status} redirect to ${(response.headers.get('location') || '').slice(0, 70)}... A worker or manifest cannot follow a redirect. Is Cloudflare Access (or a redirect rule) covering ${path}?`);
+      const target = new URL(response.headers.get('location') || '', origin + path);
+      if (sameSiteRedirectOk && target.origin === origin && !/cloudflareaccess/.test(target.host)) {
+        response = await fetch(target, { redirect: 'manual' });
+      } else {
+        throw new Error(`${response.status} redirect to ${target.href.slice(0, 70)}... A worker or manifest cannot follow a redirect. Is Cloudflare Access (or a redirect rule) covering ${path}?`);
+      }
     }
+    if (response.status >= 300 && response.status < 400) throw new Error(`${response.status} redirect again from ${path}`);
     assert.equal(response.status, 200, `expected 200, got ${response.status}`);
     await verify(response, await response.text());
     console.log(`ok   ${name}  ${path}`);
@@ -46,7 +54,7 @@ await check('manifest', '/ops.webmanifest', (res, body) => {
 await check('offline page', '/ops-offline.html', (res, body) => {
   assert.match(res.headers.get('content-type') || '', /html/);
   assert.match(body, /You're offline/);
-});
+}, { sameSiteRedirectOk: true });
 
 await check('icons are public', '/icon-192.png', (res) => {
   assert.match(res.headers.get('content-type') || '', /image\/png/);

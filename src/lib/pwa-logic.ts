@@ -88,3 +88,74 @@ export function bannerFor(input: { sessionExpired: boolean; online: boolean; sta
   }
   return null;
 }
+
+// ---- photo backup status and diagnostics text ------------------------------------------------------
+
+export type PhotoBackup = {
+  /** Is the R2 binding present on the server? null when it could not be asked (offline, signed out). */
+  configured: boolean | null;
+  /** Photos in cloud storage; null when unknown. */
+  backedUp: number | null;
+  /** Photos held by this browser, and how many of those have no cloud copy yet. */
+  total: number;
+  waiting: number;
+};
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** One line for Tools > Phone app, with a tone for the tick/dash. Photos are the one thing that exists only on the phone. */
+export function photoBackupLine(p: PhotoBackup): { ok: boolean | null; text: string } {
+  if (p.configured === null) {
+    return { ok: null, text: p.total > 0 ? `Photo backup status unknown (offline or signed out). ${plural(p.total, 'photo')} on this phone.` : 'Photo backup status unknown (offline or signed out).' };
+  }
+  if (!p.configured) {
+    return { ok: false, text: p.total > 0 ? `Cloud photo backup is NOT connected: the ${plural(p.total, 'photo')} on this phone ${p.total === 1 ? 'exists' : 'exist'} only here.` : 'Cloud photo backup is not connected yet. Photos you take will exist only on this phone.' };
+  }
+  if (p.waiting > 0) return { ok: false, text: `Cloud photo backup is on, but ${plural(p.waiting, 'photo')} on this phone ${p.waiting === 1 ? 'is' : 'are'} not backed up yet. They upload when you have signal.` };
+  return { ok: true, text: `Cloud photo backup is on${p.backedUp !== null ? ` (${plural(p.backedUp, 'photo')} backed up)` : ''}. Nothing on this phone is waiting.` };
+}
+
+export type DiagnosticsInput = {
+  now: number;
+  pageBuild: string;
+  workerBuild: string | null;
+  supported: boolean;
+  controlled: boolean;
+  standalone: boolean;
+  ios: boolean;
+  online: boolean;
+  persisted: boolean | null;
+  userAgent: string;
+  worker: { version: string; pages: number; assets: number; data: number; newestDataAt: number | null; warm: { okAt?: number; okBuild?: string; attemptAt?: number; attemptBuild?: string; running?: boolean }; log: { at: string; kind: string; detail: string }[] } | null;
+  photos: PhotoBackup;
+};
+
+const yesNo = (v: boolean | null) => (v === null ? 'unknown' : v ? 'yes' : 'no');
+const when = (ms: number | undefined | null, now: number) => (ms ? `${new Date(ms).toISOString()} (${formatAge(ms, now)})` : 'never');
+
+/**
+ * Plain text a person can paste into a message. Only versions, switches, counts and event kinds: no customer data,
+ * no job ids, no query strings (the worker already strips them from its log).
+ */
+export function diagnosticsText(d: DiagnosticsInput): string {
+  const lines = [
+    'Clearview Command Center diagnostics',
+    `taken ${new Date(d.now).toISOString()}`,
+    `page build ${d.pageBuild} (${buildLabel(d.pageBuild)}) | worker build ${d.workerBuild ?? 'not running'} (${buildLabel(d.workerBuild)})${d.workerBuild && d.workerBuild !== d.pageBuild ? ' | MISMATCH' : ''}`,
+    `installed app ${yesNo(d.standalone)} | iOS ${yesNo(d.ios)} | online ${yesNo(d.online)} | offline support available ${yesNo(d.supported)} | page controlled by worker ${yesNo(d.controlled)} | storage protected ${yesNo(d.persisted)}`,
+    `browser ${d.userAgent}`,
+  ];
+  if (d.worker) {
+    const w = d.worker;
+    lines.push(`saved: ${plural(w.pages, 'page')}, ${plural(w.assets, 'asset')}, ${plural(w.data, 'data entry').replace('entrys', 'entries')}; newest data ${when(w.newestDataAt, d.now)}`);
+    lines.push(`last clean warm-up ${when(w.warm.okAt, d.now)} for build ${w.warm.okBuild ?? 'none'} | last unfinished attempt ${w.warm.attemptAt ? when(w.warm.attemptAt, d.now) : 'none'} | running ${yesNo(!!w.warm.running)}`);
+  } else {
+    lines.push('worker: no answer (not running yet, or offline support is unavailable)');
+  }
+  lines.push(`photos: ${photoBackupLine(d.photos).text}`);
+  const log = d.worker?.log ?? [];
+  lines.push(log.length ? 'recent worker events (oldest first):' : 'recent worker events: none');
+  for (const e of log) lines.push(`  ${e.at} ${e.kind}${e.detail ? ' ' + e.detail : ''}`);
+  return lines.join('\n');
+}
+

@@ -52,3 +52,33 @@ export async function countStoredPhotos(): Promise<number> {
     return 0;
   }
 }
+
+/**
+ * Photos on this browser that have no cloud copy yet (no `remoteId`). Walks the records with a cursor; the image blobs are
+ * handles and are not read. Returns { total, waiting }, zeros on any failure.
+ */
+export async function countPhotoBackupState(): Promise<{ total: number; waiting: number }> {
+  try {
+    const db = await openPhotoDb();
+    try {
+      return await new Promise<{ total: number; waiting: number }>((resolve) => {
+        let total = 0;
+        let waiting = 0;
+        const request = db.transaction(PHOTO_STORE, 'readonly').objectStore(PHOTO_STORE).openCursor();
+        request.onsuccess = () => {
+          const cursor = request.result;
+          if (!cursor) return resolve({ total, waiting });
+          total += 1;
+          if (!(cursor.value as { remoteId?: string }).remoteId) waiting += 1;
+          cursor.continue();
+        };
+        request.onerror = () => resolve({ total: 0, waiting: 0 });
+      });
+    } finally {
+      db.close();
+    }
+  } catch {
+    return { total: 0, waiting: 0 };
+  }
+}
+

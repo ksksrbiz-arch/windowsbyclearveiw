@@ -6,9 +6,11 @@
  * Tools page card, so module state (the captured install prompt) is shared between them.
  */
 
-import { bannerFor, buildLabel, formatAge, pageIsStale, shouldCheckForUpdate, shouldWarm, updateAction, type BannerState } from '../lib/pwa-logic';
+import { bannerFor, buildLabel, diagnosticsText, formatAge, pageIsStale, shouldCheckForUpdate, shouldWarm, updateAction, type BannerState, type PhotoBackup } from '../lib/pwa-logic';
+import { countPhotoBackupState } from '../lib/field-photo-db';
 
 export { formatAge };
+export type { PhotoBackup };
 export const SW_URL = '/ops-sw.js';
 // No trailing slash on purpose: Pages serves the Dashboard at /internal (/internal/ redirects to it).
 export const SW_SCOPE = '/internal';
@@ -24,6 +26,7 @@ export type WorkerStatus = {
   version: string;
   build: string;
   warm: WarmState;
+  log: { at: string; kind: string; detail: string }[];
   pages: number;
   assets: number;
   data: number;
@@ -117,7 +120,7 @@ export async function getPwaStatus(): Promise<PwaStatus> {
     persisted,
     pageBuild: pageBuild(),
     workerBuild: worker ? worker.build : null,
-    worker: worker ? { version: worker.version, build: worker.build, warm: worker.warm || {}, pages: worker.pages, assets: worker.assets, data: worker.data, newestDataAt: worker.newestDataAt } : null,
+    worker: worker ? { version: worker.version, build: worker.build, warm: worker.warm || {}, log: worker.log || [], pages: worker.pages, assets: worker.assets, data: worker.data, newestDataAt: worker.newestDataAt } : null,
   };
 }
 
@@ -274,3 +277,41 @@ async function maybeWarm() {
   if (!shouldWarm({ now: Date.now(), online: navigator.onLine, lastOk: warm.okAt || 0, lastAttempt, buildChanged, running: !!warm.running })) return;
   await warmPages();
 }
+
+/**
+ * Is cloud photo backup connected, and what is on this phone? Photos are the one thing that exists only on the device until
+ * it is. The server answers { configured, backedUp } without any photo data; offline, signed out or any error is "unknown".
+ */
+export async function getPhotoBackup(): Promise<PhotoBackup> {
+  const local = await countPhotoBackupState();
+  let configured: boolean | null = null;
+  let backedUp: number | null = null;
+  try {
+    const response = await fetch('/internal/api/job-photos?status=1', { redirect: 'manual', headers: { 'cache-control': 'no-cache' } });
+    if (response.ok && (response.headers.get('content-type') || '').includes('json')) {
+      const data = await response.json();
+      if (typeof data.configured === 'boolean') { configured = data.configured; backedUp = Number.isFinite(Number(data.backedUp)) ? Number(data.backedUp) : null; }
+    }
+  } catch { /* offline: unknown */ }
+  return { configured, backedUp, total: local.total, waiting: local.waiting };
+}
+
+/** Text to paste into a message when something looks wrong on a real phone. No customer data in it. */
+export async function buildDiagnostics(): Promise<string> {
+  const [status, photos] = await Promise.all([getPwaStatus(), getPhotoBackup()]);
+  return diagnosticsText({
+    now: Date.now(),
+    pageBuild: status.pageBuild,
+    workerBuild: status.workerBuild,
+    supported: status.supported,
+    controlled: status.controlled,
+    standalone: status.standalone,
+    ios: status.ios,
+    online: status.online,
+    persisted: status.persisted,
+    userAgent: navigator.userAgent,
+    worker: status.worker,
+    photos,
+  });
+}
+
