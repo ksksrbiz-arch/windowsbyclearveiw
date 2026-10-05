@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getHeroBg } from '../lib/hero-bg';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WindowStudio from '../components/WindowStudio.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
 import { pricing } from '../data/pricing';
@@ -137,6 +138,8 @@ width={1580}
       </div>
     </div>
   </section>
+
+  <WindowStudio />
 
   <section class="section" id="styles">
     <div class="wrap is-wide" data-reveal>

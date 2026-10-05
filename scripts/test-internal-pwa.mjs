@@ -806,7 +806,7 @@ await test('naming: public PWA files must not start with "internal" (Cloudflare 
 });
 
 await test('headers: worker is always revalidated; manifest and offline page are not served from the private area', () => {
-  const headers = readFileSync(join(root, 'public/_headers'), 'utf8');
+  const headers = readFileSync(join(root, 'public/_headers'), 'utf8').replace(/\r\n/g, '\n');
   const rule = (path) => { const m = headers.match(new RegExp(`^${path.replace(/[.]/g, '\\.')}\\n((?:  .*\\n?)+)`, 'm')); return m ? m[1] : ''; };
   assert.match(rule('/ops-sw.js'), /Cache-Control: no-cache/);
   assert.match(rule('/ops-offline.html'), /Cache-Control: no-cache/);

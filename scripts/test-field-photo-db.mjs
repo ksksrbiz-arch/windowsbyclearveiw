@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 
 const src = fileURLToPath(new URL('../src', import.meta.url));
 const read = (path) => readFileSync(join(src, path), 'utf8');
@@ -21,7 +21,7 @@ assert.ok(/createObjectStore\(PHOTO_STORE/.test(helper), 'the helper creates the
 assert.ok(/objectStoreNames\.contains\(PHOTO_STORE\)/.test(helper) && /db\.version \+ 1/.test(helper), 'the helper repairs a database that has no photos store');
 
 for (const file of files(src)) {
-  if (file.endsWith('lib/field-photo-db.ts')) continue;
+  if (relative(src, file).split(sep).join('/') === 'lib/field-photo-db.ts') continue;
   const text = readFileSync(file, 'utf8');
   assert.ok(!/clearview-field-tools/.test(text), `${file.slice(src.length + 1)} names the photo database directly; use openPhotoDb()`);
   assert.ok(!/indexedDB\.open\(/.test(text), `${file.slice(src.length + 1)} opens IndexedDB directly; use openPhotoDb()`);

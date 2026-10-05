@@ -1,5 +1,9 @@
 ﻿# ICM State â€” 2026-10-01
 
+## 2026-10-05 - Window Studio integration
+
+Embedded an optional Blender-backed viewer on /window-features, using site tokens and the existing estimate scope handoff. Four v005 GLBs and posters; client navigation cleanup and error fallback. Fixed an Astro transitive advisory and Windows regression-test portability. All 46 test:all steps pass, including build. Implementation/audit: docs/WINDOW-STUDIO.md. Awaiting owner/installer visual review; no production publication.
+
 ## Status
 
 **Phase 2 implementation in progress:** hardened ICM foundation + deterministic Build Plan lifecycle + quote/job approval gates + Ask specialist runtime + internal AI surfaces.

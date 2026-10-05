@@ -2,7 +2,9 @@
   "name": "windowsbyclearveiw",
   "type": "module",
   "version": "0.0.1",
-  "engines": { "node": ">=22.19.0" },
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -59,8 +61,15 @@
     "test:quote-follow-ups": "node --disable-warning=ExperimentalWarning scripts/test-quote-follow-ups.mjs",
     "test:quote-signing": "node --disable-warning=ExperimentalWarning scripts/test-quote-signing.mjs",
     "test:quote-to-job": "node --disable-warning=ExperimentalWarning scripts/test-quote-to-job-flow.mjs",
-    "find:google-place-id": "node scripts/find-google-place-id.mjs"
+    "find:google-place-id": "node scripts/find-google-place-id.mjs",
+    "test:window-studio": "node scripts/test-window-studio.mjs"
   },
-  "dependencies": { "@astrojs/sitemap": "^3.7.4", "astro": "^7.3.5" },
-  "devDependencies": { "gray-matter": "^4.0.3" }
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.5",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3"
+  }
 }

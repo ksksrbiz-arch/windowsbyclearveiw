@@ -13,11 +13,14 @@ const list = fast ? steps.slice(0, steps.indexOf('build')) : steps;
 if (list.length === 0) { console.error('No `npm run` steps found in build.yml'); process.exit(2); }
 
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+// npm.cmd is a batch wrapper and cannot be spawned without a shell on Windows.
+// npm run supplies its CLI path; execute that with Node to keep arguments literal.
+const npmCli = process.env.npm_execpath;
 const results = [];
 for (const name of list) {
   const started = Date.now();
   process.stdout.write(`\n=== npm run ${name}\n`);
-  const r = spawnSync(npm, ['run', name], { cwd: root, stdio: 'inherit' });
+  const r = spawnSync(npmCli ? process.execPath : npm, npmCli ? [npmCli, 'run', name] : ['run', name], { cwd: root, stdio: 'inherit' });
   results.push({ name, ok: r.status === 0, secs: ((Date.now() - started) / 1000).toFixed(1) });
 }
 

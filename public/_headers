@@ -46,6 +46,9 @@
 /fonts/*
   Cache-Control: public, max-age=2592000
 
+/models/windows/*
+  Cache-Control: public, max-age=604800
+
 # The lead form must never be answered from a cache.
 /api/estimate
   Cache-Control: no-store
