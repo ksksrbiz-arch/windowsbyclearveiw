@@ -1,7 +1,7 @@
 const styles = {
   picture: { name: 'Picture', description: 'A fixed window with an uninterrupted view.', operation: 'Picture windows are fixed and do not open.' },
   casement: { name: 'Casement', description: 'A side-hinged sash that swings outward.', operation: 'Move the slider to open the casement sash.' },
-  'double-hung': { name: 'Double-hung', description: 'Two vertically arranged sashes.', operation: 'Move the slider to raise the lower sash.' },
+  'double-hung': { name: 'Single-hung', description: 'The lower sash slides up; the upper sash stays fixed.', operation: 'Move the slider to raise the lower sash.' },
   slider: { name: 'Slider', description: 'A sash that glides horizontally along the frame.', operation: 'Move the slider to slide the left sash.' },
 };
 const finishes = { graphite: 'Graphite', porcelain: 'Porcelain', bronze: 'Bronze' };
