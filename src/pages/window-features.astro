@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { getHeroBg } from '../lib/hero-bg';
-import heroInstallationPhoto from '../assets/work/window-features-installation.jpg';
+import heroInstallationPhoto from '../assets/work/window-features-installation-4k.png';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WindowStudio from '../components/WindowStudio.astro';
@@ -13,8 +12,6 @@ import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
-
-const heroBg = await getHeroBg(heroInstallationPhoto);
 
 const materials = pricing.materials;
 const brands = pricing.brands;
@@ -38,16 +35,21 @@ const stylePhotos = [
   ogImageSrc={ogPhoto.image}
   ogImageAlt={ogPhoto.alt}
 >
-  <section class="page-hero page-hero-photo" style={`background-image: linear-gradient(180deg, color-mix(in srgb, var(--black) 58%, transparent), color-mix(in srgb, var(--black) 88%, transparent)), url(${heroBg.src})`}>
-    <div class="wrap">
+  <section class="page-hero page-hero-photo">
+    <div class="wrap hero-installation-layout">
+      <div class="hero-copy">
       <p class="kicker">Window features</p>
       <h1>What goes into a Clearview window.</h1>
       <p class="lede">
         This page explains what a quote pays for: the frame material, the glass, the brand, and
         the window style.
       </p>
+      </div>
+      <figure class="hero-installation-photo">
+        <Image src={heroInstallationPhoto} alt="Clearview crew installing a white window beneath an arched transom on a house with taupe siding and a brick base." widths={[450, 750, 1050, 1500]} sizes="(max-width: 700px) calc(100vw - 48px), (max-width: 1000px) 42vw, 420px" format="webp" quality={88} loading="eager" fetchpriority="high" />
+        <figcaption class="hero-photo-credit">Clearview job photo — exterior window installation</figcaption>
+      </figure>
     </div>
-    <p class="hero-photo-credit">Clearview job photo — exterior window installation</p>
   </section>
 
   <section class="section">
@@ -225,16 +227,31 @@ width={1580}
   }
 
   .page-hero-photo {
-    position: relative;
-    background-size: cover;
-    background-position: center 45%;
+    padding: var(--space-xl) 0;
+  }
+
+  .hero-installation-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  .hero-installation-photo {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .hero-installation-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
   }
 
   .hero-photo-credit {
-    position: absolute;
-    right: var(--space-s);
-    bottom: var(--space-2xs);
-    margin: 0;
+    margin: var(--space-xs) 0 0;
+    text-align: center;
     font-size: var(--step--2);
     color: var(--on-dark-faint);
     opacity: 0.85;
@@ -300,6 +317,11 @@ width={1580}
   }
 
   @media (max-width: 900px) {
+    .hero-installation-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
+      gap: var(--space-m);
+    }
+
     .compare {
       grid-template-columns: 1fr;
     }
@@ -311,6 +333,17 @@ width={1580}
 
     .style-photos {
       grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .hero-installation-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-installation-photo {
+      width: min(100%, 420px);
+      justify-self: center;
     }
   }
 </style>
