@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getHeroBg } from '../lib/hero-bg';
+import heroInstallationPhoto from '../assets/work/window-features-installation.jpg';
 import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WindowStudio from '../components/WindowStudio.astro';
@@ -13,11 +14,7 @@ import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
 
 const ogPhoto = findWork('stone-craftsman')!;
 
-// The feature page already contains real photos of styles and finished work.
-// Use a real Clearview interior here too, so the page opens with an actual
-// window rather than an AI-generated product macro.
-const heroPhoto = findWork('new-unit-interior')!;
-const heroBg = await getHeroBg(heroPhoto.image);
+const heroBg = await getHeroBg(heroInstallationPhoto);
 
 const materials = pricing.materials;
 const brands = pricing.brands;
@@ -50,7 +47,7 @@ const stylePhotos = [
         the window style.
       </p>
     </div>
-    <p class="hero-photo-credit">Clearview job photo — finished window from inside the room</p>
+    <p class="hero-photo-credit">Clearview job photo — exterior window installation</p>
   </section>
 
   <section class="section">
