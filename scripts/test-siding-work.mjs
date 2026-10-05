@@ -304,7 +304,7 @@ let sidingJobId;
 
 // ── The phone screens carry the type (markup contracts; the behaviour is checked in a real browser) ──
 {
-  const page = (path) => readFileSync(new URL(`../src/pages/internal/${path}`, import.meta.url), 'utf8');
+  const page = (path) => readFileSync(new URL(`../src/pages/internal/${path}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   const builder = page('quotes/new.astro');
   assert.match(builder, /name="workType" value="siding"/, 'the builder can start a siding quote');
   assert.match(builder, /data-wt-panel="siding"[^>]*hidden/, 'the siding rates are hidden until Siding is chosen');

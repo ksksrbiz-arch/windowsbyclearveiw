@@ -1,0 +1,52 @@
+---
+import '../styles/window-studio.css';
+const styles = [
+  { id: 'picture', name: 'Picture' },
+  { id: 'casement', name: 'Casement' },
+  { id: 'double-hung', name: 'Double-hung' },
+  { id: 'slider', name: 'Slider' },
+];
+const scope = 'Window style preview: Casement, Graphite appearance. Illustrative only; please confirm available products, finishes and dimensions.';
+---
+<section class="section section-sunk" id="window-studio" aria-labelledby="studio-heading">
+  <div class="wrap">
+    <p class="rule-label">Explore the styles</p>
+    <h2 id="studio-heading">See how a window opens.</h2>
+    <p class="lede">Turn a window around, compare frame colors, and try the moving sash before you tell us about your project.</p>
+    <div class="window-studio" data-window-studio>
+      <div class="wv-stage" aria-label="Window preview">
+        <div class="wv-viewport" data-viewport>
+          <img data-poster src="/models/windows/v001/casement.webp" width="960" height="720" alt="Illustrative casement window, closed in a studio setting" loading="lazy" decoding="async" />
+        </div>
+        <div class="wv-start"><button class="btn btn-primary" type="button" data-start>Explore in 3D</button><p data-load-status role="status">3D loads only when you choose to explore.</p></div>
+        <div class="wv-tools" hidden data-tools>
+          <div class="wv-angles" role="group" aria-label="Window view">
+            <button type="button" data-view="exterior" aria-pressed="true">Exterior</button>
+            <button type="button" data-view="interior" aria-pressed="false">Interior</button>
+            <button type="button" data-view="detail" aria-pressed="false">Detail</button>
+          </div>
+          <button type="button" data-reset>Reset view</button>
+        </div>
+        <p class="wv-gesture" hidden data-gesture>Drag to rotate. Scroll or pinch to zoom.</p>
+      </div>
+      <div class="wv-options">
+        <fieldset><legend>Window style</legend><div class="wv-styles">
+          {styles.map(({id,name}) => <button type="button" data-kind={id} aria-pressed={id === 'casement' ? 'true' : 'false'}>{name}</button>)}
+        </div><p data-description>A side-hinged sash that swings outward.</p></fieldset>
+        <fieldset><legend>Frame color preview</legend><div class="wv-finishes">
+          <button type="button" data-finish="graphite" aria-pressed="true"><i class="wv-graphite" aria-hidden="true"></i>Graphite</button>
+          <button type="button" data-finish="porcelain" aria-pressed="false"><i class="wv-porcelain" aria-hidden="true"></i>Porcelain</button>
+          <button type="button" data-finish="bronze" aria-pressed="false"><i class="wv-bronze" aria-hidden="true"></i>Bronze</button>
+        </div><p>Start 3D to preview colors. Available finishes depend on the product.</p></fieldset>
+        <div class="wv-operation"><label for="wv-opening">Try the opening <output data-open-value>Closed</output></label><input id="wv-opening" data-opening type="range" min="0" max="100" value="0" step="1" disabled /><p data-operation-note>Start the 3D preview to open the sash.</p></div>
+        <div class="wv-selection"><p data-selection>Casement · Graphite appearance</p><a class="btn btn-primary" data-estimate href={`/estimate?scope=${encodeURIComponent(scope)}`}>Discuss this style <span aria-hidden="true">→</span></a><p>We measure every opening and confirm the options in your written estimate.</p></div>
+      </div>
+    </div>
+    <p class="fine-print wv-disclosure">These are illustrative models, not exact Cascade or Milgard products. Frame details, colors and dimensions need confirmation. <a href="#styles">Compare all window styles</a>.</p>
+    <noscript><p class="fine-print">The 3D preview needs JavaScript. You can still read about the styles below or <a href="/estimate">request an estimate</a>.</p></noscript>
+  </div>
+</section>
+<script>
+  import { bindWindowStudio } from '../scripts/window-studio.mjs';
+  bindWindowStudio();
+</script>

@@ -26,7 +26,7 @@ import * as paymentsApi from '../functions/internal/api/payments.js';
 
 process.removeAllListeners('warning');
 const root = fileURLToPath(new URL('..', import.meta.url));
-const read = (path) => readFileSync(`${root}${path}`, 'utf8');
+const read = (path) => readFileSync(`${root}${path}`, 'utf8').replace(/\r\n/g, '\n');
 const clientMoney = (await import(pathToFileURL(`${root}src/lib/money.ts`).href)).formatCents;
 const pass = (message) => console.log(`PASS: ${message}`);
 const ORIGIN = 'https://windowsbyclearview.com';

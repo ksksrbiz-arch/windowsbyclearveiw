@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const read = (path) => readFileSync(`${root}${path}`, 'utf8');
+const read = (path) => readFileSync(`${root}${path}`, 'utf8').replace(/\r\n/g, '\n');
 const css = read('src/styles/global.css');
 
 const block = css.match(/@media \(pointer: coarse\) \{([\s\S]*?)\n\}\n/);

@@ -56,3 +56,9 @@ The next code changes should make routing and stage transitions explicit without
 
 - Run step 1 of `workflows/public-copy-sweep/` (inventory customer-facing pages: reviewed vs not reviewed) and record the result here.
 - GitHub Actions is blocked by a billing issue; use `npm run test:all` locally.
+
+## 2026-10-05 - Window Studio integration
+
+Embedded an optional Blender-backed viewer on /window-features, using site tokens and the existing estimate scope handoff. Four v005 GLBs and posters; client navigation cleanup and error fallback. Fixed an Astro transitive advisory and Windows regression-test portability. All 46 test:all steps pass, including build. Implementation/audit: docs/WINDOW-STUDIO.md. Awaiting owner/installer visual review; no production publication.
+
+Public copy scope reviewed: new WindowStudio component and estimate carry-over hint. Existing page metadata and business facts unchanged. Other public pages not reviewed in this task. Illustration awaiting owner/installer review.
