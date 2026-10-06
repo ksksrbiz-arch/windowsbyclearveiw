@@ -1,3 +1,4 @@
+[![Architecture diagram of markrotar1000-code/windowsbyclearveiw](https://gitdiagram.com/markrotar1000-code/windowsbyclearveiw/diagram.png)](https://gitdiagram.com/markrotar1000-code/windowsbyclearveiw?utm_source=readme&utm_medium=picture)
 # Clearview Windows
 
 Marketing site and internal quoting platform for **Clearview Windows**, operated by **Clearview Windows & Trim LLC**. The public site covers replacement and new-construction windows in Vancouver, WA, Clark County, and the surrounding service area.
