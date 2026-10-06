@@ -1,5 +1,12 @@
 # ICM Changelog
 
+## 2026-10-06 - Hali Kimball review card
+
+Added the exact owner-supplied five-star Google quote to /reviews, with source attribution, accessible stars, and no inferred city or posting date. Updated the dated Google summary to 5.0 from two reviews. Static and live cards share the bordered style; live author/quote matches hide duplicate static cards while failures retain the fallback.
+
+Validation: all 46 test:all steps passed, including production build. Browser checked at default desktop and 375px; no horizontal overflow. A simulated Google response showed one live Hali card and hid its static duplicate. Interception was cleared afterward. Production /api/google-reviews returned unconfigured; no live automatic feed or deployment is claimed. Setup: docs/REVIEW-CARDS.md and internal/README.md. Places needs the server-side key and verified Place ID; every-review import needs approved Business Profile API and owner OAuth.
+
+
 ## 2026-10-05 - Window Studio integration
 
 Embedded an optional Blender-backed viewer on /window-features, using site tokens and the existing estimate scope handoff. Four v005 GLBs and posters; client navigation cleanup and error fallback. Fixed an Astro transitive advisory and Windows regression-test portability. All 46 test:all steps pass, including build. Implementation/audit: docs/WINDOW-STUDIO.md. Awaiting owner/installer visual review; no production publication.
@@ -276,3 +283,11 @@ Source: a Screaming Frog desktop crawl (106 URLs) and an OpenSEO audit run the s
 - **Companion Worker `workers/ops-cron/` (2026-09-30), built, not deployed.** Nightly D1 backup to private R2 `clearview-db-backups` (30 kept, verified after write, failure pushed) and a weekday follow-up count push. Restore script `scripts/restore-from-backup.mjs`. Owner must `wrangler deploy` it and set `LEAD_ALERT_NTFY_TOPIC` (steps in `internal/README.md`). Test: `npm run test:ops-cron` (in CI).
 
 - **Job photo backup to R2 (2026-09-30), built but not yet connected.** Photos from the Photos tool are saved on the phone first (IndexedDB, unchanged), then compressed (max 2000 px JPEG) and uploaded to a private Cloudflare R2 bucket through `functions/internal/api/job-photos.js` (binding `JOB_PHOTOS`; one row per photo in D1 `job_photos`, validation in `functions/internal/_lib/job-photos.mjs`: type sniffed from bytes, JPEG/PNG/WebP only, 8 MB cap, idempotent on the phone's photo id, orphan file deleted if the row fails). The phone logic (`src/lib/photo-sync.ts`) uploads oldest first, stops on the first connection/sign-in/not-connected failure, never removes a local photo because an upload failed, and resumes on page load and the `online` event. The Photos page shows the backup state, marks each photo, shows photos taken on other devices, and deletes both copies. **Until R2 is enabled, the bucket created and the `JOB_PHOTOS` binding added in the Pages dashboard (steps in `internal/README.md`), the API answers 503 `PHOTO_STORAGE_NOT_CONFIGURED` and everything behaves as before.** Not done yet: the Field-mode Photograph gate still trusts phone-reported counts (`job_opening_evidence.photo_summary_json`) rather than counting R2 photos, and Field mode's photo counts read the local phone only. Tests: `npm run test:job-photos` (real SQLite + in-memory R2), `npm run test:photo-sync` (both in CI).
+
+### 2026-10-06 visual refinement
+
+Replaced the initial outline card with a full-width teal gradient spotlight,
+gold stars and initials avatar, larger quote, Google source badge and separate
+author footer. Shared review-cards.css applies to both curated and live cards.
+Checked desktop and 375px layout without horizontal overflow; review tests and
+production build passed. Updated the same PR branch; production is still pending.

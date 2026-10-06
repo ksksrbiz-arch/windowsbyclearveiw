@@ -290,7 +290,12 @@ data.wa.gov dataset `m8qx-ubtq`. Tests: `npm run test:permit-leads`.
 
 `functions/api/google-reviews.js` serves the pinned Google Business Profile's
 reviews to `/reviews`. It is optional: with nothing configured it returns
-`{ status: "unconfigured" }` and the page keeps its honest empty state.
+`{ status: "unconfigured" }` and the page keeps its owner-supplied review cards.
+Hali Kimball's five-star review was transcribed from the owner's screenshot on
+2026-10-06. The dated Google summary is 5.0 from two reviews. No customer city
+or absolute posting date was inferred. When the feed returns the same author
+and quote, the matching static card is hidden to avoid displaying it twice;
+other curated reviews remain visible.
 
 Cloudflare Pages -> this project -> **Settings -> Variables and Secrets**:
 

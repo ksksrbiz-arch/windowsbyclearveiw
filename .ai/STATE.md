@@ -1,4 +1,11 @@
-﻿# ICM State â€” 2026-10-01
+# ICM State â€” 2026-10-01
+
+## 2026-10-06 - Hali Kimball review card
+
+Added the exact owner-supplied five-star Google quote to /reviews, with source attribution, accessible stars, and no inferred city or posting date. Updated the dated Google summary to 5.0 from two reviews. Static and live cards share the bordered style; live author/quote matches hide duplicate static cards while failures retain the fallback.
+
+Validation: all 46 test:all steps passed, including production build. Browser checked at default desktop and 375px; no horizontal overflow. A simulated Google response showed one live Hali card and hid its static duplicate. Interception was cleared afterward. Production /api/google-reviews returned unconfigured; no live automatic feed or deployment is claimed. Setup: docs/REVIEW-CARDS.md and internal/README.md. Places needs the server-side key and verified Place ID; every-review import needs approved Business Profile API and owner OAuth.
+
 
 ## 2026-10-05 - Window Studio integration
 
@@ -111,3 +118,11 @@ Do not treat generated confidence as human approval or evidence.
 ## Walk-test target
 
 A fresh agent with no conversation memory should be able to read `CLAUDE.md`, `.ai/CONTEXT.md`, this file, and the relevant workflow contract and immediately determine where to work, what evidence is allowed, what output is required, and what remains incomplete.
+
+### 2026-10-06 visual refinement
+
+Replaced the initial outline card with a full-width teal gradient spotlight,
+gold stars and initials avatar, larger quote, Google source badge and separate
+author footer. Shared review-cards.css applies to both curated and live cards.
+Checked desktop and 375px layout without horizontal overflow; review tests and
+production build passed. Updated the same PR branch; production is still pending.

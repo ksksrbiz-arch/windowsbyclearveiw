@@ -19,8 +19,10 @@ const reviews = defineCollection({
   schema: z.object({
     quote: z.string(),
     name: z.string(),
-    city: z.string(),
+    city: z.string().default(''),
     source: z.string().default('Customer'),
+    sourceUrl: z.string().url().optional(),
+    rating: z.number().int().min(1).max(5).optional(),
     published: z.boolean().default(false),
   }),
 });
