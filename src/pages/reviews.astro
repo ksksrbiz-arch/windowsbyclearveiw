@@ -176,6 +176,11 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
     gap: var(--space-l) var(--space-xl);
   }
 
+  .review-list:has(> :only-child) {
+    grid-template-columns: 1fr;
+    max-width: 960px;
+  }
+
   @media (max-width: 800px) {
     .review-list {
       grid-template-columns: 1fr;

@@ -24,3 +24,11 @@ Curated cards render without JavaScript and survive feed failures. A live review
 hides only a static card with the same normalized author and quote, leaving
 other curated cards intact. Review text remains plain text, with accessible
 star ratings and no self-serving review structured data.
+
+### 2026-10-06 visual refinement
+
+Replaced the initial outline card with a full-width teal gradient spotlight,
+gold stars and initials avatar, larger quote, Google source badge and separate
+author footer. Shared review-cards.css applies to both curated and live cards.
+Checked desktop and 375px layout without horizontal overflow; review tests and
+production build passed. Updated the same PR branch; production is still pending.

@@ -118,3 +118,11 @@ Do not treat generated confidence as human approval or evidence.
 ## Walk-test target
 
 A fresh agent with no conversation memory should be able to read `CLAUDE.md`, `.ai/CONTEXT.md`, this file, and the relevant workflow contract and immediately determine where to work, what evidence is allowed, what output is required, and what remains incomplete.
+
+### 2026-10-06 visual refinement
+
+Replaced the initial outline card with a full-width teal gradient spotlight,
+gold stars and initials avatar, larger quote, Google source badge and separate
+author footer. Shared review-cards.css applies to both curated and live cards.
+Checked desktop and 375px layout without horizontal overflow; review tests and
+production build passed. Updated the same PR branch; production is still pending.

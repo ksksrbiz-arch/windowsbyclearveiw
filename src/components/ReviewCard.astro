@@ -1,4 +1,6 @@
 ---
+import '../styles/review-cards.css';
+import GoogleIcon from './icons/GoogleIcon.astro';
 interface Props {
   quote: string;
   name: string;
@@ -7,49 +9,21 @@ interface Props {
   sourceUrl?: string;
   rating?: number;
 }
-
 const { quote, name, city, source = 'Customer', sourceUrl, rating } = Astro.props;
+const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('');
 ---
-<blockquote class="review" data-curated-review data-review-author={name} data-review-text={quote}>
-  {rating && <div class="review-stars" role="img" aria-label={`${rating} out of 5 stars`}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</div>}
-  <p>“{quote}”</p>
-  <footer>
-    <strong>{name}</strong>
-    <div class="fine-print">
-      {city && <>{city} · </>}
-      {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer">{source} review</a> : source}
+<blockquote class="review-spotlight" data-curated-review data-review-author={name} data-review-text={quote}>
+  <div class="review-spotlight-top">
+    {rating && <div class="review-rating"><span class="review-stars" role="img" aria-label={`${rating} out of 5 stars`}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span><span class="review-rating-label">{rating.toFixed(1)} / 5</span></div>}
+    <span class="review-source">{source === 'Google' && <GoogleIcon />} {source} review</span>
+  </div>
+  <span class="review-quote-mark" aria-hidden="true">“</span>
+  <p class="review-quote">“{quote}”</p>
+  <footer class="review-footer">
+    <div class="review-person">
+      <span class="review-avatar" aria-hidden="true">{initials}</span>
+      <div><strong class="review-name">{name}</strong><span class="review-person-meta">{city ? `${city} · ${source} review` : `${source} review`}</span></div>
     </div>
+    {sourceUrl && <a class="review-source-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">View on {source}<span aria-hidden="true">↗</span></a>}
   </footer>
 </blockquote>
-
-<style>
-  .review {
-    margin: 0;
-    padding: var(--space-m);
-    border: 1px solid var(--line);
-    border-top: 3px solid var(--accent);
-    border-radius: 0.75rem;
-    background: var(--paper);
-    overflow-wrap: anywhere;
-  }
-
-  .review[hidden] { display: none; }
-
-  .review-stars {
-    color: var(--accent-ink, var(--accent));
-    letter-spacing: 0.12em;
-    margin-bottom: var(--space-s);
-  }
-
-  .review p {
-    margin: 0 0 var(--space-s);
-    font-size: var(--step-1);
-    line-height: 1.45;
-    text-wrap: pretty;
-  }
-
-  .review footer strong {
-    display: block;
-    font-weight: 600;
-  }
-</style>

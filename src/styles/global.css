@@ -71,6 +71,7 @@
   --accent: #1f6f73;
   --accent-bright: #2a8a86;
   --accent-ink: #0f3d40;
+  --review-gold: #f2cb7c;
   --accent-wash: color-mix(in srgb, var(--accent) 8%, transparent);
   --danger: #8a3d2a;
 
