@@ -63,8 +63,12 @@ const googleUrl = site.social.google;
      would not reach them. */
   .gr-list :global(.gr-review) {
     margin: 0;
-    padding: var(--space-s) 0 var(--space-s) var(--space-m);
-    border-left: 2px solid var(--accent);
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    border-radius: 0.75rem;
+    background: var(--paper);
+    overflow-wrap: anywhere;
   }
 
   .gr-list :global(.gr-stars) {
@@ -163,6 +167,16 @@ const googleUrl = site.social.google;
     summary.hidden = parts.length === 0;
 
     root.hidden = false;
+
+    // Keep owner-supplied quotes as a fallback, but show a matching live
+    // review only once. A feed that omits a curated quote must not erase it.
+    const normalize = (value: string) => value.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
+    document.querySelectorAll<HTMLElement>('[data-curated-review]').forEach((card) => {
+      card.hidden = feed.reviews!.some((review) =>
+        normalize(review.author) === normalize(card.dataset.reviewAuthor || '') &&
+        normalize(review.text) === normalize(card.dataset.reviewText || '')
+      );
+    });
 
     // The page's "nothing here yet" copy would now be untrue. Hide it and
     // swap the lede for the accurate one.

@@ -2,29 +2,43 @@
 interface Props {
   quote: string;
   name: string;
-  city: string;
+  city?: string;
   source?: string;
+  sourceUrl?: string;
+  rating?: number;
 }
 
-const { quote, name, city, source = 'Customer' } = Astro.props;
+const { quote, name, city, source = 'Customer', sourceUrl, rating } = Astro.props;
 ---
-<blockquote class="review">
+<blockquote class="review" data-curated-review data-review-author={name} data-review-text={quote}>
+  {rating && <div class="review-stars" role="img" aria-label={`${rating} out of 5 stars`}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</div>}
   <p>“{quote}”</p>
   <footer>
     <strong>{name}</strong>
-    <div class="fine-print">{city} · {source}</div>
+    <div class="fine-print">
+      {city && <>{city} · </>}
+      {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer">{source} review</a> : source}
+    </div>
   </footer>
 </blockquote>
 
 <style>
-  /* This used to share a rule with a generic .card that no page uses any
-     more. A quote is not a card — it gets the accent rule that marks
-     everything else on the site as an attributable claim. */
   .review {
     margin: 0;
-    padding: var(--space-s) 0 var(--space-s) var(--space-m);
-    border-left: 2px solid var(--accent);
-    background: transparent;
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    border-radius: 0.75rem;
+    background: var(--paper);
+    overflow-wrap: anywhere;
+  }
+
+  .review[hidden] { display: none; }
+
+  .review-stars {
+    color: var(--accent-ink, var(--accent));
+    letter-spacing: 0.12em;
+    margin-bottom: var(--space-s);
   }
 
   .review p {
