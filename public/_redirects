@@ -17,3 +17,7 @@
 # Cloudflare Pages matches the trailing-slash form separately: without this line
 # /guides/full-frame-vs-insert/ returned a 404 (Ahrefs crawl, 2026-10-01).
 /guides/full-frame-vs-insert/ /guides/what-your-openings-need 301
+
+# Door-hanger / print QR short link (2026-10-08). 302 so the destination can change; the UTM tags make leads
+# show as "Arrived via doorhanger/print" in /internal/leads.
+/neighbors /estimate?utm_source=doorhanger&utm_medium=print&utm_campaign=jobsite-neighbors 302

@@ -1,5 +1,9 @@
 # ICM State â€” 2026-10-01
 
+## 2026-10-08 - Permit answers on city pages and door-hanger tracking link
+
+Camas, Battle Ground, Ridgefield, La Center and Brush Prairie city pages each gain a permit FAQ item and a short section linking the permit guide; wording restates the guide's primary-source findings only (Vancouver, Washougal, Woodland unchanged until verified). `/neighbors` redirects (302) to `/estimate?utm_source=doorhanger&utm_medium=print&utm_campaign=jobsite-neighbors` so a printed QR code is short and leads show as "Arrived via doorhanger/print". Print file lives outside the repo (4.25 x 11 in door hanger with the QR). Validation: all 46 test:all steps. Production verification follows the main push.
+
 ## 2026-10-07 - Existing repository photo resolution refresh
 
 Audited all 87 tracked raster assets. Fourteen existing photographs below 4K are enhanced with Higgsfield at its maximum 4K setting and replace their sources at the same paths. The unused window-features-installation.jpg reuses the existing window-features-installation-4k.png master. Existing high-resolution job photos, logos, diagrams and model posters are retained. Original photo order, captions, alt text and page placements are unchanged; source aspect ratios are preserved within the upscaler's minor dimension rounding. JPEG exports omit EXIF. Before/after comparisons are inspected, including the retained door-number privacy blur.

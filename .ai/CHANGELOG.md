@@ -1,5 +1,9 @@
 # ICM Changelog
 
+## 2026-10-08 - Permit answers on city pages; /neighbors tracking redirect
+
+Why: Search Console had the area pages at positions 22-24 with no clicks, and the permit question is a specific local query the guide already answers. What: permit FAQ item and "Permits in {city}" section on Camas, Battle Ground, Ridgefield, La Center and Brush Prairie, restating the permit guide only (sources read 2026-10-03). Added `/neighbors` (302) to `/estimate` with doorhanger UTM tags for the printed QR; existing lead-source capture shows it as "Arrived via doorhanger/print". Updated CLAUDE.md's stale verification note (Actions works). Not done: Vancouver, Washougal and Woodland permit text (unverified, see `.ai/WORKING.md` VERIFY list). Re-check city-page clicks at 14 and 28 days (`docs/seo-log.md`).
+
 ## 2026-10-07 - Existing repository photo resolution refresh
 
 Audited all 87 tracked raster assets. Fourteen existing photographs below 4K are enhanced with Higgsfield at its maximum 4K setting and replace their sources at the same paths. The unused window-features-installation.jpg reuses the existing window-features-installation-4k.png master. Existing high-resolution job photos, logos, diagrams and model posters are retained. Original photo order, captions, alt text and page placements are unchanged; source aspect ratios are preserved within the upscaler's minor dimension rounding. JPEG exports omit EXIF. Before/after comparisons are inspected, including the retained door-number privacy blur.

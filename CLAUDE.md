@@ -45,7 +45,7 @@ This repo keeps the folder name `.ai/` (maps to `context/` in Keith's standard I
 
 ## Verification
 
-GitHub Actions is not a usable signal right now (billing issue, 2026-10-01). Local runs are the gate:
+GitHub Actions works again (Build, Site smoke, Pricing health, ops-cron deploy; since 2026-10-03). Local runs remain the first gate:
 `npm run test:all` (full suite in CI order), then `npm run build`. Cloudflare Pages preview is the
 independent build signal. Inspect the live UI for anything deployment-dependent.
 
