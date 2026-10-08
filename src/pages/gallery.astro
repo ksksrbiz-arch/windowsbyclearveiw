@@ -2,6 +2,8 @@
 import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
+import GalleryAddition from '../components/GalleryAddition.astro';
+import { galleryAdditions } from '../data/gallery-additions';
 import CtaBar from '../components/CtaBar.astro';
 import { allWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
@@ -59,7 +61,7 @@ const groups = [
   },
 ].filter((group) => group.photos.length > 0);
 
-const total = allWork.length;
+const total = allWork.length + galleryAdditions.length;
 ---
 <BaseLayout
   title="Window Replacement Project Photos"
@@ -80,6 +82,7 @@ const total = allWork.length;
       <p class="gallery-index">
         <span class="gallery-count">{total}</span>
         <span>
+          <a href="#more-projects">More window projects</a> · {' '}
           {groups.map((group, index) => (
             <>
               <a href={`#${group.id}`}>{group.label.toLowerCase()}</a>
@@ -96,6 +99,21 @@ const total = allWork.length;
           </a>
         </p>
       )}
+    </div>
+  </section>
+
+  <section class="section" id="more-projects">
+    <div class="wrap is-wide" data-reveal>
+      <div class="group-head">
+        <div>
+          <p class="rule-label">More window projects</p>
+          <h2>A closer look at our work.</h2>
+        </div>
+        <p class="group-count">{galleryAdditions.length} photos</p>
+      </div>
+      <div class="work-grid is-large">
+        {galleryAdditions.map((photo) => <GalleryAddition {...photo} />)}
+      </div>
     </div>
   </section>
 

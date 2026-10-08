@@ -1,5 +1,12 @@
 # Clearview ICM — Working Context
 
+## 2026-10-07 - Curated 4K gallery additions
+
+Reviewed 239 owner-supplied Drive entries: 187 unique photographs and 52 byte-identical repeat files. Selected 12 clear exterior and interior views, upscaled with Higgsfield at its maximum 4K setting (3072 x 4096), and inspected before/after comparisons. New photos appear first in a separate gallery section; all 50 existing gallery photos, their order and captions, and hero/service assets remain unchanged. Responsive WebP previews keep downloads small; each new photo links to its full-resolution JPEG. Exported JPEGs contain no EXIF metadata. Source provenance: docs/GALLERY-PHOTOS-2026-10-07.md.
+
+Validation: all 46 test:all checks passed. Final image production build and Edge checks at 1440px, 375px and 320px verify image loading, full-photo links, preserved existing captions/order, and no horizontal overflow. Production verification follows publication to main.
+
+
 ## 2026-10-06 - Hali Kimball review card
 
 Added the exact owner-supplied five-star Google quote to /reviews, with source attribution, accessible stars, and no inferred city or posting date. Updated the dated Google summary to 5.0 from two reviews. Static and live cards share the bordered style; live author/quote matches hide duplicate static cards while failures retain the fallback.
