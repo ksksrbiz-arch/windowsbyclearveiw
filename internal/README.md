@@ -286,6 +286,64 @@ carry no phone numbers for homeowners (none are guessed).
 Sources: permits and parcels from `gis.clark.wa.gov` (ArcGIS REST), licenses from
 data.wa.gov dataset `m8qx-ubtq`. Tests: `npm run test:permit-leads`.
 
+## Mail pilot (`/internal/mail-pilot`, direct mail from public records)
+
+A test of mailing postcards to Clark County homes that just sold or pulled a re-roof or remodel permit.
+The page (Command Center > Tools > Mail pilot) shows the list at a glance, four charts, the suggested way to
+run the test, a break-even box and the mailing list with a mail-merge CSV. It is research data in two tables
+(`mail_pilot_properties`, `mail_pilot_meta`, created on first use), not leads: nothing in them is a customer
+until a person acts on it. With nothing loaded the page says so instead of failing.
+
+Refresh it from a properties file (row fields: `.ai/workflows/mail-pilot/CONTEXT.md`):
+
+```bash
+npm run build:mail-pilot -- --in=/path/to/properties.json --pulled=2026-10-08   # -> data/mail-pilot/mail-pilot.sql
+npx wrangler d1 execute QUOTES_DB --remote --file=data/mail-pilot/mail-pilot.sql
+```
+
+The build prints how many homes landed in each group so you can check it before loading. Optional flags:
+`--min-price=50000` and `--cutoff-year=1995` change the two numbers in the group rules; `--out=` must stay
+inside `data/` or outside the repo.
+
+**Loading is a merge, not a replace.** Each home has a reference code (`CV-0001`, ...) that is printed on its
+mail, so a later load never changes or reuses a code: known homes are updated in place, new homes get the next
+code, homes missing from a newer pull are left as they were. Running the same file twice leaves the same rows and codes. Money
+is stored in integer cents.
+
+**Privacy.** `data/mail-pilot/` is git-ignored because it holds street addresses and this repository is public.
+Never commit it or paste it into chat; the build refuses to write anywhere else inside the repo. The page's
+numbers and charts come from a summary request that contains no addresses; the address list and the CSV are
+separate requests, both behind the session gate and sent with `cache-control: private, no-store`, and the
+service worker never caches them. Homes are addressed to "CURRENT RESIDENT": the county data names no buyer.
+The CSV escapes cells that could be read as spreadsheet formulas.
+
+**What the groups mean** (one set of rules, `functions/internal/_lib/mail-pilot.mjs`, used by the loader, the
+page and the tests; a permit outranks a sale)
+
+| Group | Rule | Plan |
+|---|---|---|
+| A | Re-roof permit issued | Wave 1 |
+| B | Remodel or addition permit issued (the county does not say what the work is) | Wave 1 |
+| C | Sold at 50,000 dollars or more on a market-style deed, no permit, built in or before 1995 | Wave 1 |
+| D | Same as C but built after 1995, or year unknown | Optional later batch, to see whether home age changes response |
+| E | Quitclaim, probate, trust transfer, or no sale price | Hold |
+
+These are sorting rules, not a prediction that a household wants windows.
+
+**Measuring it.** The estimate link for each piece is `/estimate?utm_source=mailer&utm_medium=print&utm_campaign=CV-####`
+(`trackingLink` in `src/lib/mail-pilot.ts`). The site already records `utm_source`, `utm_medium` and `utm_campaign`
+on a visitor's first touch, the same way the `/neighbors` door-hanger link does, so a request shows its code in
+Leads. That has not yet been confirmed end to end in production: check the first real request. Phone callers
+should be asked for the code on their card. The break-even box takes pieces mailed, cost per piece, average
+signed job, profit percent and (optionally) close rate, all typed in; Clearview's real figures are not stored
+anywhere and nothing is prefilled.
+
+**County lag.** The county posts sales weeks after they close, so the newest weeks of any pull are incomplete
+(the "Homes sold per week" chart shows it). Re-pull about six weeks after the window and load again.
+
+Sources: Clark County WA public GIS (`gis.clark.wa.gov`): recent sales, permits, taxlots, zoning, school
+districts. Tests: `npm run test:mail-pilot`.
+
 ## Google reviews feed (public `/reviews` page)
 
 `functions/api/google-reviews.js` serves the pinned Google Business Profile's

@@ -150,7 +150,7 @@ await test('only the allowlisted read endpoints are intercepted; writes, other o
   const untouched = [
     '/internal/api/quote-share', '/internal/api/quotes', '/internal/api/quotes/Q1', '/internal/api/invoices', '/internal/api/payments',
     '/internal/api/leads', '/internal/api/analytics', '/internal/api/copilot', '/internal/api/copilot-summary', '/internal/api/ask-logs',
-    '/internal/api/lead-analyzer', '/internal/api/permit-leads', '/internal/api/mail-test', '/internal/api/login', '/internal/api/logout',
+    '/internal/api/lead-analyzer', '/internal/api/permit-leads', '/internal/api/mail-pilot', '/internal/api/mail-test', '/internal/api/login', '/internal/api/logout',
     '/internal/api/job-photos?id=P1', '/internal/api/review-request', '/internal/api/job-closeout', '/internal/api/build-plan', '/internal/api/dashboard/extra',
     '/api/estimate', '/api/quote-sign', '/ask/api/chat',
   ];

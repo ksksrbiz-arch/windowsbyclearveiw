@@ -24,6 +24,7 @@ It does not replace application code or D1.
 | Review or write customer-facing copy and graphics | `workflows/public-copy-sweep/` |
 | Add or verify a GA4/GTM/Meta event | `workflows/analytics-events/` |
 | Ship a change, or touch domain/mail | `workflows/deploy-check/` |
+| Refresh or load the direct-mail pilot list (Command Center > Mail pilot) | `workflows/mail-pilot/` |
 | Diagnose a window symptom/photo | `specialists/diagnostician/` |
 | Calculate or explain project pricing | `specialists/estimator/` |
 | Review installation logic | `specialists/installation-reviewer/` |

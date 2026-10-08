@@ -1,5 +1,19 @@
 # Project context — Clearview Windows
 
+## 2026-10-08 - Mail pilot in the Command Center (branch `claude/mail-pilot-internal`)
+
+Keith (Mark's marketing and dev person) asked for the direct-mail research to be packaged into Mark's Command Center. It is now `/internal/mail-pilot`: 528 Clark County homes that sold or pulled a re-roof/remodel permit, sorted into groups A-E, with charts, a break-even box and a mail-merge CSV (wave 1 = groups A, B, C = 193 homes). The "internal" in the request was read as the `/internal` Command Center of this site; that reading was not confirmed.
+
+What the next agent must know:
+- **The repository is public. Street addresses never go in git.** The page and API are code; the data is a private SQL file (`data/mail-pilot/mail-pilot.sql`, git-ignored) that Keith or Mark loads with `npx wrangler d1 execute QUOTES_DB --remote --file=data/mail-pilot/mail-pilot.sql` after this branch is merged and deployed. **That has not been run**, so the page says "no data yet" in production until it is.
+- The SQL file was built outside the repo from Keith's workbook and is not in this branch. To regenerate it you need the properties file (row fields: `.ai/workflows/mail-pilot/CONTEXT.md`); the county pull that makes that file is not scripted here.
+- Reference codes (`CV-####`) are printed on mail: never change or reuse one. Loads merge by property id.
+- Group rules live only in `functions/internal/_lib/mail-pilot.mjs`. Group D is an optional later comparison batch, not a withheld control.
+- Open: Clearview's average job value, margin and close rate (the break-even box needs them from Mark); proof that a mailed link's `utm_campaign=CV-####` shows up on a real estimate request; a re-pull about six weeks after the window (around mid-November) because the county posts sales late; the first piece of mail and its QR code are not made.
+- It reuses the existing lead-source capture and the Permit-leads loading pattern and adds no new service, so if the test brings no requests nothing else depends on it.
+
+Detail: `.ai/CHANGELOG.md` (2026-10-08), `internal/README.md` ("Mail pilot"), `.ai/workflows/mail-pilot/CONTEXT.md`.
+
 ## 2026-10-07 - Existing repository photo resolution refresh
 
 Audited all 87 tracked raster assets. Fourteen existing photographs below 4K are enhanced with Higgsfield at its maximum 4K setting and replace their sources at the same paths. The unused window-features-installation.jpg reuses the existing window-features-installation-4k.png master. Existing high-resolution job photos, logos, diagrams and model posters are retained. Original photo order, captions, alt text and page placements are unchanged; source aspect ratios are preserved within the upscaler's minor dimension rounding. JPEG exports omit EXIF. Before/after comparisons are inspected, including the retained door-number privacy blur.

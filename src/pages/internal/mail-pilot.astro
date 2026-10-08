@@ -1,0 +1,493 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+---
+<InternalLayout title="Mail pilot">
+  <div class="mp-hero">
+    <div>
+      <p class="kicker">Marketing</p>
+      <h1>Mail pilot</h1>
+      <p class="lede">A test of mailing postcards to Clark County homes that just sold or just pulled a roof or remodel permit. Built from county public records. The point is to find out whether mail brings in estimate requests at a cost that makes sense.</p>
+    </div>
+    <div class="mp-hero-actions"><button class="btn btn-ghost" type="button" data-refresh>Refresh</button></div>
+  </div>
+
+  <p class="mp-callout" data-message hidden></p>
+
+  <div data-content hidden>
+    <section class="mp-section" aria-labelledby="mp-read-h">
+      <h2 id="mp-read-h" class="mp-h">Read this first</h2>
+      <ul class="mp-points">
+        <li><strong>These are homes, not people.</strong> The county data does not name a buyer, so every piece is addressed to Current Resident.</li>
+        <li><strong>The groups are a sorting rule, not a prediction.</strong> They say a home sold or had a permit. They do not say the owner wants windows.</li>
+        <li><strong>The newest weeks are incomplete.</strong> The county posts sales weeks after they close (see the last chart). Load fresh data in about six weeks to catch what was missing.</li>
+        <li><strong>Check addresses marked "check".</strong> Those parcels have more than one address point (units or two street numbers). Mail one piece or look it up first.</li>
+      </ul>
+    </section>
+
+    <section class="mp-section" aria-labelledby="mp-sum-h">
+      <div class="mp-head">
+        <div><p class="kicker">What was found</p><h2 id="mp-sum-h">The list at a glance</h2></div>
+        <span class="mp-meta" data-window>—</span>
+      </div>
+      <div class="mp-stats">
+        <article class="mp-stat"><span>Addresses</span><strong data-stat="addresses">—</strong><small>in the county records pulled</small></article>
+        <article class="mp-stat mp-stat-key"><span>Wave 1 to mail</span><strong data-stat="wave1">—</strong><small>groups A, B and C</small></article>
+        <article class="mp-stat"><span>Permits</span><strong data-stat="permits">—</strong><small>re-roof, remodel and addition</small></article>
+        <article class="mp-stat"><span>Check address</span><strong data-stat="verify">—</strong><small>more than one address point</small></article>
+      </div>
+      <div class="mp-panel">
+        <h3>The five groups</h3>
+        <div class="mp-table-wrap">
+          <table class="mp-table mp-groups">
+            <thead><tr><th scope="col">Group</th><th scope="col">Homes</th><th scope="col">Plan</th><th scope="col">How a home gets in</th></tr></thead>
+            <tbody data-groups></tbody>
+          </table>
+        </div>
+        <p class="mp-note" data-rules>—</p>
+      </div>
+    </section>
+
+    <section class="mp-section" aria-labelledby="mp-charts-h">
+      <div class="mp-head"><div><p class="kicker">Who is on it</p><h2 id="mp-charts-h">Charts</h2></div></div>
+      <div class="mp-grid">
+        <article class="mp-panel"><h3>Wave 1 by city</h3><div class="mp-chart" data-chart="cities"></div></article>
+        <article class="mp-panel"><h3>Recent buyers: age of the home</h3><div class="mp-chart" data-chart="ages"></div></article>
+        <article class="mp-panel"><h3>Recent buyers: sale price</h3><div class="mp-chart" data-chart="prices"></div></article>
+        <article class="mp-panel">
+          <h3>Homes sold per week</h3>
+          <div class="mp-chart" data-chart="weeks"></div>
+          <p class="mp-note">Each bar counts the homes on this list that sold that week. The county publishes sales weeks after they close, so a short bar at the end means "not posted yet", not "no sales".</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="mp-section" aria-labelledby="mp-run-h">
+      <div class="mp-head"><div><p class="kicker">Suggested way to run it</p><h2 id="mp-run-h">How to read the results</h2></div></div>
+      <div class="mp-panel">
+        <ol class="mp-steps">
+          <li><strong>Mail wave 1.</strong> Download the mail-merge file below and give it to the printer or mail house. Every row has a reference code.</li>
+          <li><strong>Print the reference code on each piece</strong> and send people to that piece's own link, for example in a QR code. The site already records the tags on that link when someone arrives through it, the same way it does for the door hangers, so the request shows up with the code. Check the first real request in Leads to confirm the code appears.<br /><code class="mp-code" data-sample-link>—</code></li>
+          <li><strong>Ask phone callers for the code</strong> printed on their card and put it in the lead's notes.</li>
+          <li><strong>Wait several weeks before judging.</strong> Mail trickles in. Count requests and signed jobs by code, then use the box below.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="mp-section" aria-labelledby="mp-math-h">
+      <div class="mp-head"><div><p class="kicker">Does it pay</p><h2 id="mp-math-h">What the mailing has to earn</h2></div></div>
+      <div class="mp-panel">
+        <p class="mp-note">Type in your own numbers. Nothing here is filled in for you and nothing you type is saved or sent.</p>
+        <form class="mp-form" data-math autocomplete="off" novalidate>
+          <label>Pieces mailed<input name="pieces" inputmode="numeric" placeholder="e.g. the wave 1 count" /></label>
+          <label>Cost of one piece, all in ($)<input name="cost" inputmode="decimal" placeholder="print plus postage" /></label>
+          <label>Average signed job ($)<input name="job" inputmode="decimal" /></label>
+          <label>Profit on a job (% of the job)<input name="margin" inputmode="decimal" placeholder="1 to 100" /></label>
+          <label>Estimate requests that become signed jobs (%)<input name="close" inputmode="decimal" placeholder="optional" /></label>
+        </form>
+        <div class="mp-result" data-math-result aria-live="polite"><p class="mp-empty">Fill in the first four boxes to see the result.</p></div>
+      </div>
+    </section>
+
+    <section class="mp-section" aria-labelledby="mp-list-h">
+      <div class="mp-head">
+        <div><p class="kicker">Street addresses</p><h2 id="mp-list-h">Mailing list</h2></div>
+        <span class="mp-meta" data-list-count>—</span>
+      </div>
+      <div class="mp-panel">
+        <p class="mp-note">Public-record addresses. Use them for mail. The file has one row per home: reference code, "CURRENT RESIDENT", street, city, state, ZIP, group, and a check flag.</p>
+        <div class="mp-controls">
+          <div class="wt-filter" role="group" aria-label="Which groups" data-filter>
+            <button type="button" aria-pressed="true" data-segments="A,B,C">Wave 1</button>
+            <button type="button" aria-pressed="false" data-segments="A">A</button>
+            <button type="button" aria-pressed="false" data-segments="B">B</button>
+            <button type="button" aria-pressed="false" data-segments="C">C</button>
+            <button type="button" aria-pressed="false" data-segments="D">D</button>
+            <button type="button" aria-pressed="false" data-segments="E">E</button>
+            <button type="button" aria-pressed="false" data-segments="">All</button>
+          </div>
+          <a class="btn btn-primary" data-download href="/internal/api/mail-pilot?view=csv&segments=A,B,C" download>Download mail-merge file (CSV)</a>
+        </div>
+        <div class="mp-table-wrap">
+          <table class="mp-table mp-list">
+            <thead><tr><th scope="col">Code</th><th scope="col">Address</th><th scope="col">Group</th><th scope="col">Why it is here</th><th scope="col">Built</th><th scope="col">Check</th></tr></thead>
+            <tbody data-rows></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost" type="button" data-more hidden>Show more</button>
+      </div>
+    </section>
+  </div>
+
+  <p class="mp-status" data-status role="status">Loading the mail pilot…</p>
+</InternalLayout>
+<script>
+  import { barChart, columnChart } from '../../lib/charts';
+  import { breakEven, trackingLink } from '../../lib/mail-pilot';
+
+  type Row = { label: string; value: number };
+  type Segment = { key: string; name: string; wave: string; rule: string; addresses: number };
+  type Summary = {
+    status: 'ok' | 'empty' | 'unavailable';
+    meta?: Record<string, string>;
+    rules?: { minPrice: number; cutoffYear: number; likelyDeeds: string[] };
+    totals?: { addresses: number; wave1: number; likelySales: number; permits: number; verify: number };
+    window?: { salesFrom: string; salesTo: string; permitsFrom: string; permitsTo: string };
+    segments?: Segment[];
+    cities?: Row[];
+    ageBands?: Row[];
+    priceBands?: Row[];
+    weeklySales?: Row[];
+  };
+  type Property = {
+    ref: string; street: string; city: string; state: string; zip: string; segment: string; source: string;
+    saleDate: string; saleCents: number | null; permitType: string; permitIssued: string; yearBuilt: number | null; verify: boolean; notes: string;
+  };
+
+  const PAGE = 100;
+  const nf = new Intl.NumberFormat('en-US');
+  const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const usd2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+  const count = (value: number | null | undefined) => (typeof value === 'number' ? nf.format(value) : '—');
+  const $ = (selector: string) => document.querySelector(selector);
+  const PLAN: Record<string, string> = { wave1: 'Wave 1: mail', compare: 'Later: small test batch', hold: 'Hold' };
+  const PERMIT: Record<string, string> = { REROOF: 'Re-roof permit', REMODEL: 'Remodel permit', ADDITION: 'Addition permit' };
+
+  const shortDate = (iso: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+    return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  /** Charts are drawn at the width their box has, redrawn when it changes (same approach as Analytics). */
+  type ChartJob = { build: (width: number) => string; empty: string };
+  const jobs = new Map<string, ChartJob>();
+  const widths = new Map<string, number>();
+
+  function mountSvg(host: HTMLElement, markup: string): boolean {
+    const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
+    const root = doc.documentElement;
+    if (!root || root.nodeName !== 'svg' || doc.querySelector('parsererror')) return false;
+    host.replaceChildren(document.importNode(root, true));
+    return true;
+  }
+  function paintOne(name: string, job: ChartJob) {
+    const host = $(`[data-chart="${name}"]`);
+    if (!(host instanceof HTMLElement)) return;
+    const width = Math.floor(host.clientWidth || host.parentElement?.clientWidth || 320);
+    widths.set(name, width);
+    const markup = job.build(width);
+    if (markup && mountSvg(host, markup)) return;
+    const p = document.createElement('p');
+    p.className = 'mp-empty';
+    p.textContent = job.empty;
+    host.replaceChildren(p);
+  }
+  function setChart(name: string, job: ChartJob) {
+    jobs.set(name, job);
+    paintOne(name, job);
+  }
+  let repaintQueued = false;
+  window.addEventListener('resize', () => {
+    if (repaintQueued) return;
+    repaintQueued = true;
+    requestAnimationFrame(() => {
+      repaintQueued = false;
+      for (const [name, job] of jobs) {
+        const host = $(`[data-chart="${name}"]`);
+        if (host instanceof HTMLElement && Math.abs(host.clientWidth - (widths.get(name) ?? 0)) > 8) paintOne(name, job);
+      }
+    });
+  }, { passive: true });
+
+  function setText(selector: string, text: string) {
+    const el = $(selector);
+    if (el instanceof HTMLElement) el.textContent = text;
+  }
+  function show(selector: string, visible: boolean) {
+    const el = $(selector);
+    if (el instanceof HTMLElement) el.hidden = !visible;
+  }
+  function appendRow(body: HTMLElement, cells: (string | HTMLElement)[]) {
+    const tr = document.createElement('tr');
+    cells.forEach((value, i) => {
+      const cell = document.createElement(i === 0 ? 'th' : 'td');
+      if (i === 0) cell.setAttribute('scope', 'row');
+      if (typeof value === 'string') cell.textContent = value;
+      else cell.append(value);
+      tr.append(cell);
+    });
+    body.append(tr);
+  }
+
+  let waveSize = 0;
+
+  function renderSummary(s: Summary) {
+    const message = $('[data-message]');
+    if (s.status !== 'ok' || !s.totals || !s.segments || !s.rules) {
+      show('[data-content]', false);
+      show('[data-message]', true);
+      if (message instanceof HTMLElement) {
+        message.textContent = s.status === 'empty'
+          ? 'No mail pilot data has been loaded yet. Build it with npm run build:mail-pilot, then load the SQL file into the database. See the Mail pilot section of internal/README.md.'
+          : 'The mail pilot could not be loaded. Try Refresh; the rest of the Command Center is unaffected.';
+      }
+      return false;
+    }
+    show('[data-message]', false);
+    show('[data-content]', true);
+    const t = s.totals;
+    const w = s.window ?? { salesFrom: '', salesTo: '', permitsFrom: '', permitsTo: '' };
+    waveSize = t.wave1;
+    const pulled = shortDate(s.meta?.pulled_on ?? '');
+    setText('[data-window]', [
+      w.salesFrom ? `Sales ${shortDate(w.salesFrom)} to ${shortDate(w.salesTo)}` : '',
+      w.permitsFrom ? `Permits ${shortDate(w.permitsFrom)} to ${shortDate(w.permitsTo)}` : '',
+      pulled ? `Pulled ${pulled}` : '',
+    ].filter(Boolean).join(' · ') || '—');
+    setText('[data-stat="addresses"]', count(t.addresses));
+    setText('[data-stat="wave1"]', count(t.wave1));
+    setText('[data-stat="permits"]', count(t.permits));
+    setText('[data-stat="verify"]', count(t.verify));
+    setText('[data-rules]', `A "likely market sale" is a sale priced at ${usd.format(s.rules.minPrice)} or more on a standard deed (${s.rules.likelyDeeds.join(', ')}); "older" means built in or before ${s.rules.cutoffYear}. Both lines are choices, and can be changed when the list is loaded again.`);
+
+    const body = $('[data-groups]');
+    if (body instanceof HTMLElement) {
+      body.replaceChildren();
+      for (const g of s.segments) appendRow(body, [`${g.key}: ${g.name}`, nf.format(g.addresses), PLAN[g.wave] ?? g.wave, g.rule]);
+    }
+    setChart('cities', {
+      build: (width) => barChart((s.cities ?? []).slice(0, 12), { width, title: 'Wave 1 addresses by city' }),
+      empty: 'No wave 1 addresses.',
+    });
+    setChart('ages', {
+      build: (width) => ((s.ageBands ?? []).some((r) => r.value > 0) ? columnChart((s.ageBands ?? []).filter((r) => r.label !== 'Unknown' || r.value > 0), { width, title: 'Recent buyers by age of the home' }) : ''),
+      empty: 'No recent-buyer sales.',
+    });
+    setChart('prices', {
+      build: (width) => ((s.priceBands ?? []).some((r) => r.value > 0) ? columnChart(s.priceBands ?? [], { width, title: 'Recent buyers by sale price' }) : ''),
+      empty: 'No recent-buyer sales.',
+    });
+    setChart('weeks', {
+      build: (width) => ((s.weeklySales ?? []).length ? columnChart((s.weeklySales ?? []).map((r) => ({ label: shortDate(r.label), value: r.value })), { width, title: 'Homes on the list sold per week' }) : ''),
+      empty: 'No sales on the list.',
+    });
+    return true;
+  }
+
+  // The tracking link is fixed text built from a code, shown so it can be copied into a print file.
+  function showSampleLink() {
+    const sample = trackingLink('CV-0001');
+    setText('[data-sample-link]', sample ?? '—');
+  }
+
+  // ---------- list ----------
+  let segments = 'A,B,C';
+  let shown = 0;
+  let total = 0;
+
+  const whyText = (r: Property) => {
+    const bits: string[] = [];
+    if (r.permitType) bits.push(`${PERMIT[r.permitType] ?? r.permitType}${r.permitIssued ? ` ${shortDate(r.permitIssued)}` : ''}`);
+    if (r.saleDate) bits.push(`Sold ${shortDate(r.saleDate)}${typeof r.saleCents === 'number' ? ` · ${usd.format(r.saleCents / 100)}` : ''}`);
+    return bits.join(' · ') || '—';
+  };
+
+  function setDownload() {
+    const link = $('[data-download]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    const chosen = segments || 'A,B,C,D,E';
+    link.href = `/internal/api/mail-pilot?view=csv&segments=${encodeURIComponent(chosen)}`;
+    link.textContent = segments === 'A,B,C' ? 'Download mail-merge file for wave 1 (CSV)' : `Download mail-merge file for ${segments ? `group ${segments.split(',').join(', ')}` : 'everything'} (CSV)`;
+  }
+
+  async function loadList(reset: boolean) {
+    const body = $('[data-rows]');
+    const more = $('[data-more]');
+    if (!(body instanceof HTMLElement) || !(more instanceof HTMLButtonElement)) return;
+    if (reset) { body.replaceChildren(); shown = 0; }
+    more.disabled = true;
+    try {
+      const query = new URLSearchParams({ view: 'list', limit: String(PAGE), offset: String(shown) });
+      if (segments) query.set('segments', segments);
+      const response = await fetch(`/internal/api/mail-pilot?${query}`, { headers: { accept: 'application/json' } });
+      if (response.redirected) { location.href = '/internal/login?next=/internal/mail-pilot'; return; }
+      if (!response.ok) throw new Error('bad status');
+      const data = (await response.json()) as { rows?: Property[]; total?: number };
+      const rows = data.rows ?? [];
+      total = data.total ?? rows.length;
+      for (const r of rows) {
+        appendRow(body, [r.ref, `${r.street}, ${r.city} ${r.zip ?? ''}`.trim(), r.segment, whyText(r), r.yearBuilt ? String(r.yearBuilt) : '—', r.verify ? 'check' : '']);
+      }
+      shown += rows.length;
+      if (!shown) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.className = 'mp-empty';
+        td.textContent = 'Nothing in this group.';
+        tr.append(td);
+        body.append(tr);
+      }
+      setText('[data-list-count]', `${nf.format(shown)} of ${nf.format(total)} shown`);
+      more.hidden = shown >= total;
+      more.textContent = `Show ${nf.format(Math.min(PAGE, total - shown))} more`;
+    } catch {
+      setText('[data-status]', 'Could not load the list. Try again.');
+    } finally {
+      more.disabled = false;
+    }
+  }
+
+  document.querySelectorAll('[data-filter] button').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      segments = button.dataset.segments ?? '';
+      document.querySelectorAll('[data-filter] button').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+      setDownload();
+      void loadList(true);
+    });
+  });
+  $('[data-more]')?.addEventListener('click', () => void loadList(false));
+
+  // ---------- break-even ----------
+  const form = $('[data-math]');
+  function readNumber(name: string): number | null {
+    const el = form?.querySelector(`[name="${name}"]`);
+    if (!(el instanceof HTMLInputElement)) return null;
+    const raw = el.value.replace(/[$,%\s,]/g, '');
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+  function paintMath() {
+    const out = $('[data-math-result]');
+    if (!(out instanceof HTMLElement)) return;
+    const result = breakEven({
+      pieces: readNumber('pieces') ?? undefined,
+      costPerPiece: readNumber('cost') ?? undefined,
+      jobValue: readNumber('job') ?? undefined,
+      marginPct: readNumber('margin') ?? undefined,
+      closePct: readNumber('close'),
+    });
+    out.replaceChildren();
+    const line = (text: string, strong = false) => {
+      const p = document.createElement('p');
+      p.className = strong ? 'mp-result-main' : 'mp-result-line';
+      p.textContent = text;
+      out.append(p);
+    };
+    if (!result) {
+      const p = document.createElement('p');
+      p.className = 'mp-empty';
+      p.textContent = 'Fill in the first four boxes to see the result. Profit has to be a percent from 1 to 100.';
+      out.append(p);
+      return;
+    }
+    line(`The mailing costs ${usd2.format(result.spend)}.`);
+    line(`One signed job earns about ${usd2.format(result.profitPerJob)}.`);
+    line(`To break even you need ${nf.format(result.jobsNeeded)} signed ${result.jobsNeeded === 1 ? 'job' : 'jobs'} from this mailing, about ${result.jobsPer1000} for every 1,000 pieces.`, true);
+    if (result.requestsNeeded !== null) line(`At that close rate, that means about ${nf.format(result.requestsNeeded)} estimate requests.`);
+  }
+  form?.addEventListener('input', paintMath);
+  form?.addEventListener('submit', (event) => event.preventDefault());
+
+  async function load() {
+    setText('[data-status]', 'Loading the mail pilot…');
+    try {
+      const response = await fetch('/internal/api/mail-pilot', { headers: { accept: 'application/json' } });
+      if (response.redirected) { location.href = '/internal/login?next=/internal/mail-pilot'; return; }
+      if (!response.ok) throw new Error('bad status');
+      const ok = renderSummary((await response.json()) as Summary);
+      if (ok) {
+        showSampleLink();
+        const pieces = form?.querySelector('[name="pieces"]');
+        if (pieces instanceof HTMLInputElement && !pieces.value && waveSize) pieces.placeholder = `wave 1 is ${nf.format(waveSize)}`;
+        setDownload();
+        await loadList(true);
+      }
+      setText('[data-status]', `Updated ${new Date().toLocaleTimeString()}`);
+    } catch {
+      renderSummary({ status: 'unavailable' });
+      setText('[data-status]', 'Could not load the mail pilot. Try Refresh.');
+    }
+  }
+  $('[data-refresh]')?.addEventListener('click', load);
+  load();
+</script>
+<style>
+  .mp-hero{display:flex;justify-content:space-between;align-items:end;gap:var(--space-m);margin-bottom:var(--space-m)}
+  .mp-hero h1{margin:.08rem 0 .35rem}
+  .mp-hero .lede{max-width:46rem}
+  .mp-section{margin-bottom:var(--space-l)}
+  .mp-head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-s);margin-bottom:.4rem}
+  .mp-head h2,.mp-h{margin:.1rem 0 .4rem}
+  .mp-meta{font-size:var(--step--2);font-weight:750;color:var(--ink-soft);text-align:right}
+  .mp-note{margin:.5rem 0 var(--space-s);color:var(--ink-soft);font-size:var(--step--1)}
+  .mp-callout{margin:0 0 var(--space-s);padding:.85rem 1rem;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--1)}
+  .mp-points{display:grid;gap:.5rem;margin:0;padding:.95rem 1.1rem .95rem 2.2rem;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--1)}
+  .mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-s)}
+  .mp-panel{min-width:0;padding:1rem 1.05rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised);box-shadow:var(--shadow-sm)}
+  .mp-panel h3{margin:0 0 .5rem;font-size:var(--step-0)}
+  .mp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:var(--space-s)}
+  .mp-stat{display:grid;gap:.25rem;padding:1rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--paper-raised)}
+  .mp-stat-key{border-color:var(--accent)}
+  .mp-stat>span{font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .mp-stat strong{font-size:var(--step-3);line-height:1;font-variant-numeric:tabular-nums}
+  .mp-stat small{color:var(--ink-soft)}
+  .mp-steps{display:grid;gap:.7rem;margin:0;padding-left:1.3rem;font-size:var(--step--1)}
+  .mp-code{display:block;margin-top:.4rem;padding:.5rem .65rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-sunk);font-size:var(--step--2);overflow-wrap:anywhere}
+  .mp-form{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.65rem;margin-bottom:var(--space-s)}
+  .mp-form label{display:grid;gap:.25rem;font-size:var(--step--2);font-weight:700;color:var(--ink-soft)}
+  .mp-form input{min-height:2.75rem;font-size:var(--step-0)}
+  .mp-controls{display:flex;justify-content:space-between;align-items:center;gap:var(--space-s);flex-wrap:wrap;margin-bottom:var(--space-s)}
+  .mp-status{color:var(--ink-soft);font-size:var(--step--1)}
+  .mp-table-wrap{overflow-x:auto}
+  .mp-table{min-width:36rem;width:100%;border-collapse:collapse;font-size:var(--step--1);font-variant-numeric:tabular-nums}
+  .mp-groups{min-width:44rem}
+  .mp-list{min-width:46rem}
+  /* Rows are built by script after load, so Astro's scoped-style attribute is absent; these must be global. */
+  :global(.mp-table th),:global(.mp-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  :global(.mp-table thead th){font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
+  :global(.mp-groups td:last-child){min-width:16rem;color:var(--ink-soft)}
+  :global(.mp-list td:nth-child(3)),:global(.mp-list td:nth-child(5)){white-space:nowrap}
+  :global(.mp-empty){margin:0;color:var(--ink-soft);font-size:var(--step--1)}
+  :global(.mp-result-main){margin:.25rem 0 0;font-size:var(--step-1);font-weight:700}
+  :global(.mp-result-line){margin:.15rem 0;font-size:var(--step--1)}
+  /* Charts are built by script (see src/lib/charts.ts), so these must be global. */
+  :global(.mp-chart){min-width:0}
+  :global(svg.ch){--ch-1:var(--accent);--ch-2:#3a3d42;--ch-3:#b7791f;--ch-4:#2b6cb0;--ch-5:#b83280;--ch-6:#8a8d93;display:block;width:100%;height:auto;overflow:visible;font-family:inherit}
+  :global(.ch-label){font-size:12px;fill:var(--ink)}
+  :global(.ch-axis){font-size:11px;fill:var(--ink-soft)}
+  :global(.ch-value){font-size:12px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
+  :global(.ch-grid){stroke:var(--line);stroke-width:1}
+  :global(.ch-track){fill:var(--paper-sunk)}
+  :global(.ch-zero){fill:var(--line-strong)}
+  :global(.ch-bar){fill:var(--c,var(--ch-1))}
+  @media(max-width:900px){.mp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mp-form{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:720px){
+    .mp-hero{align-items:flex-start;flex-direction:column}
+    .mp-grid{grid-template-columns:minmax(0,1fr)}
+    .mp-controls .btn{width:100%;text-align:center}
+    .mp-head{flex-direction:column;align-items:flex-start}
+    .mp-meta{text-align:left}
+    /* On a phone each row becomes a small card instead of a table that scrolls sideways. */
+    .mp-groups,.mp-list{min-width:0;display:block}
+    .mp-groups thead,.mp-list thead{display:none}
+    .mp-groups tbody,.mp-list tbody{display:block}
+    :global(.mp-groups th),:global(.mp-groups td),:global(.mp-list th),:global(.mp-list td){padding:0;border-bottom:0}
+    :global(.mp-groups tr){display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.2rem .75rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+    :global(.mp-groups th){grid-column:1}
+    :global(.mp-groups td:nth-child(2)){grid-column:2;grid-row:1;font-weight:700;text-align:right}
+    :global(.mp-groups td:nth-child(3)),:global(.mp-groups td:nth-child(4)){grid-column:1/-1;min-width:0}
+    :global(.mp-list tr){display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"code group check" "addr addr addr" "why why built";gap:.15rem .75rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+    :global(.mp-list th){grid-area:code}
+    :global(.mp-list td:nth-child(2)){grid-area:addr}
+    :global(.mp-list td:nth-child(3)){grid-area:group;font-weight:700}
+    :global(.mp-list td:nth-child(3)::before){content:'Group '}
+    :global(.mp-list td:nth-child(4)){grid-area:why;color:var(--ink-soft);white-space:normal}
+    :global(.mp-list td:nth-child(5)){grid-area:built;text-align:right;color:var(--ink-soft)}
+    :global(.mp-list td:nth-child(5)::before){content:'Built '}
+    :global(.mp-list td:nth-child(6)){grid-area:check;justify-self:end;font-weight:700}
+    .mp-controls .wt-filter button{white-space:nowrap;padding-inline:.7rem}
+  }
+  @media(max-width:420px){.mp-stats,.mp-form{grid-template-columns:1fr}}
+</style>
