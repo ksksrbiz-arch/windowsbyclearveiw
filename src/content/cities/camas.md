@@ -5,6 +5,8 @@ title: Window Replacement in Camas, WA
 description: Window replacement in Camas, WA for older downtown homes and newer builds. Free in-home measure, then a written estimate before anything is ordered.
 published: true
 faq:
+  - question: Do I need a permit to replace windows in Camas?
+    answer: Camas's published permit list shows doors and windows as needing a permit. For a like-for-like replacement the city says no plans are required, and the permit is generally issued the day you apply. A new opening or a different size needs plans. Rules change, so confirm with the Camas Building Division for your address.
   - question: Does the old downtown core need different windows than a newer North Camas subdivision?
     answer: Usually a different amount of work, not a different product. Downtown's original sash tends to need more work because the frame itself has settled with age; North Camas houses are newer and more often need less. We tell you which on site.
   - question: Are builder-grade windows in newer Camas subdivisions actually a problem?
@@ -22,6 +24,10 @@ Downtown and the streets around it carry original early-1900s construction: sett
 ## What tends to go wrong
 
 In the old mill-town core, the problem is usually the frame more than the glass. A sill or jamb may have moved enough over the decades that a new window will not sit right without more work at the opening (see [what each opening needs](/guides/what-your-openings-need)). In the newer subdivisions, problems are rarer and smaller: an early seal failure, or hardware that never worked quite right.
+
+## Permits in Camas
+
+Camas's permit list shows doors and windows as needing a permit. A like-for-like replacement needs no plans, and the permit is generally issued the day you apply. A new or resized opening needs plans. Rules change and exceptions apply, so confirm for your address. The details, with sources, are in [our permit guide](/guides/window-replacement-permit-washington). We talk through permits with you before work starts.
 
 ## What we do here
 

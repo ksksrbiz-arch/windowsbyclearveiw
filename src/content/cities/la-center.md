@@ -5,6 +5,8 @@ title: Window Replacement in La Center, WA
 description: Window replacement in La Center, WA for homes and acreage. Free in-home measure, then a written estimate before anything is ordered. (564) 208-0801
 published: true
 faq:
+  - question: Do I need a permit to replace windows in La Center?
+    answer: The City of La Center lists window replacement among the projects that need a building permit. A new or different-size opening needs one too. Rules change, so confirm with the city's building department for your address.
   - question: Is La Center too small or too far out for a normal quote?
     answer: No — the same measure and written estimate process, handled the same way. Short drive north, not a special trip.
   - question: What's the most common window problem in La Center?
@@ -22,6 +24,10 @@ There is no single dominant building era at this size. Older in-town houses clos
 ## What tends to go wrong
 
 It is the same rain as the rest of Clark County, and the same old sliders and fogged insulated glass. A cloudy pane that never wipes clean is a failed seal, not a cleaning problem (see [fogged windows](/guides/fogged-windows)). On the older river-adjacent houses, original wood sashes and drafty frames show up more often than on the newer acreage builds.
+
+## Permits in La Center
+
+La Center lists window replacement among the projects that need a building permit. Rules change and exceptions apply, so confirm for your address. The details, with sources, are in [our permit guide](/guides/window-replacement-permit-washington). We talk through permits with you before work starts.
 
 ## What we do here
 

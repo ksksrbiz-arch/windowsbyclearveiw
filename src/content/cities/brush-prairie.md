@@ -5,6 +5,8 @@ title: Window Replacement in Brush Prairie, WA
 description: Window replacement in Brush Prairie, WA, from acreage homes to new builds. Free in-home measure and a written estimate. Call (564) 208-0801.
 published: true
 faq:
+  - question: Do I need a permit to replace windows in Brush Prairie?
+    answer: Yes. Brush Prairie is unincorporated Clark County, and the county requires a roofing, siding and windows permit to replace windows, even the same size in the same place. The new window also has to meet the Washington energy code (U-factor 0.30 or lower). Rules change, so confirm with Clark County for your address.
   - question: Does an unincorporated area like Brush Prairie change how you quote a job?
     answer: No — the same measure, written estimate, and installation standard apply anywhere in Clark County. Unincorporated just means no city government of its own, not different work.
   - question: Does a rural lot actually need different flashing than an in-town house?
@@ -22,6 +24,10 @@ Older ranch houses on bigger lots make up most of the established housing, with 
 ## What tends to go wrong
 
 Most of what we remove here is original aluminum or first-generation vinyl with failed seals. Rural lots take more wind and more driven rain than a tucked-in city street, so a flashing detail that was already marginal fails faster than it would in town.
+
+## Permits in Brush Prairie
+
+Brush Prairie is unincorporated, so Clark County's rule applies: a roofing, siding and windows permit is required, even for same-size replacement. Rules change and exceptions apply, so confirm for your address. The details, with sources, are in [our permit guide](/guides/window-replacement-permit-washington). We talk through permits with you before work starts.
 
 ## What we do here
 

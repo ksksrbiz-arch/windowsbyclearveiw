@@ -3,6 +3,14 @@
 Newest first. One entry per change that could move search results, with the numbers
 that motivated it so the follow-up check has a baseline.
 
+## 2026-10-08 — Permit answers on five city pages
+
+**Why.** The area pages sat at positions 22-24 with no clicks (see the 2026-09-29 baseline). "Do I need a permit to replace windows in {city}" is a specific local question the guide already answers from primary sources.
+
+**Changed.** Camas, Battle Ground, Ridgefield, La Center and Brush Prairie each got a first FAQ item and a "Permits in {city}" section linking the permit guide. Vancouver, Washougal and Woodland unchanged (rules not verified).
+
+**Re-check** at 14 and 28 days: clicks, impressions and position for `/areas/camas`, `/areas/battle-ground`, `/areas/ridgefield`, `/areas/la-center`, `/areas/brush-prairie`.
+
 ## 2026-09-29 — Striking-distance titles and descriptions (area pages)
 
 **Why.** Search Console (28 days, Aug 29 to Sep 26, 2026) shows the area pages ranking

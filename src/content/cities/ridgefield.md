@@ -5,6 +5,8 @@ title: Window Replacement in Ridgefield, WA
 description: Window replacement in Ridgefield, WA, from historic downtown to new subdivisions. Free in-home measure and a written estimate. Call (564) 208-0801.
 published: true
 faq:
+  - question: Do I need a permit to replace windows in Ridgefield?
+    answer: The City of Ridgefield's home-improvement page lists window and door replacement of the same size as work that does not need a permit. A different size does. Either way, the new window still has to meet the Washington energy code (U-factor 0.30 or lower). Rules change, so confirm with the city for your address.
   - question: Is Ridgefield mostly new construction now?
     answer: A lot of it is — Ridgefield's one of the fastest-growing cities in the state. But there's still a small historic downtown with older housing mixed in, so we see replacement work in older houses and new-construction window sets in the same week.
   - question: What should a Ridgefield builder have ready before calling?
@@ -22,6 +24,10 @@ That growth means a small historic downtown surrounded by a lot of new framed op
 ## What tends to go wrong
 
 In the historic downtown, it is the usual older-house problems: original sashes, drafts, and a frame that has settled out of square. In the new subdivisions, real defects are rare because most of the housing is only a few years old. When something is wrong, it is more often a builder-grade window or an installation detail than the window itself.
+
+## Permits in Ridgefield
+
+Ridgefield lists same-size window and door replacement as work that does not need a permit. A different size does. The new window still has to meet the state energy code. Rules change and exceptions apply, so confirm for your address. The details, with sources, are in [our permit guide](/guides/window-replacement-permit-washington). We talk through permits with you before work starts.
 
 ## What we do here
 
