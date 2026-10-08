@@ -42,7 +42,9 @@ districts) is done by hand or ad hoc; no script in this repo fetches it yet, and
    D recent buyer in a newer home, E other transfer) and writes `data/mail-pilot/mail-pilot.sql`. The
    output directory is git-ignored; the script refuses any other folder inside the repo.
 3. Read the printed segment tally. Compare it with the last load before going further.
-4. Load it: `npx wrangler d1 execute QUOTES_DB --remote --file=data/mail-pilot/mail-pilot.sql`. This is a
+4. Load it with `wrangler d1 execute ... --remote --file=data/mail-pilot/mail-pilot.sql` against the production database in
+   Mark's account (use the scratch config in `internal/README.md` → "Which database"; the repo's `wrangler.toml` points at a
+   different database). This is a
    merge. A property keeps the `CV-####` code printed on its mail, new properties get the next code, rows
    missing from the new pull are left alone, nothing is deleted.
 5. Open `/internal/mail-pilot` and check the totals, the charts and the Download button (the mail-merge CSV).

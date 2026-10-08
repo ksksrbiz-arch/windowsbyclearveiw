@@ -9,7 +9,8 @@
 // sorts each property into a segment with the one set of rules in functions/internal/_lib/mail-pilot.mjs,
 // and writes mail-pilot.sql, ready for D1:
 //
-//   npx wrangler d1 execute QUOTES_DB --remote --file=data/mail-pilot/mail-pilot.sql
+//   wrangler d1 execute <production database> --remote --file=data/mail-pilot/mail-pilot.sql
+//   (config and account: internal/README.md, "Which database"; the repo's wrangler.toml is local-dev only)
 //
 // Loading is a merge: a property keeps the reference code printed on its mail, new properties get the
 // next code, and nothing is deleted. The output directory holds street addresses and this repository is

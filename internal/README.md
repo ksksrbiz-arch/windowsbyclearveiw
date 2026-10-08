@@ -255,6 +255,9 @@ npm run build:permit-leads -- --since=2026-04-02 # or an explicit start date
 npx wrangler d1 execute QUOTES_DB --remote --file=data/permit-leads/permit-leads.sql
 ```
 
+(`--remote` from the repo root uses the id in `wrangler.toml`, which is not the production database; use the scratch
+config described under "Which database" in the Mail pilot section below. Production held no permit data on 2026-10-08.)
+
 The SQL file replaces the whole snapshot (it deletes and re-inserts), so run it as
 often as you like. The page shows when the data was loaded and its date window.
 `prospects.csv` and `builders.csv` in the same folder hold the same rows for a
@@ -298,8 +301,28 @@ Refresh it from a properties file (row fields: `.ai/workflows/mail-pilot/CONTEXT
 
 ```bash
 npm run build:mail-pilot -- --in=/path/to/properties.json --pulled=2026-10-08   # -> data/mail-pilot/mail-pilot.sql
-npx wrangler d1 execute QUOTES_DB --remote --file=data/mail-pilot/mail-pilot.sql
 ```
+
+then load it into the production database (next paragraph for the command).
+
+**Which database.** Production D1 lives in Mark's Cloudflare account (database `clearveiw-quotes`; its id is under
+Storage & databases > D1 in the dashboard). The `database_id` in the repo's `wrangler.toml` is for local development
+only and is a different database (checked 2026-10-08), so `--remote` from the repo root does not reach production.
+Load with a scratch config outside the repo that names the production id, and pick Mark's account (its Account ID is
+listed by `npx wrangler whoami`):
+
+```bash
+# scratch/wrangler.toml
+#   name = "mail-pilot-load"
+#   [[d1_databases]]
+#   binding = "QUOTES_DB"
+#   database_name = "clearveiw-quotes"
+#   database_id = "<production id from the dashboard>"
+CLOUDFLARE_ACCOUNT_ID=<Mark's account id> npx wrangler d1 execute QUOTES_DB --remote --config scratch/wrangler.toml --file=data/mail-pilot/mail-pilot.sql -y
+```
+
+Check a first look before and after with `--command "SELECT COUNT(*) FROM mail_pilot_properties"`. On 2026-10-08 the
+first load wrote 528 homes (CV-0001 to CV-0528).
 
 The build prints how many homes landed in each group so you can check it before loading. Optional flags:
 `--min-price=50000` and `--cutoff-year=1995` change the two numbers in the group rules; `--out=` must stay
