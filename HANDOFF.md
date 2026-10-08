@@ -1,5 +1,12 @@
 # Project context — Clearview Windows
 
+## 2026-10-07 - Existing repository photo resolution refresh
+
+Audited all 87 tracked raster assets. Fourteen existing photographs below 4K are enhanced with Higgsfield at its maximum 4K setting and replace their sources at the same paths. The unused window-features-installation.jpg reuses the existing window-features-installation-4k.png master. Existing high-resolution job photos, logos, diagrams and model posters are retained. Original photo order, captions, alt text and page placements are unchanged; source aspect ratios are preserved within the upscaler's minor dimension rounding. JPEG exports omit EXIF. Before/after comparisons are inspected, including the retained door-number privacy blur.
+
+WorkCard now supplies 680px and 900px WebP variants for high-density screens, retaining its 450px fallback and the same layout. Inventory and source dimensions: docs/REPO-PHOTO-AUDIT-2026-10-07.md. Validation: all 46 test:all steps and a separate production build passed. Local Edge checks at 1440px, 375px and 320px verify gallery photo order/alt text, image decoding on gallery/siding/guide pages, no horizontal overflow, and 900px image delivery on a 2x desktop screen. Production verification follows the main push.
+
+
 Paste this into a new Claude session to pick up where the last one left off.
 Technical detail lives in [README.md](./README.md); this file is the *why*.
 

@@ -28,11 +28,9 @@ const {
   sizes = '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px',
 } = Astro.props;
 
-// Largest tile render. Sources are far wider than this (1200-3000px), so `width`
-// below pins the fallback `src` to 450 too; without it Astro writes the
-// full-size original as `src`, which crawlers fetch even though browsers
-// pick from `srcset`.
-const widths = [240, 340, 450];
+// Keep the fallback at the desktop tile width. Larger responsive variants
+// use the 4K sources for sharper tiles on high-density screens.
+const widths = [240, 340, 450, 680, 900];
 ---
 <figure class="work-card">
   <div class="work-media">
@@ -40,7 +38,7 @@ const widths = [240, 340, 450];
       src={image}
       alt={alt}
       widths={widths}
-      width={Math.max(...widths)}
+      width={450}
       sizes={sizes}
       format="webp"
       quality={72}
@@ -58,13 +56,7 @@ const widths = [240, 340, 450];
 </figure>
 
 <style>
-  /* ───────────────────────────────────────────────────────────────────────
-     Every source photo here is 450px wide, shot on a phone. That is the hard
-     ceiling on this site and no CSS lifts it. What CSS can do is make the
-     constraint look chosen: a consistent crop, a real frame, and a caption
-     system that treats each tile as a catalogued job rather than a thumbnail
-     floating on the page.
-     ─────────────────────────────────────────────────────────────────────── */
+  /* Consistent crops, frames and captions keep the project grid cohesive. */
   .work-card {
     margin: 0;
     background: var(--paper-raised);

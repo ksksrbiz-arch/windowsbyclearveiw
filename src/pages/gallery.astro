@@ -18,11 +18,7 @@ const heroBg = await getHeroBg(ogPhoto.image);
 // Grouped rather than poured into one long grid: 26 tiles in a single field
 // is a contact sheet, not a portfolio. The groups also let a builder skip
 // straight to framing shots.
-// Every source photo is 450x600, so tiles cannot be made wider without
-// upscaling — a two-column span would ask a 450px file to fill ~800px. Scale
-// therefore varies between groups rather than within them: the elevations run
-// large and tall, the interiors square and mid-sized, install day dense like a
-// contact sheet. Nothing renders above its source width.
+// Group density controls presentation; responsive images use 4K sources.
 const groups = [
   {
     id: 'elevations',
