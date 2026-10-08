@@ -26,6 +26,7 @@ Mission: a trustworthy operating system for Clearview Windows & Trim LLC, not me
 | Customer-facing copy, guides, graphics | `.ai/workflows/public-copy-sweep/`, `.ai/references/public-copy-positioning.md` | internal specialists |
 | GA4, GTM, Meta events | `.ai/workflows/analytics-events/` | copy references |
 | Ship, deploy, domain or mail change | `.ai/workflows/deploy-check/` | analytics, specialists |
+| Direct-mail pilot: refresh the list, read or load Mail pilot data | `.ai/workflows/mail-pilot/` | quote workflows; address data in chat or git |
 | `/ask` routing or specialists | `.ai/references/ask-routing.md`, `.ai/specialists/<id>/CONTEXT.md` | workflows |
 | New Command Center feature | `.ai/references/command-center-gap-analysis.md` | specialists |
 | Install, offline, service worker, manifest (Command Center PWA) | `.ai/references/internal-pwa.md` | workflows, specialists |

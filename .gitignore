@@ -15,6 +15,9 @@ pnpm-debug.log*
 # permit-leads snapshots: owner names and mailing addresses, repo is public
 data/permit-leads/
 
+# mail-pilot load files: street addresses of public record, repo is public
+data/mail-pilot/
+
 # environment variables
 .env
 .env.production
