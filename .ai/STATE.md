@@ -1,5 +1,12 @@
 # ICM State â€” 2026-10-01
 
+## 2026-10-07 - 1Commerce footer credit
+
+Added a subtle teal pill badge, Built by 1Commerce, below the shared public footer. Links to https://1commercesolutions.com in a new tab with noopener noreferrer. Includes a 44px tap target, keyboard focus outline, and reduced-motion support.
+
+Validation: all 46 test:all steps passed, including the production build. Edge browser checks passed at 1440px, 375px and 320px: correct link, visible focus, and no horizontal overflow. Desktop and phone screenshots inspected. Production verification follows the main publication.
+
+
 ## 2026-10-06 - Hali Kimball review card
 
 Added the exact owner-supplied five-star Google quote to /reviews, with source attribution, accessible stars, and no inferred city or posting date. Updated the dated Google summary to 5.0 from two reviews. Static and live cards share the bordered style; live author/quote matches hide duplicate static cards while failures retain the fallback.
