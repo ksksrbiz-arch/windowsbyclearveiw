@@ -66,3 +66,4 @@ jobs:
       - run: npm run test:field-photo-db
       - run: npm run test:general-jobs
       - run: npm run test:contact-import
+      - run: npm run test:internal-audit

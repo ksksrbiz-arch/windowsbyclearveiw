@@ -50,6 +50,17 @@ export function breakEven(input: Partial<BreakEvenInput> | null | undefined): Br
   };
 }
 
+/**
+ * What to say under an empty result: only a problem with something that was actually typed. A profit that is
+ * typed but outside 1 to 100 is the one entry breakEven() rejects on its own, so it gets its own sentence;
+ * every other empty box is covered by "fill in the first four boxes".
+ */
+export function breakEvenProblem(input: Partial<BreakEvenInput> | null | undefined): string | null {
+  const margin = input?.marginPct;
+  if (margin === undefined || margin === null) return null;
+  return !positive(margin) || margin > 100 ? 'Profit has to be a percent from 1 to 100.' : null;
+}
+
 const REF = /^CV-\d{4,}$/;
 
 /**

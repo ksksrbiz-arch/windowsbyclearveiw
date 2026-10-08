@@ -163,6 +163,7 @@ const catalog = {
 
 <script>
   import { formatCents } from '../../../lib/money';
+  import { QUANTITY_MESSAGE, wholeQuantity } from '../../../lib/quote-lines';
 
   type CatalogOpening = { id: string; label: string; low: number; high: number; isDoor: boolean };
   type CatalogMaterial = { id: string; label: string; multiplier: number };
@@ -190,6 +191,28 @@ const catalog = {
 
     const catalog: Catalog = JSON.parse(form.dataset.catalog || '{}');
     const items: LineItem[] = [];
+
+    // A problem with something typed into an add-line or line-item field, shown at the bottom of that block
+    // (and the field focused) so it is visible on a phone, where the browser's own validation bubble may not be.
+    function lineProblem(anchor: HTMLInputElement, message: string) {
+      const host = anchor.closest('fieldset') ?? form;
+      let el = host.querySelector(':scope > [data-line-problem]');
+      if (!(el instanceof HTMLElement)) {
+        if (!message) return;
+        el = document.createElement('p');
+        el.className = 'qb-status';
+        el.setAttribute('role', 'alert');
+        el.setAttribute('data-line-problem', '');
+        host.append(el);
+      }
+      el.hidden = message === '';
+      el.textContent = message;
+      if (message) anchor.focus();
+    }
+    // Clear the message as soon as the field is edited again.
+    function clearProblemOnEdit(input: HTMLInputElement) {
+      input.addEventListener('input', () => lineProblem(input, ''));
+    }
 
     // Windows or siding. Chosen here for a new quote (the ?type=siding link, a siding inquiry, or the radios)
     // and locked for an existing draft: the server refuses to change a saved quote's type.
@@ -225,6 +248,9 @@ const catalog = {
     ) {
       return;
     }
+
+    clearProblemOnEdit(qtyInput);
+    if (sidingAreaInput instanceof HTMLInputElement) clearProblemOnEdit(sidingAreaInput);
 
     const mid = (low: number, high: number) => (low + high) / 2;
 
@@ -282,6 +308,9 @@ const catalog = {
     // Rebuilds the rows. Only for adding, removing and loading lines, never while typing.
     function render() {
       itemsBody.innerHTML = '';
+      // The rows are rebuilt from the saved numbers, so a typed-but-rejected quantity is gone and so is its message.
+      const staleProblem = itemsBody.closest('fieldset')?.querySelector(':scope > [data-line-problem]');
+      if (staleProblem instanceof HTMLElement) staleProblem.hidden = true;
       totalCells = [];
       itemsEmpty.hidden = items.length > 0;
 
@@ -310,9 +339,24 @@ const catalog = {
         qtyInputEl.step = '1';
         qtyInputEl.value = String(item.quantity);
         qtyInputEl.setAttribute('aria-label', 'Quantity');
+        qtyInputEl.dataset.lineQty = '';
         qtyInputEl.addEventListener('input', () => {
-          items[index].quantity = Math.max(1, Number(qtyInputEl.value) || 1);
+          const whole = wholeQuantity(qtyInputEl.value);
+          if (whole === null) {
+            // Keep the last good quantity in the totals; the form will not save until this field is fixed.
+            qtyInputEl.setAttribute('aria-invalid', 'true');
+            lineProblem(qtyInputEl, QUANTITY_MESSAGE);
+            return;
+          }
+          qtyInputEl.removeAttribute('aria-invalid');
+          lineProblem(qtyInputEl, '');
+          items[index].quantity = whole;
           updateTotals();
+        });
+        // The browser's own step/min check blocks the save before our submit handler runs; say why.
+        qtyInputEl.addEventListener('invalid', () => {
+          qtyInputEl.setAttribute('aria-invalid', 'true');
+          lineProblem(qtyInputEl, QUANTITY_MESSAGE);
         });
         qtyCell.append(qtyInputEl);
 
@@ -366,7 +410,12 @@ const catalog = {
       const material = catalog.materials.find((m) => m.id === materialSelect.value) || catalog.materials[0];
       const brand = catalog.brands.find((b) => b.id === brandSelect.value);
       const method = methodSelect.value;
-      const qty = Math.max(1, Number(qtyInput.value) || 1);
+      const qty = wholeQuantity(qtyInput.value);
+      if (qty === null) {
+        lineProblem(qtyInput, QUANTITY_MESSAGE);
+        return;
+      }
+      lineProblem(qtyInput, '');
 
       let unitPrice = mid(opening.low, opening.high) * (material?.multiplier ?? 1);
       if (!opening.isDoor && brand) unitPrice += mid(brand.low, brand.high);
@@ -383,6 +432,7 @@ const catalog = {
     const customQty = form.querySelector('[data-custom-qty]');
     const customPrice = form.querySelector('[data-custom-price]');
     const customAdd = form.querySelector('[data-custom-add]');
+    if (customQty instanceof HTMLInputElement) clearProblemOnEdit(customQty);
     customAdd?.addEventListener('click', () => {
       if (!(customLabel instanceof HTMLInputElement) || !(customQty instanceof HTMLInputElement) || !(customPrice instanceof HTMLInputElement)) return;
       const label = customLabel.value.trim();
@@ -390,10 +440,16 @@ const catalog = {
         customLabel.focus();
         return;
       }
+      const customQuantity = wholeQuantity(customQty.value);
+      if (customQuantity === null) {
+        lineProblem(customQty, QUANTITY_MESSAGE);
+        return;
+      }
+      lineProblem(customQty, '');
       items.push({
         label,
         description: '',
-        quantity: Math.max(1, Number(customQty.value) || 1),
+        quantity: customQuantity,
         unitPrice: Number(customPrice.value) || 0,
       });
       customLabel.value = '';
@@ -419,9 +475,10 @@ const catalog = {
       const area = Math.round(Number(sidingAreaInput.value));
       if (!rate) return;
       if (!Number.isFinite(area) || area < 1) {
-        sidingAreaInput.focus();
+        lineProblem(sidingAreaInput, 'Enter the wall area in square feet, 1 or more.');
         return;
       }
+      lineProblem(sidingAreaInput, '');
       // Quantity is square feet of wall; the unit price is the per-square-foot labor rate. Both stay editable.
       items.push({ label: rate.label, description: 'Per sq ft of total wall area (height × width)', quantity: area, unitPrice: rate.rate });
       sidingAreaInput.value = '';
@@ -577,6 +634,17 @@ const catalog = {
       if (items.length === 0) {
         status.hidden = false;
         status.textContent = 'Add at least one line item first.';
+        return;
+      }
+
+      // Re-check every quantity as typed. The per-field handlers keep the last good number in the totals, so a
+      // field left empty or fractional must stop the save here rather than save a number the person cannot see.
+      const badQty = [...itemsBody.querySelectorAll<HTMLInputElement>('input[data-line-qty]')].find((el) => wholeQuantity(el.value) === null);
+      if (badQty) {
+        badQty.setAttribute('aria-invalid', 'true');
+        status.hidden = false;
+        status.textContent = `${QUANTITY_MESSAGE} Fix the highlighted line.`;
+        badQty.focus();
         return;
       }
 

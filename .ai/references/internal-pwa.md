@@ -123,6 +123,11 @@ quote → plan → approve → sign → job through the API. For offline runs pu
 imitate Cloudflare Access. Then drive Chromium (touch, 390 and 360 wide): overflow, console/network errors, control sizes (>= 16 px,
 >= 36 px), labels, keyboard types. Results and the fixes they led to: `.ai/CHANGELOG.md` (2026-10-03 entries).
 
+Re-run 2026-10-08 (audit, no worker change): the proxy was a 25-line Node server on a second port with two switches (`drop` destroys every
+connection; `access` answers `/internal*` with a 302 to another origin, leaving `/ops-*` public), Chromium with `serviceWorkers: 'allow'`,
+and checks through `postMessage({type:'cv:status'})` plus `caches.open('cv-data-v1').keys()`. Wait for `warm.running === false` before
+counting saved data (the first status call lands mid-run). Pass criteria are the rows of the tables above; the run is in `.ai/CHANGELOG.md`.
+
 ## Not built, on purpose (Cathedral order: Foundation first)
 
 Offline write queue / Background Sync, push notifications (lead alerts already use ntfy), offline quotes or

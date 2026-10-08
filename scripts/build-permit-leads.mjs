@@ -6,8 +6,9 @@
 //
 // Reads public records only (Clark County + City of Vancouver permits and assessor
 // parcels; WA L&I contractor licenses), joins them, and writes:
-//   permit-leads.sql   whole-snapshot replace, ready for D1:
-//                      npx wrangler d1 execute clearview-quotes --remote --file data/permit-leads/permit-leads.sql
+//   permit-leads.sql   whole-snapshot replace, ready for D1. Load it against the production database in
+//                      Mark's account with the scratch config in internal/README.md ("Which database"):
+//                      the repo's wrangler.toml points at a different, local-dev-only database.
 //   prospects.csv, builders.csv   the same rows for a spreadsheet
 //
 // The output directory is git-ignored on purpose: it holds owner names and mailing
