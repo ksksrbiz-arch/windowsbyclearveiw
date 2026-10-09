@@ -43,6 +43,7 @@
     "check:pwa-live": "node scripts/check-pwa-live.mjs",
     "test:internal-pwa": "node scripts/test-internal-pwa.mjs",
     "test:contact-import": "node scripts/test-contact-import.mjs",
+    "test:internal-audit": "node --disable-warning=ExperimentalWarning scripts/test-internal-audit.mjs",
     "test:field-photo-db": "node scripts/test-field-photo-db.mjs",
     "test:dashboard-first-run": "node scripts/test-dashboard-first-run.mjs",
     "test:job-photos": "node --disable-warning=ExperimentalWarning scripts/test-job-photos.mjs",

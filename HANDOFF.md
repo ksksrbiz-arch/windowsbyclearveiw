@@ -1,5 +1,17 @@
 # Project context — Clearview Windows
 
+## 2026-10-08 - Audit and bug-fix pass on the Command Center and phone app (branch `claude/internal-pwa-audit`)
+
+Keith asked for a full audit and bug-fix pass of `/internal` and the phone app. Five bugs were fixed (details and tests: `.ai/CHANGELOG.md`, `scripts/test-internal-audit.mjs`). The one that matters most: **Field mode could not save an opening record** (wrong key names), so no window job could have been completed from the UI. It is fixed; do a first real job end to end on Mark's phone and watch Field mode, closeout and completion.
+
+What the next agent must know:
+- The audit used only synthetic local data. The phone app held up and was left alone. Not testable without hardware or a live sign-in: a real iPhone install, and Cloudflare Access; run `npm run check:pwa-live` after a deploy.
+- Decisions found but not made (surface them, do not change them quietly): (a) approval `actor` on the Build Plan is typed by the browser, so the history is not proof of who approved; (b) the Photograph gate trusts the photo counts the phone sends; (c) write endpoints rely on SameSite=Lax cookies and do not check Origin; (d) sessions are stateless, so a copied cookie works for 30 days after logout (revoking means a server-side session list or rotating `INTERNAL_SESSION_SECRET`); (e) a field gate can be unchecked after a later gate is done; (f) the closeout screen is read-only after finalizing but its checklist items stay editable; (g) the server accepts fractional quote quantities, the builder is whole-number only; (h) dashboard due-today and overdue lists can overlap.
+- Quote quantities on the builder are whole numbers of 1 or more by design and the page now says so; the shared rule is `src/lib/quote-lines.ts`. Field mode builds its evidence body with `src/lib/field-evidence.ts`; if `job-evidence.js` changes its keys, the audit test fails.
+- Revenue note: production has 0 leads, 0 quotes and 1 job. This pass fixed things Mark would have hit on his first real job; more internal tooling before that job is scale before revenue.
+
+Detail: `.ai/CHANGELOG.md` (2026-10-08, audit), `.ai/references/internal-pwa.md` ("Phone audit harness").
+
 ## 2026-10-08 - Mail pilot in the Command Center (branch `claude/mail-pilot-internal`)
 
 Keith (Mark's marketing and dev person) asked for the direct-mail research to be packaged into Mark's Command Center. It is now `/internal/mail-pilot`: 528 Clark County homes that sold or pulled a re-roof/remodel permit, sorted into groups A-E, with charts, a break-even box and a mail-merge CSV (wave 1 = groups A, B, C = 193 homes). The "internal" in the request was read as the `/internal` Command Center of this site; that reading was not confirmed.

@@ -52,7 +52,15 @@ export async function verifySessionToken(token, secret) {
 export function readCookie(request, name) {
   const header = request.headers.get('cookie') || '';
   const match = new RegExp(`(?:^|;\\s*)${name}=([^;]+)`).exec(header);
-  return match ? decodeURIComponent(match[1]) : '';
+  if (!match) return '';
+  // A cookie the browser (or anyone) sent with a bad percent escape, such as `cv_session=%E0%A4%A`,
+  // makes decodeURIComponent throw. Uncaught, that is a 500 on every /internal page for that browser
+  // instead of the sign-in page. It is simply not a valid session.
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return '';
+  }
 }
 
 export function sessionCookie(token) {

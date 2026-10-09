@@ -122,7 +122,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
 </InternalLayout>
 <script>
   import { barChart, columnChart } from '../../lib/charts';
-  import { breakEven, trackingLink } from '../../lib/mail-pilot';
+  import { breakEven, breakEvenProblem, trackingLink } from '../../lib/mail-pilot';
 
   type Row = { label: string; value: number };
   type Segment = { key: string; name: string; wave: string; rule: string; addresses: number };
@@ -361,13 +361,14 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   function paintMath() {
     const out = $('[data-math-result]');
     if (!(out instanceof HTMLElement)) return;
-    const result = breakEven({
+    const inputs = {
       pieces: readNumber('pieces') ?? undefined,
       costPerPiece: readNumber('cost') ?? undefined,
       jobValue: readNumber('job') ?? undefined,
       marginPct: readNumber('margin') ?? undefined,
       closePct: readNumber('close'),
-    });
+    };
+    const result = breakEven(inputs);
     out.replaceChildren();
     const line = (text: string, strong = false) => {
       const p = document.createElement('p');
@@ -378,7 +379,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     if (!result) {
       const p = document.createElement('p');
       p.className = 'mp-empty';
-      p.textContent = 'Fill in the first four boxes to see the result. Profit has to be a percent from 1 to 100.';
+      p.textContent = ['Fill in the first four boxes to see the result.', breakEvenProblem(inputs)].filter(Boolean).join(' ');
       out.append(p);
       return;
     }
