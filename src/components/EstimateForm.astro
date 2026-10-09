@@ -70,7 +70,13 @@ function bindEstimate() {
     if (role instanceof HTMLInputElement) role.checked = true;
   }
   if (window.history.replaceState && ['home_type', 'openings', 'opening_type', 'concern', 'stage', 'scope', 'role', 'service'].some((key) => params.has(key))) {
-    window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash}`);
+    const campaign = new URLSearchParams();
+    for (const key of ['utm_source', 'utm_medium', 'utm_campaign']) {
+      const value = params.get(key);
+      if (value && /^[a-zA-Z][a-zA-Z0-9_.-]{0,99}$/.test(value)) campaign.set(key, value);
+    }
+    const search = campaign.size ? `?${campaign.toString()}` : '';
+    window.history.replaceState({}, '', `${window.location.pathname}${search}${window.location.hash}`);
   }
 
   // Turnstile (only present when a site key is configured). Explicit render so it also works after
