@@ -2,11 +2,11 @@
 import { getHeroBg } from '../../lib/hero-bg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
-import { pricingIsUsable } from '../../data/pricing';
+import { showPublicPrices } from '../../data/pricing';
 import { site } from '../../data/site';
 import { findWork } from '../../data/work';
 
-const showMoney = pricingIsUsable();
+const showMoney = showPublicPrices();
 
 const heroPhoto = findWork('caulk-gun-interior-sill')!;
 const heroBg = await getHeroBg(heroPhoto.image);
@@ -34,7 +34,7 @@ const schema = {
 ---
 <BaseLayout
   title="Free window replacement tools"
-  description="Free tools for Clark County homeowners planning a window replacement, including a cost calculator — no email required."
+  description={showMoney ? "Free tools for Clark County homeowners planning a window replacement, including a cost calculator — no email required." : "Free tools for Clark County homeowners planning a window replacement, including a project planner that turns your opening count into a quote request."}
   path="/tools"
   crumbs={[{ name: 'Tools', href: '/tools' }]}
   schema={schema}
@@ -60,9 +60,9 @@ const schema = {
             {showMoney ? 'Window replacement cost calculator' : 'Window project planner'}
           </h2>
           <p>
-            Count your openings, choose a material, and see where a Clark County
-            project lands before anyone comes out. It runs entirely in your browser — nothing
-            is sent anywhere unless you decide to send it.
+            {showMoney
+              ? 'Count your openings, choose a material, and see where a Clark County project lands before anyone comes out. It runs entirely in your browser — nothing is sent anywhere unless you decide to send it.'
+              : 'Count your openings, add the details that apply, and send the whole project to us as a quote request. Counting runs in your browser — nothing is sent anywhere unless you decide to send it.'}
           </p>
           <p class="tool-go">Open the tool <span aria-hidden="true">&rarr;</span></p>
         </div>
@@ -70,7 +70,7 @@ const schema = {
         <ul class="tool-facts">
           <li><strong>Free</strong><span>No account, no email</span></li>
           <li><strong>Private</strong><span>Runs in your browser</span></li>
-          <li><strong>Clear</strong><span>A range, not a single figure</span></li>
+          <li><strong>Clear</strong><span>{showMoney ? 'A range, not a single figure' : 'Straight into your quote request'}</span></li>
         </ul>
       </a>
 

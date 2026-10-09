@@ -1,10 +1,10 @@
 ---
 title: Cascade vs Milgard windows
-description: The real difference between the two window lines Clearview installs — where they're made, what they cost, and when the step up to Milgard is worth it.
+description: The real difference between the two window lines Clearview installs — where they're made, how the pricing differs, and when Milgard is worth it.
 kicker: Guide
 topic: Product
 published: true
-updated: 2026-09-04
+updated: 2026-10-09
 order: 6
 heroImage: ../../assets/work/blue-slider.jpg
 heroImageAlt: White slider window installed on a dark blue house beside a wood deck, showing a finished Clearview installation.
@@ -60,7 +60,7 @@ That manufacturer warranty is separate from Clearview's install warranty — the
 
 ## What it costs
 
-On Clearview's own pricing, Cascade is the baseline window — no added charge over the base installed price for a standard vinyl opening. Milgard adds roughly $100 per window opening on top of that same install, for the upgraded product. That gap is per window, not per house — it does not apply to doors, since the brand choice here is a window-line decision, not a door one. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how that fits into a full quote.
+On Clearview's own pricing, Cascade is the baseline window — no added charge over the base installed price for a standard vinyl opening. Milgard adds a per-window charge on top of that same install, for the upgraded product, and your written estimate shows it as its own line. That gap is per window, not per house — it does not apply to doors, since the brand choice here is a window-line decision, not a door one. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how that fits into a full quote.
 
 ## How to decide
 

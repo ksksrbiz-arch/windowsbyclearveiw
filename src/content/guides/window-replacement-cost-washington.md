@@ -1,14 +1,14 @@
 ---
 title: Window replacement cost in Washington
-description: What drives the price of replacement windows in Washington — scope, material, glass, and access — plus honest ranges and what a measure is for.
+description: What drives the price of replacement windows in Washington — scope, material, glass, and access — and what a measure is for.
 kicker: Planning the budget
 topic: Cost
 published: true
-updated: 2026-08-30
+updated: 2026-10-09
 order: 4
 faq:
   - question: How much does one window cost in Washington?
-    answer: Public 2026 guides often put a typical installed vinyl unit in the mid hundreds to low thousands, depending on size, glass, and how much work the opening needs. A measure beats any average.
+    answer: It depends on size, glass, and how much work the opening needs, and no average tells you what yours will be. We do not publish prices. We measure your openings and put the number in a written estimate.
   - question: Is there still a federal tax credit for windows?
     answer: The Section 25C energy-efficient home improvement credit ended for property placed in service after December 31, 2025. Do not count on it for a 2026 install. Some Washington utilities still offer window rebates. Those change by fuel type and U-factor, so we check your utility at estimate time.
   - question: Why is a whole-house price so wide?
@@ -20,7 +20,7 @@ heroImageFocus: 50% 50%
 secondaryDiagram: cost-build-up
 ---
 
-Short answer: published 2026 industry data puts a standard vinyl replacement window in Washington at roughly **$600 to $1,300 installed per opening**, with Seattle-area labor toward the top of that band. That is a regional average, not a quote. The number that matters is the one we give you after measuring your openings. This page is here so that number is not a surprise.
+Short answer: what a replacement window costs in Washington depends on the opening, the window, the glass, and access, and no regional average tells you what your house will cost. We do not publish prices. The number that matters is the one we give you after measuring your openings. This page is here so that number is not a surprise.
 
 ## What you are paying for
 
@@ -33,9 +33,9 @@ Four things move the bid:
 
 Permits, if the city requires them for the scope, sit on top of that. Whether you need one depends on where you live; see [do you need a permit to replace windows in Washington](/guides/window-replacement-permit-washington).
 
-## Ranges, not quotes
+## Why we measure first
 
-That per-opening figure is a starting point, not a ceiling. A handful of windows can land in the low thousands once scope and access are added. A mid-size house is often a five-figure project. Bay windows, sliding and French doors, and openings that need extra work cost well above a typical opening built around a standard vinyl window in a sound opening.
+A handful of windows and a whole-house project are very different jobs, and scope and access change either one. Bay windows, sliding and French doors, and openings that need extra work cost more than a typical opening built around a standard vinyl window in a sound opening.
 
 Your openings, your trim, and the work each opening needs will move the number, which is what a measure is for.
 
