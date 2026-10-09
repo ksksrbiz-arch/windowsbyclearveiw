@@ -1,5 +1,12 @@
 # ICM Changelog
 
+
+## 2026-10-09 - Website buying intent and Tag Manager audit
+
+Added fixed, privacy-limited buying-intent events for service/pricing/reviews visits, calculator starts/results/handoffs, estimate and callback form progress/errors, consultant starts, FAQ opens, review/email/download/outbound clicks, active reading and studio starts. Browser counters expire after 90 days and honor GPC/DNT. Submitted leads carry bounded, allowlisted activity to a lazily added intent_json column; Leads displays fixed signals, browser sessions and deterministic engagement score. GA4 Analytics adds a fail-soft 28-day behavior chart. Updated privacy disclosures. No form contents or internal visitor ID enter GA4.
+
+Browser GTM audit paused duplicate generated GA4 config/event bridge tags, sanitized URLs/referrers/clicks, narrowed Meta's broad custom trigger and limited Ahrefs initialization to once per page. GA4 enhanced automatic form/search/outbound/download events were disabled in favor of explicit counts. Synthetic local calculator and form-start flow appeared in Google DebugView; transport URLs exclude scope/query notes. Chrome DNT=1 independently suppressed new events. The local test fixture is discarded by the final rebuild. All 48 required checks passed initially; final checks and production verification follow before publishing main. Internal live UI sign-in rejected the active Cloudflare account; authorized sign-in is pending, so GA4 server reader connection remains unverified.
+
 ## 2026-10-08 - Google reviews visibility and branded panel
 
 Added Reviews to desktop and mobile navigation, and live Google rating badges to the home hero, shared estimate CTA, footer and estimate form sidebar. A shared browser request updates ratings across page transitions without extra requests for each badge. Failed feeds leave a plain reviews link without a rating claim. The reviews page now leads with a white Google-branded panel, Google logo, gold stars, live rating/count, three written customer reviews and a direct write-review button. Customer text still uses textContent. Corrected the dated fallback to the verified 5.0 / 4 ratings on 2026-10-08. Review cards now reinitialize on client navigation.

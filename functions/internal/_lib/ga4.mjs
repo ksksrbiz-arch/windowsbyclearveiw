@@ -91,6 +91,8 @@ async function accessToken(config, fetchImpl, now) {
   return tokenCache.token;
 }
 
+import { INTENT_EVENTS, INTENT_LABELS } from '../../_lib/intent.mjs';
+
 const RANGES = [
   { startDate: '7daysAgo', endDate: 'today', name: 'last7' },
   { startDate: '28daysAgo', endDate: 'today', name: 'last28' },
@@ -217,7 +219,16 @@ export async function fetchGa4Summary(env, { fetchImpl = fetch, now = Date.now()
       body: JSON.stringify({ requests: buildRequests() }),
     });
     if (!response.ok) return { status: 'unavailable' };
-    return { status: 'ok', propertyId: config.propertyId, ...normalizeReports(await response.json()) };
+    const summary = normalizeReports(await response.json());
+    let intentEvents = null;
+    try {
+      const eventsResponse = await fetchImpl(`${DATA_API}/${config.propertyId}:runReport`, {
+        method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ dateRanges: [RANGES[1]], dimensions: [{ name: 'eventName' }], metrics: [{ name: 'eventCount' }], dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: INTENT_EVENTS } } }, orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }], limit: 31 }),
+      });
+      if (eventsResponse.ok) intentEvents = topRows(await eventsResponse.json()).filter(row => INTENT_EVENTS.includes(row.label)).map(row => ({ ...row, label: INTENT_LABELS[row.label] }));
+    } catch { /* Optional behavior report must not blank traffic or pipeline. */ }
+    return { status: 'ok', propertyId: config.propertyId, ...summary, intentEvents };
   } catch {
     return { status: 'unavailable' };
   }

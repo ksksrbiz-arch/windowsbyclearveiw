@@ -159,7 +159,7 @@ await ok(async () => {
   }
   assert.ok(!privacy.includes('None of the words from your conversation are stored'), 'the old "nothing stored" claim is gone');
   assert.ok(!/do not keep a copy of your messages/i.test(privacy), 'the old "no copy" claim is gone');
-  assert.match(privacy, /updated: 2026-10-03/, 'the policy carries today\'s date');
+  assert.match(privacy, /updated: 2026-10-09/, 'the policy carries today\'s date');
 });
 
 console.log(`ask logs: ok (${groups} groups)`);

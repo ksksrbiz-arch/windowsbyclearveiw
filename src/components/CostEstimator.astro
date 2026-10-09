@@ -167,6 +167,7 @@ const model = {
 </section>
 
 <script>
+  import { trackIntent } from '../scripts/intent-tracking';
   type OpeningRow = { id: string; label: string; low: number; high: number; isDoor?: boolean };
   type ModifierRow = { id: string; label: string; perOpening: boolean; low: number; high: number };
   type BrandRow = { id: string; label: string; low: number; high: number };
@@ -213,7 +214,8 @@ const model = {
         (el) => el.value,
       );
 
-    function render() {
+    function render(userAction = false) {
+      if (userAction) trackIntent("calculator_start");
       const picked = model.openings
         .map((opening) => ({ ...opening, count: counts.get(opening.id) || 0 }))
         .filter((opening) => opening.count > 0);
@@ -223,6 +225,7 @@ const model = {
       if (empty instanceof HTMLElement) empty.hidden = total > 0;
       if (summary instanceof HTMLElement) summary.hidden = total === 0;
       if (total === 0) return;
+      if (userAction) trackIntent("calculator_result");
 
       // With a single material the step is not rendered, so nothing is checked
       // and this falls through to the only entry — vinyl, multiplier 1.
@@ -374,12 +377,12 @@ const model = {
         // rather than the count being the only difference between twelve rows.
         button.closest('.counter')?.classList.toggle('is-chosen', next > 0);
         syncStepper(id);
-        render();
+        render(true);
       });
     });
 
     root.addEventListener('change', (event) => {
-      if (event.target instanceof HTMLInputElement) render();
+      if (event.target instanceof HTMLInputElement) render(true);
     });
 
     render();

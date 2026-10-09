@@ -47,6 +47,7 @@ function mockFetch({ tokenOk = true, reportsOk = true, reports = goodReports } =
         ? new Response(JSON.stringify({ access_token: 'tok-abc', expires_in: 3600 }), { status: 200 })
         : new Response(JSON.stringify({ error: 'invalid_grant', detail: PRIVATE_KEY }), { status: 400 });
     }
+    if (String(url).endsWith(':runReport')) return new Response(JSON.stringify({ rows: [row(['calculator_start'], [12]), row(['calculator_result'], [8]), row(['secret_name'], [3])] }));
     return reportsOk
       ? new Response(JSON.stringify(reports), { status: 200 })
       : new Response(JSON.stringify({ error: { message: `secret ${EMAIL}` } }), { status: 403 });
@@ -103,6 +104,7 @@ function mockFetch({ tokenOk = true, reportsOk = true, reports = goodReports } =
   assert.equal(body.requests[1].dimensionFilter.filter.stringFilter.value, 'generate_lead');
   assert.deepEqual(result.last7, { users: 40, sessions: 55, pageViews: 130, leadEvents: 2 });
   assert.deepEqual(result.last28, { users: 150, sessions: 210, pageViews: 520, leadEvents: 7 });
+  assert.deepEqual(result.intentEvents, [{ label: 'Used the calculator', value: 12 }, { label: 'Built a calculator result', value: 8 }]);
   assert.equal(result.topPages[0].label, '/replacement');
   assert.equal(result.channels[0].value, 120);
   assert.ok(result.topPages.every((p) => p.label.length <= 120 && !/[\u0000-\u001f]/.test(p.label)), 'labels are bounded and control-free');

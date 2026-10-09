@@ -140,6 +140,7 @@ import WorkTypeFilter from '../../components/WorkTypeFilter.astro';
                 ${lead.email ? `<a class="ld-action" href="mailto:${escapeHtml(lead.email)}">Email</a>` : ''}
               </div>
               ${lead.notes ? `<p class="ld-notes">${escapeHtml(lead.notes)}</p>` : ''}
+              ${lead.intent ? `<p class="ld-meta"><strong>Website engagement: ${Number(lead.intent.score)}/100</strong> &middot; ${Number(lead.intent.sessions)} browser visit(s)<br>${lead.intent.signals.map(escapeHtml).join(" &middot; ")}<br><small>Browser-reported activity before this request; a prioritization aid, not a buying prediction.</small></p>` : ""}
               <details class="ld-journey-wrap">
                 <summary>${lead.visit_count || 0} page${lead.visit_count === 1 ? '' : 's'} viewed this visit &middot; ${arrivalLine(lead)}</summary>
                 ${renderJourney(lead)}

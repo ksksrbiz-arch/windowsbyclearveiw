@@ -17,7 +17,10 @@ import '../styles/estimate-form.css';
 </form>
 <div class="form-success" data-success hidden><p class="kicker">Received</p><h2>We have the request.</h2><p>We will follow up, usually the same day. If you would rather talk now, call <a href={telHref()}>{site.phoneDisplay}</a>.</p></div>
 {site.turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>}
-<script define:vars={{ phoneDisplay: site.phoneDisplay }}>
+<script>
+import { site } from "../data/site";
+import { readIntent, trackIntent } from "../scripts/intent-tracking";
+const phoneDisplay = site.phoneDisplay;
 function bindEstimate() {
   const form = document.getElementById('estimate-form');
   const status = document.querySelector('[data-status]');
@@ -124,7 +127,7 @@ function bindEstimate() {
         try { visits = JSON.parse(sessionStorage.getItem('clearview:visits') || '[]'); } catch {}
         let firstTouch = null;
         try { firstTouch = JSON.parse(localStorage.getItem('clearview:first_touch') || 'null'); } catch {}
-        journey.value = JSON.stringify({ visits, firstTouch });
+        journey.value = JSON.stringify({ visits, firstTouch, intent: readIntent() });
       }
     } catch {}
   }
@@ -132,6 +135,7 @@ function bindEstimate() {
     event.preventDefault();
     status.textContent = '';
     clearFieldErrors();
+    trackIntent('estimate_form_attempt', false);
     populateVisitJourney();
     if (button instanceof HTMLButtonElement) { button.disabled = true; button.textContent = 'Sending…'; }
     try {
@@ -149,6 +153,7 @@ function bindEstimate() {
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
       try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'generate_lead', method: 'estimate_form_js' }); } catch {}
     } catch (error) {
+      trackIntent('estimate_form_error', false);
       try { if (widgetId !== null && window.turnstile) window.turnstile.reset(widgetId); } catch {}
       status.textContent = error instanceof Error ? error.message : 'Could not send. Please call us instead.';
       if (button instanceof HTMLButtonElement) { button.disabled = false; button.textContent = idleLabel || 'Send estimate request'; }

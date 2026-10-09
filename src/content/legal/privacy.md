@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 description: What Clearview Windows collects when you use this website, who processes it, and how to have it deleted.
-updated: 2026-10-03
+updated: 2026-10-09
 order: 1
 summary: This site uses Google Analytics and Cloudflare Web Analytics to see which pages get read, which sets a cookie and assigns you a random ID. It also runs a Meta (Facebook/Instagram) advertising pixel, which sets its own cookie and tells Meta when a page is viewed and when the estimate form is submitted, so we can measure our own Facebook/Instagram ads. If you submit the estimate form, we also keep your submission and the pages you viewed beforehand in our own database, tied to your name — never sold, shared, or used to build a mailing list. The /ask consultant sends what you type to an AI service (Groq or Google) to write its answers, analyzes any photo you attach on Cloudflare, and keeps no photos. We keep each question and answer for 30 days, with phone numbers, email addresses, street addresses and similar details removed, so we can see what people ask, and then delete them. If you ask it for a call back, that request is handled like an estimate request.
 ---
@@ -59,14 +59,18 @@ Analytics side by side, and they work differently:
   processed on Google's servers under Google's own privacy policy, which we do
   not control.
 
+  We also send Google Analytics event counts for calculator starts and results,
+  form starts, attempts and errors, review and download clicks, service and pricing
+  page visits, and 30 active seconds on a page. We do not send form contents,
+  calculator project details, or our internal browser ID in these events.
   We also send Google Analytics a small number of aggregate event counts: when
   someone clicks a phone number, clicks a link to the estimate form, reads at
   least three-quarters of the way down a guide article, or submits the
   estimate form. These only count how often each thing happens across all
   visitors — the same cookie-based ID as above, no new personal information.
 
-We use both to see which pages are worth writing and which are not. That is
-the whole purpose.
+We use these counts to improve pages, find problems in inquiry forms,
+measure campaigns, and understand which website actions precede an inquiry.
 
 **Advertising.** The site also runs a Meta (Facebook/Instagram) pixel,
 delivered through the same Google Tag Manager. Unlike the analytics tools
@@ -80,7 +84,7 @@ ad, or if you are logged into Facebook or Instagram in the same browser, Meta
 may be able to connect this visit to your account; if you use ad blockers or
 tracking protection, some or all of this pixel will not load at all.
 
-**We do not collect** heatmaps, session recordings, mouse or scroll tracking,
+**We do not collect** heatmaps, session recordings, individual mouse movements, or continuous scroll recordings,
 or location beyond the city you type in.
 
 ## The website consultant (/ask)
@@ -171,6 +175,15 @@ pages viewed in your current browsing session, cleared when you close the
 tab). None of these are cookies, and none are sent anywhere in the
 background — they only reach us if you submit the estimate form or a
 call-back request.
+
+We also keep `clearview:intent` and `clearview:intent_last` locally. The activity summary
+expires after 90 days and starts over on your next visit. They contain fixed action counts
+and the number of browser visits (a new visit starts after 30 inactive minutes).
+The summary reaches Clearview only with a submitted inquiry. We show an
+engagement score to help the owner read that inquiry; it does not predict a
+purchase or trigger unsolicited messages. The additional intent tracking honors
+Global Privacy Control and Do Not Track. Clearing browser storage clears this
+summary; other analytics and hosting described above have separate controls.
 
 ## Requests your browser makes to other companies
 

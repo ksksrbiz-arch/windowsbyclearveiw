@@ -469,3 +469,11 @@ shouldn't be silently editable.
 - **Single shared password.** There's no per-user login, audit log of who
 created which quote, or password reset flow. Fine for one person (Mark);
 revisit if a second person needs access.
+
+### Website buying intent (2026-10-09)
+
+GTM-WGCFVHQM sends fixed `cv_intent` action names to G-YE96XMJSWJ. URLs and referrers exclude query strings; contact fields and internal browser IDs stay out of GA4. Duplicate generated GA4 bridge tags are paused.
+
+Additional browser action counters expire after 90 days and honor GPC/DNT. Submitted leads carry bounded, allowlisted activity into `leads.intent_json`; the Leads page shows browser visits, signals and a deterministic engagement score. It is a reading aid, not purchase likelihood or a trigger for automated contact. Shared devices, blocked storage and altered browser data limit reliability. Older leads remain without a score.
+
+Analytics shows a 28-day action chart when the existing GA4 read-only service account is configured. Use calculator starts/results/handoffs and form starts/attempts/errors to locate drop-offs. Compare submitted requests to signed quotes and collected payments in the existing D1 pipeline. Phone clicks measure interest, not completed calls. Keep conversions limited to confirmed submissions.

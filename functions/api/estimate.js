@@ -1,3 +1,4 @@
+import { normalizeIntent, ensureLeadIntentColumn } from '../_lib/intent.mjs';
 import { sendLeadAlert } from '../_lib/lead-alert.mjs';
 import { takeRateLimit, verifyTurnstile } from '../_lib/abuse-guard.mjs';
 import { ensureLeadServiceColumn, leadServiceFromForm } from '../_lib/lead-service.mjs';
@@ -168,7 +169,7 @@ function parseJourney(raw) {
           ts: Number.isFinite(Number(first.ts)) ? Number(first.ts) : null,
         }
       : null;
-    return { visits, firstTouch };
+    return { visits, firstTouch, intent: normalizeIntent(parsed?.intent) };
   } catch {
     return empty;
   }
@@ -206,13 +207,14 @@ async function logLead(env, lead, journey, visitorId) {
   try {
     const first = journey.firstTouch || {};
     // The service tag is a convenience: if the column cannot be added, the lead is saved without it.
+    const hasIntent = await ensureLeadIntentColumn(env.QUOTES_DB);
     const tagged = lead.service && (await ensureLeadServiceColumn(env.QUOTES_DB));
     await env.QUOTES_DB.prepare(
       `INSERT INTO leads (
         created_at, name, phone, email, city, role, notes, visitor_id,
         first_seen_at, first_referrer, first_utm_source, first_utm_medium, first_utm_campaign, landing_path,
-        visit_count, page_views_json${tagged ? ', service' : ''}
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?${tagged ? ',?' : ''})`,
+        visit_count, page_views_json${tagged ? ', service' : ''}${hasIntent ? ', intent_json' : ''}
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?${tagged ? ',?' : ''}${hasIntent ? ',?' : ''})`,
     )
       .bind(
         new Date().toISOString(),
@@ -232,6 +234,7 @@ async function logLead(env, lead, journey, visitorId) {
         journey.visits.length,
         JSON.stringify(journey.visits),
         ...(tagged ? [lead.service] : []),
+        ...(hasIntent ? [journey.intent ? JSON.stringify(journey.intent) : null] : []),
       )
       .run();
   } catch (error) {

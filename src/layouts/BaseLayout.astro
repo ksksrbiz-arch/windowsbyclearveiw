@@ -229,6 +229,7 @@ const breadcrumbSchema =
     <Footer />
     <MobileCtaBar />
     <script>
+      import { trackIntent } from "../scripts/intent-tracking";
       // Gate the hidden state on JS actually running: if this script never
       // executes, `.reveal-ready` is never set and everything stays visible.
       function initReveal() {
@@ -306,7 +307,7 @@ const breadcrumbSchema =
         window.dataLayer.push({
           event: 'spa_page_view',
           page_title: document.title,
-          page_location: window.location.href,
+          page_location: window.location.origin + window.location.pathname,
           page_path: window.location.pathname,
         });
       }
@@ -401,6 +402,7 @@ const breadcrumbSchema =
           const depth = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 100;
           if (depth < 75) return;
           fired = true;
+          trackIntent("guide_read");
           try {
             // @ts-expect-error — initialized by the GTM snippet in <head>.
             window.dataLayer = window.dataLayer || [];

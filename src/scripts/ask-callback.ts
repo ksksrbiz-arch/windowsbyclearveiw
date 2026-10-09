@@ -8,6 +8,7 @@
  * so validation, the lead record, the phone alert and the email all stay in one
  * place (role "Ask assistant" marks where the lead came from).
  */
+import { readIntent, trackIntent } from './intent-tracking';
 import {
   buildLeadNotes,
   isHandoffKind,
@@ -59,7 +60,7 @@ function visitContext(): { visitorId: string; journey: string } {
   } catch {
     // Private mode or blocked storage: the lead simply has no journey.
   }
-  return { visitorId, journey: JSON.stringify({ visits, firstTouch }) };
+  return { visitorId, journey: JSON.stringify({ visits, firstTouch, intent: readIntent() }) };
 }
 
 function query<T extends Element>(root: ParentNode, selector: string): T | null {
@@ -145,6 +146,7 @@ function bindDialog(dialog: HTMLDialogElement): void {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    trackIntent('callback_form_attempt', false);
     clearErrors();
     const data = new FormData(form);
     data.set('role', LEAD_ROLE);
@@ -171,6 +173,7 @@ function bindDialog(dialog: HTMLDialogElement): void {
       success.querySelector<HTMLElement>('[data-callback-close]')?.focus();
       pushEvent({ ...SUCCESS_EVENT });
     } catch (error) {
+      trackIntent('callback_form_error', false);
       // A TypeError is the browser reporting a network failure; its text is not for visitors.
       status.textContent =
         error instanceof Error && !(error instanceof TypeError)

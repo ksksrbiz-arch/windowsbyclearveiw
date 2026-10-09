@@ -113,6 +113,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     <div class="an-grid" data-ga4-lists hidden>
       <article class="an-panel an-wide"><h3>Sessions and visitors per day</h3><div class="an-chart" data-chart="ga4Daily"></div></article>
       <article class="an-panel"><h3>Where sessions come from</h3><div class="an-chart" data-chart="channels"></div></article>
+      <article class="an-panel"><h3>Website buying signals</h3><p>Action counts over 28 days. These are interest signals, not purchases or distinct leads.</p><div class="an-chart" data-chart="intentEvents"></div></article>
       <article class="an-panel"><h3>Most viewed pages</h3><div class="an-chart" data-chart="topPages"></div></article>
     </div>
   </section>
@@ -139,6 +140,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     last28?: Record<string, number>;
     topPages?: Row[];
     channels?: Row[];
+    intentEvents?: Row[] | null;
     daily?: { date: string; sessions: number; users: number }[];
   };
   type Leads = {
@@ -284,6 +286,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
         build: (width) => donutChart(ga4.channels, { width, title: 'Sessions by channel, last 28 days', centerLabel: 'sessions' }),
         empty: 'No sessions recorded yet.',
       });
+      setChart('intentEvents', { build: (width) => barChart(ga4.intentEvents ?? [], { width, title: 'Website actions, last 28 days' }), empty: ga4.intentEvents === null ? 'Behavior report unavailable.' : 'No new buying signals recorded yet.' });
       setChart('topPages', {
         build: (width) => barChart(ga4.topPages, { width, title: 'Most viewed pages, last 28 days' }),
         empty: 'No page views recorded yet.',
