@@ -20,6 +20,6 @@ Email: owner@windowsbyclearveiw.com
 Service area: Based in Vancouver, WA. Installs throughout Clark County — Vancouver, Camas, Washougal, Battle Ground, Brush Prairie, Ridgefield, La Center, Woodland. Does not serve Portland, OR or other Oregon locations.
 Hours: By appointment.
 Estimates: Free measure and written estimate — request one at /estimate.
-Cost tool: A free online cost calculator at /tools/window-replacement-cost-calculator gives a price range from Clearview's own installed pricing. It is not a firm quote.
+Pricing: Clearview does not publish prices. Every opening is measured in person and the price is given in a written estimate. The free project planner at /tools/window-replacement-cost-calculator lets a visitor list their openings and send them straight into the quote request at /estimate.
 Facebook: https://www.facebook.com/share/18pyB4MHkS/
 `.trim();

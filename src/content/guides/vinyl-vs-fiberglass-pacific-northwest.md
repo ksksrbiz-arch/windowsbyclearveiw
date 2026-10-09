@@ -5,7 +5,7 @@ description: How vinyl and fiberglass window frames actually perform in a wet, m
 kicker: Guide
 topic: Product
 published: true
-updated: 2026-09-04
+updated: 2026-10-09
 order: 7
 heroImage: ../../assets/work/tan-upper-slider.jpg
 heroImageAlt: Close view of an upper-story white slider on tan vertical siding, showing the kind of opening where frame size and exposure matter.
@@ -21,7 +21,7 @@ faq:
   - question: Why does frame size matter so much to this choice?
     answer: A wider slider or picture window has more unsupported span. Vinyl flexes more under wind load and thermal movement across that span; fiberglass's stiffness and lower expansion rate keep it flatter and the seal tighter. On a small standard window, that difference rarely matters.
   - question: Does fiberglass actually cost that much more?
-    answer: Yes, meaningfully — expect roughly 30-40% more than a comparable vinyl unit installed. It's worth confirming on the specific opening rather than assuming it across the whole house.
+    answer: Yes, meaningfully — it costs more than a comparable vinyl unit installed. It's worth confirming on the specific opening rather than assuming it across the whole house.
   - question: Which one insulates better?
     answer: Frame material has a smaller effect on whole-window performance than the glass package does. Both vinyl and fiberglass frames, built well with a good Low-E glass unit, land in a similar U-factor range — the frame choice is mostly about movement, stiffness, and cost, not a big jump in energy performance.
 ---
@@ -56,7 +56,7 @@ Dark vinyl in direct sun also runs hotter than a light color, and heat combined 
 
 ## Cost
 
-Fiberglass costs more — plan on roughly 30 to 40% more than a comparable vinyl unit installed, reflecting the frame's manufacturing cost, not a markup for the name. On a standard-size opening where the durability difference barely shows up, that premium is hard to justify on function alone. On a wide slider, a large picture window, or a run of matching dark-colored windows across a street-facing elevation, it buys real, measurable stability. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how material choice fits into a full quote.
+Fiberglass costs more than a comparable vinyl unit installed, reflecting the frame's manufacturing cost, not a markup for the name. On a standard-size opening where the durability difference barely shows up, that premium is hard to justify on function alone. On a wide slider, a large picture window, or a run of matching dark-colored windows across a street-facing elevation, it buys real, measurable stability. See [what a Washington project costs](/guides/window-replacement-cost-washington) for how material choice fits into a full quote.
 
 ## How to decide
 

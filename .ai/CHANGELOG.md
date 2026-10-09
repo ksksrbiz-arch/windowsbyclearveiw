@@ -1,5 +1,11 @@
 # ICM Changelog
 
+## 2026-10-09 - No public pricing (calculator is now a quote funnel)
+
+Owner direction (Mark): no dollar figures anywhere on the public site. One switch, `publicPricing = false` in `src/data/pricing.ts`, mirrored as `PUBLIC_PRICING` in `functions/ask/_lib/pricing.mjs` (`npm run test:ask-pricing` fails on drift). The price data itself is untouched and still feeds the Command Center quote builder. The calculator page (URL unchanged) is now a project planner: count openings, pick window line and details, then "Get my free quote" carries the scope into `/estimate` notes (existing `scope` handoff). Its serialised model carries no prices. Dollar figures and price-like claims were removed from the siding page (rates stay in `src/data/siding.ts`), sliding glass doors (rows and `Offer` schema), the cost / Cascade-vs-Milgard / vinyl-vs-fiberglass guides (information kept, numbers dropped), About, tools index, shared CTA and hero links, and the JSON-LD `priceRange`. Ask no longer offers `estimate_price`, its prompt and facts say Clearview does not publish prices, and any `$` figure in a reply is a violation that triggers the repair path. Guard: `npm run test:no-public-pricing` (scans built public HTML, after build); `test:siding`, `test:pricing-health` updated.
+
+**Not done / open:** the Ask guide index text was patched in place (no embedding keys here); re-run `npm run build:guides-index` when a key is available. The site tagline "Great prices." is unchanged (a claim, not a figure; Mark's call). Legal pages (terms, privacy, accessibility) only had the tool's name adjusted; Keith should eyeball them.
+
 ## 2026-10-08 - Google reviews visibility and branded panel
 
 Added Reviews to desktop and mobile navigation, and live Google rating badges to the home hero, shared estimate CTA, footer and estimate form sidebar. A shared browser request updates ratings across page transitions without extra requests for each badge. Failed feeds leave a plain reviews link without a rating claim. The reviews page now leads with a white Google-branded panel, Google logo, gold stars, live rating/count, three written customer reviews and a direct write-review button. Customer text still uses textContent. Corrected the dated fallback to the verified 5.0 / 4 ratings on 2026-10-08. Review cards now reinitialize on client navigation.

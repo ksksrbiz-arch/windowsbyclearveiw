@@ -2,11 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import { site } from '../data/site';
-import { pricingIsRegionalAverage } from '../data/pricing';
+import { pricingIsRegionalAverage, showPublicPrices } from '../data/pricing';
 import { getHeroBg } from '../lib/hero-bg';
 import { findWork } from '../data/work';
 
 const pricesAreAverages = pricingIsRegionalAverage();
+const pricesArePublic = showPublicPrices();
 
 const description = `Clearview Windows replaces windows and installs sliding glass doors in Vancouver, WA and Clark County. Free in-home measure, written estimate first.`;
 
@@ -79,9 +80,17 @@ const heroBg = await getHeroBg(heroPhoto.image);
       <h2>How our prices work.</h2>
       <dl class="honest">
         <div>
-          <dt>{pricesAreAverages ? 'Prices are regional averages' : 'Prices are still ranges'}</dt>
+          <dt>{!pricesArePublic ? 'We price after we measure' : pricesAreAverages ? 'Prices are regional averages' : 'Prices are still ranges'}</dt>
           <dd>
-            {pricesAreAverages ? (
+            {!pricesArePublic ? (
+              <>
+                We do not publish prices. Every opening is measured in person, and the written
+                estimate puts the approach and the price down for each one. Anyone quoting a
+                single figure before seeing your openings is guessing, and so would we be. The
+                free <a href="/tools/window-replacement-cost-calculator">project planner</a> lets
+                you list your openings and send them to us as a quote request.
+              </>
+            ) : pricesAreAverages ? (
               <>
                 The <a href="/tools/window-replacement-cost-calculator">cost calculator</a> runs
                 on published Washington averages, clearly labeled as such, not on Clearview’s

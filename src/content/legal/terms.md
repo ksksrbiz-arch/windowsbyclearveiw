@@ -1,7 +1,7 @@
 ---
 title: Terms of use
-description: The terms that apply to using windowsbyclearview.com, including what the cost calculator and the website consultant are and are not.
-updated: 2026-09-30
+description: The terms that apply to using windowsbyclearview.com, including what the project planner and the website consultant are and are not.
+updated: 2026-10-09
 order: 2
 summary: Using this site does not hire us, and nothing on it is a quote, including answers from the website consultant. A price becomes real when we have measured your openings and put it in writing.
 ---
@@ -20,7 +20,7 @@ conflict about the work, the signed contract controls.
 
 This is the most important paragraph on this page.
 
-The cost calculator, the ranges it produces, the guides, the website consultant's
+The project planner (the cost calculator page), any ranges it produces, the guides, the website consultant's
 answers, and every figure published anywhere on this site are **general information, not an offer, not a
 bid, and not a quote**. They do not create a contract, and we are not bound by
 them.

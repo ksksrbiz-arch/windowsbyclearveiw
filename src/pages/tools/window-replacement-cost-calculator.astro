@@ -2,10 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CostEstimator from '../../components/CostEstimator.astro';
 import CtaBar from '../../components/CtaBar.astro';
-import { pricing, pricingIsRegionalAverage, pricingIsUsable } from '../../data/pricing';
+import { pricing, pricingIsRegionalAverage, showPublicPrices } from '../../data/pricing';
 import { site } from '../../data/site';
 
-const showMoney = pricingIsUsable();
+// Owner direction 2026-10-09: no dollar figures on the public site. With showMoney
+// false this page is a project funnel into the quote form; the URL stays the same.
+const showMoney = showPublicPrices();
 const isAverage = pricingIsRegionalAverage();
 
 // The layout appends " | Clearview Windows" (20 chars), so the base has to
@@ -16,18 +18,20 @@ const title = showMoney
 
 const description = showMoney
   ? 'Count your openings and get an honest installed cost range for window replacement in Vancouver, WA and Clark County. Free, no email required.'
-  : 'Size up a window replacement project in Vancouver, WA: count your openings, pick a material, and send the scope straight to us. No email required.';
+  : 'Plan a window replacement in Vancouver, WA: count your openings, add the details that apply, and send the project to us for a free written quote.';
 
 const faq = [
   {
     question: 'What does window replacement cost in Vancouver, WA?',
-    answer:
-      'It depends far more on the opening than on the window. A sound opening on the ground floor is the low end. Openings that need more work, upstairs access, custom shapes, and any rot at the sill all move it up. The calculator on this page prices the scope you describe; a measure turns that into a real number.',
+    answer: showMoney
+      ? 'It depends far more on the opening than on the window. A sound opening on the ground floor is the low end. Openings that need more work, upstairs access, custom shapes, and any rot at the sill all move it up. The calculator on this page prices the scope you describe; a measure turns that into a real number.'
+      : 'It depends far more on the opening than on the window. A sound opening on the ground floor is the simplest job. Openings that need more work, upstairs access, custom shapes, and any rot at the sill all add to it. We do not publish prices: you tell us what you would replace, we measure, and the written estimate gives you the real number.',
   },
   {
-    question: 'Why do you not just show one price per window?',
-    answer:
-      'Because a single number would be wrong for most houses. Two identical-looking windows can differ by hundreds of dollars once you account for the condition of the opening, how it is flashed, and what the trim has to match. Ranges are honest; one number is marketing.',
+    question: showMoney ? 'Why do you not just show one price per window?' : 'Why do you not list prices?',
+    answer: showMoney
+      ? 'Because a single number would be wrong for most houses. Two identical-looking windows can differ by hundreds of dollars once you account for the condition of the opening, how it is flashed, and what the trim has to match. Ranges are honest; one number is marketing.'
+      : 'Because a single number would be wrong for most houses. Two identical-looking windows can differ once you account for the condition of the opening, how it is flashed, and what the trim has to match. We would rather measure your openings and give you a number that is right for your house.',
   },
   {
     question: 'Why do two similar windows cost different amounts?',
@@ -35,9 +39,10 @@ const faq = [
       'Because the opening decides the scope. A sound, square opening takes less work than one that is rotten, out of square, or leaking, and the right fix for a bad opening costs more. That is why we measure every opening and put the approach for each one in the written estimate.',
   },
   {
-    question: 'Do I have to give an email to see the estimate?',
-    answer:
-      'No. The calculator runs entirely in your browser and nothing is sent anywhere. If you want a real quote you can hand the scope to the estimate form, but that is your choice.',
+    question: showMoney ? 'Do I have to give an email to see the estimate?' : 'Do I have to give an email to use this?',
+    answer: showMoney
+      ? 'No. The calculator runs entirely in your browser and nothing is sent anywhere. If you want a real quote you can hand the scope to the estimate form, but that is your choice.'
+      : 'No. Counting your openings runs entirely in your browser and nothing is sent anywhere. When you want a quote, your project carries into the request form, which asks for your name, phone, and city. Email is optional, and sending it is your choice.',
   },
   {
     question: 'Does the federal tax credit still cover windows?',
@@ -50,11 +55,18 @@ const faq = [
 // in full sentences for the structured-data readers that never see the page's
 // terse on-screen fragments. If the step order or count changes there, update
 // this array too — the `name` fields intentionally echo that list's wording.
-const howToSteps = [
-  { name: 'Count the openings', text: 'Walk the house and count every opening you would want done, by type, not by room.' },
-  { name: 'Pick a material', text: 'Vinyl is the Clark County default. Fiberglass costs more but holds up better on wide or large openings.' },
-  { name: 'Flag the complications', text: 'Note upstairs access, arches or custom shapes, and any soft or rotten sills.' },
-];
+const howToSteps = showMoney
+  ? [
+      { name: 'Count the openings', text: 'Walk the house and count every opening you would want done, by type, not by room.' },
+      { name: 'Pick a material', text: 'Vinyl is the Clark County default. Fiberglass costs more but holds up better on wide or large openings.' },
+      { name: 'Flag the complications', text: 'Note upstairs access, arches or custom shapes, and any soft or rotten sills.' },
+    ]
+  : [
+      { name: 'Count the openings', text: 'Walk the house and count every opening you would want done, by type, not by room.' },
+      { name: 'Choose a window line', text: 'Cascade is the standard window on most jobs. Milgard is the step up, with more product lines and options.' },
+      { name: 'Flag the complications', text: 'Note upstairs access, arches or custom shapes, and any soft or rotten sills.' },
+      { name: 'Send it to us', text: 'Your project carries into the quote request form. Add your name, phone, and city, and send it.' },
+    ];
 
 const schema = {
   '@context': 'https://schema.org',
@@ -71,8 +83,10 @@ const schema = {
     },
     {
       '@type': 'HowTo',
-      name: 'How to use the window replacement cost calculator',
-      description: 'Three steps to a scoped, ranged estimate for a Clark County window replacement.',
+      name: showMoney ? 'How to use the window replacement cost calculator' : 'How to plan a window replacement and request a quote',
+      description: showMoney
+        ? 'Three steps to a scoped, ranged estimate for a Clark County window replacement.'
+        : 'Four steps from counting your openings to a free written quote for a Clark County window replacement.',
       step: howToSteps.map((step) => ({
         '@type': 'HowToStep',
         name: step.name,
@@ -96,17 +110,18 @@ const schema = {
   path="/tools/window-replacement-cost-calculator"
   crumbs={[
     { name: 'Tools', href: '/tools' },
-    { name: 'Cost calculator', href: '/tools/window-replacement-cost-calculator' },
+    { name: showMoney ? 'Cost calculator' : 'Project planner', href: '/tools/window-replacement-cost-calculator' },
   ]}
   schema={schema}
 >
   <section class="page-hero">
     <div class="wrap">
-      <p class="kicker">Free tool &middot; no email</p>
+      <p class="kicker">{showMoney ? 'Free tool · no email' : 'Free quote builder'}</p>
       <h1>{showMoney ? 'What will new windows actually cost?' : 'Plan your window project.'}</h1>
       <p class="lede">
-        Count what you would replace, tell us how much has to come out, and see where your
-        project lands. This is a general-use tool, not a formal request for a quote.
+        {showMoney
+          ? 'Count what you would replace, tell us how much has to come out, and see where your project lands. This is a general-use tool, not a formal request for a quote.'
+          : 'Count what you would replace and add the details that apply. Your project carries straight into the quote request form, so all that is left is your contact details.'}
       </p>
     </div>
   </section>
@@ -134,8 +149,13 @@ const schema = {
       </div>
       <ol class="steps">
         <li><strong>Count the openings.</strong> Group them by window type, not by room.</li>
-        <li><strong>Pick a material.</strong> Vinyl is the Clark County default; fiberglass costs more.</li>
+        {showMoney ? (
+          <li><strong>Pick a material.</strong> Vinyl is the Clark County default; fiberglass costs more.</li>
+        ) : (
+          <li><strong>Choose a window line.</strong> Cascade is the standard window; Milgard is the step up.</li>
+        )}
         <li><strong>Flag the complications.</strong> Upstairs access, arched or custom shapes, and any soft or rotten sills.</li>
+        {!showMoney && <li><strong>Send it to us.</strong> Your project fills in the quote request; add your contact details and send.</li>}
       </ol>
     </div>
   </section>
@@ -184,8 +204,11 @@ const schema = {
   </section>
 
   <CtaBar
-    heading="Turn the range into a number."
-    body="The calculator gets you to the right order of magnitude. A measure gets you the figure you can actually plan around."
+    heading={showMoney ? 'Turn the range into a number.' : 'Ready for your number?'}
+    body={showMoney
+      ? 'The calculator gets you to the right order of magnitude. A measure gets you the figure you can actually plan around.'
+      : 'We measure every opening in person and put the approach and the price in a written estimate. No guess from a photo.'}
+    showToolLink={showMoney}
   />
 </BaseLayout>
 

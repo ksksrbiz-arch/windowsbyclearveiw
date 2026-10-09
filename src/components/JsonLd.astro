@@ -1,5 +1,6 @@
 ---
 import { site, phoneDigits } from '../data/site';
+import { publicPricing } from '../data/pricing';
 
 interface Props {
   extra?: Record<string, unknown>;
@@ -35,7 +36,7 @@ const business = {
     addressRegion: site.address.region,
     addressCountry: 'US',
   },
-  priceRange: '$$',
+  ...(publicPricing ? { priceRange: '$$' } : {}),
   knowsAbout: [
     'Replacement windows',
     'New construction windows',

@@ -20,6 +20,16 @@
  * the baseline or they double-count.
  */
 
+/**
+ * Public price display switch (owner direction, 2026-10-09: no dollar figures anywhere on the
+ * public site). While false, the calculator is a project funnel (count openings, pick details,
+ * hand the scope to the quote form), no public page prints a dollar amount, and Ask does not
+ * calculate one. The figures below stay as the internal reference (the Command Center quote
+ * builder reads them). Flip to true to bring the old behaviour back; the Ask copy in
+ * functions/ask/_lib/pricing.mjs mirrors this and `npm run test:ask-pricing` fails on drift.
+ */
+export const publicPricing = false;
+
 export type PricingBasis = {
   /** 'averages' = regional published data. 'clearview' = Mark's own numbers. */
   source: 'averages' | 'clearview';
@@ -247,6 +257,27 @@ export function pricedOpenings() {
 
 export function pricingIsUsable() {
   return pricedOpenings().length > 0 && pricing.fullFrame.high > 0;
+}
+
+/** Descriptions that talk about price. While public pricing is off, pages use these instead. */
+const neutralBlurbs: Record<string, string> = {
+  fiberglass: 'Stiffer and holds paint. Worth it on big openings.',
+  milgard: 'A step up in the window itself, same install.',
+  'third-story-plus': 'Third floor and up needs more staging than a second-story opening.',
+  oversize: 'Arches, transoms, and anything past standard sizing.',
+  'rot-repair': 'Soft wood means opening the wall. We scope it once we see it.',
+  trim: 'Wrapping, casing, or matching an existing profile.',
+  'triple-pane': 'Upgrade from the standard double-pane insulated unit — added performance.',
+};
+
+/** The blurb for a public page: the price-free wording unless public pricing is on. */
+export function publicBlurb(item: { id: string; blurb: string }) {
+  return publicPricing ? item.blurb : (neutralBlurbs[item.id] ?? item.blurb);
+}
+
+/** True only when dollar figures may be printed on a public page. */
+export function showPublicPrices() {
+  return publicPricing && pricingIsUsable();
 }
 
 /** True while the figures are somebody else's averages rather than Mark's. */

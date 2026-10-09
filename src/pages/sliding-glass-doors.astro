@@ -4,7 +4,7 @@ import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { pricing } from '../data/pricing';
+import { pricing, showPublicPrices } from '../data/pricing';
 import { findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
 
@@ -21,6 +21,7 @@ const heroBg = await getHeroBg(doorWork[0].image);
 // The estimator already prices sliding patio doors as their own opening type
 // (doors are not brand-specific — see pricing.ts) — reuse that single source
 // of truth rather than hand-writing a second number here.
+const showMoney = showPublicPrices();
 const doorPricing = pricing.openings.find((opening) => opening.id === 'sliding-door')!;
 const frenchDoor = pricing.openings.find((opening) => opening.id === 'french-door');
 
@@ -128,16 +129,20 @@ const schema = {
     name: place.name,
     containedInPlace: { '@type': 'State', name: place.state },
   })),
-  offers: {
-    '@type': 'Offer',
-    priceCurrency: 'USD',
-    priceSpecification: {
-      '@type': 'PriceSpecification',
-      minPrice: doorPricing.low,
-      maxPrice: doorPricing.high,
-      priceCurrency: 'USD',
-    },
-  },
+  ...(showMoney
+    ? {
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'USD',
+          priceSpecification: {
+            '@type': 'PriceSpecification',
+            minPrice: doorPricing.low,
+            maxPrice: doorPricing.high,
+            priceCurrency: 'USD',
+          },
+        },
+      }
+    : {}),
 };
 ---
 <BaseLayout
@@ -187,7 +192,7 @@ const schema = {
       <p class="fine-print">
         Vinyl and fiberglass frames, from the same Cascade and Milgard lines we use for windows
         (<a href="/guides/cascade-vs-milgard">how the two lines compare</a>).
-        Door pricing is not broken out by brand; see the range below.
+        Door pricing is not broken out by brand{showMoney ? '; see the range below' : ''}.
       </p>
     </div>
   </section>
@@ -263,14 +268,23 @@ const schema = {
         </p>
       </div>
       <dl class="spec-table">
-        <div class="spec-pair">
-          <dt>Sliding door</dt>
-          <dd>{`$${doorPricing.low.toLocaleString('en-US')} – $${doorPricing.high.toLocaleString('en-US')} installed`}</dd>
-        </div>
-        {frenchDoor && (
+        {showMoney ? (
+          <>
+            <div class="spec-pair">
+              <dt>Sliding door</dt>
+              <dd>{`$${doorPricing.low.toLocaleString('en-US')} – $${doorPricing.high.toLocaleString('en-US')} installed`}</dd>
+            </div>
+            {frenchDoor && (
+              <div class="spec-pair">
+                <dt>French door</dt>
+                <dd>{`$${frenchDoor.low.toLocaleString('en-US')} – $${frenchDoor.high.toLocaleString('en-US')} installed`}</dd>
+              </div>
+            )}
+          </>
+        ) : (
           <div class="spec-pair">
-            <dt>French door</dt>
-            <dd>{`$${frenchDoor.low.toLocaleString('en-US')} – $${frenchDoor.high.toLocaleString('en-US')} installed`}</dd>
+            <dt>Price</dt>
+            <dd>Written estimate after we measure the opening</dd>
           </div>
         )}
         <div class="spec-pair">
@@ -289,10 +303,11 @@ const schema = {
     </div>
     <div class="wrap" data-reveal>
       <p class="fine-print">
-        A range, not a quote — every opening is measured before anything is ordered, and a widened
-        opening or a new header adds to the range above. See the{' '}
-        <a href="/tools/window-replacement-cost-calculator">free cost estimator</a> to run this
-        against the rest of the house.
+        {showMoney
+          ? 'A range, not a quote — every opening is measured before anything is ordered, and a widened opening or a new header adds to the range above.'
+          : 'Every opening is measured before anything is ordered, and a widened opening or a new header changes the scope. The written estimate says so.'}
+        {' '}Use the{' '}
+        <a href="/tools/window-replacement-cost-calculator">{showMoney ? 'free cost estimator' : 'free project planner'}</a> to {showMoney ? 'run this against' : 'list'} the rest of the house{showMoney ? '' : ' and send it to us as a quote request'}.
       </p>
     </div>
   </section>

@@ -3,11 +3,13 @@
 // when the two drift, so Ask can never quote a range that disagrees with the site
 // calculator. Node loads the .ts file directly (type stripping).
 import assert from 'node:assert/strict';
-import { pricing } from '../src/data/pricing.ts';
-import { PRICING, estimatePrice, estimateFromToolArgs, estimatePriceToolDeclaration } from '../functions/ask/_lib/pricing.mjs';
+import { pricing, publicPricing } from '../src/data/pricing.ts';
+import { PRICING, PUBLIC_PRICING, estimatePrice, estimateFromToolArgs, estimatePriceToolDeclaration } from '../functions/ask/_lib/pricing.mjs';
 
 const pick = (rows, keys) => rows.map((r) => Object.fromEntries(keys.map((k) => [k, r[k] ?? null])));
 
+assert.equal(PUBLIC_PRICING, publicPricing, 'Ask and the site agree on whether prices are public');
+assert.equal(publicPricing, false, 'owner direction 2026-10-09: no dollar figures on the public site (flip deliberately, with the Ask prompt and guides)');
 assert.equal(PRICING.reviewedAt, pricing.basis.reviewedAt, 'reviewedAt matches the site');
 assert.equal(PRICING.rounding, pricing.displayRounding, 'rounding matches the site');
 assert.deepEqual(pick(PRICING.openings, ['id', 'label', 'low', 'high', 'isDoor']), pick(pricing.openings, ['id', 'label', 'low', 'high', 'isDoor']), 'openings match the site');

@@ -6,7 +6,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import WindowStudio from '../components/WindowStudio.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
-import { pricing } from '../data/pricing';
+import { pricing, publicBlurb } from '../data/pricing';
 import { findWork } from '../data/work';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
 import UFactorGauge from '../components/diagrams/UFactorGauge.astro';
@@ -77,7 +77,7 @@ const stylePhotos = [
         {materials.map((material) => (
           <article class="compare-card">
             <h3>{material.label}</h3>
-            <p class="compare-blurb">{material.blurb}</p>
+            <p class="compare-blurb">{publicBlurb(material)}</p>
           </article>
         ))}
       </div>
@@ -109,14 +109,14 @@ width={1580}
         {brands.map((brand) => (
           <article class="compare-card">
             <h3>{brand.label}</h3>
-            <p class="compare-blurb">{brand.blurb}</p>
+            <p class="compare-blurb">{publicBlurb(brand)}</p>
           </article>
         ))}
       </div>
       <p class="fine-print">
         The installation is done to the same standard either way; the window in the opening is
         different. We tell you which one a quote is based on, and why, before anything is ordered.
-        <a href="/guides/cascade-vs-milgard">Cascade vs Milgard: where each is made, what each costs, and when the step up is worth it.</a>
+        <a href="/guides/cascade-vs-milgard">Cascade vs Milgard: where each is made, how they differ, and when the step up is worth it.</a>
       </p>
     </div>
   </section>

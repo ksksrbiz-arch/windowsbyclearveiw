@@ -48,6 +48,35 @@ try {
   process.exit(1);
 }
 
+if (model.showMoney === false) {
+  // Owner direction 2026-10-09: no public prices. The page must ship none; the figures live only in
+  // src/data/pricing.ts as the internal reference (the Command Center quote builder), so check those.
+  const leak = JSON.stringify(model).match(/"(low|high|multiplier)"/g);
+  if (leak) {
+    console.log('::error::Public pricing is off but the calculator page still carries price fields.');
+    process.exit(1);
+  }
+  const { pricing } = await import('../../src/data/pricing.ts');
+  const internal = validatePricing({
+    basis: pricing.basis,
+    displayRounding: pricing.displayRounding,
+    openings: pricing.openings,
+    materials: pricing.materials,
+    brands: pricing.brands,
+    fullFrame: pricing.fullFrame,
+    modifiers: pricing.modifiers,
+  });
+  console.log('public pricing off  calculator ships no price fields');
+  console.log(`internal reviewed   ${pricing.basis.reviewedAt} (${internal.ageDays} days ago)`);
+  for (const warning of internal.warnings) console.log(`::warning::${warning}`);
+  if (!internal.ok) {
+    for (const problem of internal.problems) console.log(`::error::${problem}`);
+    process.exit(1);
+  }
+  console.log('Internal reference pricing is structurally valid.');
+  process.exit(0);
+}
+
 const doc = {
   basis: {
     source: model.isAverage ? 'averages' : 'clearview',

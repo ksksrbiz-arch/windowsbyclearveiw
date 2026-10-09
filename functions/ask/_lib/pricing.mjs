@@ -4,6 +4,11 @@
 // (src/components/CostEstimator.astro) — the chatbot's price tool must
 // never produce a number that disagrees with the page a visitor can see
 // right next to it.
+// Owner direction 2026-10-09: no dollar figures on the public site, and Ask does not calculate
+// them either. Mirrors `publicPricing` in src/data/pricing.ts (npm run test:ask-pricing fails on
+// drift). While false, the estimate_price tool is not offered to the model.
+export const PUBLIC_PRICING = false;
+
 export const PRICING = {
   reviewedAt: '2026-10-02',
   rounding: 50,
