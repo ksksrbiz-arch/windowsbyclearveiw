@@ -28,6 +28,7 @@ Mission: a trustworthy operating system for Clearview Windows & Trim LLC, not me
 | Ship, deploy, domain or mail change | `.ai/workflows/deploy-check/` | analytics, specialists |
 | Direct-mail pilot: refresh the list, read or load Mail pilot data | `.ai/workflows/mail-pilot/` | quote workflows; address data in chat or git |
 | `/ask` routing or specialists | `.ai/references/ask-routing.md`, `.ai/specialists/<id>/CONTEXT.md` | workflows |
+| Google operations connections and limits | `.ai/references/google-operations.md`, `internal/README.md` | public analytics events |
 | New Command Center feature | `.ai/references/command-center-gap-analysis.md` | specialists |
 | Install, offline, service worker, manifest (Command Center PWA) | `.ai/references/internal-pwa.md` | workflows, specialists |
 | AI feature (provider, budget, tools) | `.ai/AI-OPERATING-CONTRACT.md`, `.ai/RULES.md` | workflows |

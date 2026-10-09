@@ -1,5 +1,12 @@
 # ICM State â€” 2026-10-01
 
+## 2026-10-09 - Google operations tools (account activation pending)
+
+Added Command Center > Tools > Google tools: Search Console top queries/pages, Business Profile metrics/reviews, address validation, Routes waypoint planning, five-day Weather, Document AI receipt/invoice extraction, Cloud Vision label OCR, owned Calendar reads/reviewed appointment creation, and manually reviewed USD expenses. Reports and proposals stay separate from job state; no automatic customer messaging, payments, quote changes or schedule changes. Scoped server credentials, authenticated same-origin writes, bounded uploads/results, fixed endpoints/timeouts and D1 daily attempt caps enforce the boundary. Conflicting retry IDs are rejected; expense saves use integer cents. Full 50-step suite passed with a 69-page build; final 69-page build passed after the attribution and upload controls. Publication and production checks follow.
+
+VERIFY: browser control repeatedly timed out, so no new APIs/credentials/roles/OAuth grants or Document AI processor have been activated this turn. Existing GA4 reader may supply Search Console auth only after that service-account email receives property access. Business Profile project approval can block reports/reviews. New connections must be live-tested; configured flags do not assert access. Authenticated desktop/phone UI and production connection tests await browser reconnection. Setup details: `.ai/references/google-operations.md` and `internal/README.md`.
+
+
 
 ## 2026-10-09 - Website buying intent and Tag Manager audit
 

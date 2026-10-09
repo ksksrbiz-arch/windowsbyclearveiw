@@ -35,6 +35,7 @@ jobs:
       - run: npm run test:public-terminology
       - run: npm run test:copilot
       - run: npm run test:ai-surfaces
+      - run: npm run test:google-tools
       - run: npm run test:google-reviews
       - run: npm run test:analytics
       - run: npm run test:permit-leads

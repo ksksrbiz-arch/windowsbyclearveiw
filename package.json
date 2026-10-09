@@ -66,7 +66,8 @@
     "test:quote-signing": "node --disable-warning=ExperimentalWarning scripts/test-quote-signing.mjs",
     "test:quote-to-job": "node --disable-warning=ExperimentalWarning scripts/test-quote-to-job-flow.mjs",
     "find:google-place-id": "node scripts/find-google-place-id.mjs",
-    "test:window-studio": "node scripts/test-window-studio.mjs"
+    "test:window-studio": "node scripts/test-window-studio.mjs",
+    "test:google-tools": "node --disable-warning=ExperimentalWarning scripts/test-google-tools.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

@@ -1,0 +1,83 @@
+---
+import InternalLayout from '../../layouts/InternalLayout.astro';
+const reports = [{id:'search',title:'Search visibility',description:'Top Google searches and pages over the last available 28 days. These are aggregated searches, not individual visitor histories.'},{id:'business',title:'Google Business Profile',description:'Search and Maps visibility, website clicks and call-button clicks. A click does not confirm a completed call.'},{id:'reviews',title:'Recent Google reviews',description:'The latest 50 reviews and existing replies for the connected business profile.'},{id:'calendar',title:'Calendar this week',description:'Upcoming events from the connected calendar. This does not change the installation schedule.'}];
+---
+<InternalLayout title="Google tools">
+  <header class="head"><div><p class="kicker">Connected operations</p><h1>Google tools</h1><p class="muted">Check your marketing, prepare visits and capture expenses. Review every suggestion before using it.</p></div><a class="btn btn-ghost" href="/internal/analytics">Website leads & revenue →</a></header>
+  <p class="status" data-connections role="status">Checking connections…</p>
+  <div class="tool-grid">
+    {reports.map(r=><section class="panel" data-tool={r.id}><h2>{r.title}</h2><p>{r.description}</p><p class="connection" data-ready={r.id}>Checking connection…</p><button type="button" class="btn" data-report={r.id}>Load report</button><div class="result" data-result={r.id} aria-live="polite"></div></section>)}
+    <section class="panel"><h2>Check an address</h2><p>Send a street address to Google Maps for suggested corrections and coordinates. Your saved customer address stays unchanged.</p><p class="connection" data-ready="address"></p><form data-action="address"><label>Street address<input name="address" required maxlength="300" autocomplete="off" /></label><label>City in Washington<input name="city" required maxlength="100" autocomplete="off" /></label><button class="btn">Check address</button></form><div class="result" data-result="address" aria-live="polite"></div></section>
+    <section class="panel"><h2>Installation weather</h2><p>Five-day forecast from Google Maps. Use an address check to find coordinates. Forecasts are planning information; Mark decides whether conditions suit the work.</p><p class="connection" data-ready="weather"></p><form data-action="weather"><label>Latitude<input name="latitude" type="number" step="any" min="-90" max="90" value="45.6387" required /></label><label>Longitude<input name="longitude" type="number" step="any" min="-180" max="180" value="-122.6615" required /></label><button class="btn">Check weather</button></form><div class="result" data-result="weather" aria-live="polite"></div></section>
+    <section class="panel"><h2>Plan a driving route</h2><p>Google Maps travel estimates for 2–10 complete addresses. Keep the first and last stops fixed. Reordering does not account for appointment windows; confirm the proposed order yourself.</p><p class="connection" data-ready="route"></p><form data-action="route"><label>Addresses, one per line<textarea name="stops" rows="5" maxlength="3000" required></textarea></label><label class="check"><input name="optimize" type="checkbox" />Suggest an order for the middle stops</label><button class="btn">Plan route</button></form><div class="result" data-result="route" aria-live="polite"></div></section>
+    <section class="panel"><h2>Read a supplier receipt or invoice</h2><p>Send one receipt image or PDF to Google Document AI. Only the first page is read. Extracted values are suggestions. Files are not saved here; keep the original in your job records. Maximum 2 MB.</p><p class="connection" data-ready="receipt"></p><form data-action="receipt"><label>Receipt or invoice<input name="file" type="file" accept="image/jpeg,image/png,application/pdf" required /></label><button class="btn">Read document with Google</button></form><div class="result" data-result="receipt" aria-live="polite"></div></section>
+    <section class="panel"><h2>Read a product label</h2><p>Send a label image to Google Cloud Vision to extract printed text. Check serial numbers and specifications against the original label. Maximum 2 MB.</p><p class="connection" data-ready="ocr"></p><form data-action="ocr"><label>Label photo<input name="file" type="file" accept="image/jpeg,image/png" required /></label><button class="btn">Read label with Google</button></form><div class="result" data-result="ocr" aria-live="polite"></div></section>
+    <section class="panel"><h2>Add a calendar appointment</h2><p>Create one appointment in the connected Google calendar. Times use your device’s local timezone. This does not update a job’s saved installation date or send customer invitations.</p><p class="connection" data-ready="calendar_create"></p><form data-action="calendar_create"><label>Appointment title<input name="title" required maxlength="120" /></label><label>Starts<input name="start" type="datetime-local" required /></label><label>Ends<input name="end" type="datetime-local" required /></label><label class="check"><input type="checkbox" name="confirmed" required />I reviewed the title and times and want to create this appointment.</label><button class="btn">Create Google calendar appointment</button></form><div class="result" data-result="calendar_create" aria-live="polite"></div></section>
+    <section class="panel"><h2>Save a reviewed expense</h2><p>Enter confirmed values in US dollars. This records an expense internally; it does not pay a supplier, change a quote or reconcile the books.</p><form data-action="save_expense"><label>Supplier<input name="vendor" required maxlength="120" /></label><label>Amount in USD<input name="amount" type="number" min="0.01" max="9999999.99" step="0.01" required /></label><label>Expense date<input name="date" type="date" required /></label><label>Existing job reference (optional)<input name="jobId" maxlength="80" /></label><label class="check"><input name="confirmed" type="checkbox" required />I checked these values against the original document.</label><button class="btn">Save reviewed expense</button></form><div class="result" data-result="save_expense" aria-live="polite"></div></section>
+  </div>
+  <section class="panel expense-list"><h2>Recent reviewed expenses</h2><p>Latest 30 records. These are recorded costs, not proof of payment.</p><div class="result" data-expenses></div></section>
+</InternalLayout>
+<script>
+  const endpoint = '/internal/api/google-tools';
+  function paragraph(root: Element, text: string) { const p=document.createElement('p');p.textContent=text;root.append(p); }
+  function table(root:Element, headers:string[], rows:unknown[][]) {
+    if(!rows.length){paragraph(root,'No records returned for this period.');return;}
+    const wrap=document.createElement('div');wrap.className='table-scroll';const t=document.createElement('table');
+    const head=document.createElement('thead'),tr=document.createElement('tr');for(const h of headers){const th=document.createElement('th');th.scope='col';th.textContent=h;tr.append(th);}head.append(tr);t.append(head);
+    const body=document.createElement('tbody');for(const row of rows){const r=document.createElement('tr');for(const value of row){const td=document.createElement('td');td.textContent=value==null?'Unknown':String(value);r.append(td);}body.append(r);}t.append(body);wrap.append(t);root.append(wrap);
+  }
+  async function call(action:string,values:Record<string,unknown>={}) {
+    const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action,...values})});
+    if(response.redirected || response.status===401 || response.status===403)throw new Error('Sign in again to use this tool.');
+    let data;try{data=await response.json();}catch{throw new Error('The tool is unavailable. Please retry after signing in.');}
+    if(!response.ok || data.status!=='ok')throw new Error(data.error || 'This connection needs account setup.');return data;
+  }
+  const number = (v:unknown,suffix='')=>v==null?'Unknown':`${Number(v).toFixed(1)}${suffix}`;
+  function show(action:string,d:any,root:Element) {
+    root.replaceChildren();
+    if(['address','route','weather'].includes(action)){const credit=document.createElement('p');credit.className='maps-credit';credit.translate=false;credit.textContent='Google Maps';root.append(credit);}
+    if(action==='weather')paragraph(root,'Source: Includes weather data from Google');
+    if(action==='search'){paragraph(root,`${d.startDate} to ${d.endDate}. Top 25 query/page combinations; this is not the full search total.`);table(root,['Search','Page','Clicks','Impressions','CTR','Avg. position'],d.rows.map((r:any)=>[r.query,r.page,r.clicks,r.impressions,number(r.ctr*100,'%'),number(r.position)]));}
+    if(action==='business'){const labels:Record<string,string>={CALL_CLICKS:'Call-button clicks',WEBSITE_CLICKS:'Website clicks',BUSINESS_DIRECTION_REQUESTS:'Direction requests',BUSINESS_IMPRESSIONS_DESKTOP_MAPS:'Desktop Maps impressions',BUSINESS_IMPRESSIONS_DESKTOP_SEARCH:'Desktop Search impressions',BUSINESS_IMPRESSIONS_MOBILE_MAPS:'Mobile Maps impressions',BUSINESS_IMPRESSIONS_MOBILE_SEARCH:'Mobile Search impressions'};table(root,['Last 30 days','Count'],d.metrics.map((r:any)=>[labels[r.metric]||r.metric,r.count]));}
+    if(action==='reviews'){paragraph(root,`${d.averageRating ?? 'Unknown'} average rating · ${d.totalReviewCount ?? 'Unknown'} reviews${d.hasMore?' · More reviews exist beyond this latest batch':''}`);for(const r of d.reviews){const q=document.createElement('blockquote');paragraph(q,`${r.author} · ${r.rating}`);paragraph(q,r.comment || 'No written comment.');if(r.reply)paragraph(q,`Existing reply: ${r.reply}`);root.append(q);}}
+    if(action==='address'){paragraph(root,d.formattedAddress || 'No suggested address returned.');paragraph(root,d.needsReview?'Review the suggested address before using it.':'Google reports a complete address. Confirm it with the customer.');paragraph(root,`Coordinates: ${d.latitude ?? 'Unknown'}, ${d.longitude ?? 'Unknown'}`);}
+    if(action==='weather')table(root,['Day','Forecast','High / low °F','Rain chance','Gust mph'],d.days.map((r:any)=>[r.date,r.conditions,`${number(r.highF)} / ${number(r.lowF)}`,number(r.rainPercent,'%'),number(r.gustMph)]));
+    if(action==='route'){paragraph(root,`${number(d.miles)} miles · ${number(d.minutes)} minutes. Appointment windows are not included.`);const list=document.createElement('ol');for(const s of d.stops){const li=document.createElement('li');li.textContent=s;list.append(li);}root.append(list);}
+    if(action==='receipt'){table(root,['Suggested field','Value','Confidence'],d.fields.map((r:any)=>[r.field.replaceAll('_',' '),r.value,number(r.confidence*100,'%')]));paragraph(root,'Review the original document, then enter confirmed values in “Save a reviewed expense”.');}
+    if(action==='ocr'){const p=document.createElement('pre');p.textContent=d.text || 'No printed text detected.';root.append(p);paragraph(root,'Check this text against the original label.');}
+    if(action==='calendar'){table(root,['Appointment','Starts','Ends'],d.events.map((r:any)=>[r.title,r.start,r.end]));if(d.hasMore)paragraph(root,'More events exist beyond these first 50.');}
+    if(action==='calendar_create')paragraph(root,d.alreadyExists?'This appointment was already created. No duplicate was added.':'Appointment created in Google Calendar.');
+    if(action==='save_expense')paragraph(root,'Reviewed expense saved.');
+  }
+  async function loadConnections() {
+    const status=document.querySelector('[data-connections]');
+    try{const response=await fetch(endpoint);if(response.redirected||!response.ok)throw new Error();const d=await response.json();
+      if(status)status.textContent='Tools run only when requested. A configured connection still needs a successful live test.';
+      for(const el of document.querySelectorAll<HTMLElement>('[data-ready]'))el.textContent=d.configured[el.dataset.ready!]?'Configured · ready to test':'Not connected · account setup needed';
+      for(const button of document.querySelectorAll<HTMLButtonElement>('[data-report], form[data-action] button')){const action=button.dataset.report||button.closest<HTMLElement>('form')?.dataset.action;button.disabled=action!=='save_expense'&&!d.configured[action!];}
+      const expenses=document.querySelector('[data-expenses]');if(expenses){expenses.replaceChildren();table(expenses,['Date','Supplier','USD','Job'],d.expenses.map((e:any)=>[e.spent_date,e.vendor,(e.amount_cents/100).toFixed(2),e.job_id||'Unassigned']));}
+    }catch{if(status)status.textContent='Sign in to the Command Center to check connections.';}
+  }
+  async function run(button:HTMLButtonElement,action:string,values:Record<string,unknown>) {
+    const root=document.querySelector(`[data-result="${action}"]`);if(!root)return;button.disabled=true;root.replaceChildren();paragraph(root,'Working…');
+    try{show(action,await call(action,values),root);if(action==='save_expense')await loadConnections();}catch(error){root.replaceChildren();paragraph(root,error instanceof Error?error.message:'The request could not be completed.');}finally{button.disabled=false;}
+  }
+  for(const b of document.querySelectorAll<HTMLButtonElement>('[data-report]'))b.addEventListener('click',()=>run(b,b.dataset.report!,{}));
+  for(const form of document.querySelectorAll<HTMLFormElement>('form[data-action]')){
+    let busy=false;let requestId=crypto.randomUUID();form.addEventListener('input',()=>{requestId=crypto.randomUUID();});
+    form.addEventListener('submit',async event=>{event.preventDefault();const action=form.dataset.action!,b=form.querySelector<HTMLButtonElement>('button')!;if(b.disabled||busy)return;busy=true;
+      try {
+      const f=new FormData(form),values:Record<string,unknown>=Object.fromEntries(f.entries());values.requestId=requestId;values.confirmed=f.get('confirmed')==='on';
+      if(action==='route'){values.stops=String(f.get('stops')||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);values.optimize=f.get('optimize')==='on';}
+      if(action==='calendar_create'){try{values.start=new Date(String(f.get('start'))).toISOString();values.end=new Date(String(f.get('end'))).toISOString();}catch{return;}}
+      if(action==='receipt'||action==='ocr'){const file=f.get('file');if(!(file instanceof File)||!file.size||file.size>2*1024*1024){const root=document.querySelector(`[data-result="${action}"]`);if(root){root.replaceChildren();paragraph(root,'Choose one supported file no larger than 2 MB.');}return;}let binary='';for(const byte of new Uint8Array(await file.arrayBuffer()))binary+=String.fromCharCode(byte);values.content=btoa(binary);values.mimeType=file.type;delete values.file;}
+      await run(b,action,values);
+      } catch(error){const root=document.querySelector(`[data-result="${action}"]`);if(root){root.replaceChildren();paragraph(root,'The file could not be read. Please choose it again.');}} finally{busy=false;}
+    });
+  }
+  loadConnections();
+</script>
+<style>
+  .head{display:flex;align-items:start;justify-content:space-between;gap:1rem;margin-bottom:1rem}.head h1{margin:.3rem 0}.head p{max-width:65ch}.tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.panel{padding:1.25rem;min-width:0}.panel h2{font-size:1.3rem;margin-top:0}.panel>p{color:var(--ink-soft)}form{display:grid;gap:.8rem}label{display:grid;gap:.35rem;font-weight:650}input,textarea{max-width:100%;width:100%;padding:.75rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--ink);font:inherit;box-sizing:border-box}.check{display:flex;align-items:flex-start;font-weight:400;gap:.6rem}.check input{width:1.15rem;flex:0 0 1.15rem;margin-top:.25rem}.connection,.status{font-size:.85rem}.connection{font-weight:650}.btn{min-height:44px;white-space:normal}.result{margin-top:1rem;overflow-wrap:anywhere}.expense-list{margin-top:1rem}:global(.result .table-scroll){overflow-x:auto;max-width:100%}:global(.result table){width:100%;border-collapse:collapse;font-size:.85rem}:global(.result th),:global(.result td){padding:.6rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}:global(.result blockquote){margin:1rem 0;padding:.75rem;border-left:3px solid var(--accent)}:global(.result .maps-credit){font-family:Arial,sans-serif;font-style:normal;font-weight:400;font-size:14px;letter-spacing:normal;white-space:nowrap;color:#5e5e5e}:global(.result pre){white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem}
+  @media(max-width:800px){.head{flex-direction:column}.tool-grid{grid-template-columns:1fr}.panel{padding:1rem}}
+</style>
