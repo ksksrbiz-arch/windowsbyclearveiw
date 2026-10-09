@@ -40,7 +40,7 @@ aim at the Web Content Accessibility Guidelines (WCAG) 2.2, Level AA.
 - **The job photographs are phone photographs.** Some are lower contrast or
   softer than we would like. We describe them in text; we cannot make them
   sharper without reshooting.
-- **The cost calculator needs JavaScript.** Without it, the tool cannot run.
+- **The project planner (the cost calculator page) needs JavaScript.** Without it, the tool cannot run.
   The page still explains the trade-offs in text, and the phone number works —
   call and we will walk you through the same questions.
 - **We have not commissioned a formal third-party audit.** Testing so far has

@@ -1,5 +1,9 @@
 # Project context — Clearview Windows
 
+## 2026-10-09 - No public pricing
+
+Mark asked for all pricing off the public site. Done behind one flag (`publicPricing` in `src/data/pricing.ts`, plus `PUBLIC_PRICING` for Ask). To restore prices: flip both, revisit the edited guides, the Ask system prompt (`functions/ask/api/chat.js`) and `test:no-public-pricing`. Details: `.ai/CHANGELOG.md` (2026-10-09). Next agent: rebuild the Ask guide index with a key (text was patched by hand); pricing data in `src/data/pricing.ts` is still reviewed 2026-10-02 and only the internal quote builder uses it now.
+
 ## 2026-10-08 - Audit and bug-fix pass on the Command Center and phone app (branch `claude/internal-pwa-audit`)
 
 Keith asked for a full audit and bug-fix pass of `/internal` and the phone app. Five bugs were fixed (details and tests: `.ai/CHANGELOG.md`, `scripts/test-internal-audit.mjs`). The one that matters most: **Field mode could not save an opening record** (wrong key names), so no window job could have been completed from the UI. It is fixed; do a first real job end to end on Mark's phone and watch Field mode, closeout and completion.

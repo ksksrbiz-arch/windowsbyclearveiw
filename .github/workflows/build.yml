@@ -50,6 +50,7 @@ jobs:
       - run: npm run test:window-studio
       - run: npm run test:seo
       - run: npm run test:siding
+      - run: npm run test:no-public-pricing
       - run: npm run test:pricing-health
       - run: npm run test:form-patterns
       - run: npm run test:charts

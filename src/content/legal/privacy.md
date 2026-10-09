@@ -157,7 +157,7 @@ and `_ga_*`) so it can recognize a returning visit. **The Meta pixel** sets its
 own cookies (named `_fbp`, and `_fbc` if you arrived from a Meta ad) so Meta
 can do the same for its own measurement. Cloudflare Web Analytics sets none.
 
-The cost calculator also stores one item in your browser's `sessionStorage` — the
+The project planner (the cost calculator page) also stores one item in your browser's `sessionStorage` — the
 project scope you built, under the key `clearview:scope` — so that the estimate
 form can pre-fill your notes if you choose to continue. It stays in your
 browser, is never transmitted to us, and your browser discards it when you

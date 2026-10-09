@@ -3,14 +3,19 @@ import {
   pricedOpenings,
   pricing,
   pricingIsRegionalAverage,
-  pricingIsUsable,
+  publicBlurb,
+  showPublicPrices,
 } from '../data/pricing';
 
-const showMoney = pricingIsUsable();
+// Owner direction 2026-10-09: no dollar figures on the public site. With
+// showMoney false this is a project funnel: count openings, pick details, hand
+// the scope to the quote form. The serialised model below then carries no
+// prices at all (view-source must not leak them either).
+const showMoney = showPublicPrices();
 const isAverage = pricingIsRegionalAverage();
 
 // Unpriced types are hidden rather than counted as zero — a silent $0 would
-// under-quote the whole job.
+// under-quote the whole job. (Only matters while prices are shown.)
 const openings = showMoney ? pricedOpenings() : pricing.openings;
 
 // A radio group with one option is not a choice. Clearview installs vinyl
@@ -28,15 +33,27 @@ const model = {
   isAverage,
   reviewedAt: pricing.basis.reviewedAt,
   rounding: pricing.displayRounding,
-  openings: openings.map((o) => ({ id: o.id, label: o.label, low: o.low, high: o.high, isDoor: !!o.isDoor })),
-  materials: pricing.materials.map((m) => ({ id: m.id, label: m.label, multiplier: m.multiplier })),
-  brands: pricing.brands.map((b) => ({ id: b.id, label: b.label, low: b.low, high: b.high })),
+  openings: openings.map((o) => ({
+    id: o.id,
+    label: o.label,
+    isDoor: !!o.isDoor,
+    ...(showMoney ? { low: o.low, high: o.high } : {}),
+  })),
+  materials: pricing.materials.map((m) => ({
+    id: m.id,
+    label: m.label,
+    ...(showMoney ? { multiplier: m.multiplier } : {}),
+  })),
+  brands: pricing.brands.map((b) => ({
+    id: b.id,
+    label: b.label,
+    ...(showMoney ? { low: b.low, high: b.high } : {}),
+  })),
   modifiers: pricing.modifiers.map((m) => ({
     id: m.id,
     label: m.label,
     perOpening: m.perOpening,
-    low: m.low,
-    high: m.high,
+    ...(showMoney ? { low: m.low, high: m.high } : {}),
   })),
 };
 ---
@@ -79,7 +96,7 @@ const model = {
                 <input type="radio" name="est-material" value={material.id} checked={index === 0} />
                 <span>
                   <strong>{material.label}</strong>
-                  <span class="est-hint">{material.blurb}</span>
+                  <span class="est-hint">{publicBlurb(material)}</span>
                 </span>
               </label>
             ))}
@@ -96,7 +113,7 @@ const model = {
               <input type="radio" name="est-brand" value={brand.id} checked={index === 0} />
               <span>
                 <strong>{brand.label}</strong>
-                <span class="est-hint">{brand.blurb}</span>
+                <span class="est-hint">{publicBlurb(brand)}</span>
               </span>
             </label>
           ))}
@@ -111,7 +128,7 @@ const model = {
               <input type="checkbox" name="est-modifier" value={modifier.id} />
               <span>
                 <strong>{modifier.label}</strong>
-                <span class="est-hint">{modifier.blurb}</span>
+                <span class="est-hint">{publicBlurb(modifier)}</span>
               </span>
             </label>
           ))}
@@ -123,7 +140,7 @@ const model = {
       <p class="kicker">Your project</p>
 
       <p class="est-empty" data-empty>
-        Count an opening and this fills in.
+        Count an opening and your project summary fills in here.
       </p>
 
       <div class="est-summary" data-summary hidden>
@@ -143,40 +160,40 @@ const model = {
           </div>
         ) : (
           <div class="est-range est-range-pending">
-            <p class="kicker">Scope, not a price</p>
+            <p class="kicker">Next: your free quote</p>
             <p class="est-hint">
-              We are not publishing dollar ranges until they are our own numbers rather than
-              somebody’s national average. Send the scope over and you will get a real figure for
-              your house.
+              We measure every opening at the house and put the approach and the price in a
+              written estimate. This summary carries over to the request form, so you only add
+              your contact details and send it.
             </p>
           </div>
         )}
 
         <div class="est-drivers" data-drivers-block hidden>
-          <p class="kicker">What moves this number</p>
+          <p class="kicker">{showMoney ? 'What moves this number' : 'What we look at'}</p>
           <ul class="est-driver-list" data-drivers></ul>
         </div>
 
         <p class="est-actions">
-          <a class="btn btn-primary" href="/estimate" data-handoff>Send this scope to us</a>
+          <a class="btn btn-primary" href="/estimate" data-handoff>{showMoney ? 'Send this scope to us' : 'Get my free quote'}</a>
         </p>
-        <p class="fine-print">This is a general guide, not a quote. Nothing reaches us unless you submit the request form on the next page.</p>
+        <p class="fine-print">{showMoney ? 'This is a general guide, not a quote. Nothing reaches us unless you submit the request form on the next page.' : 'Nothing reaches us until you submit the request form on the next page.'}</p>
       </div>
     </aside>
   </div>
 </section>
 
 <script>
-  type OpeningRow = { id: string; label: string; low: number; high: number; isDoor?: boolean };
-  type ModifierRow = { id: string; label: string; perOpening: boolean; low: number; high: number };
-  type BrandRow = { id: string; label: string; low: number; high: number };
+  type OpeningRow = { id: string; label: string; low?: number; high?: number; isDoor?: boolean };
+  type ModifierRow = { id: string; label: string; perOpening: boolean; low?: number; high?: number };
+  type BrandRow = { id: string; label: string; low?: number; high?: number };
   type Model = {
     showMoney: boolean;
     isAverage: boolean;
     reviewedAt: string;
     rounding: number;
     openings: OpeningRow[];
-    materials: { id: string; label: string; multiplier: number }[];
+    materials: { id: string; label: string; multiplier?: number }[];
     brands: BrandRow[];
     modifiers: ModifierRow[];
   };
@@ -253,17 +270,18 @@ const model = {
 
       // --- range ----------------------------------------------------------
       if (model.showMoney && rangeEl instanceof HTMLElement) {
+        const multiplier = material.multiplier ?? 1;
         let low = 0;
         let high = 0;
         for (const opening of picked) {
-          low += opening.low * opening.count * material.multiplier;
-          high += opening.high * opening.count * material.multiplier;
+          low += (opening.low ?? 0) * opening.count * multiplier;
+          high += (opening.high ?? 0) * opening.count * multiplier;
         }
 
         // Brand is a window-line choice, not a door choice — only counts
         // against windowCount, never the sliding/French door openings.
-        low += brand.low * windowCount;
-        high += brand.high * windowCount;
+        low += (brand.low ?? 0) * windowCount;
+        high += (brand.high ?? 0) * windowCount;
 
         // Owner direction (2026-10-02): the range is the base opening prices plus
         // whatever the visitor ticks below. No allowance for extra work is added;
@@ -273,8 +291,8 @@ const model = {
           const modifier = model.modifiers.find((m) => m.id === id);
           if (!modifier) continue;
           const units = modifier.perOpening ? total : 1;
-          low += modifier.low * units;
-          high += modifier.high * units;
+          low += (modifier.low ?? 0) * units;
+          high += (modifier.high ?? 0) * units;
         }
 
         rangeEl.textContent = `${money(low)} – ${money(high)}`;
@@ -283,29 +301,41 @@ const model = {
       // --- what moves the number -----------------------------------------
       const notes: string[] = [];
       notes.push(
-        'These are base prices for standard openings. If the measure finds extra work, such as damage at the opening, the written estimate says so before anything is ordered.',
+        model.showMoney
+          ? 'These are base prices for standard openings. If the measure finds extra work, such as damage at the opening, the written estimate says so before anything is ordered.'
+          : 'If the measure finds extra work, such as damage at the opening, the written estimate says so before anything is ordered.',
       );
       if (material.id !== 'vinyl') {
-        notes.push(`${material.label} costs more than vinyl but holds up better on wide openings.`);
-      }
-      if (windowCount > 0 && brand.id !== model.brands[0].id && (brand.low > 0 || brand.high > 0)) {
         notes.push(
-          `${brand.label} adds ${money(brand.low)}–${money(brand.high)} per window over ${model.brands[0].label} — doors are not brand-specific.`,
+          model.showMoney
+            ? `${material.label} costs more than vinyl but holds up better on wide openings.`
+            : `${material.label} holds up better than vinyl on wide openings.`,
+        );
+      }
+      if (windowCount > 0 && brand.id !== model.brands[0].id) {
+        notes.push(
+          model.showMoney
+            ? `${brand.label} adds ${money(brand.low ?? 0)}–${money(brand.high ?? 0)} per window over ${model.brands[0].label} — doors are not brand-specific.`
+            : `${brand.label} is a different window line from ${model.brands[0].label}; doors are not brand-specific. Your written estimate shows the line you chose.`,
         );
       }
       if (mods.includes('third-story-plus')) notes.push('Third floor and up needs more staging than a typical second-story opening.');
       if (mods.includes('oversize')) {
         notes.push(
-          model.isAverage
+          model.showMoney && model.isAverage
             ? 'Arches and transoms are custom-ordered — this line is still the regional average.'
-            : 'Arches and transoms are custom-ordered, so this line is the least certain one here.',
+            : 'Arches and transoms are custom-ordered, so we confirm them at the measure.',
         );
       }
       if (mods.includes('rot-repair')) {
-        notes.push('Rot is priced once the wall is open — it is not in any range on this page.');
+        notes.push(
+          model.showMoney
+            ? 'Rot is priced once the wall is open — it is not in any range on this page.'
+            : 'Rot is scoped once the wall is open, and the written estimate says what it covers.',
+        );
       }
       if (mods.includes('metal-removal')) notes.push('Old metal frames need extra cut-back before the new one goes in.');
-      if (total >= 8) notes.push('Whole-house jobs usually price better per opening than a few.');
+      if (total >= 8 && model.showMoney) notes.push('Whole-house jobs usually price better per opening than a few.');
 
       if (drivers instanceof HTMLElement) {
         drivers.innerHTML = '';

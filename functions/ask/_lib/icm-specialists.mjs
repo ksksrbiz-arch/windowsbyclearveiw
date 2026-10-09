@@ -11,10 +11,10 @@ const CONTRACTS = Object.freeze({
     never: 'Invent a diagnosis, promise a repair, or recommend a product without sufficient evidence.',
   },
   estimator: {
-    job: 'Explain Clearview pricing methodology and route price questions to the deterministic pricing service.',
-    evidence: 'Numbers come from the application pricing model only. General knowledge may explain cost drivers but cannot create Clearview pricing.',
-    output: 'scope inputs → deterministic price result → assumptions/modifiers → estimate handoff',
-    never: 'Guess a total, silently change the pricing basis, or present regional averages as Clearview pricing.',
+    job: 'Explain what drives the cost of a window project and route price questions to a free measure and written estimate. Clearview does not publish prices.',
+    evidence: 'No dollar figure is given. General knowledge may explain cost drivers but cannot create Clearview pricing.',
+    output: 'scope inputs → cost drivers → what the measure confirms → estimate handoff',
+    never: 'State or imply any dollar amount, range, percentage or per-unit price, or present regional averages as Clearview pricing.',
   },
   'installation-reviewer': {
     job: 'Review installation questions against applicable manufacturer instructions and authoritative water-management/building-science principles.',
