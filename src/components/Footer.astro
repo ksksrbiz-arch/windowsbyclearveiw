@@ -7,6 +7,7 @@ import NextdoorIcon from './icons/NextdoorIcon.astro';
 import LicenseTag from './LicenseTag.astro';
 import InsuranceTag from './InsuranceTag.astro';
 import BondTag from './BondTag.astro';
+import GoogleReviewBadge from './GoogleReviewBadge.astro';
 
 const year = new Date().getFullYear();
 
@@ -73,6 +74,7 @@ const columns = [
         Replace old windows and sliding glass doors, or set new construction, in Vancouver, WA
         and surrounding Clark County.
       </p>
+      <GoogleReviewBadge onDark />
       {socialLinks.length > 0 && (
         <ul class="footer-social">
           {socialLinks.map(([label, href, Icon]) => (

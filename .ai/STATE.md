@@ -1,5 +1,11 @@
 # ICM State â€” 2026-10-01
 
+## 2026-10-08 - Google reviews visibility and branded panel
+
+Added Reviews to desktop and mobile navigation, and live Google rating badges to the home hero, shared estimate CTA, footer and estimate form sidebar. A shared browser request updates ratings across page transitions without extra requests for each badge. Failed feeds leave a plain reviews link without a rating claim. The reviews page now leads with a white Google-branded panel, Google logo, gold stars, live rating/count, three written customer reviews and a direct write-review button. Customer text still uses textContent. Corrected the dated fallback to the verified 5.0 / 4 ratings on 2026-10-08. Review cards now reinitialize on client navigation.
+
+Validation: all 48 test:all steps; browser checks at 320, 390, 1401, 1440, 1481 and 1920 px found no horizontal overflow or desktop navigation overlap. Live Google feed was used in the local preview; repeat menu navigation loads all three written reviews and the estimate sidebar shows the live rating. Generic fallback was checked with the endpoint unavailable. Publication and final live verification follow the main push.
+
 ## 2026-10-08 - Audit and bug-fix pass on the Command Center and phone app (branch `claude/internal-pwa-audit`)
 
 Five bugs fixed with regression tests (`npm run test:internal-audit`, a new CI step): Field mode's evidence save used snake_case keys the API refuses, so the Verify gate and therefore job completion could not be done from the phone; the Build Plan editor accepted client-supplied state, approver and history; a malformed `cv_session` cookie caused a 500; the quote builder blocked the save without a message on a fractional or blank quantity; the Mail pilot break-even box showed a profit message when profit was not the problem. The phone app (service worker, offline, expiry, Access redirect, logout) held up under a real-browser test and was not changed. Decisions left open for Mark or Keith (approval actor, photo-count trust, Origin checks, 30-day cookie after logout, fractional quantities, a few gate and dashboard edge cases) are in `HANDOFF.md`. Not testable here: a real iPhone and the live Access sign-in. Full detail: `.ai/CHANGELOG.md` (2026-10-08, audit).

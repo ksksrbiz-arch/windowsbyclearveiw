@@ -42,7 +42,9 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
     </div>
   </section>
 
-  <section class="section">
+  <GoogleReviews />
+
+  <section class="section" data-hide-when-google-reviews={reviews.length === 0 ? true : undefined}>
     <div class="wrap">
       {reviews.length > 0 ? (
         <>
@@ -116,7 +118,6 @@ const googleHeading = `${google.count === 1 ? 'One' : google.count} ${
     </div>
   </section>
 
-  <GoogleReviews />
 
   {reviews.length === 0 && (
     <section class="section section-sunk">

@@ -16,6 +16,7 @@ const links = [
   ['/tools', 'Tools'],
   ['/guides', 'Guides'],
   ['/gallery', 'Gallery'],
+  ['/reviews', 'Reviews'],
   ['/areas', 'Areas'],
   ['/about', 'About'],
 ];
@@ -220,11 +221,7 @@ const links = [
     flex: 1 1 auto;
     min-width: 0;
     justify-content: center;
-    /* .wrap caps this row at --max (1240px), so above the 1400px breakpoint
-       where .header-estimate reappears, the unwrapped nav is short by a
-       constant amount regardless of viewport width: it overlaps .header-social
-       and never resolves, however wide the window gets. See the 1401px block
-       below for how the row is given room (Siding made it eleven links). */
+    /* The twelve-link menu needs a wider header row on desktop. */
     gap: 0.1rem .65rem;
     white-space: nowrap;
   }
@@ -234,7 +231,7 @@ const links = [
      1240px) and the links close up slightly, which restores ~30px of clearance at every width up to
      1920px. Measured in a browser at 1401, 1440, 1536 and 1920. */
   @media (min-width: 1401px) {
-    .header-inner { width: min(1340px, calc(100% - var(--space-m) * 2)); }
+    .header-inner { width: min(1440px, calc(100% - var(--space-m) * 2)); }
     .nav { gap: 0.1rem .6rem; }
   }
 
@@ -293,22 +290,11 @@ const links = [
     transform: translateY(-1px);
   }
 
-  /* The inline nav's gap above was tuned to close a small, constant overlap
-     against exactly one .header-social icon (see the .nav comment above) —
-     it stays tight at every width down to the 1280px breakpoint where nav
-     becomes a hamburger. Two more icons here would reopen that overlap well
-     before 1280px, so Google/Nextdoor only join the header once nav is
-     already hidden behind the toggle and the row has real room again. They
-     are always reachable from the footer regardless of screen size. */
+  /* Extra social icons appear when navigation is inside the menu. */
   .header-social-extra { display: none; }
 
-  /* Room reopens once nav collapses behind the hamburger toggle at 1280px,
-     but closes again on phone widths: the brand mark/wordmark, three fixed
-     2.25rem icons, and the non-shrinking Menu button don't all fit inside
-     .wrap at 320px (Codex caught this — measured overflow of ~90px). Below
-     480px only Facebook stays, matching .header-cta's own narrower cutoff
-     just below; Google/Nextdoor remain one tap away in the footer. */
-  @media (max-width: 1280px) and (min-width: 481px) {
+  /* Keep the phone header compact; all social links remain in the footer. */
+  @media (max-width: 1400px) and (min-width: 481px) {
     .header-social-extra { display: flex; }
   }
 
@@ -343,14 +329,14 @@ const links = [
     background: color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
-  @media (max-width: 1400px) {
+  @media (max-width: 1480px) {
     .header-estimate { display: none; }
     .header-inner,
     .site-header[data-scrolled='true'] .header-inner { min-height: 64px; }
     .nav { gap: .1rem .7rem; }
   }
 
-  @media (max-width: 1280px) {
+  @media (max-width: 1400px) {
     .header-inner,
     .site-header[data-scrolled='true'] .header-inner {
       position: relative;

@@ -1,0 +1,45 @@
+---
+import GoogleIcon from './icons/GoogleIcon.astro';
+interface Props { onDark?: boolean; }
+const { onDark = false } = Astro.props;
+---
+<a href="/reviews" class:list={['google-review-badge', { 'on-dark': onDark }]} data-google-review-badge>
+  <span class="google-mark"><GoogleIcon /></span>
+  <span class="badge-copy">
+    <strong data-rating>Read our Google reviews</strong>
+    <span class="badge-stars" data-stars aria-hidden="true" hidden></span>
+    <span data-detail>See what customers say</span>
+  </span>
+  <span class="badge-arrow" aria-hidden="true">→</span>
+</a>
+<style>
+  .google-review-badge { display: inline-flex; align-items: center; gap: .7rem; max-width: 100%; min-height: 64px; padding: .65rem .85rem; margin-block: .75rem; border: 1px solid var(--line-strong); border-radius: 12px; background: white; color: var(--ink); text-decoration: none; box-sizing: border-box; }
+  .google-mark { display: grid; place-items: center; width: 32px; height: 32px; flex: none; background: white; border-radius: 50%; padding: 5px; }
+  .google-mark :global(svg) { width: 22px; height: 22px; }
+  .badge-copy { display: grid; gap: .15rem; font-size: .875rem; line-height: 1.35; }
+  .badge-copy strong { font-weight: 650; }
+  .badge-copy > span { font-size: .8rem; }
+  .badge-copy .badge-stars { color: #fbbc04; font-size: 1rem; letter-spacing: .08em; }
+  .badge-stars[hidden] { display: none; }
+  .badge-arrow { flex: none; }
+  .on-dark { background: #123f42; border-color: #40777a; color: #fff; }
+  .google-review-badge:hover { border-color: var(--accent); }
+  .google-review-badge:focus-visible { outline: 3px solid var(--accent-bright); outline-offset: 4px; }
+</style>
+<script>
+  import { getGoogleReviewFeed } from '../lib/google-review-feed';
+  async function refreshReviewBadges() {
+    const feed = await getGoogleReviewFeed();
+    if (!feed || feed.status !== 'ok' || typeof feed.rating !== 'number' || feed.rating < 1 || feed.rating > 5 || !Number.isInteger(feed.count) || !feed.count || feed.count < 1) return;
+    document.querySelectorAll<HTMLElement>('[data-google-review-badge]').forEach(badge => {
+      const rating = badge.querySelector('[data-rating]');
+      const detail = badge.querySelector('[data-detail]');
+      const stars = badge.querySelector<HTMLElement>('[data-stars]');
+      if (stars) { const n = Math.round(feed.rating!); stars.textContent = '★'.repeat(n) + '☆'.repeat(5 - n); stars.hidden = false; }
+      if (rating) rating.textContent = `${feed.rating!.toFixed(1)} out of 5 on Google`;
+      if (detail) detail.textContent = `${feed.count} customer review${feed.count === 1 ? '' : 's'} · Read reviews`;
+    });
+  }
+  refreshReviewBadges();
+  document.addEventListener('astro:page-load', refreshReviewBadges);
+</script>

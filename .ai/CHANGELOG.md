@@ -1,5 +1,11 @@
 # ICM Changelog
 
+## 2026-10-08 - Google reviews visibility and branded panel
+
+Added Reviews to desktop and mobile navigation, and live Google rating badges to the home hero, shared estimate CTA, footer and estimate form sidebar. A shared browser request updates ratings across page transitions without extra requests for each badge. Failed feeds leave a plain reviews link without a rating claim. The reviews page now leads with a white Google-branded panel, Google logo, gold stars, live rating/count, three written customer reviews and a direct write-review button. Customer text still uses textContent. Corrected the dated fallback to the verified 5.0 / 4 ratings on 2026-10-08. Review cards now reinitialize on client navigation.
+
+Validation: all 48 test:all steps; browser checks at 320, 390, 1401, 1440, 1481 and 1920 px found no horizontal overflow or desktop navigation overlap. Live Google feed was used in the local preview; repeat menu navigation loads all three written reviews and the estimate sidebar shows the live rating. Generic fallback was checked with the endpoint unavailable. Publication and final live verification follow the main push.
+
 ## 2026-10-08 - Audit and bug-fix pass on the Command Center and phone app (branch `claude/internal-pwa-audit`)
 
 Why: Keith asked for a full audit of `/internal` and the installable phone app before Mark's first real jobs go through it. How: a read-only pass over every `functions/internal` handler, `public/ops-sw.js`, the manifest, `src/scripts/internal-pwa.ts` and all 36 internal pages, then a real-browser pass (Chromium, 390 px touch and 1366 px desktop) against `wrangler pages dev` with a local D1/R2 and synthetic data only (no customer data, nothing from production): every page crawled for console and network errors, sideways scroll, control sizes, labels and script injection; every client write call compared with the keys its handler reads; the quote, plan, signature, job, Field mode, closeout and completion flows driven through the real pages; and the service worker run with a proxy that drops connections and another that 302s `/internal/*` to a second origin (the Access sign-in imitation, as in `.ai/references/internal-pwa.md`).

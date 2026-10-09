@@ -9,6 +9,7 @@
 // Review text is untrusted third-party content: it is written with
 // textContent only, so it is never parsed as markup.
 import { site } from '../data/site';
+import GoogleIcon from './icons/GoogleIcon.astro';
 import '../styles/review-cards.css';
 
 const googleUrl = site.social.google;
@@ -21,9 +22,17 @@ const googleUrl = site.social.google;
   hidden
 >
   <div class="wrap">
-    <p class="kicker">From Google</p>
-    <h2 id="google-reviews-title">What customers wrote on Google.</h2>
-    <p class="lede" data-gr-summary></p>
+    <div class="google-panel">
+    <div class="google-panel-header">
+      <div>
+        <h2 id="google-reviews-title" class="google-heading"><GoogleIcon /> Google reviews</h2>
+        <p class="google-business">Clearview windows and trim LLC</p>
+        <p class="google-overall-stars" data-gr-stars aria-hidden="true"></p>
+        <p class="google-summary" data-gr-summary></p>
+      </div>
+      <a class="google-write" href={site.social.googleReview || googleUrl} target="_blank" rel="noopener noreferrer">Write a review on Google</a>
+    </div>
+    <template data-google-mark><GoogleIcon /></template>
     <div class="gr-list" data-gr-list></div>
     <p class="fine-print gr-attribution">
       Reviews shown as written, straight from Google Maps. Only the most relevant
@@ -35,6 +44,7 @@ const googleUrl = site.social.google;
         </>
       )}
     </p>
+    </div>
   </div>
 </section>
 
@@ -45,12 +55,12 @@ const googleUrl = site.social.google;
 
   .gr-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-l) var(--space-xl);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
     margin-top: var(--space-l);
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: 900px) {
     .gr-list {
       grid-template-columns: 1fr;
     }
@@ -61,10 +71,31 @@ const googleUrl = site.social.google;
   }
 
   .gr-list:has(> :only-child) { grid-template-columns: 1fr; max-width: 960px; }
+  .google-panel { padding: clamp(1rem, 3vw, 2rem); border: 1px solid #dadce0; border-radius: 20px; background: #fff; color: #202124; box-shadow: 0 8px 30px rgb(32 33 36 / .06); }
+  .google-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; }
+  .google-heading { display: flex; align-items: center; gap: .65rem; font-size: 1.65rem; margin: 0; color: #202124; }
+  .google-heading :global(svg) { width: 30px; height: 30px; }
+  .google-business { margin: .6rem 0 .3rem; font-weight: 600; }
+  .google-summary { margin: 0; font-size: 1rem; color: #5f6368; }
+  .google-overall-stars { color: #fbbc04; font-size: 1.5rem; letter-spacing: .08em; margin: .35rem 0; }
+  .google-write { border-radius: 24px; background: #1a73e8; color: white; padding: .8rem 1.1rem; font-size: .9rem; font-weight: 600; text-decoration: none; }
+  .google-write:hover { background: #1558b0; }
+  .gr-attribution { font-size: .8rem; color: #5f6368; }
+  .google-panel :global(.gr-review) { display: flex; flex-direction: column; padding: 1.3rem; border: 1px solid #dadce0; border-radius: 12px; background: #fff; color: #202124; box-shadow: none; }
+  .google-panel :global(.review-stars) { color: #fbbc04; font-size: 1.2rem; letter-spacing: .08em; }
+  .google-panel :global(.review-source) { background: transparent; padding: 0; font-size: .8rem; color: #5f6368; }
+  .google-panel :global(.review-source svg) { width: 18px; height: 18px; }
+  .google-panel :global(.review-quote-mark) { display: none; }
+  .google-panel :global(.review-quote) { font-size: 1rem; line-height: 1.65; letter-spacing: normal; margin: 1.25rem 0; max-width: none; }
+  .google-panel :global(.review-footer) { margin-top: auto; border-color: #e8eaed; padding-top: 1rem; }
+  .google-panel :global(.review-avatar) { flex-basis: 40px; height: 40px; font-size: .9rem; background: #e8f0fe; color: #185abc; }
+  .google-panel :global(.review-name) { font-size: .95rem; }
+  .google-panel :global(.review-person-meta) { color: #5f6368; font-size: .75rem; }
+  .google-panel :global(.gr-review a) { color: #202124; }
 </style>
 
 <script>
-  const root = document.querySelector<HTMLElement>('[data-google-reviews]');
+  import { getGoogleReviewFeed } from '../lib/google-review-feed';
 
   type GoogleReview = {
     rating: number;
@@ -87,6 +118,7 @@ const googleUrl = site.social.google;
   }
 
   function render(feed: Feed) {
+    const root = document.querySelector<HTMLElement>('[data-google-reviews]');
     if (!root || feed.status !== 'ok' || !feed.reviews || feed.reviews.length === 0) return;
 
     const list = root.querySelector<HTMLElement>('[data-gr-list]');
@@ -141,6 +173,8 @@ const googleUrl = site.social.google;
       const source = document.createElement('span');
       source.className = 'review-source';
       source.textContent = 'Google review';
+      const logo = root.querySelector<HTMLTemplateElement>('[data-google-mark]');
+      if (logo) source.prepend(logo.content.cloneNode(true));
       const quoteMark = document.createElement('span');
       quoteMark.className = 'review-quote-mark';
       quoteMark.setAttribute('aria-hidden', 'true');
@@ -156,6 +190,8 @@ const googleUrl = site.social.google;
       parts.push(`${feed.count} Google review${feed.count === 1 ? '' : 's'}`);
     }
     summary.textContent = parts.join(' · ');
+    const overallStars = root.querySelector('[data-gr-stars]');
+    if (overallStars && typeof feed.rating === 'number') overallStars.textContent = stars(feed.rating);
     summary.hidden = parts.length === 0;
 
     root.hidden = false;
@@ -181,9 +217,9 @@ const googleUrl = site.social.google;
     });
   }
 
-  if (root) {
-    fetch('/api/google-reviews', { headers: { accept: 'application/json' } })
-      .then((response) => (response.ok ? response.json() : null))
+  function loadReviews() {
+    if (!document.querySelector('[data-google-reviews]')) return;
+    getGoogleReviewFeed()
       .then((feed: Feed | null) => {
         if (feed) render(feed);
       })
@@ -191,4 +227,6 @@ const googleUrl = site.social.google;
         /* Leave the page as the honest default. */
       });
   }
+  loadReviews();
+  document.addEventListener('astro:page-load', loadReviews);
 </script>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EstimateForm from '../components/EstimateForm.astro';
+import GoogleReviewBadge from '../components/GoogleReviewBadge.astro';
 import { mailHref, site, telHref } from '../data/site';
 ---
 <BaseLayout
@@ -29,6 +30,7 @@ import { mailHref, site, telHref } from '../data/site';
       <EstimateForm />
 
       <aside class="estimate-aside">
+        <GoogleReviewBadge />
         <p class="rule-label">Prefer to talk</p>
         <p class="phone-display"><a href={telHref()}>{site.phoneDisplay}</a></p>
         <p>
