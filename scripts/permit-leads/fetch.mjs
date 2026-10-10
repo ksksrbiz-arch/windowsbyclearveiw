@@ -2,14 +2,14 @@
 // official endpoint; nothing is scraped and nothing is written to the sources.
 // `fetchImpl` is injectable so the paging logic can be tested without a network.
 
-const PERMITS = 'https://gis.clark.wa.gov/arcgisfed2/rest/services/MapCatalog/Permitting/MapServer';
-const PARCELS = 'https://gis.clark.wa.gov/arcgisfed2/rest/services/MapCatalog/Addressing/MapServer/10/query';
+export const PERMITS = 'https://gis.clark.wa.gov/arcgisfed2/rest/services/MapCatalog/Permitting/MapServer';
+export const PARCELS = 'https://gis.clark.wa.gov/arcgisfed2/rest/services/MapCatalog/Addressing/MapServer/10/query';
 const SALES = 'https://gis.clark.wa.gov/arcgisfed2/rest/services/MapCatalog/LandRecords/MapServer/0/query';
 const LICENSES = 'https://data.wa.gov/resource/m8qx-ubtq.json';
 
 const PAGE = 2000;
-const POLITE_MS = 200;
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export const POLITE_MS = 200;
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function getJson(fetchImpl, url, { body, tries = 5 } = {}) {
   let lastError;
@@ -59,15 +59,17 @@ export async function fetchPermits(fetchImpl, since) {
   return [...byCase.values()];
 }
 
-const chunk = (list, size) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, i * size + size));
+export const chunk = (list, size) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, i * size + size));
 
-/** Assessor parcel attributes keyed by property id (`sn` on a permit = `serial_num`). */
-export async function fetchParcels(fetchImpl, propertyIds) {
+const PARCEL_FIELDS = 'serial_num,Owner,OwnAddrs,SitAddrs,Yrblt,PT1Desc,Juris,bldgsqft,LotSqFt,Legal';
+
+/** Assessor parcel attributes keyed by property id (`sn` on a permit = `serial_num`). `fields` widens the columns asked for. */
+export async function fetchParcels(fetchImpl, propertyIds, { fields = PARCEL_FIELDS } = {}) {
   const out = new Map();
   for (const ids of chunk([...new Set(propertyIds)].filter(Number.isInteger), 400)) {
     const rows = await arcgisAll(fetchImpl, PARCELS, {
       where: `serial_num IN (${ids.join(',')})`,
-      outFields: 'serial_num,Owner,OwnAddrs,SitAddrs,Yrblt,PT1Desc,Juris,bldgsqft,LotSqFt,Legal',
+      outFields: fields,
     });
     for (const row of rows) if (!out.has(row.serial_num)) out.set(row.serial_num, row);
     await sleep(POLITE_MS);
@@ -85,9 +87,10 @@ export async function fetchSales(fetchImpl, propertyIds) {
   return out;
 }
 
-/** Every ACTIVE contractor license in Washington (about 76,000 rows). */
-export async function fetchActiveLicenses(fetchImpl) {
-  const select = 'businessname,contractorlicensenumber,address1,city,state,zip,phonenumber,primaryprincipalname,contractorlicensestatus,licenseexpirationdate,ubi';
+const LICENSE_FIELDS = 'businessname,contractorlicensenumber,address1,city,state,zip,phonenumber,primaryprincipalname,contractorlicensestatus,licenseexpirationdate,ubi';
+
+/** Every ACTIVE contractor license in Washington (about 76,000 rows). `select` widens the columns asked for. */
+export async function fetchActiveLicenses(fetchImpl, { select = LICENSE_FIELDS } = {}) {
   const out = [];
   for (let offset = 0; ; offset += 50000) {
     const query = new URLSearchParams({ $select: select, $where: "statuscode='A'", $order: 'contractorlicensenumber', $limit: '50000', $offset: String(offset) });

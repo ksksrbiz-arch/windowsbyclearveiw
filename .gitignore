@@ -18,6 +18,9 @@ data/permit-leads/
 # mail-pilot load files: street addresses of public record, repo is public
 data/mail-pilot/
 
+# supplier permit list: owner names, mailing addresses and phone numbers from a licensed report, repo is public
+data/supplier-permits/
+
 # environment variables
 .env
 .env.production
