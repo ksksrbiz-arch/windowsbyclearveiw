@@ -2,7 +2,7 @@
 
 ## 2026-10-09 - Supplier permit list (branch `claude/supplier-permit-list`)
 
-Keith asked for the weekly permit report from Mark's supplier (Construction Monitor) to be fully enriched and loaded into the Command Center. It is Analytics > "Supplier permit list". Week 40 built cleanly (197 Clark County permits); the production load waits for the merge and deploy.
+Keith asked for the weekly permit report from Mark's supplier (Construction Monitor) to be fully enriched and loaded into the Command Center. It is Analytics > "Supplier permit list". Week 40 built cleanly (197 Clark County permits) and was loaded into production on 2026-10-09 (wrangler reported 210 statements, no error; counts not re-read); the live page waits for the merge and deploy.
 
 What the next agent must know:
 - **The report is licensed to one subscriber and forbids sharing, and the repo is public.** Nothing from it may be committed, pasted or screenshotted (PDF, parsed JSON, SQL, CSV, any row). The parser and build refuse any output folder in the repo except git-ignored `data/`. This session did not see Mark told what the section holds; make sure he knows. If the supplier objects to its use, removing it is `DROP TABLE supplier_permits; DROP TABLE supplier_import_meta;` on the production database; nothing else depends on them.

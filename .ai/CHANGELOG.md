@@ -8,7 +8,7 @@ Decisions: a parcel is chosen only when exactly one parcel at the street matches
 
 Week 40 result: 197 Clark County permits enriched; 50 found as county permit records (property id), 128 more matched by exact street, 15 no match, 4 ambiguous; 26 already in permit leads (21 same permit, 5 same street), 4 in the mail pilot; 41 builders matched to an active L&I license by business name; 30 of 48 new-home permits are by builders already tracked. All permits in this edition are approved (none pending). `recent_permit` is true for every scored permit in this edition (permit dates run Aug 17 to Sep 25), so it will only separate rows once several weeks are loaded.
 
-Validation: `npm run test:supplier-permits` (new CI step) and `npm run test:all`. Not tested here: the production load and the live page (pending merge and deploy), a real phone, and the PDF parser on a second week's report.
+Validation: `npm run test:supplier-permits` (new CI step) and `npm run test:all`. The production load ran 2026-10-09 (wrangler: 210 statements, no error; counts not re-read). Not tested here: the live page (pending merge and deploy), a real phone, and the PDF parser on a second week's report.
 
 ## 2026-10-09 - Google operations tools (account activation pending)
 
