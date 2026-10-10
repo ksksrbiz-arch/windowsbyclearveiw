@@ -1,5 +1,9 @@
 # Project context — Clearview Windows
 
+## 2026-10-10 - Dependency audit (branch `claude/improve-next`)
+
+`sharp` was bumped to 0.35.5 in `package-lock.json` only, closing the one high `npm audit` advisory (librsvg CVE). Four moderate advisories remain through `gray-matter` (dev only, guide index script); `npm audit fix --force` would downgrade it to 2.0.1, so do not run it. Compare with GitHub's Dependabot list, which could not be read from the agent environment. The Dependabot alerts Keith saw (2 high, 1 moderate) may not match `npm audit` one to one. Everything from the supplier permit list work (PR #198 and #200) is merged; the live Analytics check still needs a signed-in person.
+
 ## 2026-10-10 - Supplier permit list: connected records (branch `claude/supplier-permit-links`)
 
 Keith asked for the number and names of corresponding projects to be connected and clearly displayed. The Analytics list now has a "Connected to" column: Permit leads case and owner, Mail pilot CV number and property, a Clearview quote or job at the same street (matched when the page is read, linked to its page), and the tracked builder; builders open to their own permits; the spreadsheet has Subdivision and Connected records. No new load. I read "correspondent projects" as these connected records: if Keith meant something else (for example project names printed in the report), change it in `readConnections` (`functions/internal/_lib/supplier-permits.mjs`). "Same address" is a lead to check, not proof of the same customer. Merge is Keith's; after deploy, open the list and check one permit that shares a street with a quote or job.
