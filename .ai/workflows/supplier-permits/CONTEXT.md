@@ -57,6 +57,13 @@ Rows in D1 (`supplier_permits`, `supplier_import_meta`), the Analytics section, 
 builder business names only; the list and the spreadsheet carry owner names, mailing addresses and phones and are
 separate requests behind the session gate, `private, no-store`, never cached by the service worker.
 
+Connections: every permit row from the list view carries `connections`, the same project in our other records, each with
+a label, **number**, **name**, detail, how it matched and, for our own quotes and jobs, a link into the Command Center.
+Permit leads and the mail pilot are read by the ids saved on the permit at load time; Clearview quotes and jobs are
+matched at read time by street (the city must agree when both name one) and are never written to `supplier_permits`,
+because D1 is the truth for quotes and jobs and they change daily. The list view also takes `builder=<key>` (the key the
+summary gives each builder) to open one builder's permits. "Same address" is a lead to check, not a confirmed match.
+
 ## Stop conditions
 
 - The repository is public and the report is licensed: never commit, paste or screenshot the PDF, the parsed JSON, the

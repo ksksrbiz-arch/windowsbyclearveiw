@@ -1,5 +1,9 @@
 # Project context — Clearview Windows
 
+## 2026-10-10 - Supplier permit list: connected records (branch `claude/supplier-permit-links`)
+
+Keith asked for the number and names of corresponding projects to be connected and clearly displayed. The Analytics list now has a "Connected to" column: Permit leads case and owner, Mail pilot CV number and property, a Clearview quote or job at the same street (matched when the page is read, linked to its page), and the tracked builder; builders open to their own permits; the spreadsheet has Subdivision and Connected records. No new load. I read "correspondent projects" as these connected records: if Keith meant something else (for example project names printed in the report), change it in `readConnections` (`functions/internal/_lib/supplier-permits.mjs`). "Same address" is a lead to check, not proof of the same customer. Merge is Keith's; after deploy, open the list and check one permit that shares a street with a quote or job.
+
 ## 2026-10-09 - Supplier permit list (branch `claude/supplier-permit-list`)
 
 Keith asked for the weekly permit report from Mark's supplier (Construction Monitor) to be fully enriched and loaded into the Command Center. It is Analytics > "Supplier permit list". Week 40 built cleanly (197 Clark County permits) and was loaded into production on 2026-10-09 (wrangler reported 210 statements, no error; counts not re-read); the live page waits for the merge and deploy.

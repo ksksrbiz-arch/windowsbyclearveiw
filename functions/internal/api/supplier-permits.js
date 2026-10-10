@@ -1,6 +1,8 @@
 // GET /internal/api/supplier-permits                        counts, charts and the builder table (no personal data)
-// GET /internal/api/supplier-permits?view=list[&group=remodel][&limit=100][&offset=0]
-//                                                           permit rows with owner names, mailing addresses and phones
+// GET /internal/api/supplier-permits?view=list[&group=remodel][&builder=TESTCO HOMES][&limit=100][&offset=0]
+//                                                           permit rows with owner names, mailing addresses and phones, and for each
+//                                                           permit the same project in our other lists (permit leads, mail pilot),
+//                                                           our own quotes and jobs at the same street, and the builder (number + name)
 // GET /internal/api/supplier-permits?view=csv[&group=remodel]
 //                                                           the same rows as a spreadsheet download
 //
@@ -32,7 +34,7 @@ export async function onRequestGet(context) {
   try {
     if (view === 'summary') return json(await readSupplierSummary(db));
     if (view === 'list') {
-      return json({ status: 'ok', ...(await readSupplierList(db, { group, limit: url.searchParams.get('limit'), offset: url.searchParams.get('offset') })) });
+      return json({ status: 'ok', ...(await readSupplierList(db, { group, builder: url.searchParams.get('builder'), limit: url.searchParams.get('limit'), offset: url.searchParams.get('offset') })) });
     }
     if (view === 'csv') {
       const file = await readSupplierCsv(db, { group });
