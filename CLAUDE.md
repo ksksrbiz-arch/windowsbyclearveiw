@@ -27,6 +27,7 @@ Mission: a trustworthy operating system for Clearview Windows & Trim LLC, not me
 | GA4, GTM, Meta events | `.ai/workflows/analytics-events/` | copy references |
 | Ship, deploy, domain or mail change | `.ai/workflows/deploy-check/` | analytics, specialists |
 | Direct-mail pilot: refresh the list, read or load Mail pilot data | `.ai/workflows/mail-pilot/` | quote workflows; address data in chat or git |
+| Supplier permit list: parse the weekly report, enrich it, load or read it | `.ai/workflows/supplier-permits/` | quote workflows; the report, its rows or phone numbers in chat or git |
 | `/ask` routing or specialists | `.ai/references/ask-routing.md`, `.ai/specialists/<id>/CONTEXT.md` | workflows |
 | Google operations connections and limits | `.ai/references/google-operations.md`, `internal/README.md` | public analytics events |
 | New Command Center feature | `.ai/references/command-center-gap-analysis.md` | specialists |

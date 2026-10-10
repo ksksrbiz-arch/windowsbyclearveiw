@@ -97,6 +97,51 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     </div>
   </section>
 
+  <section class="an-section" aria-labelledby="an-supplier-h">
+    <div class="an-head">
+      <div><p class="kicker">Supplier list</p><h2 id="an-supplier-h">Supplier permit list</h2></div>
+      <span class="an-meta" data-supplier-window>—</span>
+    </div>
+    <p class="an-note">The weekly permit report from Mark's supplier (Construction Monitor), joined to county parcels, sales and state contractor licenses, and compared with the permit leads and mail pilot lists above. The report is licensed to the supplier for their own use: keep it inside Clearview and do not forward or post it. This is research, not customers.</p>
+    <p class="an-callout" data-supplier-message hidden></p>
+    <div class="an-stats" data-supplier-stats hidden>
+      <article class="an-stat"><span>Permits this load</span><strong data-supplier="permits">—</strong><small data-supplier="permitsNote">—</small></article>
+      <article class="an-stat"><span>New to our lists</span><strong data-supplier="fresh">—</strong><small data-supplier="freshNote">—</small></article>
+      <article class="an-stat"><span>With an owner phone</span><strong data-supplier="phones">—</strong><small>printed in the report</small></article>
+      <article class="an-stat"><span>County parcel found</span><strong data-supplier="parcels">—</strong><small data-supplier="parcelsNote">—</small></article>
+    </div>
+    <div class="an-grid" data-supplier-grid hidden>
+      <article class="an-panel"><h3>Permits by type</h3><div class="an-chart" data-chart="supplierGroups"></div></article>
+      <article class="an-panel"><h3>Remodel, ADU and re-roof: what fits</h3><div class="an-chart" data-chart="supplierSignals"></div></article>
+      <article class="an-panel an-wide">
+        <h3>New-home builders in the report</h3>
+        <p class="an-note">"Metro rank" is the builder's place in the report's year-to-date ranking of single-family builders for the whole metro area; the report prints shortened names, so a match is by the start of the name. "Already tracked" means the same company is in the Permit leads builders above; the report cuts long names off and those match by the start of the name, so read the tracked name shown. A license is shown only when the name matches a state record exactly (ignoring punctuation and LLC or INC).</p>
+        <div class="an-table-wrap">
+          <table class="an-table an-table-wide an-table-list">
+            <thead><tr><th scope="col">Builder</th><th scope="col">Permits</th><th scope="col">Value</th><th scope="col">Last permit</th><th scope="col">Metro rank</th><th scope="col">Already tracked</th><th scope="col">State license</th><th scope="col">Phone</th></tr></thead>
+            <tbody data-supplier-builder-rows></tbody>
+          </table>
+        </div>
+      </article>
+      <article class="an-panel an-wide">
+        <h3>Permit list</h3>
+        <p class="an-note">Owner names, mailing addresses and phone numbers come from the report and the county assessor. Use mail for homeowners: Washington restricts unsolicited calls and texts, so phone an owner only if they asked to hear from us. Best fit first; "fit" counts how many of five signals apply (single-family, no contractor named, addition or ADU, permit in the last 90 days, sold in the last 2 years) and applies to remodel, ADU and re-roof permits only. It is a sort order, not a prediction.</p>
+        <div class="an-actions">
+          <label class="an-field"><span>Show</span><select data-supplier-group></select></label>
+          <button class="btn btn-ghost" type="button" data-supplier-load>Show the list</button>
+          <a class="btn btn-ghost" href="/internal/api/supplier-permits?view=csv" data-supplier-csv download>Download as spreadsheet</a>
+        </div>
+        <div class="an-table-wrap" data-supplier-wrap hidden>
+          <table class="an-table an-table-xwide an-table-list">
+            <thead><tr><th scope="col">Address</th><th scope="col">Permit</th><th scope="col">Work</th><th scope="col">Owner</th><th scope="col">Owner mail</th><th scope="col">Owner phone</th><th scope="col">Contractor</th><th scope="col">Home</th><th scope="col">Sold</th><th scope="col">Fit</th><th scope="col">Already in</th></tr></thead>
+            <tbody data-supplier-rows></tbody>
+          </table>
+        </div>
+        <p class="an-note" data-supplier-count hidden></p>
+      </article>
+    </div>
+  </section>
+
   <section class="an-section" aria-labelledby="an-site-h">
     <div class="an-head">
       <div><p class="kicker">Google Analytics</p><h2 id="an-site-h">Site traffic</h2></div>
@@ -181,6 +226,27 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   type HomeownerLead = {
     id: string; permitDate: string; status: string; workType: string; address: string; yearBuilt: number | null; sqft: number | null;
     owner: string; ownerMailing: string; absentee: boolean; ownerApplied: boolean; lastSaleDate: string; lastSaleCents: number | null; signals: string[]; score: number;
+  };
+  type SupplierBuilder = {
+    name: string; permits: number; valueCents: number; lastDate: string; tracked: string; related: string;
+    metro: { rank: number; homes: number; rows: number } | null;
+    license: { number: string; business: string; status: string; expires: string; match: string } | null;
+    phone: string;
+  };
+  type SupplierSummary = {
+    status: 'ok' | 'empty' | 'unavailable';
+    meta?: { imported_at: string; edition: string; edition_start: string; edition_end: string; xref_asof: string };
+    totals?: { permits: number; pending: number; withOwnerPhone: number; known: number; inPermitLeads: number; inMailPilot: number; newToLists: number; parcelMatched: number };
+    groups?: { key: string; label: string; value: number }[];
+    scored?: { total: number; signals: { key: string; label: string; value: number }[] };
+    editions?: { edition: string; permits: number }[];
+    builders?: SupplierBuilder[];
+  };
+  type SupplierRow = {
+    id: string; pending: boolean; group: string; groupLabel: string; city: string; permitType: string; valueCents: number | null; address: string; permitDate: string;
+    owner: string; ownerPhone: string; ownerMailing: string; builder: string; builderPhone: string; builderLicense: string;
+    yearBuilt: number | null; sqft: number | null; absentee: boolean; ownerDiffers: boolean; lastSaleDate: string; lastSaleCents: number | null;
+    stateLicense: { number: string; status: string } | null; trackedBuilder: string; relatedBuilder: string; inPermitLeads: string; mailPilot: string; score: number;
   };
   type Payload = { ga4: Ga4; leads: Leads; pipeline?: Pipeline; links: Record<string, string> };
 
@@ -582,6 +648,166 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
     }
   }
 
+  // ---------- supplier permit list ----------
+  // Only the remodel-style groups get the fit score; the endpoint sends a score for every row, so the page decides what to show.
+  const SCORED_GROUPS = ['remodel', 'adu', 'reroof'];
+  const editionLabel = (value: string) => {
+    const m = /^(\d{4})-W(\d{2})$/.exec(value);
+    return m ? `Week ${Number(m[2])}, ${m[1]}` : value || 'Latest report';
+  };
+
+  function emptyRow(body: HTMLElement, columns: number, text: string) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = columns;
+    td.className = 'an-empty';
+    td.textContent = text;
+    tr.append(td);
+    body.append(tr);
+  }
+
+  function fillGroupSelect(groups: { key: string; label: string; value: number }[]) {
+    const select = $('[data-supplier-group]');
+    if (!(select instanceof HTMLSelectElement)) return;
+    const keep = select.value;
+    select.replaceChildren();
+    const all = document.createElement('option');
+    all.value = '';
+    all.textContent = 'Everything';
+    select.append(all);
+    for (const g of groups) {
+      const option = document.createElement('option');
+      option.value = g.key;
+      option.textContent = `${g.label} (${nf.format(g.value)})`;
+      select.append(option);
+    }
+    select.value = groups.some((g) => g.key === keep) ? keep : '';
+    updateSupplierCsv();
+  }
+
+  function updateSupplierCsv() {
+    const select = $('[data-supplier-group]');
+    const link = $('[data-supplier-csv]');
+    if (!(select instanceof HTMLSelectElement) || !(link instanceof HTMLAnchorElement)) return;
+    link.href = `/internal/api/supplier-permits?view=csv${select.value ? `&group=${encodeURIComponent(select.value)}` : ''}`;
+  }
+
+  function renderSupplier(data: SupplierSummary | undefined) {
+    const message = $('[data-supplier-message]');
+    if (!data || data.status !== 'ok' || !data.totals || !data.meta) {
+      show('[data-supplier-stats]', false);
+      show('[data-supplier-grid]', false);
+      show('[data-supplier-message]', true);
+      setText('[data-supplier-window]', data?.status === 'empty' ? 'Not loaded' : 'Unavailable');
+      if (message instanceof HTMLElement) {
+        message.textContent = data?.status === 'empty'
+          ? 'No supplier list loaded yet. Build it with npm run build:supplier-permits from the weekly report, then load the SQL file into the database. See the Supplier permit list section of internal/README.md.'
+          : 'The supplier list could not be loaded. Try Refresh; the rest of this page is unaffected.';
+      }
+      return;
+    }
+    const t = data.totals;
+    const meta = data.meta;
+    show('[data-supplier-message]', false);
+    show('[data-supplier-stats]', true);
+    show('[data-supplier-grid]', true);
+    const editions = data.editions?.length ?? 0;
+    setText('[data-supplier-window]', `${editionLabel(meta.edition)} · ${shortDate(meta.edition_start)} to ${shortDate(meta.edition_end)} · loaded ${shortDate(meta.imported_at.slice(0, 10))}${editions > 1 ? ` · ${editions} weeks in total` : ''}`);
+    setText('[data-supplier="permits"]', count(t.permits));
+    setText('[data-supplier="permitsNote"]', t.pending ? `${nf.format(t.pending)} still pending approval` : 'all approved');
+    setText('[data-supplier="fresh"]', count(t.newToLists));
+    setText('[data-supplier="freshNote"]', `${nf.format(t.inPermitLeads)} already in permit leads · ${nf.format(t.inMailPilot)} in the mail pilot${meta.xref_asof ? ` (compared ${shortDate(meta.xref_asof.slice(0, 10))})` : ''}`);
+    setText('[data-supplier="phones"]', count(t.withOwnerPhone));
+    setText('[data-supplier="parcels"]', count(t.parcelMatched));
+    setText('[data-supplier="parcelsNote"]', `of ${nf.format(t.permits)} · the rest have no street or no single match`);
+    const groups = data.groups ?? [];
+    fillGroupSelect(groups);
+    setChart('supplierGroups', {
+      build: (width) => barChart(groups.map((g) => ({ label: g.label, value: g.value })), { width, title: 'Supplier permits by type' }),
+      empty: 'No permits loaded.',
+    });
+    const signals = data.scored?.signals ?? [];
+    setChart('supplierSignals', {
+      build: (width) => ((data.scored?.total ?? 0) > 0 ? barChart(signals.map((s) => ({ label: s.label, value: s.value })), { width, title: `${data.scored?.total ?? 0} remodel, ADU and re-roof permits by fit signal` }) : ''),
+      empty: 'No remodel, ADU or re-roof permits in this report.',
+    });
+    const body = $('[data-supplier-builder-rows]');
+    if (!(body instanceof HTMLElement)) return;
+    body.replaceChildren();
+    const builders = data.builders ?? [];
+    if (!builders.length) {
+      emptyRow(body, 8, 'No new-home builders in this report.');
+      return;
+    }
+    for (const b of builders) {
+      const tracked = b.tracked ? `Yes: ${b.tracked}` : b.related ? `Check: ${b.related}` : '—';
+      const license = b.license ? `${b.license.number}${b.license.status && b.license.status !== 'ACTIVE' ? ` · ${b.license.status}` : ''}` : 'None found by exact name';
+      const metro = b.metro ? `#${b.metro.rank} · ${nf.format(b.metro.homes)} homes this year` : '—';
+      appendRow(body, [b.name, nf.format(b.permits), b.valueCents ? dollars(b.valueCents) : '—', shortDate(b.lastDate), metro, tracked, license, phoneCell(b.phone)]);
+    }
+  }
+
+  async function loadSupplier() {
+    try {
+      const response = await fetch('/internal/api/supplier-permits', { headers: { accept: 'application/json' } });
+      if (!response.ok) throw new Error('bad status');
+      renderSupplier((await response.json()) as SupplierSummary);
+    } catch {
+      renderSupplier(undefined);
+    }
+  }
+
+  let supplierShown = false;
+  async function loadSupplierRows() {
+    const button = $('[data-supplier-load]');
+    const select = $('[data-supplier-group]');
+    const body = $('[data-supplier-rows]');
+    if (!(button instanceof HTMLButtonElement) || !(select instanceof HTMLSelectElement) || !(body instanceof HTMLElement)) return;
+    if (supplierShown) {
+      supplierShown = false;
+      show('[data-supplier-wrap]', false);
+      show('[data-supplier-count]', false);
+      button.textContent = 'Show the list';
+      return;
+    }
+    button.disabled = true;
+    try {
+      const group = select.value;
+      const response = await fetch(`/internal/api/supplier-permits?view=list&limit=300${group ? `&group=${encodeURIComponent(group)}` : ''}`, { headers: { accept: 'application/json' } });
+      if (!response.ok) throw new Error('bad status');
+      const result = (await response.json()) as { rows?: SupplierRow[]; total?: number };
+      const rows = result.rows ?? [];
+      body.replaceChildren();
+      for (const r of rows) {
+        const scored = SCORED_GROUPS.includes(r.group);
+        const mail = r.ownerMailing ? (r.absentee ? `Elsewhere: ${r.ownerMailing}` : 'At the property') : '—';
+        const licensed = Boolean(r.stateLicense || r.builderLicense);
+        const contractor = r.builder ? `${r.builder}${r.stateLicense ? ` · ${r.stateLicense.number}` : r.builderLicense ? ` · ${r.builderLicense}` : ''}` : '—';
+        const home = [r.yearBuilt ? String(r.yearBuilt) : '', r.sqft ? `${nf.format(r.sqft)} sq ft` : ''].filter(Boolean).join(' · ') || '—';
+        const sold = r.lastSaleDate ? `${shortDate(r.lastSaleDate)}${typeof r.lastSaleCents === 'number' ? ` · ${dollars(r.lastSaleCents)}` : ''}` : '—';
+        const known = [r.inPermitLeads ? 'Permit leads' : '', r.mailPilot ? `Mail pilot ${r.mailPilot}` : '', r.trackedBuilder ? 'Builder tracked' : ''].filter(Boolean).join(' · ') || 'New to us';
+        const work = `${r.permitType || r.groupLabel}${typeof r.valueCents === 'number' ? ` · ${dollars(r.valueCents)}` : ''}`;
+        const address = `${r.address || '(no address)'}${r.city ? `, ${r.city}` : ''}`;
+        // An owner's phone is shown as text on purpose (see the note above); only a licensed contractor's number is a link.
+        const contractorCell = document.createElement('span');
+        contractorCell.append(contractor);
+        if (r.builderPhone) contractorCell.append(' · ', licensed ? phoneCell(r.builderPhone) : r.builderPhone);
+        appendRow(body, [address, `${shortDate(r.permitDate)} · ${r.id}${r.pending ? ' (pending)' : ''}`, work, r.owner || '—', mail, r.ownerPhone || '—', contractorCell, home, sold, scored ? `${r.score} of 5` : '—', known]);
+      }
+      if (!rows.length) emptyRow(body, 11, 'No permits in this group.');
+      const total = result.total ?? rows.length;
+      setText('[data-supplier-count]', total > rows.length ? `Showing the best ${nf.format(rows.length)} of ${nf.format(total)}. The spreadsheet has all of them.` : `${nf.format(rows.length)} permit${rows.length === 1 ? '' : 's'}.`);
+      show('[data-supplier-count]', true);
+      supplierShown = true;
+      show('[data-supplier-wrap]', true);
+      button.textContent = 'Hide the list';
+    } catch {
+      setText('[data-status]', 'Could not load the supplier list. Try again.');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   async function load() {
     setText('[data-status]', 'Loading analytics…');
     try {
@@ -597,6 +823,7 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
       renderLeads(data.leads);
       renderGa4(data.ga4);
       void loadPermits();
+      void loadSupplier();
       document.querySelectorAll('[data-link]').forEach((el) => {
         const href = data.links?.[(el as HTMLElement).dataset.link || ''];
         if (el instanceof HTMLAnchorElement && typeof href === 'string' && /^https:\/\//.test(href)) el.href = href;
@@ -608,6 +835,11 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   }
 
   document.querySelector('[data-homeowners-load]')?.addEventListener('click', loadHomeowners);
+  document.querySelector('[data-supplier-load]')?.addEventListener('click', loadSupplierRows);
+  document.querySelector('[data-supplier-group]')?.addEventListener('change', () => {
+    updateSupplierCsv();
+    if (supplierShown) { supplierShown = false; void loadSupplierRows(); }
+  });
   document.querySelector('[data-refresh]')?.addEventListener('click', load);
   load();
 </script>
@@ -667,6 +899,12 @@ import InternalLayout from '../../layouts/InternalLayout.astro';
   :global(.an-table th),:global(.an-table td){padding:.5rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
   :global(.an-table th[scope="row"]),.an-table thead th:first-child{text-align:left;white-space:normal;overflow-wrap:anywhere;min-width:7rem}
   .an-table-wide{min-width:54rem}
+  .an-actions{display:flex;flex-wrap:wrap;align-items:end;gap:.6rem;margin-bottom:var(--space-s)}
+  .an-field{display:grid;gap:.2rem;font-size:var(--step--2);font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .an-field select{min-width:12rem;max-width:100%;text-transform:none;letter-spacing:0;font-weight:500;font-size:var(--step--1)}
+  .an-table-xwide{min-width:80rem}
+  /* Text-heavy tables: left-aligned and allowed to wrap. Rows are built by script, so these must be global. */
+  :global(.an-table-list th),:global(.an-table-list td){text-align:left;white-space:normal;vertical-align:top;min-width:6rem}
   .an-table-wide thead th:nth-child(5),.an-table-wide thead th:nth-child(6){text-align:left}
   :global(.an-table a){color:inherit;text-decoration:underline}
   :global(.an-table td:nth-child(5)),:global(.an-table td:nth-child(6)){text-align:left;white-space:normal;min-width:9rem}

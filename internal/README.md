@@ -269,7 +269,8 @@ chat. The list of homeowner rows is a separate request the page only makes when 
 press "Show the list", and both endpoints sit behind the session gate like every
 `/internal` route. Use the owner mailing address for mail. Washington's 2022
 telephone-solicitation law restricts unsolicited calls and texts, and these records
-carry no phone numbers for homeowners (none are guessed).
+carry no phone numbers for homeowners (none are guessed). The separate
+Supplier permit list below does carry owner phones, copied from a licensed report; see its privacy note.
 
 **What the numbers mean**
 
@@ -288,6 +289,72 @@ carry no phone numbers for homeowners (none are guessed).
 
 Sources: permits and parcels from `gis.clark.wa.gov` (ArcGIS REST), licenses from
 data.wa.gov dataset `m8qx-ubtq`. Tests: `npm run test:permit-leads`.
+
+## Supplier permit list (Analytics page, licensed weekly report)
+
+The **Supplier permit list** section of `/internal/analytics` shows the weekly permit report Mark's supplier shares
+(Construction Monitor: Portland, Vancouver and Salem metro), joined to Clark County parcels, sales and WA L&I contractor
+licenses and compared with the Permit leads and Mail pilot lists. It is research data in two tables (`supplier_permits`,
+`supplier_import_meta`, created by the SQL file itself), not leads: nothing in them is a customer, quote or job until a
+person acts on it. With nothing loaded the section says "No supplier list loaded yet".
+
+Each week, from the new PDF (steps and rules: `.ai/workflows/supplier-permits/CONTEXT.md`):
+
+```bash
+pip install pdfplumber                           # once
+python3 scripts/supplier-permits/parse-construction-monitor.py REPORT.pdf --out ../private/wk41.json
+npm run build:permit-leads                       # refresh the list the report is compared with (optional)
+npm run build:supplier-permits -- --in=../private/wk41.json --mail-pilot=../private/properties.json
+# -> data/supplier-permits/supplier-permits.sql and .csv; the terminal shows counts only
+```
+
+Then load the SQL into the production database exactly as described under "Which database" in the Mail pilot section
+below (scratch config, Mark's account id, `--file=data/supplier-permits/supplier-permits.sql`). Check before and after with
+`--command "SELECT COUNT(*) FROM supplier_permits"`.
+
+**Loading is a merge, not a replace.** Rows are keyed by the report's permit number. A permit seen again is refreshed in
+place and keeps its `first_seen`; new permits are added; permits missing from a later report are left alone; nothing is
+deleted; running the same file twice leaves the same rows; an older file loaded after a newer one does not overwrite it.
+Each weekly report therefore adds to the table.
+
+**The parser** reads the report's three-column layout by position (font, colour, indent) and checks itself against the
+report's own week totals: if the permits it found do not add up to the totals on page 2 it writes nothing. It is not part
+of CI (it needs a licensed report to run), so a new report layout shows up as that failure, not as silently wrong data.
+
+**What is joined, and how sure it is**
+
+- *County parcel*: by the permit's county case number when the county has the permit (the permit carries its property id),
+  otherwise by street address. One exact street match is used ("address exact"); one near match is "address close"; several
+  parcels at one address are left unmatched ("ambiguous") rather than guessed. Permits with no street, or on a brand-new lot
+  the assessor does not list yet, have no parcel facts.
+- *Owner and phone*: names and phone numbers are copied from the report; the assessor's owner and mailing address are shown
+  next to them ("owner lives elsewhere" compares the mailing address with the site; "owner differs from county record" flags
+  a sale the county has not caught up with). No phone number is looked up or guessed.
+- *Contractor license*: exact business-name match (ignoring punctuation and LLC/INC) to an active L&I license. The license number the report prints is kept
+  as printed and is a separate column. "None found" is not proof of no license.
+- *Already in our lists*: same case number, else same street, in Permit leads; same case or street in the Mail pilot. A
+  builder is "already tracked" when the whole company name matches a Permit leads builder (the report cuts long names off,
+  so a cut-off name matches only when it is long enough to be unambiguous); "HSR 124 LLC" next to a tracked "HSR 121 LLC" is
+  shown as "Check", never as a match.
+- *Metro rank*: the builder's place in the report's year-to-date single-family builder ranking, matched by the start of
+  the name. Rows for two LLCs of one company add up.
+- *Fit* (0 to 5, remodel, ADU and re-roof permits only): single-family home, no contractor named, addition or ADU, permit in
+  the last 90 days, sold in the last 2 years. Equal weights; a sort order, not a probability or a price.
+
+**Privacy and licence.** The report is licensed to one subscriber and forbids sharing, owners' names, mailing addresses and
+phone numbers are in it, and this repository is public. So the PDF and the parsed JSON stay outside the repo (the parser
+refuses any output folder inside it except `data/`), `data/supplier-permits/` is git-ignored (the build refuses any other
+folder in the repo), and nothing from the report belongs in chat, issues or screenshots. The page's counts, charts and builder
+table come from a summary request with no owner data; the list and the spreadsheet are separate requests, behind the session
+gate, `private, no-store`, never cached by the service worker. The spreadsheet escapes cells that could be read as formulas.
+Owner phone numbers are shown as plain text on purpose: Washington restricts unsolicited calls and texts, so use mail for
+homeowners and phone only people who asked to hear from us.
+
+**Counties.** Only Clark County permits are enriched (the county publishes parcels and sales for free). Oregon permits in
+the same report are skipped, not half-enriched.
+
+Sources: the supplier's weekly PDF; `gis.clark.wa.gov` (permits, assessor parcels, recorded sales); data.wa.gov dataset
+`m8qx-ubtq` (licenses). Tests: `npm run test:supplier-permits`.
 
 ## Mail pilot (`/internal/mail-pilot`, direct mail from public records)
 

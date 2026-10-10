@@ -40,6 +40,7 @@ jobs:
       - run: npm run test:analytics
       - run: npm run test:permit-leads
       - run: npm run test:mail-pilot
+      - run: npm run test:supplier-permits
       - run: npm run test:estimate
       - run: npm run test:quote-to-job
       - run: npm run test:lead-links

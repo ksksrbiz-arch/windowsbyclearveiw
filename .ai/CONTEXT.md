@@ -25,6 +25,7 @@ It does not replace application code or D1.
 | Add or verify a GA4/GTM/Meta event | `workflows/analytics-events/` |
 | Ship a change, or touch domain/mail | `workflows/deploy-check/` |
 | Refresh or load the direct-mail pilot list (Command Center > Mail pilot) | `workflows/mail-pilot/` |
+| Load or read the supplier's weekly permit list (Command Center > Analytics > Supplier permit list) | `workflows/supplier-permits/` |
 | Diagnose a window symptom/photo | `specialists/diagnostician/` |
 | Calculate or explain project pricing | `specialists/estimator/` |
 | Review installation logic | `specialists/installation-reviewer/` |

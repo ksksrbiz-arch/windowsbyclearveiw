@@ -1,5 +1,18 @@
 # Project context — Clearview Windows
 
+## 2026-10-09 - Supplier permit list (branch `claude/supplier-permit-list`)
+
+Keith asked for the weekly permit report from Mark's supplier (Construction Monitor) to be fully enriched and loaded into the Command Center. It is Analytics > "Supplier permit list". Week 40 built cleanly (197 Clark County permits); the production load waits for the merge and deploy.
+
+What the next agent must know:
+- **The report is licensed to one subscriber and forbids sharing, and the repo is public.** Nothing from it may be committed, pasted or screenshotted (PDF, parsed JSON, SQL, CSV, any row). The parser and build refuse any output folder in the repo except git-ignored `data/`. This session did not see Mark told what the section holds; make sure he knows. If the supplier objects to its use, removing it is `DROP TABLE supplier_permits; DROP TABLE supplier_import_meta;` on the production database; nothing else depends on them.
+- Owner phone numbers are in the report and shown as plain text. Washington restricts unsolicited calls and texts. This list is for mail; calling needs a person who asked to hear from us. Do not add click-to-call or bulk dialing on owner phones.
+- Each new weekly PDF: parse (`pdfplumber`), `npm run build:permit-leads`, `npm run build:supplier-permits`, load with the scratch-config method in `internal/README.md` ("Which database"). The load is a merge; weekly reports add up. The parser is untested on any layout but week 40; its self-check against the report's week totals fails loudly if a layout changes.
+- Oregon permits are skipped; wiring a free source for Multnomah or Washington County parcels is possible but is scale before revenue.
+- Open, unchanged: Mark's average job value, margin and close rate; a working Census API key; the mid-November re-pull of the mail pilot; confirming that `utm_campaign=CV-####` shows in Leads; `npm run check:pwa-live` after a deploy; 3 Dependabot alerts (2 high, 1 moderate) on the default branch.
+
+Detail: `.ai/CHANGELOG.md` (2026-10-09, supplier permit list), `.ai/workflows/supplier-permits/CONTEXT.md`, `internal/README.md`.
+
 ## 2026-10-09 - Google operations tools (account activation pending)
 
 Added Command Center > Tools > Google tools: Search Console top queries/pages, Business Profile metrics/reviews, address validation, Routes waypoint planning, five-day Weather, Document AI receipt/invoice extraction, Cloud Vision label OCR, owned Calendar reads/reviewed appointment creation, and manually reviewed USD expenses. Reports and proposals stay separate from job state; no automatic customer messaging, payments, quote changes or schedule changes. Scoped server credentials, authenticated same-origin writes, bounded uploads/results, fixed endpoints/timeouts and D1 daily attempt caps enforce the boundary. Conflicting retry IDs are rejected; expense saves use integer cents. Full 50-step suite passed with a 69-page build; final 69-page build passed after the attribution and upload controls. Merged code commit b8b6d34 to main; Cloudflare production deployment 4b98c654-f62c-43e2-81d4-dac32607fa2b is Active. Canonical PWA files carry b8b6d34 and pass the live check; both new page and API redirect unauthenticated requests to Access. Authenticated UI/API/provider tests remain VERIFY.
