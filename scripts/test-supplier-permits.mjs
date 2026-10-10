@@ -8,8 +8,11 @@ import { fileURLToPath } from 'node:url';
 import { createD1 } from './_lib/d1-sqlite.mjs';
 import * as api from '../functions/internal/api/supplier-permits.js';
 import { onRequest as gate } from '../functions/internal/_middleware.js';
+import { ensurePermitLeadTables } from '../functions/internal/_lib/permit-leads.mjs';
+import { ensureMailPilotTables } from '../functions/internal/_lib/mail-pilot.mjs';
+import { ensureJobsSchema } from '../functions/internal/_lib/jobs-schema.mjs';
 import {
-  CSV_HEADER, GROUPS, GROUP_KEYS, SCORED_GROUPS, SIGNAL_LABELS, SUPPLIER_COLUMNS, SUPPLIER_DDL, cleanGroup, groupFor, listRow, metroRankFor, nameWords, readSupplierCsv, readSupplierList, readSupplierSummary, toSupplierCsv,
+  CSV_HEADER, GROUPS, GROUP_KEYS, SCORED_GROUPS, SIGNAL_LABELS, SUPPLIER_COLUMNS, SUPPLIER_DDL, cleanBuilderKey, cleanGroup, connectionText, groupFor, listRow, looseAddressKey, metroRankFor, nameWords, readConnections, readSupplierCsv, readSupplierList, readSupplierSummary, toSupplierCsv,
 } from '../functions/internal/_lib/supplier-permits.mjs';
 import { CASE_NUMBER, SUPPLIER_LICENSE_FIELDS, SUPPLIER_PARCEL_FIELDS, fetchCasePermits, fetchParcelCandidates, fetchSupplierLicenses, fetchSupplierParcels, likeLiteral } from './supplier-permits/fetch.mjs';
 import { fetchParcels } from './permit-leads/fetch.mjs';
@@ -405,7 +408,7 @@ const askFresh = async (query = '', env = { QUOTES_DB: fresh }, method = 'GET') 
   assert.equal(summary.status, 'ok');
   assert.equal(summary.meta.edition, '2026-W40');
   assert.equal(summary.meta.xref_asof, '2026-10-08T23:11:51.821Z');
-  assert.deepEqual(summary.totals, { permits: 6, pending: 1, withOwnerPhone: 2, known: 2, inPermitLeads: 1, inMailPilot: 1, newToLists: 4, parcelMatched: 3 });
+  assert.deepEqual(summary.totals, { permits: 6, pending: 1, withOwnerPhone: 2, known: 2, inPermitLeads: 1, inMailPilot: 1, newToLists: 4, parcelMatched: 3, inClearviewWork: 0 });
   assert.deepEqual(summary.window, { from: '2026-09-01', to: '2026-10-08' });
   assert.deepEqual(Object.fromEntries(summary.groups.map((g) => [g.key, g.value])), { new_home: 2, remodel: 2, adu: 1, commercial: 1 }, 'empty groups are left out');
   assert.deepEqual(summary.newHomes, { permits: 2, trackedPermits: 1 });
@@ -419,6 +422,7 @@ const askFresh = async (query = '', env = { QUOTES_DB: fresh }, method = 'GET') 
   assert.equal(summary.builders.length, 2);
   const [first, second] = summary.builders;
   assert.equal(first.name, 'TESTCO HOMES LLC');
+  assert.equal(first.key, 'TESTCO HOMES', 'the builder key lets the page open that builder\'s own permits');
   assert.equal(first.tracked, 'TESTCO HOMES LLC');
   assert.deepEqual(first.metro, { rank: 3, homes: 40, rows: 1 });
   assert.equal(first.license.number, 'TESTCHL123');
@@ -497,6 +501,107 @@ const askFresh = async (query = '', env = { QUOTES_DB: fresh }, method = 'GET') 
   pass('the list and the file are sorted, filtered, clamped and uncached, and formula cells are defused');
 }
 
+// ---------- connections: number and name of the same project in our other records ----------
+{
+  const linked = createD1({ schemaFiles: [`${root}internal/db/schema.sql`] });
+  await linked.exec(sql1);
+  await ensurePermitLeadTables(linked);
+  await ensureMailPilotTables(linked);
+  await ensureJobsSchema(linked);
+  const run = (sql, ...bind) => linked.raw.prepare(sql).run(...bind);
+  run(`INSERT INTO permit_prospects (id, kind, issued, work_type, owner_name, applicant_name, situs_address, score) VALUES (?, 'homeowner', '2026-10-05', 'Residential Addition', 'SMITH JOHN', 'ACME BUILDERS LLC', '300 NE TESTING ST', 4)`, 'RES-390001');
+  run(`INSERT INTO mail_pilot_properties (pid, ref, street, city, state, source, segment, permit_case) VALUES (7, 'CV-0001', '200 NE TESTING ST', 'VANCOUVER', 'WA', 'test', 'A', '')`);
+  const quote = (id, name, address, city, status = 'draft') => run(`INSERT INTO quotes (id, created_at, updated_at, status, customer_name, customer_address, customer_city) VALUES (?, '2026-10-01T00:00:00Z', '2026-10-01T00:00:00Z', ?, ?, ?, ?)`, id, status, name, address, city);
+  quote('Q-TEST-1', 'ROE TESTER', '300 NE Testing St, Vancouver WA 98660', 'Vancouver');
+  quote('Q-TEST-2', 'JOB CUSTOMER', '300 NE Testing Street', 'Vancouver', 'finalized');
+  quote('Q-TEST-3', 'OTHER TOWN', '300 NE Testing St', 'Camas');
+  quote('Q-TEST-4', 'NEXT DOOR', '301 NE Testing St', 'Vancouver');
+  quote('Q-TEST-5', 'NO STREET', 'PO Box 9', 'Vancouver');
+  quote('Q&x=<b>', 'ODD ID', '500 NE Testing St', 'Vancouver');
+  run(`INSERT INTO jobs (id, created_at, updated_at, quote_id, status, customer_name, customer_address, customer_city) VALUES ('J-TEST-1', '2026-10-02T00:00:00Z', '2026-10-02T00:00:00Z', 'Q-TEST-2', 'ready', 'JOB CUSTOMER', '300 NE Testing Street', 'Vancouver')`);
+
+  assert.equal(looseAddressKey('300 NE Testing Street, Vancouver WA 98660'), looseAddressKey('300 ne testing st'), 'the city and ZIP after a comma, the full street word and capitals do not change the street');
+  assert.equal(looseAddressKey('PO Box 9'), '', 'a PO box is not a street');
+  assert.equal(addressKey('300 NE Testing St # 5'), '300 NE TESTING ST', 'a unit is not part of the street');
+
+  const list = await readSupplierList(linked, { limit: 50 });
+  const row = (id) => list.rows.find((r) => r.id === id);
+  const kinds = (id) => row(id).connections.map((c) => c.kind);
+
+  const addition = row('RES-390001').connections;
+  assert.deepEqual(kinds('RES-390001'), ['permit_lead', 'job', 'quote'], 'order: permit leads, mail pilot, our jobs and quotes, then the builder; a quote that became a job shows once, as the job');
+  assert.deepEqual(addition[0], { kind: 'permit_lead', label: 'Permit leads', number: 'RES-390001', name: 'SMITH JOHN', detail: 'Residential Addition · issued 2026-10-05', how: 'same permit', href: '' });
+  assert.equal(addition[1].number, 'J-TEST-1');
+  assert.equal(addition[1].name, 'JOB CUSTOMER');
+  assert.equal(addition[1].detail, 'ready · from quote Q-TEST-2');
+  assert.equal(addition[1].href, '/internal/jobs/view?id=J-TEST-1', 'a job links to its page');
+  assert.equal(addition[2].number, 'Q-TEST-1');
+  assert.equal(addition[2].name, 'ROE TESTER');
+  assert.equal(addition[2].href, '/internal/quotes/view?id=Q-TEST-1');
+  const numbers = addition.map((c) => c.number);
+  assert.ok(!numbers.includes('Q-TEST-2'), 'the quote behind a job is not listed twice');
+  assert.ok(!numbers.includes('Q-TEST-3'), 'the same street number in another city is another home');
+  assert.ok(!numbers.includes('Q-TEST-4') && !numbers.includes('Q-TEST-5'), 'a different street and a PO box do not connect');
+
+  const hsr = row('NHC-2026-90002').connections;
+  assert.deepEqual(hsr.map((c) => c.kind), ['mail_pilot', 'builder_check']);
+  assert.deepEqual(hsr[0], { kind: 'mail_pilot', label: 'Mail pilot', number: 'CV-0001', name: '200 NE TESTING ST, VANCOUVER', detail: 'Re-roof permit', how: 'same address', href: '' });
+  assert.equal(hsr[1].name, 'HSR 121 LLC');
+  assert.equal(hsr[1].how, 'to confirm', 'a builder that differs only by a number is a hint to check, not a match');
+
+  const home = row('NHC-2026-90001').connections;
+  assert.deepEqual(home.map((c) => c.kind), ['builder']);
+  assert.equal(home[0].name, 'TESTCO HOMES LLC');
+  assert.deepEqual(row('CMI-390003').connections, [], 'a permit with no street and nothing tracked has no connections');
+  const odd = row('RES-390004').connections.find((c) => c.kind === 'quote');
+  assert.equal(odd.number, 'Q&x=<b>');
+  assert.equal(odd.href, '/internal/quotes/view?id=Q%26x%3D%3Cb%3E', 'an id is encoded into the link, never concatenated');
+
+  // the summary counts permits on a street where we have work, and carries no names
+  const linkedSummary = await readSupplierSummary(linked);
+  assert.equal(linkedSummary.totals.inClearviewWork, 2, 'two permits sit on a street with a quote or job');
+  const summaryText = JSON.stringify(linkedSummary);
+  for (const secret of ['ROE TESTER', 'JOB CUSTOMER', 'Q-TEST-1', 'J-TEST-1', 'SMITH JOHN']) assert.ok(!summaryText.includes(secret), `the summary must not carry "${secret}"`);
+
+  // a builder's own permits
+  const askLinked = (query) => api.onRequest({ request: new Request(`https://example.test/internal/api/supplier-permits${query}`), env: { QUOTES_DB: linked } });
+  const mine = await (await askLinked('?view=list&builder=testco%20homes')).json();
+  assert.equal(mine.total, 1);
+  assert.equal(mine.builder, 'TESTCO HOMES');
+  assert.equal(mine.rows[0].id, 'NHC-2026-90001');
+  assert.equal(mine.rows[0].subdivision, 'TESTING ESTATES', 'the subdivision name comes with the permit');
+  assert.equal(mine.rows[0].connections[0].name, 'TESTCO HOMES LLC');
+  assert.equal((await (await askLinked("?view=list&builder=O'BRIEN HOMES")).json()).total, 0, 'a name with a quote is bound as data and finds nothing');
+  assert.equal((await (await askLinked("?view=list&builder=X'; DROP TABLE supplier_permits;--")).json()).total, 6, 'an unusable builder key is no filter, never SQL');
+  assert.equal((await (await askLinked('?view=list&group=new_home&builder=TESTCO%20HOMES')).json()).total, 1, 'group and builder combine');
+  assert.equal((await (await askLinked('?view=list&group=remodel&builder=TESTCO%20HOMES')).json()).total, 0);
+  assert.equal(cleanBuilderKey('  testco   homes '), 'TESTCO HOMES');
+  assert.equal(cleanBuilderKey("a;b"), '');
+  assert.equal(cleanBuilderKey('x'.repeat(81)), '');
+  assert.equal(cleanBuilderKey(null), '');
+
+  // the file carries the same connections as text, and the new columns line up with the header
+  const file = (await readSupplierCsv(linked)).csv.trimEnd().split('\r\n');
+  assert.equal(file[0], CSV_HEADER.join(','));
+  assert.ok(CSV_HEADER.includes('Connected records') && CSV_HEADER.includes('Subdivision'));
+  const additionLine = file.find((l) => l.startsWith('Remodel / addition,RES-390001,'));
+  assert.ok(additionLine.includes('Permit leads RES-390001 (SMITH JOHN, Residential Addition · issued 2026-10-05), same permit'));
+  assert.ok(additionLine.includes('Clearview job J-TEST-1 (JOB CUSTOMER, ready · from quote Q-TEST-2), same address'));
+  assert.ok(additionLine.includes(' | Clearview quote Q-TEST-1 (ROE TESTER, draft), same address'), 'connections are separated by a bar');
+  assert.equal(connectionText({ label: 'Builder tracked', number: '', name: 'ACME LLC', detail: '', how: 'same company' }), 'Builder tracked (ACME LLC), same company');
+  assert.equal(toSupplierCsv([listRow({ id: 'X-2', grp: 'remodel', signals: '[]', score: 0 })]).trimEnd().split('\r\n').length, 2, 'a row with no connections is still one line');
+
+  // a database without quotes, jobs or the other lists reads as "no connections", never an error
+  const bare = createD1();
+  await bare.exec(sql1);
+  const bareConnections = await readConnections(bare, [{ id: 'RES-1', site_address: '1 A ST', city: 'X', county_prospect_id: 'RES-1', county_prospect_how: 'same permit', mail_pilot_ref: 'CV-9' }]);
+  assert.deepEqual(bareConnections.get('RES-1').map((c) => [c.kind, c.number, c.name]), [['permit_lead', 'RES-1', ''], ['mail_pilot', 'CV-9', '']], 'the number still shows when the other list cannot be read');
+  assert.equal((await readConnections(bare, [])).size, 0);
+  const noTables = { prepare() { throw new Error('no such table'); } };
+  assert.deepEqual((await readConnections(noTables, [{ id: 'A', site_address: '1 A ST' }])).get('A'), []);
+  pass('every permit shows the number and name of the same project in our other lists, quotes and jobs, and builders open to their own permits');
+}
+
 // ---------- privacy: session gate, private output, git ----------
 {
   const redirects = [];
@@ -538,6 +643,8 @@ const askFresh = async (query = '', env = { QUOTES_DB: fresh }, method = 'GET') 
   const calls = [...page.matchAll(/['"`](\/internal\/api\/supplier-permits[^'"`]*)['"`]/g)].map((m) => m[1].split('?')[0]);
   assert.ok(calls.length > 0 && calls.every((c) => c === '/internal/api/supplier-permits'), 'the page only calls its own endpoint');
   assert.ok(/No supplier list loaded yet/.test(page), 'an empty database is a plain message, not an error');
+  assert.ok(/Connected to/.test(page) && /view=list&limit=100&builder=/.test(page), 'the list shows connections and a builder opens its own permits');
+  assert.ok(/c\.href\.startsWith\('\/internal\/'\)/.test(page), 'only a link into the Command Center is ever made a link');
   assert.ok(/licensed/i.test(page) && /telephone|solicit/i.test(page), 'the page says the list is licensed and warns about unsolicited calls and texts');
   assert.equal(pkg.scripts['build:supplier-permits'], 'node scripts/build-supplier-permits.mjs');
   assert.equal(pkg.scripts['test:supplier-permits'], 'node --disable-warning=ExperimentalWarning scripts/test-supplier-permits.mjs');

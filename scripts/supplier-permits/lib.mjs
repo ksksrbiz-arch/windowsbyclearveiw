@@ -7,9 +7,10 @@
 // Nothing here guesses a phone number, an owner or a license: a value is copied from the report or from one of the
 // public sources, or it is left empty.
 import { applicantIsOwnerName, daysBetween, isoDate, looksLikeBusiness, matchLicense, nameTokens, normName, sameTokens, streetOf } from '../permit-leads/lib.mjs';
-import { SCORED_GROUPS, SUPPLIER_COLUMNS, SUPPLIER_DDL, groupFor, nameWords } from '../../functions/internal/_lib/supplier-permits.mjs';
+import { SCORED_GROUPS, SUPPLIER_COLUMNS, SUPPLIER_DDL, addressKey, groupFor, lookupStreet, nameWords } from '../../functions/internal/_lib/supplier-permits.mjs';
 
 export { assertPrivateOutput } from '../mail-pilot/lib.mjs';
+export { addressKey, lookupStreet };
 
 const BUILDER_ROLES = ['Contractor', 'Contr-Owner', 'Owner-Contractor', 'Owner-Builder'];
 const OWNER_ROLES = ['Owner', 'Owner-Builder', 'Contr-Owner', 'Owner-Contractor'];
@@ -107,19 +108,8 @@ export function normalizeEntries(input, { county = 'Clark County' } = {}) {
 
 // ---------- addresses ----------
 
-const SUFFIX_WORDS = { STREET: 'ST', AVENUE: 'AVE', DRIVE: 'DR', COURT: 'CT', CIRCLE: 'CIR', LANE: 'LN', ROAD: 'RD', PLACE: 'PL', BOULEVARD: 'BLVD', TERRACE: 'TER', HIGHWAY: 'HWY', PARKWAY: 'PKWY', TRAIL: 'TRL', PLAZA: 'PLZ' };
-const DIRECTIONS = { NORTH: 'N', SOUTH: 'S', EAST: 'E', WEST: 'W', NORTHEAST: 'NE', NORTHWEST: 'NW', SOUTHEAST: 'SE', SOUTHWEST: 'SW' };
-
-/** Street as the county prints it, for a parcel lookup: capitals, single spaces, unit dropped. '' when there is no usable street. */
-export function lookupStreet(street) {
-  const s = text(String(street ?? '').split('|')[0]).toUpperCase().replace(/\s+(APT|UNIT|STE|SUITE|SPC|#)\s*\S+.*$/, '');
-  return /^\d/.test(s) ? s : '';
-}
-
-/** Comparable form of a street: abbreviations and directions standardized, punctuation gone. */
-export function addressKey(street) {
-  return lookupStreet(street).replace(/[^A-Z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map((w) => DIRECTIONS[w] || SUFFIX_WORDS[w] || w).join(' ');
-}
+// lookupStreet and addressKey live in functions/internal/_lib/supplier-permits.mjs: the page's read-time connections to our own
+// quotes and jobs compare streets exactly the way the loader does, so there is one definition of "the same street".
 
 const zipOf = (situs) => String(situs ?? '').split(',').at(-1).trim().slice(0, 5);
 

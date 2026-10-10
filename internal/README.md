@@ -336,6 +336,14 @@ of CI (it needs a licensed report to run), so a new report layout shows up as th
   builder is "already tracked" when the whole company name matches a Permit leads builder (the report cuts long names off,
   so a cut-off name matches only when it is long enough to be unambiguous); "HSR 124 LLC" next to a tracked "HSR 121 LLC" is
   shown as "Check", never as a match.
+- *Connected to* (the list column and the spreadsheet's "Connected records"): the same project in our other records, one
+  line each with its **number and name** and how it matched. Permit leads: the case number and the owner (same permit, or
+  same address with a different permit, which is another job at that home). Mail pilot: the CV number, the property and
+  its segment. Clearview quotes and jobs: matched when the page is read, by street (unit, suffix and capitals ignored, and
+  the city must agree when both sides name one), never stored on the permit; a quote that became a job shows once, as the
+  job; the number links to its quote or job page. The builder, when we track it. "Same address" is a lead to check, not
+  proof it is the same customer or job. In the builders table, "Show N permits" opens that builder's own permits from the
+  report (permit number, address, subdivision, date, value, and the same connections).
 - *Metro rank*: the builder's place in the report's year-to-date single-family builder ranking, matched by the start of
   the name. Rows for two LLCs of one company add up.
 - *Fit* (0 to 5, remodel, ADU and re-roof permits only): single-family home, no contractor named, addition or ADU, permit in
