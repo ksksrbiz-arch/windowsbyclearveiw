@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { FRAMES, SLOT_SIZES, coverScale, scaleSizes, tileWidths, type FrameName } from '../lib/image-sizes';
 
 interface Props {
   image: ImageMetadata;
@@ -10,11 +11,17 @@ interface Props {
   /** First tile on a page paints above the fold — skip lazy loading there. */
   eager?: boolean;
   /**
-   * How wide this tile actually renders. Grids differ per page and per group,
-   * and a `sizes` that under-declares makes the browser pick a smaller file
-   * and upscale it. Measured slot widths, not guesses.
+   * How wide this tile actually renders: one of SLOT_SIZES (measured slot widths),
+   * not a guess. Grids differ per page and per group, and a `sizes` that
+   * under-declares makes the browser pick a smaller file and upscale it.
    */
   sizes?: string;
+  /**
+   * Shape of the frame. Portrait is the site's standard tile. Use landscape only
+   * for a group in which every photo is wider than tall (see `frameForGroup`), so
+   * the whole building shows instead of a cropped middle strip.
+   */
+  frame?: FrameName;
 }
 
 const {
@@ -25,21 +32,27 @@ const {
   eager = false,
   // Default suits a three-across grid in the standard wrap. Measured: tiles
   // render at 450px on a 1440px viewport, 397px at 1280px.
-  sizes = '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px',
+  sizes = SLOT_SIZES.threeAcross,
+  frame = 'portrait',
 } = Astro.props;
 
-// Keep the fallback at the desktop tile width. Larger responsive variants
-// use the 4K sources for sharper tiles on high-density screens.
-const widths = [240, 340, 450, 680, 900];
+// The tile crops its photo to the frame (object-fit: cover). A photo wider than
+// the frame is scaled to the frame's height, so the file must be wider than the
+// tile by the same factor or the browser stretches a too-small file. A photo
+// cropped hard (a landscape shot in a portrait frame) also gets 1600 and 2000px
+// candidates; the larger responsive variants come from the 4K sources.
+const scale = coverScale(image, FRAMES[frame]);
+const slotSizes = scaleSizes(sizes, scale);
+const widths = tileWidths(scale);
 ---
-<figure class="work-card">
+<figure class="work-card" data-frame={frame}>
   <div class="work-media">
     <Image
       src={image}
       alt={alt}
       widths={widths}
       width={450}
-      sizes={sizes}
+      sizes={slotSizes}
       format="webp"
       quality={72}
       loading={eager ? 'eager' : 'lazy'}
@@ -88,6 +101,15 @@ const widths = [240, 340, 450, 680, 900];
     aspect-ratio: 3 / 4;
     object-fit: cover;
     transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  /* Keep these ratios in step with FRAMES in src/lib/image-sizes.ts. */
+  .work-card[data-frame='landscape'] img {
+    aspect-ratio: 4 / 3;
+  }
+
+  .work-card[data-frame='square'] img {
+    aspect-ratio: 1 / 1;
   }
 
   .work-card:hover img {

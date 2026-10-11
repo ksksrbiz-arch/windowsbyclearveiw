@@ -1,5 +1,13 @@
 # ICM State â€” 2026-10-01
 
+## 2026-10-10 - Photo delivery and framing (branch `claude/image-display`)
+
+Keith asked for better images and image display. Measured every photo in a real browser (desktop 1x, laptop 2x, 390 px phone at 3x; 37 pages, 141 photos), found four causes of soft or over-cropped pictures, and fixed them: `sizes` now match the real tile widths (`SLOT_SIZES` in `src/lib/image-sizes.ts`), cropped photos are downloaded wide enough for `object-fit: cover` (`coverScale`), all-landscape groups (siding, new construction) get a landscape frame, and the home hero, lead photos, service tiles, guide heroes and guide graphics offer larger files. Soft photos (<0.9x) on the 12 key pages: desktop 14 to 0, laptop 2x 18 to 2, phone 41 to 0. Three remain site-wide on a 2x laptop, all source-limited or capped (0.85 to 0.89).
+
+Guard: `npm run test:image-delivery` (new CI step after `test:no-public-pricing`; 12 groups, reads `dist/`). It includes a trap that cost 71 MB once: reading `photo.image.width` on an imported photo publishes the original; use `dimensionsOf` (reads through `.clone`). Manual tool: `scripts/audit-image-delivery.mjs` (needs Playwright; not in CI). Evidence, rules and how to add a photo: `docs/IMAGE-DELIVERY.md`.
+
+Not verified: a real phone or retina laptop (measured in Chromium with emulated pixel ratios), and the live site (pending merge and deploy). Cost: phones download more (audited key pages 6.6 to 9.0 MB with the whole page scrolled); `dist/_astro` 39 MB to 49 MB. Not built: tap-to-enlarge for gallery photos, a landscape home-hero photo, the phone hero's logo crop.
+
 ## 2026-10-10 - Dependency audit: sharp high advisory closed (branch `claude/improve-next`)
 
 `npm audit` had one high advisory: `sharp` below 0.35.5 (librsvg CVE-2026-96889), pulled in by Astro. Fixed with a lockfile-only update to 0.35.5 (Astro asks for `^0.35.4`, so `package.json` is unchanged); all 51 `test:all` steps and the build pass. Four moderate advisories remain, all through `gray-matter` (`js-yaml` 3 / `sprintf-js`). `gray-matter` is a dev dependency used only by `scripts/build-guides-index.mjs` on the repo's own guide files, and `npm audit fix --force` would "fix" it by downgrading to gray-matter 2.0.1, so it is left alone. GitHub's own Dependabot list was not readable from this environment (HTTP 403), so Keith should compare it with this.

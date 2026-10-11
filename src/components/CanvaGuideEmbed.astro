@@ -1,6 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { SLOT_SIZES } from '../lib/image-sizes';
 
 interface Props {
   desktopSrc: ImageMetadata;
@@ -9,16 +10,22 @@ interface Props {
   title?: string;
   description?: string;
   desktopMaxWidth?: string;
+  /** The `sizes` of the desktop <img>: how wide it renders above the phone breakpoint. */
+  sizes?: string;
 }
 
-const { desktopSrc, mobileSrc, alt, title, description, desktopMaxWidth = '100%' } = Astro.props;
+const { desktopSrc, mobileSrc, alt, title, description, desktopMaxWidth = '100%', sizes = SLOT_SIZES.guideGraphic } = Astro.props;
 
 // Source files come straight out of Canva at several megabytes each. Running
 // them through Astro's image pipeline instead of a plain <img> gets them down
 // to real web weight (WebP, sized for how large the graphic is ever shown)
 // and gives the <img> explicit dimensions so it does not shift the layout
 // while it loads.
-const desktop = await getImage({ src: desktopSrc, width: 1400, format: 'webp', quality: 78 });
+//
+// The graphic is shown up to 1180 px wide, so a laptop at 2x needs 2360 px: one 1400 px file left it
+// at 0.59 of what the screen can show. The srcset lets the browser pick; the Canva export is 2000 px
+// wide, so 2000 is as sharp as this graphic can get.
+const desktop = await getImage({ src: desktopSrc, widths: [1000, 1400, 2000], width: 1400, format: 'webp', quality: 78 });
 const mobile = mobileSrc
   ? await getImage({ src: mobileSrc, width: 900, format: 'webp', quality: 78 })
   : null;
@@ -28,6 +35,8 @@ const mobile = mobileSrc
     {mobile && <source media="(max-width: 760px)" srcset={mobile.src} />}
     <img
       src={desktop.src}
+      srcset={desktop.srcSet.attribute}
+      sizes={sizes}
       width={desktop.attributes.width}
       height={desktop.attributes.height}
       alt={alt}

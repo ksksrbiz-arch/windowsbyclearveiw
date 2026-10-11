@@ -4,7 +4,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import FlashingOrder from '../components/diagrams/FlashingOrder.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES, frameForGroup } from '../lib/image-sizes';
 import { newBuildWork, findWork, workKindLabel } from '../data/work';
+
+// Both new-build photos are wider than tall, so they get a landscape frame instead of a cropped strip.
+const newBuildFrame = frameForGroup(newBuildWork);
 import { site, mailHref, telHref } from '../data/site';
 
 const ogPhoto = findWork('new-build-sheathed-garage')!;
@@ -258,6 +262,8 @@ const projectInquiryMailto = site.email
             alt={photo.alt}
             caption={photo.caption}
             kind={workKindLabel(photo.kind)}
+            sizes={SLOT_SIZES.fullThenBeside}
+            frame={newBuildFrame}
           />
         ))}
       </div>

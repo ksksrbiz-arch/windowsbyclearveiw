@@ -37,6 +37,22 @@ const poster = await getImage({
   format: 'webp',
   quality: 70,
 });
+
+// The static photo is what the hero settles on, and it fills the whole stage with
+// `object-fit: cover`. The source is a tall portrait, so on a phone the stage is
+// taller than the photo is wide and the browser scales the photo to the stage's
+// height: a 390px-wide iPhone at 3x needs about 2100px of file, a 1440px laptop at
+// 2x needs 2880px. The single 1200px file this used to be was 0.42-0.63x of that
+// (measured 2026-10-10), which read as soft on exactly the screens people have.
+// Widths run up to 2560; `sizes` says 160vw on phones (the stage is taller than wide)
+// and 100vw elsewhere. Quality 66: the top of the photo carries only a 20-38% wash.
+const heroStatic = await getImage({
+  src: heroPhoto.image,
+  widths: [828, 1200, 1600, 2000, 2560],
+  width: 1600,
+  format: 'webp',
+  quality: 66,
+});
 ---
 {hasVideo ? (
   <section class="video-hero">
@@ -52,7 +68,16 @@ const poster = await getImage({
         <source src={`/video/${HERO_VIDEO}.webm`} type="video/webm" />
         <source src={`/video/${HERO_VIDEO}.mp4`} type="video/mp4" />
       </video>
-      <img class="hero-static" id="hero-static" src={poster.src} alt="" />
+      <img
+        class="hero-static"
+        id="hero-static"
+        src={heroStatic.src}
+        srcset={heroStatic.srcSet.attribute}
+        sizes="(max-width: 640px) 160vw, 100vw"
+        alt=""
+        decoding="async"
+        fetchpriority="low"
+      />
       <div class="video-wash"></div>
     </div>
 

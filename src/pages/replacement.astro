@@ -5,6 +5,7 @@ import vinylFiberglassGraphic from '../assets/guides/vinyl-fiberglass-guide.png'
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES } from '../lib/image-sizes';
 import { replacementWork, findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
 
@@ -123,9 +124,9 @@ const spec = [
         <Image
           src={vinylFiberglassGraphic}
           alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
-          widths={[760, 1140, 1580]}
+          widths={[760, 1140, 1580, 2200]}
 width={1580}
-          sizes="(max-width: 800px) 100vw, 1100px"
+          sizes="(max-width: 800px) 100vw, 1240px"
           quality={82}
           loading="lazy"
         />
@@ -180,6 +181,7 @@ width={1580}
             alt={photo.alt}
             caption={photo.caption}
             kind={workKindLabel(photo.kind)}
+            sizes={SLOT_SIZES.autoFill}
           />
         ))}
       </div>

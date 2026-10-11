@@ -2,6 +2,7 @@
 import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES, frameForGroup } from '../lib/image-sizes';
 import GalleryAddition from '../components/GalleryAddition.astro';
 import { galleryAdditions } from '../data/gallery-additions';
 import CtaBar from '../components/CtaBar.astro';
@@ -55,7 +56,21 @@ const groups = [
     density: 'is-dense',
     photos: allWork.filter((photo) => photo.kind === 'siding'),
   },
-].filter((group) => group.photos.length > 0);
+]
+  .filter((group) => group.photos.length > 0)
+  .map((group) => ({
+    ...group,
+    // Interiors are room shots that survive a square crop; a group of only landscape photos
+    // (siding, new construction) gets a landscape frame so the whole building shows; the rest
+    // keep the portrait frame. The frame also decides which file the browser downloads.
+    frame: group.density === 'is-square' ? ('square' as const) : frameForGroup(group.photos),
+    sizes:
+      group.photos.length === 1
+        ? SLOT_SIZES.single
+        : group.density === 'is-dense'
+          ? SLOT_SIZES.fourAcross
+          : SLOT_SIZES.threeAcross,
+  }));
 
 const total = allWork.length + galleryAdditions.length;
 ---
@@ -133,11 +148,8 @@ const total = allWork.length + galleryAdditions.length;
               caption={photo.caption}
               kind={workKindLabel(photo.kind)}
               eager={groupIndex === 0 && index < 3}
-              sizes={
-                group.density === 'is-dense'
-                  ? '(max-width: 560px) 45vw, (max-width: 900px) 31vw, 340px'
-                  : '(max-width: 560px) 45vw, (max-width: 900px) 46vw, 450px'
-              }
+              sizes={group.sizes}
+              frame={group.frame}
             />
           ))}
         </div>
@@ -232,12 +244,10 @@ const total = allWork.length + galleryAdditions.length;
     grid-template-columns: minmax(0, 22rem);
   }
 
-  /* Interiors are room shots, which survive a square crop better than an
-     elevation does — an elevation cropped short loses the roofline that makes
-     it legible. */
-  .work-grid.is-square :global(.work-card img) {
-    aspect-ratio: 1 / 1;
-  }
+  /* The frame shape (portrait, landscape, square) is set per group through
+     WorkCard's `frame` prop, so the ratio and the file the browser downloads
+     always agree. Interiors get a square frame: room shots survive that crop
+     better than an elevation does, which loses the roofline when cropped short. */
 
   @media (max-width: 900px) {
     .work-grid.is-large,
