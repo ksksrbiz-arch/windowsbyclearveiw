@@ -1,5 +1,17 @@
 # Project context — Clearview Windows
 
+## 2026-10-10 - Photo delivery and framing (branch `claude/image-display`)
+
+Keith asked for the website's images and their display to be improved. Done by measurement: a real-browser audit of every photo, then fixes to which file the browser downloads and to how photos are framed. Numbers, rules and the add-a-photo checklist: `docs/IMAGE-DELIVERY.md`; summary: `.ai/CHANGELOG.md` (2026-10-10, photo delivery).
+
+What the next agent must know:
+- **Never write `photo.image.width`, `.height` or `.format` in a component.** Imported photos are Proxies; a direct read publishes the full-size original into `dist/_astro` (71 MB happened). Use `dimensionsOf`/`coverScale` from `src/lib/image-sizes.ts`. `npm run test:image-delivery` fails on it.
+- **Do not type a `sizes` string on a `<WorkCard>`.** Use a `SLOT_SIZES` preset (each was measured; rounded up). A new layout means a new measured preset plus a row in the doc table.
+- The CSS aspect ratios in `WorkCard.astro` mirror `FRAMES` in `image-sizes.ts`; change both together.
+- `scripts/audit-image-delivery.mjs` is the browser tool (Playwright; not in CI). Run it after any layout, preset or frame change.
+- Judgment calls for Keith/Mark, not made: tap-to-enlarge in the gallery; a landscape photo for the home hero; whether the extra phone weight (about +35% on audited pages) is acceptable. Levers: WebP quality in `WorkCard` and the top of `TILE_WIDTHS`.
+- Not tested: a real phone or retina laptop; the live site until this merges and deploys.
+
 ## 2026-10-10 - Dependency audit (branch `claude/improve-next`)
 
 `sharp` was bumped to 0.35.5 in `package-lock.json` only, closing the one high `npm audit` advisory (librsvg CVE). Four moderate advisories remain through `gray-matter` (dev only, guide index script); `npm audit fix --force` would downgrade it to 2.0.1, so do not run it. Compare with GitHub's Dependabot list, which could not be read from the agent environment. The Dependabot alerts Keith saw (2 high, 1 moderate) may not match `npm audit` one to one. Everything from the supplier permit list work (PR #198 and #200) is merged; the live Analytics check still needs a signed-in person.

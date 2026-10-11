@@ -4,6 +4,7 @@ import { getHeroBg } from '../../lib/hero-bg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBar from '../../components/CtaBar.astro';
 import WorkCard from '../../components/WorkCard.astro';
+import { SLOT_SIZES } from '../../lib/image-sizes';
 import FaqAccordion from '../../components/FaqAccordion.astro';
 import { site } from '../../data/site';
 import { replacementWork, workKindLabel, findWork } from '../../data/work';
@@ -148,7 +149,7 @@ const heroBg = await getHeroBg(heroPhoto.image);
         </p>
         <div class="work-grid">
           {localWork.map((photo) => (
-            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} />
+            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} sizes={SLOT_SIZES.autoFill} />
           ))}
         </div>
         <p class="section-link"><a href="/gallery">See the full gallery</a></p>

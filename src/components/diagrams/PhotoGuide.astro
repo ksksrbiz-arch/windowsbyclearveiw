@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { findWork, newBuildWork } from '../../data/work';
+import { LEAD_PHOTO_WIDTHS, SLOT_SIZES } from '../../lib/image-sizes';
 
 interface Props { type: 'installation' | 'flashing' | 'symptoms' | 'cost'; heading?: string | null; concise?: boolean; }
 const { type, heading = null, concise = false } = Astro.props;
@@ -80,7 +81,7 @@ const isClearviewPhoto = Boolean(clearviewPhoto?.image);
   <div class="photo-lead">
     <div class="photo-wrap">
       {isClearviewPhoto ? (
-        <Image src={clearviewPhoto!.image} alt={clearviewPhoto!.alt} widths={[700, 1000, 1400]} width={1400} sizes="(max-width: 800px) 100vw, 62vw" format="webp" quality={70} loading="eager" fetchpriority="high" />
+        <Image src={clearviewPhoto!.image} alt={clearviewPhoto!.alt} widths={LEAD_PHOTO_WIDTHS} width={1400} sizes={SLOT_SIZES.leadPhoto} format="webp" quality={70} loading="eager" fetchpriority="high" />
       ) : (
         <img src={photo.image} alt={photo.alt} loading="eager" fetchpriority="high" decoding="async" />
       )}

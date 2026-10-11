@@ -3,6 +3,7 @@ import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES } from '../lib/image-sizes';
 import { processWork, workKindLabel, findWork } from '../data/work';
 
 // The process page should show the process. This is an actual Clearview
@@ -84,7 +85,7 @@ const schema = {
       <h2>What install day looks like.</h2>
       <div class="work-grid">
         {processWork.map((photo) => (
-          <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} />
+          <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={workKindLabel(photo.kind)} sizes={SLOT_SIZES.autoFill} />
         ))}
       </div>
     </div>

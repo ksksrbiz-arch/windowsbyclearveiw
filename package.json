@@ -39,6 +39,7 @@
     "test:ai-surfaces": "node scripts/test-ai-surfaces.mjs",
     "test:google-reviews": "node scripts/test-google-reviews.mjs",
     "test:charts": "node scripts/test-charts.mjs",
+    "test:image-delivery": "node scripts/test-image-delivery.mjs",
     "test:internal-styles": "node scripts/test-internal-runtime-styles.mjs",
     "test:internal-mobile": "node scripts/test-internal-mobile.mjs",
     "check:pwa-live": "node scripts/check-pwa-live.mjs",

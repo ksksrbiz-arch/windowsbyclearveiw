@@ -4,6 +4,7 @@ import { getHeroBg } from '../lib/hero-bg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES } from '../lib/image-sizes';
 import { pricing, showPublicPrices } from '../data/pricing';
 import { findWork, workKindLabel } from '../data/work';
 import { site } from '../data/site';
@@ -323,6 +324,7 @@ const schema = {
             alt={photo.alt}
             caption={photo.caption}
             kind={workKindLabel(photo.kind)}
+            sizes={SLOT_SIZES.autoFill}
           />
         ))}
       </div>

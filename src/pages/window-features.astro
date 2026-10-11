@@ -6,6 +6,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import WindowStudio from '../components/WindowStudio.astro';
 import CtaBar from '../components/CtaBar.astro';
 import WorkCard from '../components/WorkCard.astro';
+import { SLOT_SIZES } from '../lib/image-sizes';
 import { pricing, publicBlurb } from '../data/pricing';
 import { findWork } from '../data/work';
 import CanvaGuideEmbed from '../components/CanvaGuideEmbed.astro';
@@ -86,9 +87,9 @@ const stylePhotos = [
           <Image
             src={vinylFiberglassGraphic}
             alt="Vinyl versus fiberglass window frame comparison showing hollow multi-chamber vinyl construction and a denser fiberglass profile."
-            widths={[760, 1140, 1580]}
+            widths={[760, 1140, 1580, 2200]}
 width={1580}
-            sizes="(max-width: 800px) 100vw, 1100px"
+            sizes="(max-width: 800px) 100vw, 1240px"
             quality={82}
             loading="lazy"
           />
@@ -161,7 +162,7 @@ width={1580}
       {stylePhotos.length > 0 && (
         <div class="work-grid style-photos">
           {stylePhotos.map(({ label, photo }) => (
-            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={label} />
+            <WorkCard image={photo.image} alt={photo.alt} caption={photo.caption} kind={label} sizes={SLOT_SIZES.twoThenFour} />
           ))}
         </div>
       )}

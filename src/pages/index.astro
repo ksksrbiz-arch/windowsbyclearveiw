@@ -8,10 +8,18 @@ import FacebookIcon from '../components/icons/FacebookIcon.astro';
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { featuredWork, findWork, workKindLabel } from '../data/work';
+import { coverScale, scaleSizes } from '../lib/image-sizes';
 
 const replacementTile = findWork('gray-lap-siding-triple-hung')!;
 const newBuildTile = findWork('new-build-tan-corner')!;
 const slidingDoorsTile = findWork('gray-siding-white-slider-deck')!;
+
+// A service tile's frame is about 404 x 460 on a desktop and 341 x 320 on a phone. 0.85 is
+// the narrower ratio, so a landscape photo (the new-build tile) is asked for at a width that
+// covers the taller frame instead of being stretched to it.
+const SERVICE_TILE_RATIO = 0.85;
+const serviceTileSizes = (photo: { image: Parameters<typeof coverScale>[0] }) =>
+  scaleSizes('(max-width: 800px) 100vw, 33vw', coverScale(photo.image, SERVICE_TILE_RATIO));
 
 const serviceLinks = [
   { slug: 'vancouver', label: 'Vancouver' },
@@ -77,9 +85,9 @@ const signs = [
           <Image
             src={replacementTile.image}
             alt=""
-            widths={[400, 640, 900]}
-width={900}
-            sizes="(max-width: 800px) 100vw, 33vw"
+            widths={[400, 640, 900, 1200, 1600]}
+            width={900}
+            sizes={serviceTileSizes(replacementTile)}
             format="webp"
             quality={72}
           />
@@ -92,9 +100,9 @@ width={900}
           <Image
             src={newBuildTile.image}
             alt=""
-            widths={[400, 640, 900]}
-width={900}
-            sizes="(max-width: 800px) 100vw, 33vw"
+            widths={[400, 640, 900, 1200, 1600]}
+            width={900}
+            sizes={serviceTileSizes(newBuildTile)}
             format="webp"
             quality={72}
           />
@@ -107,9 +115,9 @@ width={900}
           <Image
             src={slidingDoorsTile.image}
             alt=""
-            widths={[400, 640, 900]}
-width={900}
-            sizes="(max-width: 800px) 100vw, 33vw"
+            widths={[400, 640, 900, 1200, 1600]}
+            width={900}
+            sizes={serviceTileSizes(slidingDoorsTile)}
             format="webp"
             quality={72}
           />
